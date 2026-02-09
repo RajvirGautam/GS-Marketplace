@@ -44,15 +44,24 @@ const modalStyles = `
     cursor: not-allowed;
   }
 
-  /* OCR Debug Panel */
   .debug-panel {
     background: #000;
     border: 1px solid rgba(0, 217, 255, 0.3);
     color: #00D9FF;
     font-family: 'Space Mono', monospace;
     font-size: 10px;
-    max-height: 200px;
+    max-h: 200px;
     overflow-y: auto;
+  }
+
+  .debug-panel::-webkit-scrollbar {
+    width: 4px;
+  }
+  .debug-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  .debug-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 217, 255, 0.3);
   }
 `;
 
@@ -105,38 +114,41 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          // Create canvas for preprocessing
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           
-          // Set canvas size (scale down if too large for better performance)
-          const maxWidth = 1200;
+          // Scale for optimal OCR (higher resolution for text recognition)
+          const maxWidth = 1600;
           const scale = Math.min(1, maxWidth / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           
-          // Draw image
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          // Get image data
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           
-          // Convert to grayscale and increase contrast
+          // Enhanced preprocessing: grayscale + adaptive thresholding
           for (let i = 0; i < data.length; i += 4) {
             const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            // Increase contrast
-            const contrast = 1.5;
+            
+            // Adaptive contrast enhancement
+            const contrast = 1.8;
             const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
             let newValue = factor * (avg - 128) + 128;
-            newValue = Math.max(0, Math.min(255, newValue));
+            
+            // Apply threshold for better text recognition
+            if (newValue < 128) {
+              newValue = Math.max(0, newValue * 0.7);
+            } else {
+              newValue = Math.min(255, newValue * 1.2);
+            }
             
             data[i] = data[i + 1] = data[i + 2] = newValue;
           }
           
           ctx.putImageData(imageData, 0, 0);
           
-          // Convert to blob
           canvas.toBlob((blob) => {
             resolve(blob);
           }, 'image/png');
@@ -149,41 +161,151 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     });
   };
 
-  // --- Enhanced Text Normalization ---
-  const normalizeText = (text) => {
+  // --- ENHANCED NORMALIZATION: Character-level substitution map ---
+  const createNormalizedVersion = (text) => {
     if (!text) return '';
+    
     return text
       .toLowerCase()
       .replace(/\s+/g, '') // Remove all spaces
-      .replace(/[^\w]/g, '') // Remove special characters
-      .replace(/[ilI|]/g, '1')
-      .replace(/[oO]/g, '0')
-      .replace(/[zZ]/g, '2')
-      .replace(/[sS]/g, '5')
-      .replace(/[bB]/g, '8');
+      .replace(/[^a-z0-9]/g, '') // Remove special characters
+      // Common OCR misreads
+      .replace(/[il|!]/g, '1')  // i, l, |, ! → 1
+      .replace(/[o]/g, '0')      // o → 0
+      .replace(/[z]/g, '2')      // z → 2
+      .replace(/[s$]/g, '5')     // s, $ → 5
+      .replace(/[b]/g, '8')      // b → 8
+      .replace(/[g]/g, '9')      // g → 9
+      .replace(/[t]/g, '7');     // t → 7
   };
 
-  // --- Fuzzy Matching Function ---
-  const fuzzyMatch = (text, search) => {
-    text = text.toLowerCase();
-    search = search.toLowerCase();
+  // --- ADVANCED FUZZY MATCHING with multiple strategies ---
+  const fuzzyMatchEnrollment = (scannedText, targetEnrollment, debugLog) => {
+    const target = targetEnrollment.toLowerCase().replace(/\s+/g, '');
+    const scanned = scannedText.toLowerCase();
     
-    // Direct substring match
-    if (text.includes(search)) return true;
+    debugLog(`🎯 Target Enrollment: "${targetEnrollment}"`);
+    debugLog(`📄 Searching in ${scanned.length} characters of scanned text`);
     
-    // Character-by-character fuzzy match (allows for 20% error rate)
-    let matches = 0;
-    let searchIndex = 0;
+    // Strategy 1: Direct case-insensitive match
+    if (scanned.includes(target)) {
+      debugLog(`✅ Strategy 1: Direct match found`);
+      return true;
+    }
     
-    for (let i = 0; i < text.length && searchIndex < search.length; i++) {
-      if (text[i] === search[searchIndex]) {
-        matches++;
-        searchIndex++;
+    // Strategy 2: Normalized match (with OCR character substitutions)
+    const normalizedTarget = createNormalizedVersion(target);
+    const normalizedScanned = createNormalizedVersion(scanned);
+    
+    debugLog(`🔄 Normalized Target: "${normalizedTarget}"`);
+    
+    if (normalizedScanned.includes(normalizedTarget)) {
+      debugLog(`✅ Strategy 2: Normalized match found`);
+      return true;
+    }
+    
+    // Strategy 3: Extract all number sequences and check similarity
+    const scannedNumbers = scanned.match(/[a-z0-9]{6,}/gi) || [];
+    debugLog(`🔢 Found ${scannedNumbers.length} alphanumeric sequences (6+ chars)`);
+    
+    for (const seq of scannedNumbers) {
+      const similarity = calculateSimilarity(seq.toLowerCase(), target);
+      debugLog(`   Checking "${seq}" → similarity: ${(similarity * 100).toFixed(1)}%`);
+      
+      if (similarity >= 0.75) { // 75% similarity threshold
+        debugLog(`✅ Strategy 3: High similarity match (${(similarity * 100).toFixed(1)}%)`);
+        return true;
       }
     }
     
-    const matchRate = matches / search.length;
-    return matchRate >= 0.8; // 80% match required
+    // Strategy 4: Check with character-level tolerance
+    const tokens = scanned.split(/\s+/);
+    for (const token of tokens) {
+      if (token.length >= target.length - 2 && token.length <= target.length + 2) {
+        const similarity = calculateSimilarity(token, target);
+        if (similarity >= 0.8) {
+          debugLog(`✅ Strategy 4: Token match with tolerance (${(similarity * 100).toFixed(1)}%)`);
+          return true;
+        }
+      }
+    }
+    
+    // Strategy 5: Sliding window approach with normalized versions
+    const windowSize = normalizedTarget.length;
+    for (let i = 0; i <= normalizedScanned.length - windowSize; i++) {
+      const window = normalizedScanned.substring(i, i + windowSize);
+      const similarity = calculateSimilarity(window, normalizedTarget);
+      
+      if (similarity >= 0.8) {
+        debugLog(`✅ Strategy 5: Sliding window match at position ${i} (${(similarity * 100).toFixed(1)}%)`);
+        return true;
+      }
+    }
+    
+    debugLog(`❌ No match found with any strategy`);
+    return false;
+  };
+
+  // --- LEVENSHTEIN DISTANCE based similarity calculation ---
+  const calculateSimilarity = (str1, str2) => {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+    
+    for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+    for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+    
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,      // deletion
+          matrix[i][j - 1] + 1,      // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+    
+    const distance = matrix[len1][len2];
+    const maxLen = Math.max(len1, len2);
+    return 1 - (distance / maxLen);
+  };
+
+  // --- ENHANCED NAME MATCHING (case-insensitive) ---
+  const fuzzyMatchName = (scannedText, targetName, debugLog) => {
+    const scannedLower = scannedText.toLowerCase();
+    const nameParts = targetName.trim().toLowerCase().split(/\s+/).filter(part => part.length >= 2);
+    
+    debugLog(`🔎 Checking ${nameParts.length} name parts: ${nameParts.join(', ')}`);
+    
+    let matchCount = 0;
+    const requiredMatches = Math.ceil(nameParts.length / 2);
+    
+    for (const part of nameParts) {
+      // Direct match
+      if (scannedLower.includes(part)) {
+        matchCount++;
+        debugLog(`   ✓ "${part}" found (direct)`);
+        continue;
+      }
+      
+      // Fuzzy match with tolerance
+      const words = scannedLower.split(/\s+/);
+      for (const word of words) {
+        if (word.length >= part.length - 1 && word.length <= part.length + 1) {
+          const similarity = calculateSimilarity(word, part);
+          if (similarity >= 0.85) {
+            matchCount++;
+            debugLog(`   ✓ "${part}" matched "${word}" (${(similarity * 100).toFixed(1)}% similar)`);
+            break;
+          }
+        }
+      }
+    }
+    
+    const matched = matchCount >= requiredMatches;
+    debugLog(`📊 Name Match: ${matchCount}/${nameParts.length} parts (need ${requiredMatches}): ${matched ? '✓ PASS' : '✗ FAIL'}`);
+    return matched;
   };
 
   // --- Handlers ---
@@ -213,9 +335,13 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const handleFileSelect = (selectedFile) => {
     if (!selectedFile) return;
     
-    // Validate file type
     if (!selectedFile.type.startsWith('image/')) {
       alert('Please upload an image file (JPG, PNG, etc.)');
+      return;
+    }
+    
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
       return;
     }
     
@@ -224,7 +350,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     setExtractedText('');
     setDebugInfo([]);
     
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setImagePreview(e.target.result);
@@ -246,7 +371,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   };
 
   const handleVerification = async () => {
-    if (!file || !fullName || !enrollment) {
+    if (!file || !fullName.trim() || !enrollment.trim()) {
       alert("Please fill in all fields and upload an ID card.");
       return;
     }
@@ -258,17 +383,21 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     setDebugInfo([]);
     
     try {
-      addDebugInfo('🔄 Starting verification process...');
-      addDebugInfo(`📝 Name: ${fullName}`);
-      addDebugInfo(`🔢 Enrollment: ${enrollment}`);
+      addDebugInfo('═══════════════════════════════');
+      addDebugInfo('🚀 VERIFICATION PROCESS STARTED');
+      addDebugInfo('═══════════════════════════════');
+      addDebugInfo(`📝 Name Input: "${fullName}"`);
+      addDebugInfo(`🔢 Enrollment Input: "${enrollment}"`);
+      addDebugInfo(`📁 File: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
       
       // Preprocess image
       addDebugInfo('🖼️  Preprocessing image...');
       const processedImage = await preprocessImage(file);
+      addDebugInfo('✓ Image preprocessed successfully');
       
       addDebugInfo('🔍 Starting OCR scan...');
       
-      // Perform OCR with enhanced configuration
+      // Perform OCR
       const { data: { text, confidence } } = await Tesseract.recognize(
         processedImage,
         'eng',
@@ -277,100 +406,71 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             if (m.status === 'recognizing text') {
               const progress = Math.round(m.progress * 100);
               setOcrProgress(progress);
-              if (progress % 20 === 0) {
+              if (progress % 25 === 0 && progress > 0) {
                 addDebugInfo(`⚙️  OCR Progress: ${progress}%`);
               }
             }
           },
-          tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .-/',
+          tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ./-',
           tessedit_pageseg_mode: Tesseract.PSM.AUTO,
         }
       );
       
       setExtractedText(text);
-      addDebugInfo(`✅ OCR Complete! Confidence: ${Math.round(confidence)}%`);
-      addDebugInfo(`📄 Extracted Text Length: ${text.length} characters`);
+      addDebugInfo('═══════════════════════════════');
+      addDebugInfo(`✅ OCR COMPLETE`);
+      addDebugInfo(`📊 Confidence: ${Math.round(confidence)}%`);
+      addDebugInfo(`📄 Extracted ${text.length} characters`);
+      addDebugInfo('═══════════════════════════════');
       
-      // Enhanced matching logic
-      const scannedLower = text.toLowerCase();
-      const scannedNormalized = normalizeText(text);
-      const enrollmentNormalized = normalizeText(enrollment);
+      // Name Verification
+      addDebugInfo('');
+      addDebugInfo('👤 NAME VERIFICATION:');
+      addDebugInfo('─────────────────────────────');
+      const nameMatch = fuzzyMatchName(text, fullName, addDebugInfo);
       
-      // Name matching - check each word
-      const nameParts = fullName.trim().toLowerCase().split(/\s+/);
-      addDebugInfo(`🔎 Checking name parts: ${nameParts.join(', ')}`);
+      // Enrollment Verification
+      addDebugInfo('');
+      addDebugInfo('🎫 ENROLLMENT VERIFICATION:');
+      addDebugInfo('─────────────────────────────');
+      const enrollmentMatch = fuzzyMatchEnrollment(text, enrollment, addDebugInfo);
       
-      let nameMatchCount = 0;
-      nameParts.forEach(part => {
-        if (part.length >= 3) { // Only check meaningful parts
-          if (fuzzyMatch(scannedLower, part)) {
-            nameMatchCount++;
-            addDebugInfo(`✓ Found name part: "${part}"`);
-          }
-        }
-      });
+      // Final Decision
+      addDebugInfo('');
+      addDebugInfo('═══════════════════════════════');
+      addDebugInfo('📋 VERIFICATION RESULTS:');
+      addDebugInfo('─────────────────────────────');
+      addDebugInfo(`👤 Name: ${nameMatch ? '✅ VERIFIED' : '❌ FAILED'}`);
+      addDebugInfo(`🎫 Enrollment: ${enrollmentMatch ? '✅ VERIFIED' : '❌ FAILED'}`);
+      addDebugInfo('═══════════════════════════════');
       
-      const nameMatch = nameMatchCount >= Math.ceil(nameParts.length / 2); // At least half the name parts
-      
-      // Enrollment matching - multiple strategies
-      addDebugInfo(`🔎 Checking enrollment: ${enrollment}`);
-      
-      let enrollmentMatch = false;
-      
-      // Strategy 1: Direct substring match
-      if (scannedLower.includes(enrollment.toLowerCase())) {
-        enrollmentMatch = true;
-        addDebugInfo(`✓ Enrollment found (direct match)`);
-      }
-      
-      // Strategy 2: Normalized match
-      if (!enrollmentMatch && scannedNormalized.includes(enrollmentNormalized)) {
-        enrollmentMatch = true;
-        addDebugInfo(`✓ Enrollment found (normalized match)`);
-      }
-      
-      // Strategy 3: Fuzzy match with number extraction
-      if (!enrollmentMatch) {
-        const extractedNumbers = text.match(/\d+/g) || [];
-        for (const num of extractedNumbers) {
-          if (num.length >= 6 && fuzzyMatch(num, enrollment)) {
-            enrollmentMatch = true;
-            addDebugInfo(`✓ Enrollment found (fuzzy match): ${num}`);
-            break;
-          }
-        }
-      }
-      
-      // Strategy 4: Check for partial enrollment match (useful for long enrollment numbers)
-      if (!enrollmentMatch && enrollment.length >= 8) {
-        const enrollmentPart = enrollment.substring(0, 6);
-        if (scannedLower.includes(enrollmentPart.toLowerCase())) {
-          enrollmentMatch = true;
-          addDebugInfo(`✓ Enrollment found (partial match)`);
-        }
-      }
-      
-      addDebugInfo('─────────────────────────');
-      addDebugInfo(`📊 Name Match: ${nameMatch ? '✓ YES' : '✗ NO'} (${nameMatchCount}/${nameParts.length} parts)`);
-      addDebugInfo(`📊 Enrollment Match: ${enrollmentMatch ? '✓ YES' : '✗ NO'}`);
-      
-      // Final verification
       if (nameMatch && enrollmentMatch) {
-        addDebugInfo('🎉 VERIFICATION SUCCESSFUL!');
+        addDebugInfo('');
+        addDebugInfo('🎉 ✅ VERIFICATION SUCCESSFUL! 🎉');
+        addDebugInfo('Redirecting to marketplace...');
         setVerificationStatus('success');
         setTimeout(() => {
           onClose();
         }, 2000);
       } else {
+        addDebugInfo('');
         addDebugInfo('❌ VERIFICATION FAILED');
-        if (!nameMatch) addDebugInfo('⚠️  Name not found or insufficient matches');
-        if (!enrollmentMatch) addDebugInfo('⚠️  Enrollment number not found');
+        if (!nameMatch) addDebugInfo('⚠️  Reason: Name not found or insufficient match');
+        if (!enrollmentMatch) addDebugInfo('⚠️  Reason: Enrollment number not found or insufficient match');
+        addDebugInfo('');
+        addDebugInfo('💡 Tips:');
+        addDebugInfo('   • Ensure ID card is clear and well-lit');
+        addDebugInfo('   • Check that name/enrollment are typed correctly');
+        addDebugInfo('   • Try uploading a higher quality image');
         setVerificationStatus('failed');
       }
       
     } catch (error) {
       console.error("OCR Error:", error);
-      addDebugInfo(`❌ ERROR: ${error.message}`);
+      addDebugInfo('');
+      addDebugInfo('═══════════════════════════════');
+      addDebugInfo(`❌ CRITICAL ERROR: ${error.message}`);
+      addDebugInfo('═══════════════════════════════');
       setVerificationStatus('failed');
     } finally {
       setIsProcessing(false);
@@ -385,7 +485,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING...'}
+          {ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING IMAGE...'}
         </span>
       );
     }
@@ -399,7 +499,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     if (verificationStatus === 'failed') {
       return (
         <span className="flex items-center gap-2 text-red-500 font-bold mono text-xs uppercase">
-          <Icons.AlertCircle size={16} /> VERIFICATION FAILED. RETRY.
+          <Icons.AlertCircle size={16} /> VERIFICATION FAILED. CHECK LOGS & RETRY
         </span>
       );
     }
@@ -417,7 +517,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
       <div className="relative w-full max-w-6xl bg-[#050505] border border-white/20 shadow-2xl flex flex-col md:flex-row animate-modal-pop overflow-hidden max-h-[90vh]">
         
-        {/* Left Side: Aesthetic / USP Highlight */}
+        {/* Left Side */}
         <div className="w-full md:w-2/5 bg-zinc-900 border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden p-8 flex flex-col justify-between text-white">
           
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
@@ -448,18 +548,18 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"></div>
                 <span className="text-[10px] font-bold mono text-[#00D9FF] uppercase tracking-wider">
-                  {isProcessing ? `OCR SCANNING ${ocrProgress}%` : 'SECURED VERIFICATION ACTIVE'}
+                  {isProcessing ? `AI SCANNING ${ocrProgress}%` : 'SECURED VERIFICATION ACTIVE'}
                 </span>
               </div>
               <p className="text-[10px] text-white/50 mono leading-relaxed">
                 SYSTEM ACCESS GRANTED <br/>
-                {isProcessing ? 'ANALYZING ID CARD...' : 'READY FOR VERIFICATION...'}
+                {isProcessing ? 'ANALYZING ID CARD WITH AI...' : 'READY FOR VERIFICATION...'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Right Side: The Form */}
+        {/* Right Side */}
         <div className="w-full md:w-3/5 p-8 relative bg-[#0A0A0A] overflow-y-auto custom-scrollbar">
           <button 
             onClick={onClose}
@@ -542,8 +642,9 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                   value={enrollment}
                   onChange={(e) => setEnrollment(e.target.value)}
                   className="w-full input-brutal px-4 py-3 text-sm" 
-                  placeholder="0801CS..." 
+                  placeholder="0801CS211234" 
                 />
+                <p className="text-[9px] text-white/40 mono mt-1">Case insensitive • AI will handle OCR errors</p>
               </div>
             </div>
 
@@ -574,9 +675,21 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <img 
                       src={imagePreview} 
                       alt="ID Preview" 
-                      className="max-h-32 mx-auto border border-white/20"
+                      className="max-h-40 mx-auto border border-white/20 shadow-lg"
                     />
                   )}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFile(null);
+                      setImagePreview(null);
+                      setExtractedText('');
+                      setDebugInfo([]);
+                    }}
+                    className="text-[10px] text-red-400 hover:text-red-300 mono uppercase"
+                  >
+                    Remove Image
+                  </button>
                 </div>
               ) : (
                 <>
@@ -586,7 +699,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                   <p className="text-xs font-bold text-white uppercase mono">
                     Upload College ID Card
                   </p>
-                  <p className="text-[10px] text-white/40 mt-1 mono">JPG, PNG • MAX 5MB</p>
+                  <p className="text-[10px] text-white/40 mt-1 mono">JPG, PNG • MAX 10MB • CLEAR & WELL-LIT</p>
                 </>
               )}
               
@@ -604,32 +717,44 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
             {/* Debug Panel */}
             {(extractedText || debugInfo.length > 0) && (
-              <div className="debug-panel p-4 space-y-2 mt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold uppercase text-[#00D9FF]">// Verification Log</span>
+              <div className="debug-panel p-4 space-y-2 mt-6">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#00D9FF]/20">
+                  <span className="font-bold uppercase text-[#00D9FF]">// AI VERIFICATION LOG</span>
                   <button 
                     onClick={() => {
                       setExtractedText('');
                       setDebugInfo([]);
                     }}
-                    className="text-[8px] text-white/40 hover:text-white"
+                    className="text-[8px] text-white/40 hover:text-white uppercase tracking-wider px-2 py-1 border border-white/10 hover:border-white/30 transition-colors"
                   >
                     CLEAR
                   </button>
                 </div>
                 
-                <div className="space-y-1 max-h-32 overflow-y-auto">
+                <div className="space-y-0.5 max-h-48 overflow-y-auto pr-2">
                   {debugInfo.map((info, i) => (
-                    <div key={i} className="text-[9px] text-white/70">{info}</div>
+                    <div 
+                      key={i} 
+                      className={`text-[9px] leading-relaxed ${
+                        info.includes('✅') || info.includes('✓') ? 'text-green-400' :
+                        info.includes('❌') || info.includes('✗') ? 'text-red-400' :
+                        info.includes('⚠️') ? 'text-yellow-400' :
+                        info.includes('═══') ? 'text-[#00D9FF] font-bold' :
+                        info.includes('🎉') ? 'text-green-300 font-bold' :
+                        'text-white/70'
+                      }`}
+                    >
+                      {info}
+                    </div>
                   ))}
                 </div>
                 
                 {extractedText && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-[10px] text-[#00D9FF] hover:text-white">
-                      View Raw OCR Text ({extractedText.length} chars)
+                  <details className="mt-4 pt-3 border-t border-[#00D9FF]/20">
+                    <summary className="cursor-pointer text-[10px] text-[#00D9FF] hover:text-white uppercase tracking-wider">
+                      📄 View Raw OCR Text ({extractedText.length} characters)
                     </summary>
-                    <div className="mt-2 p-2 bg-black/50 text-[8px] text-white/60 max-h-24 overflow-y-auto break-all">
+                    <div className="mt-3 p-3 bg-black/50 border border-white/5 text-[9px] text-white/60 max-h-32 overflow-y-auto break-all leading-relaxed font-mono">
                       {extractedText}
                     </div>
                   </details>
