@@ -7,9 +7,10 @@ const NeonButton = ({ children, primary = false, className = "", ...props }) => 
     {...props} 
     className={`
     relative px-8 py-3 rounded-xl font-bold transition-all duration-300 group overflow-hidden border-2
-    ${primary 
-      ? "bg-gradient-to-r from-violet-600 to-cyan-600 text-white border-transparent shadow-lg shadow-violet-500/30 hover:shadow-cyan-500/50 hover:scale-105" 
-      : "bg-transparent border-indigo-400 dark:border-white/20 text-indigo-950 dark:text-white hover:bg-white/20 dark:hover:bg-white/5 hover:border-indigo-600 dark:hover:border-white/50"}
+   ${primary 
+  ? "bg-gradient-to-r from-cyan-400 to-sky-500 text-black border-transparent shadow-lg shadow-cyan-400/50 hover:shadow-sky-500/60 hover:scale-105" 
+  : "bg-transparent border-indigo-400 dark:border-white/20 text-indigo-950 dark:text-white hover:bg-white/20 dark:hover:bg-white/5 hover:border-indigo-600 dark:hover:border-white/50"}
+   
     ${className}
   `}>
     <span className="relative z-10 flex items-center gap-2">{children}</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
 import NeonButton from '../ui/NeonButton'
+import { Link } from 'react-router-dom'
 
 const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -9,6 +10,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   useEffect(() => {
     const handleUpdate = () => {
       if (!navRef.current) return
+      
       const scrollY = window.scrollY
       const maxScroll = 200
       let ratio = scrollY / maxScroll
@@ -16,24 +18,37 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       if (ratio < 0) ratio = 0
 
       const isMobile = window.innerWidth < 768
+      
+      // 1. WIDTH LOGIC
       const startWidth = isMobile ? 90 : 55
       const endWidth = 100
-
       const currentWidth = startWidth + ((endWidth - startWidth) * ratio)
-      const currentTop = 24 - (24 * ratio)
-      const currentRadius = 24 - (24 * ratio)
+
+      // 2. POSITION LOGIC (THE FIX)
+      // We start 120px to the left of the center, and decay to 0px (center)
+      // You can change '120' to '200' if you want it even more to the left.
+      const startOffset = 72
+      const currentOffset = startOffset * (1 - ratio)
+      const currentLeft = `calc(50% - ${currentOffset}px)`
+
+      // 3. OTHER VISUALS
+      const currentTop = 55 - (55 * ratio)
+      const currentRadius = 55 - (55 * ratio)
       
       const minOpacity = 0.25
       const maxOpacity = 0.85
       const currentOpacity = minOpacity + ((maxOpacity - minOpacity) * ratio)
 
+      // Colors
       const lightBg = `rgba(255, 255, 255, ${currentOpacity})`
-      const darkBg = `rgba(3, 0, 20, ${currentOpacity})`
+      const darkBg = `rgba(0, 0, 0, ${currentOpacity})`
 
       const lightBorder = `rgba(255, 255, 255, ${0.4 - (0.2 * ratio)})`
       const darkBorder = `rgba(255, 255, 255, ${0.15 - (0.1 * ratio)})`
 
+      // 4. APPLY STYLES
       const el = navRef.current
+      el.style.left = currentLeft // Applies the calculation
       el.style.width = `${currentWidth}%`
       el.style.top = `${currentTop}px`
       el.style.borderTopLeftRadius = `${currentRadius}px`
@@ -46,6 +61,8 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate)
+    
+    // Force run immediately to set initial position
     handleUpdate()
 
     return () => {
@@ -60,49 +77,50 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       className={`
         /* Positioning & Layout */
         fixed z-50 left-1/2 -translate-x-1/2 top-6
-        flex items-center justify-between px-8 py-4
+        flex items-center justify-between px-10 py-2
         
         /* Shape */
         rounded-full
         
-        /* The Material (Base) */
-        bg-gray-50/10 /* Very faint white tint */
-        backdrop-blur-xl /* Heavy blurring for depth */
+        /* Material */
+        bg-white/5 
+        backdrop-blur-xl
+        border border-white/20
         
-        /* The Edges (Simulating 3D Glass) */
-        border border-white/20 /* Subtle outer definition */
-        
-        /* THE LIGHTING ENGINE */
+        /* Lighting */
         shadow-[0_20px_50px_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.6)]
         
-        /* Interaction */
-        transition-all duration-100 ease-out
-        hover:bg-gray-50/20 
+        /* CRITICAL CHANGE: 
+           Removed 'transition-all' so JavaScript can control position instantly without drag.
+           Only animating color/shadow via CSS now.
+        */
+        transition-colors duration-200 ease-out
+        hover:bg-white/10 
         hover:shadow-[0_20px_50px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.9)]
       `}
     >
       {/* Logo Section */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <Link to="/" className="flex items-center gap-2 flex-shrink-0">
         <div className="w-10 h-10 bg-gradient-to-tr from-cyan-600 to-violet-700 dark:from-cyan-500 dark:to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
           <Icons.Zap />
         </div>
         <span className="text-xl md:text-2xl font-black text-indigo-950 dark:text-white tracking-tighter whitespace-nowrap">
           SGSITS<span className="text-cyan-700 dark:text-cyan-400">.MKT</span>
         </span>
-      </div>
+      </Link>
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center gap-6 text-sm font-bold text-indigo-900 dark:text-slate-200">
-        {['Marketplace', 'Categories', 'About'].map((item) => (
+       {['Marketplace', 'Categories', 'About'].map((item) => (
           <a
             key={item}
-            href="#"
+            href={item === 'Marketplace' ? '/marketplace' : '#'}
             className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm"
           >
             {item}
           </a>
         ))}
-        
+
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-indigo-800 dark:text-yellow-300 ring-1 ring-black/5 dark:ring-white/10 transition-colors"
@@ -110,7 +128,6 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           {isDark ? <Icons.Sun /> : <Icons.Moon />}
         </button>
 
-        {/* Desktop Connect Button */}
         <NeonButton 
             primary 
             className="!py-1.5 !px-5 !text-xs shadow-lg shadow-violet-500/20"
@@ -124,7 +141,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       <div className="flex items-center gap-3 md:hidden">
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-lg bg-indigo-100/50 dark:bg-white/5 text-indigo-900 dark:text-yellow-300 backdrop-blur-md"
+          className="p-2 rounded-lg bg-gray-100/50 dark:bg-white/5 text-indigo-900 dark:text-yellow-300 backdrop-blur-md"
         >
           {isDark ? <Icons.Sun /> : <Icons.Moon />}
         </button>
@@ -142,13 +159,12 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           {['Marketplace', 'Categories', 'About', 'Safety'].map((item) => (
             <a
               key={item}
-              href="#"
+              href={item === 'Marketplace' ? '/marketplace' : '#'}
               className="text-indigo-900 dark:text-white font-bold text-lg"
             >
               {item}
             </a>
           ))}
-          {/* Mobile Connect Button */}
           <NeonButton 
             primary 
             className="w-full justify-center"
