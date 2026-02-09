@@ -991,7 +991,7 @@ const Marketplace = () => {
                 onClick={clearAllFilters}
                 className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono"
               >
-                CLEAR ALL
+                CLEAR
               </button>
               <button 
                 onClick={() => setMobileFilterOpen(false)}
@@ -1005,11 +1005,12 @@ const Marketplace = () => {
 
         {/* Floating Action Button (Mobile) */}
         <button className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-2xl flex items-center justify-center shadow-2xl z-40">
-          ➕
+          ➕    
         </button>
       </div>
     </>
   )
 }
+
 
 export default Marketplace
