@@ -1,0 +1,95 @@
+/* Global Styles - Minimal since we're using Tailwind CDN */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  /* Define the speed and curve of the transition here for consistency */
+  --transition-speed: 0.5s;
+  --transition-curve: ease-in-out; 
+}
+
+/* Apply transition to the root and body */
+html, body {
+  transition: background-color var(--transition-speed) var(--transition-curve), 
+              color var(--transition-speed) var(--transition-curve);
+}
+
+/* Global Animations - Add this to your main CSS file (index.css or tailwind.css) */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInBlur {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9) skewX(-2deg);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) skewX(0);
+    filter: blur(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-catchy-content {
+  animation: slideInBlur 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Custom Global Animations - Matches your Hero exactly */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInBlur {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9) skewX(-2deg);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) skewX(0);
+    filter: blur(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-catchy-content {
+  animation: slideInBlur 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
