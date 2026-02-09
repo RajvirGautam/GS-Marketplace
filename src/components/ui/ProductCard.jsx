@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const HeartIcon = ({ filled }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -38,17 +39,19 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const [isSaved, setIsSaved] = useState(false)
   const [showActions, setShowActions] = useState(false)
 
-  // Calculate staggered delay based on index
-  // 0.05s delay per item, plus a base delay of 0.5s so they start after the UI loads
   const animationStyle = {
     opacity: 0,
     animationDelay: `${0.5 + (index * 0.05)}s`
   }
 
+  // Stop propagation helper — prevents Link navigation when clicking heart/share
+  const stopNav = (e) => e.preventDefault()
+
   if (viewMode === 'list') {
     return (
-      <div 
-        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex anim-slide-up"
+      <Link 
+        to={`/product/${product.id}`}
+        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex anim-slide-up no-underline"
         style={animationStyle}
       >
         
@@ -64,7 +67,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             className="relative w-full h-full object-cover mix-blend-normal transition-transform duration-700 group-hover:scale-110"
           />
 
-          {/* Badges */}
           {product.isTrending && (
             <div className="absolute top-3 left-3 bg-[#F59E0B] text-black px-2 py-1 mono text-[9px] font-bold">
               🔥 TRENDING
@@ -90,15 +92,17 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
                 </div>
               </div>
               
-              {/* Quick Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2" onClick={stopNav}>
                 <button 
-                  onClick={() => setIsSaved(!isSaved)}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsSaved(!isSaved) }}
                   className="w-9 h-9 flex items-center justify-center bg-black/60 backdrop-blur border border-white/10 hover:border-white/40 transition-colors"
                 >
                   <HeartIcon filled={isSaved} />
                 </button>
-                <button className="w-9 h-9 flex items-center justify-center bg-black/60 backdrop-blur border border-white/10 hover:border-white/40 transition-colors">
+                <button 
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                  className="w-9 h-9 flex items-center justify-center bg-black/60 backdrop-blur border border-white/10 hover:border-white/40 transition-colors"
+                >
                   <ShareIcon />
                 </button>
               </div>
@@ -108,7 +112,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               {product.description}
             </p>
 
-            {/* Metadata */}
             <div className="flex items-center gap-4 text-xs text-white/40 mono mb-4">
               <span className="flex items-center gap-1">
                 <LocationIcon /> {product.location}
@@ -119,7 +122,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               <span>⏰ {product.timeAgo}</span>
             </div>
 
-            {/* Seller Info */}
             <div className="flex items-center gap-2 py-3 border-t border-dashed border-white/10">
               <div className="w-8 h-8 rounded-none bg-zinc-800 border border-white/20 flex items-center justify-center text-xs font-bold text-white">
                 {product.user.charAt(0)}
@@ -128,7 +130,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex items-end justify-between pt-4 border-t border-white/10">
             <div>
               <div className="mono text-[9px] text-white/30 uppercase mb-1">Price</div>
@@ -138,23 +139,27 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
             
             <div className="flex gap-2">
-              <button className="bg-transparent border border-white/20 text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center gap-2">
+              <button 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                className="bg-transparent border border-white/20 text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center gap-2"
+              >
                 <ChatIcon /> Chat
               </button>
-              <button className="bg-white text-black border border-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all">
+              <span className="bg-white text-black border border-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all">
                 View Details
-              </button>
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }
 
-  // Grid View (Original)
+  // Grid View
   return (
-    <div 
-      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] anim-slide-up"
+    <Link 
+      to={`/product/${product.id}`}
+      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] anim-slide-up no-underline block"
       style={animationStyle}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -169,7 +174,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       {/* Image Section */}
       <div className="relative aspect-[4/5] overflow-hidden bg-zinc-900 border-b border-white/10">
         
-        {/* Background Gradient */}
         <div 
           className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
           style={{ background: `linear-gradient(to bottom, ${product.gradientStart}, #000)` }} 
@@ -205,20 +209,23 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           )}
         </div>
 
-        {/* Quick Actions - Top Right Corner */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2">
+        {/* Quick Actions */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2" onClick={stopNav}>
           <button 
-            onClick={() => setIsSaved(!isSaved)}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsSaved(!isSaved) }}
             className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/90 backdrop-blur shadow-lg transition-all ${isSaved ? 'text-red-500' : 'text-black'} hover:scale-110`}
           >
             <HeartIcon filled={isSaved} />
           </button>
-          <button className="w-8 h-8 rounded-full flex items-center justify-center bg-white/90 backdrop-blur shadow-lg transition-all hover:scale-110">
+          <button 
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/90 backdrop-blur shadow-lg transition-all hover:scale-110"
+          >
             <ShareIcon />
           </button>
         </div>
 
-        {/* Metadata Row - Bottom of Image */}
+        {/* Metadata Row */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 text-[10px] text-white/80 mono bg-black/60 backdrop-blur px-2 py-1">
           <span className="flex items-center gap-1">
             <LocationIcon /> {product.location}
@@ -233,12 +240,10 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       {/* Content Section */}
       <div className="p-4 relative">
         
-        {/* Glitch Effect on Hover */}
         <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-200"
              style={{ background: `linear-gradient(45deg, transparent 40%, ${product.accent}10 40%, transparent 60%)` }}
         />
 
-        {/* Title */}
         <div className="mb-2">
             <h3 className="text-white font-bold text-lg leading-tight group-hover:text-[#00D9FF] transition-colors truncate">
                 {product.title}
@@ -248,7 +253,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
         </div>
 
-        {/* User / Seller */}
         <div className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-white/10">
             <div className="w-6 h-6 rounded-none bg-zinc-800 border border-white/20 flex items-center justify-center text-[10px] font-bold text-white">
                 {product.user.charAt(0)}
@@ -259,7 +263,6 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             )}
         </div>
 
-        {/* Footer: Price & Actions */}
         <div className="space-y-3">
           <div className="flex items-end justify-between">
             <div>
@@ -276,18 +279,20 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             )}
           </div>
 
-          {/* Action Buttons - Show on hover or mobile */}
           <div className={`grid grid-cols-2 gap-2 transition-all duration-300 ${showActions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'} md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto`}>
-            <button className="bg-transparent border border-white/20 text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center justify-center gap-1">
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+              className="bg-transparent border border-white/20 text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center justify-center gap-1"
+            >
               <ChatIcon /> Chat
             </button>
-            <button className="bg-white text-black border border-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all">
+            <span className="bg-white text-black border border-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all text-center">
               View
-            </button>
+            </span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
