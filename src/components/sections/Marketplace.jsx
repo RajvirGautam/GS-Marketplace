@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react'
-import ProductCard from '../ui/ProductCard'
 import { Link } from 'react-router-dom'
+import ProductCard from '../ui/ProductCard' // Ensure you have this component
+import { products as allProducts } from '/Users/vkgautam/Desktop/GS-MARK-II/sgsits-market/src/components/sections/Products.js' // Importing shared data
 
 // --- Internal Icons ---
 const ChevronDown = () => (
@@ -43,7 +45,7 @@ const Marketplace = () => {
   const [selectedConditions, setSelectedConditions] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedPostedWithin, setSelectedPostedWithin] = useState(null)
-  const [priceRange, setPriceRange] = useState([0, 5000])
+  const [priceRange, setPriceRange] = useState([0, 10000]) // Increased range
   const [availability, setAvailability] = useState({
     availableNow: true,
     auction: false,
@@ -78,10 +80,10 @@ const Marketplace = () => {
 
   const conditions = [
     { label: 'Any Condition', count: 'all', value: null },
-    { label: 'New', count: 32, value: 'new' },
-    { label: 'Like New', count: 87, value: 'likenew' },
-    { label: 'Good', count: 214, value: 'good' },
-    { label: 'Acceptable', count: 45, value: 'acceptable' }
+    { label: 'New', count: 32, value: 'New' },
+    { label: 'Like New', count: 87, value: 'Like New' },
+    { label: 'Good', count: 214, value: 'Good' },
+    { label: 'Acceptable', count: 45, value: 'Acceptable' }
   ]
 
   const itemTypes = [
@@ -89,90 +91,6 @@ const Marketplace = () => {
     { label: 'For Barter (Exchange)', count: 78, value: 'barter' },
     { label: 'For Rent', count: 12, value: 'rent' },
     { label: 'Free (Giveaway)', count: 6, value: 'free' }
-  ]
-
-  const postedWithinOptions = [
-    { label: 'Any Time', count: 'all', value: null },
-    { label: 'Today', count: 12, value: 'today' },
-    { label: 'This Week', count: 89, value: 'week' },
-    { label: 'This Month', count: 324, value: 'month' },
-    { label: 'Last 3 Months', count: 578, value: '3months' }
-  ]
-
-  // Mock product data
-  const allProducts = [
-    {
-      id: 1, user: "Shivani (CSE)", price: "₹8,000", title: "Raspberry Pi 4", tag: "Electronics",
-      image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
-      accent: "#FF6B35", gradientStart: "#FF6B35", gradientEnd: "#C92A00", 
-      isTrending: true, isVerified: true, timeAgo: "2m ago",
-      stats: [{ label: 'H', value: '8' }], condition: 'likenew', branch: 'cs', year: 4,
-      description: "4GB RAM model, barely used, includes power adapter and case",
-      location: "Near ATC", views: 45, saves: 12, type: 'sale', category: 'electronics'
-    },
-    {
-      id: 2, user: "Amit (Mech)", price: "₹450", title: "Drafter (Omega)", tag: "Engineering",
-      image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=800&q=80",
-      accent: "#00D9FF", gradientStart: "#0EA5E9", gradientEnd: "#0369A1", 
-      isTrending: false, isVerified: true, timeAgo: "5m ago",
-      stats: [{ label: 'H', value: '6' }], condition: 'good', branch: 'mech', year: 3,
-      description: "Professional drafting tool, excellent condition",
-      location: "Hostel 2", views: 28, saves: 5, type: 'sale', category: 'stationery'
-    },
-    {
-      id: 3, user: "Rahul (IT)", price: "₹1,200", title: "Casio FX-991EX", tag: "Tools",
-      image: "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?auto=format&fit=crop&w=800&q=80",
-      accent: "#F59E0B", gradientStart: "#F59E0B", gradientEnd: "#D97706", 
-      isTrending: true, isVerified: true, timeAgo: "12m ago",
-      stats: [{ label: 'H', value: '5' }], condition: 'new', branch: 'cs', year: 2,
-      description: "Brand new calculator, sealed pack",
-      location: "Library", views: 67, saves: 18, type: 'sale', category: 'stationery'
-    },
-    {
-      id: 4, user: "Priya (EI)", price: "₹150", title: "Data Structures", tag: "Books",
-      image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=800&q=80",
-      accent: "#A855F7", gradientStart: "#A855F7", gradientEnd: "#7C3AED", 
-      isTrending: false, isVerified: true, timeAgo: "18m ago",
-      stats: [{ label: 'H', value: '4' }], condition: 'good', branch: 'cs', year: 3,
-      description: "CS textbook, minimal highlighting, all pages intact",
-      location: "Canteen", views: 89, saves: 22, type: 'sale', category: 'books'
-    },
-    {
-      id: 5, user: "Neha (ECE)", price: "₹2,500", title: "Arduino Mega", tag: "Electronics",
-      image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
-      accent: "#10B981", gradientStart: "#10B981", gradientEnd: "#059669", 
-      isTrending: true, isVerified: true, timeAgo: "25m ago",
-      stats: [{ label: 'H', value: '7' }], condition: 'likenew', branch: 'ece', year: 4,
-      description: "Arduino Mega 2560 with USB cable and sensors",
-      location: "Lab Block", views: 102, saves: 34, type: 'sale', category: 'electronics'
-    },
-    {
-      id: 6, user: "Rohan (CS)", price: "₹800", title: "Drawing Board", tag: "Tools",
-      image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=800&q=80",
-      accent: "#EC4899", gradientStart: "#EC4899", gradientEnd: "#DB2777", 
-      isTrending: false, isVerified: true, timeAgo: "35m ago",
-      stats: [{ label: 'H', value: '3' }], condition: 'acceptable', branch: 'civil', year: 2,
-      description: "A3 size drawing board, some wear but functional",
-      location: "Workshop", views: 23, saves: 7, type: 'sale', category: 'stationery'
-    },
-    {
-      id: 7, user: "Kavya (IT)", price: "₹200", title: "Python Pro", tag: "Books",
-      image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=800&q=80",
-      accent: "#8B5CF6", gradientStart: "#8B5CF6", gradientEnd: "#7C3AED", 
-      isTrending: false, isVerified: true, timeAgo: "1h ago",
-      stats: [{ label: 'H', value: '2' }], condition: 'good', branch: 'cs', year: 3,
-      description: "Python programming guide, great for beginners",
-      location: "Hostel 1", views: 56, saves: 15, type: 'sale', category: 'books'
-    },
-    {
-      id: 8, user: "Aditya (Mech)", price: "₹5,000", title: "Oscilloscope", tag: "Lab Equipment",
-      image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=800&q=80",
-      accent: "#EF4444", gradientStart: "#EF4444", gradientEnd: "#DC2626", 
-      isTrending: true, isVerified: true, timeAgo: "2h ago",
-      stats: [{ label: 'H', value: '9' }], condition: 'good', branch: 'ece', year: 4,
-      description: "Digital oscilloscope, dual channel, excellent for projects",
-      location: "ECE Lab", views: 134, saves: 45, type: 'sale', category: 'lab'
-    }
   ]
 
   const [filteredProducts, setFilteredProducts] = useState(allProducts)
@@ -211,7 +129,7 @@ const Marketplace = () => {
     setSelectedConditions([])
     setSelectedTypes([])
     setSelectedPostedWithin(null)
-    setPriceRange([0, 5000])
+    setPriceRange([0, 10000])
     setAvailability({
       availableNow: true,
       auction: false,
@@ -229,7 +147,7 @@ const Marketplace = () => {
     if (selectedConditions.length > 0) count++
     if (selectedTypes.length > 0) count++
     if (selectedPostedWithin) count++
-    if (priceRange[0] !== 0 || priceRange[1] !== 5000) count++
+    if (priceRange[0] !== 0 || priceRange[1] !== 10000) count++
     return count
   }
 
@@ -273,7 +191,8 @@ const Marketplace = () => {
 
     // Price range filter
     result = result.filter(p => {
-      const price = parseInt(p.price.replace(/[^0-9]/g, ''))
+      // Use numericPrice from data structure for cleaner sorting
+      const price = p.numericPrice || parseInt(p.price.replace(/[^0-9]/g, ''))
       return price >= priceRange[0] && price <= priceRange[1]
     })
 
@@ -285,24 +204,16 @@ const Marketplace = () => {
     // Sort
     switch(sortBy) {
       case 'newest':
-        // Already in newest order
+        // Assuming default is newest
         break
       case 'oldest':
         result.reverse()
         break
       case 'price_low':
-        result.sort((a, b) => {
-          const priceA = parseInt(a.price.replace(/[^0-9]/g, ''))
-          const priceB = parseInt(b.price.replace(/[^0-9]/g, ''))
-          return priceA - priceB
-        })
+        result.sort((a, b) => (a.numericPrice || 0) - (b.numericPrice || 0))
         break
       case 'price_high':
-        result.sort((a, b) => {
-          const priceA = parseInt(a.price.replace(/[^0-9]/g, ''))
-          const priceB = parseInt(b.price.replace(/[^0-9]/g, ''))
-          return priceB - priceA
-        })
+        result.sort((a, b) => (b.numericPrice || 0) - (a.numericPrice || 0))
         break
       case 'popular':
         result.sort((a, b) => b.views - a.views)
@@ -550,10 +461,10 @@ const Marketplace = () => {
               
               {/* Logo */}
               <Link to="/">
-  <div className="mono text-lg font-bold text-white hidden md:block cursor-pointer">
-    SGSITS<span className="text-[#00D9FF]">.MKT</span>
-  </div>
-</Link>
+                <div className="mono text-lg font-bold text-white hidden md:block cursor-pointer">
+                  SGSITS<span className="text-[#00D9FF]">.MKT</span>
+                </div>
+              </Link>
 
               {/* Search Bar */}
               <div className="flex-1 max-w-2xl relative">
@@ -681,7 +592,7 @@ const Marketplace = () => {
                 <input 
                   type="range" 
                   min="0" 
-                  max="5000" 
+                  max="10000" 
                   step="100"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
@@ -697,7 +608,7 @@ const Marketplace = () => {
                   <input 
                     type="number" 
                     value={priceRange[1]} 
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 5000])}
+                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
                     className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white"
                     placeholder="Max"
                   />
@@ -979,14 +890,29 @@ const Marketplace = () => {
 
             {/* Mobile filters content - Same as sidebar */}
             <div className="space-y-6">
-              {/* Add same filter sections as sidebar here */}
-              <div className="text-center text-white/60 text-sm py-8">
-                Mobile filters (same structure as desktop sidebar)
+              {/* Categories */}
+              <div>
+                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Categories</h4>
+                <div className="space-y-3">
+                    {categories.map(cat => (
+                        <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                            type="checkbox" 
+                            className="brutal-checkbox"
+                            checked={selectedCategories.includes(cat.slug)}
+                            onChange={() => toggleCategory(cat.slug)}
+                        />
+                        <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
+                            {cat.emoji} {cat.name}
+                        </span>
+                        </label>
+                    ))}
+                </div>
               </div>
             </div>
 
             {/* Sticky Footer */}
-            <div className="sticky bottom-0 bg-black border-t border-white/10 p-4 flex gap-3">
+            <div className="sticky bottom-0 bg-black border-t border-white/10 p-4 flex gap-3 mt-8">
               <button 
                 onClick={clearAllFilters}
                 className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono"
@@ -1011,6 +937,5 @@ const Marketplace = () => {
     </>
   )
 }
-
 
 export default Marketplace
