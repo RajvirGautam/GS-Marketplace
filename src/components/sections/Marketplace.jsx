@@ -626,9 +626,11 @@ const Marketplace = () => {
               </div>
 
               {/* List Product Button */}
+              <Link to="/add-product">
               <button className="px-6 py-3 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-sm font-bold mono hover:scale-105 transition-transform hidden md:block">
                 LIST PRODUCT
               </button>
+              </Link>
 
               {/* User Icon */}
               <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/20 flex items-center justify-center text-sm font-bold cursor-pointer hover:border-white/40 transition-colors">

@@ -12,6 +12,8 @@ import RecentListings from './components/sections/RecentListings'
 import CTA from './components/sections/CTA'
 import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
+import AddProduct from './components/sections/AddProduct';
+
 
 import ConnectIdModal from './components/auth/ConnectIdModal'
 
@@ -55,6 +57,7 @@ function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/add-product" element={<AddProduct />} />
         </Routes>
 
         {/* Footer stays global */}

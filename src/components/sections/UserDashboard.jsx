@@ -360,7 +360,7 @@ const UserDashboard = () => {
                   Manage your listings, track performance, and connect with buyers
                 </p>
               </div>
-              <Link to="/list-product">
+             <Link to="/add-product">
                 <button className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white px-6 py-3 font-bold mono text-sm flex items-center gap-2 hover:scale-105 transition-transform">
                   <PlusIcon /> ADD PRODUCT
                 </button>
