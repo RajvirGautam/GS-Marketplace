@@ -1,10 +1,17 @@
 // src/components/sections/UserDashboard.jsx
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { userListings, userChats } from './UserListings';
 
 // Icons
+const ArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5" />
+    <path d="M12 19l-7-7 7-7" />
+  </svg>
+);
+
 const PlusIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19" />
@@ -76,10 +83,14 @@ const CheckCircleIcon = () => (
 );
 
 const UserDashboard = () => {
+  const navigate = useNavigate();
   const [listings, setListings] = useState(userListings);
   const [activeTab, setActiveTab] = useState('all'); // all, active, sold, pending
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
+
+  // User info (can be fetched from auth context/localStorage in real app)
+  const userName = "Rajvir";
 
   // Calculate stats
   const totalListings = listings.length;
@@ -107,6 +118,10 @@ const UserDashboard = () => {
     setListings(listings.filter(l => l.id !== deleteItemId));
     setShowDeleteModal(false);
     setDeleteItemId(null);
+  };
+
+  const handleBackClick = () => {
+    navigate('/');
   };
 
   const getStatusBadge = (status) => {
@@ -153,8 +168,31 @@ const UserDashboard = () => {
           background-image: 
             repeating-linear-gradient(0deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px),
             repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px);
-          pointer-events: none;
+          pointer-events none;
           z-index: 1;
+        }
+
+        .btn-glass {
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: white;
+          border-radius: 50px;
+          padding: 10px 18px;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          backdrop-filter: blur(10px);
+          text-decoration: none;
+        }
+
+        .btn-glass:hover {
+          background: rgba(255,255,255,0.15);
+          border-color: white;
         }
 
         .stat-card {
@@ -301,14 +339,22 @@ const UserDashboard = () => {
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
 
-        <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-12">
+        {/* Back Button Navigation */}
+        <nav className="fixed top-0 left-0 right-0 z-40 p-6 flex justify-between items-center pointer-events-none">
+          <button onClick={handleBackClick} className="btn-glass pointer-events-auto shadow-lg">
+            <ArrowLeft />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+        </nav>
+
+        <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-24 md:py-32">
           
           {/* Header */}
           <div className="mb-12 anim-slide-up">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
-                  Your Dashboard
+                  Hey {userName} 👋
                 </h1>
                 <p className="text-white/60 text-sm">
                   Manage your listings, track performance, and connect with buyers
