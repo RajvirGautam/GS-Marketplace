@@ -17,9 +17,9 @@ export const products = [
     views: 145,
     saves: 32,
     location: "Near ATC",
-    image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=1200&q=80",
+    image: "https://res.cloudinary.com/djjufrcal/image/upload/v1770735231/image_14_xzgh7c.png",
     images: [
-      "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=1200&q=80",
+      "https://res.cloudinary.com/djjufrcal/image/upload/v1770735231/image_14_xzgh7c.png",
       "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=1200&q=80"
     ],

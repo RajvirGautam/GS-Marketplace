@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const HeartIcon = ({ filled }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -38,6 +38,7 @@ const LocationIcon = () => (
 const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const [isSaved, setIsSaved] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const navigate = useNavigate()
 
   const animationStyle = {
     opacity: 0,
@@ -47,11 +48,39 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   // Stop propagation helper — prevents Link navigation when clicking heart/share
   const stopNav = (e) => e.preventDefault()
 
+  // Handle click with zoom transition
+  const handleCardClick = (e) => {
+    e.preventDefault()
+    
+    // Find the image element
+    const cardElement = e.currentTarget
+    const imgElement = cardElement.querySelector('img')
+    
+    if (imgElement) {
+      const rect = imgElement.getBoundingClientRect()
+      
+      // Store transition data
+      sessionStorage.setItem('productTransition', JSON.stringify({
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        },
+        imgSrc: product.image,
+        scrollY: window.scrollY
+      }))
+    }
+    
+    // Navigate to product page
+    navigate(`/product/${product.id}`)
+  }
+
   if (viewMode === 'list') {
     return (
-      <Link 
-        to={`/product/${product.id}`}
-        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex anim-slide-up no-underline"
+      <div
+        onClick={handleCardClick}
+        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex anim-slide-up cursor-pointer"
         style={animationStyle}
       >
         
@@ -151,15 +180,15 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     )
   }
 
   // Grid View
   return (
-    <Link 
-      to={`/product/${product.id}`}
-      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] anim-slide-up no-underline block"
+    <div
+      onClick={handleCardClick}
+      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] anim-slide-up cursor-pointer"
       style={animationStyle}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -292,7 +321,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 

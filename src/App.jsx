@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
-
 import Footer from './components/layout/Footer'
 
 import Hero from './components/sections/Hero'
@@ -12,6 +11,7 @@ import Categories from './components/sections/Categories'
 import RecentListings from './components/sections/RecentListings'
 import CTA from './components/sections/CTA'
 import Marketplace from './components/sections/Marketplace'
+import UserDashboard from './components/sections/UserDashboard'
 
 import ConnectIdModal from './components/auth/ConnectIdModal'
 
@@ -54,9 +54,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/product/:id" element={<ProductPage />} />
-          <Route path="/product/:id" element={<ProductPage />} />
-
-
+          <Route path="/dashboard" element={<UserDashboard />} />
         </Routes>
 
         {/* Footer stays global */}

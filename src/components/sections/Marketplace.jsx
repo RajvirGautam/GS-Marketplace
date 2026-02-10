@@ -1,159 +1,193 @@
-
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import ProductCard from '../ui/ProductCard' // Ensure you have this component
-import { products as allProducts } from './Products' // Importing shared data
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import ProductCard from '../ui/ProductCard'; // Ensure you have this component
+import { products as allProducts } from './Products.js'; // Importing shared data
 
 // --- Internal Icons ---
 const ChevronDown = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-)
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
+
 const ChevronLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+);
+
 const ChevronRight = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-)
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+  </svg>
+);
+
 const XIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 6 6 18"/>
+    <path d="M6 6l12 12"/>
+  </svg>
+);
+
 const FilterIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+  </svg>
+);
+
 const GridIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/>
+    <rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/>
+  </svg>
+);
+
 const ListIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-)
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6"/>
+    <line x1="8" y1="12" x2="21" y2="12"/>
+    <line x1="8" y1="18" x2="21" y2="18"/>
+    <line x1="3" y1="6" x2="3.01" y2="6"/>
+    <line x1="3" y1="12" x2="3.01" y2="12"/>
+    <line x1="3" y1="18" x2="3.01" y2="18"/>
+  </svg>
+);
 
 const Marketplace = () => {
+  const location = useLocation();
+
   // State Management
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false)
-  const [sortBy, setSortBy] = useState('newest')
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
-  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
   // Filter States
-  const [selectedCategories, setSelectedCategories] = useState([])
-  const [selectedBranches, setSelectedBranches] = useState([])
-  const [selectedYears, setSelectedYears] = useState([])
-  const [selectedConditions, setSelectedConditions] = useState([])
-  const [selectedTypes, setSelectedTypes] = useState([])
-  const [selectedPostedWithin, setSelectedPostedWithin] = useState(null)
-  const [priceRange, setPriceRange] = useState([0, 10000]) // Increased range
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedBranches, setSelectedBranches] = useState([]);
+  const [selectedYears, setSelectedYears] = useState([]);
+  const [selectedConditions, setSelectedConditions] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedPostedWithin, setSelectedPostedWithin] = useState(null);
+  const [priceRange, setPriceRange] = useState([0, 10000]); // Increased range
   const [availability, setAvailability] = useState({
     availableNow: true,
     auction: false,
     trending: false,
     hasPhotos: false
-  })
+  });
 
   // Category data with counts
   const categories = [
-    { name: 'Books & Notes', count: 245, emoji: '📚', slug: 'books' },
-    { name: 'Lab Equipment', count: 89, emoji: '🔧', slug: 'lab' },
-    { name: 'Stationery', count: 156, emoji: '📐', slug: 'stationery' },
-    { name: 'Electronics', count: 67, emoji: '💻', slug: 'electronics' },
-    { name: 'Hostel Items', count: 43, emoji: '🛏️', slug: 'hostel' },
-    { name: 'Miscellaneous', count: 92, emoji: '🎒', slug: 'misc' }
-  ]
+    { name: "📚 Books & Notes", count: 245, emoji: "📚", slug: "books" },
+    { name: "🔬 Lab Equipment", count: 89, emoji: "🔬", slug: "lab" },
+    { name: "✏️ Stationery", count: 156, emoji: "✏️", slug: "stationery" },
+    { name: "💻 Electronics", count: 67, emoji: "💻", slug: "electronics" },
+    { name: "🛏️ Hostel Items", count: 43, emoji: "🛏️", slug: "hostel" },
+    { name: "🎨 Miscellaneous", count: 92, emoji: "🎨", slug: "misc" }
+  ];
 
   const branches = [
-    { name: 'Computer Science', count: 142, slug: 'cs' },
-    { name: 'Electronics & Comm.', count: 98, slug: 'ece' },
-    { name: 'Mechanical', count: 87, slug: 'mech' },
-    { name: 'Civil', count: 54, slug: 'civil' },
-    { name: 'Electrical', count: 39, slug: 'ee' }
-  ]
+    { name: "Computer Science", count: 142, slug: "cs" },
+    { name: "Electronics & Comm.", count: 98, slug: "ece" },
+    { name: "Mechanical", count: 87, slug: "mech" },
+    { name: "Civil", count: 54, slug: "civil" },
+    { name: "Electrical", count: 39, slug: "ee" }
+  ];
 
   const years = [
-    { label: '1st Year', count: 89, value: 1 },
-    { label: '2nd Year', count: 156, value: 2 },
-    { label: '3rd Year', count: 178, value: 3 },
-    { label: '4th Year', count: 269, value: 4 }
-  ]
+    { label: "1st Year", count: 89, value: 1 },
+    { label: "2nd Year", count: 156, value: 2 },
+    { label: "3rd Year", count: 178, value: 3 },
+    { label: "4th Year", count: 269, value: 4 }
+  ];
 
   const conditions = [
-    { label: 'Any Condition', count: 'all', value: null },
-    { label: 'New', count: 32, value: 'New' },
-    { label: 'Like New', count: 87, value: 'Like New' },
-    { label: 'Good', count: 214, value: 'Good' },
-    { label: 'Acceptable', count: 45, value: 'Acceptable' }
-  ]
+    { label: "Any Condition", count: "all", value: null },
+    { label: "New", count: 32, value: "New" },
+    { label: "Like New", count: 87, value: "Like New" },
+    { label: "Good", count: 214, value: "Good" },
+    { label: "Acceptable", count: 45, value: "Acceptable" }
+  ];
 
   const itemTypes = [
-    { label: 'For Sale (Cash)', count: 512, value: 'sale' },
-    { label: 'For Barter (Exchange)', count: 78, value: 'barter' },
-    { label: 'For Rent', count: 12, value: 'rent' },
-    { label: 'Free (Giveaway)', count: 6, value: 'free' }
-  ]
+    { label: "For Sale (Cash)", count: 512, value: "sale" },
+    { label: "For Barter (Exchange)", count: 78, value: "barter" },
+    { label: "For Rent", count: 12, value: "rent" },
+    { label: "Free Giveaway", count: 6, value: "free" }
+  ];
 
-  const [filteredProducts, setFilteredProducts] = useState(allProducts)
-  const [currentPage, setCurrentPage] = useState(1)
-  const productsPerPage = 24
+  const [filteredProducts, setFilteredProducts] = useState(allProducts);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 24;
 
   // Toggle functions
   const toggleCategory = (slug) => {
     setSelectedCategories(prev => 
       prev.includes(slug) ? prev.filter(c => c !== slug) : [...prev, slug]
-    )
-  }
+    );
+  };
 
   const toggleBranch = (slug) => {
     setSelectedBranches(prev => 
       prev.includes(slug) ? prev.filter(b => b !== slug) : [...prev, slug]
-    )
-  }
+    );
+  };
 
   const toggleYear = (value) => {
     setSelectedYears(prev => 
       prev.includes(value) ? prev.filter(y => y !== value) : [...prev, value]
-    )
-  }
+    );
+  };
 
   const toggleType = (value) => {
     setSelectedTypes(prev => 
       prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
-    )
-  }
+    );
+  };
 
   const clearAllFilters = () => {
-    setSelectedCategories([])
-    setSelectedBranches([])
-    setSelectedYears([])
-    setSelectedConditions([])
-    setSelectedTypes([])
-    setSelectedPostedWithin(null)
-    setPriceRange([0, 10000])
+    setSelectedCategories([]);
+    setSelectedBranches([]);
+    setSelectedYears([]);
+    setSelectedConditions([]);
+    setSelectedTypes([]);
+    setSelectedPostedWithin(null);
+    setPriceRange([0, 10000]);
     setAvailability({
       availableNow: true,
       auction: false,
       trending: false,
       hasPhotos: false
-    })
-    setSearchQuery('')
-  }
+    });
+    setSearchQuery('');
+  };
 
   const getActiveFilterCount = () => {
-    let count = 0
-    if (selectedCategories.length > 0) count++
-    if (selectedBranches.length > 0) count++
-    if (selectedYears.length > 0) count++
-    if (selectedConditions.length > 0) count++
-    if (selectedTypes.length > 0) count++
-    if (selectedPostedWithin) count++
-    if (priceRange[0] !== 0 || priceRange[1] !== 10000) count++
-    return count
-  }
+    let count = 0;
+    if (selectedCategories.length > 0) count++;
+    if (selectedBranches.length > 0) count++;
+    if (selectedYears.length > 0) count++;
+    if (selectedConditions.length > 0) count++;
+    if (selectedTypes.length > 0) count++;
+    if (selectedPostedWithin) count++;
+    if (priceRange[0] !== 0 || priceRange[1] !== 10000) count++;
+    return count;
+  };
 
   // Filter and sort products
   useEffect(() => {
-    let result = [...allProducts]
+    let result = [...allProducts];
 
     // Search filter
     if (searchQuery.trim()) {
@@ -161,77 +195,97 @@ const Marketplace = () => {
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      );
     }
 
     // Category filter
     if (selectedCategories.length > 0) {
-      result = result.filter(p => selectedCategories.includes(p.category))
+      result = result.filter(p => selectedCategories.includes(p.category));
     }
 
     // Branch filter
     if (selectedBranches.length > 0) {
-      result = result.filter(p => selectedBranches.includes(p.branch))
+      result = result.filter(p => selectedBranches.includes(p.branch));
     }
 
     // Year filter
     if (selectedYears.length > 0) {
-      result = result.filter(p => selectedYears.includes(p.year))
+      result = result.filter(p => selectedYears.includes(p.year));
     }
 
     // Condition filter
     if (selectedConditions.length > 0) {
-      result = result.filter(p => selectedConditions.includes(p.condition))
+      result = result.filter(p => selectedConditions.includes(p.condition));
     }
 
     // Type filter
     if (selectedTypes.length > 0) {
-      result = result.filter(p => selectedTypes.includes(p.type))
+      result = result.filter(p => selectedTypes.includes(p.type));
     }
 
     // Price range filter
     result = result.filter(p => {
       // Use numericPrice from data structure for cleaner sorting
-      const price = p.numericPrice || parseInt(p.price.replace(/[^0-9]/g, ''))
-      return price >= priceRange[0] && price <= priceRange[1]
-    })
+      const price = p.numericPrice || parseInt(p.price.replace(/[^0-9]/g, ''));
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
 
     // Availability filters
     if (availability.trending) {
-      result = result.filter(p => p.isTrending)
+      result = result.filter(p => p.isTrending);
     }
 
     // Sort
     switch(sortBy) {
       case 'newest':
         // Assuming default is newest
-        break
+        break;
       case 'oldest':
-        result.reverse()
-        break
-      case 'price_low':
-        result.sort((a, b) => (a.numericPrice || 0) - (b.numericPrice || 0))
-        break
-      case 'price_high':
-        result.sort((a, b) => (b.numericPrice || 0) - (a.numericPrice || 0))
-        break
+        result.reverse();
+        break;
+      case 'pricelow':
+        result.sort((a, b) => (a.numericPrice || 0) - (b.numericPrice || 0));
+        break;
+      case 'pricehigh':
+        result.sort((a, b) => (b.numericPrice || 0) - (a.numericPrice || 0));
+        break;
       case 'popular':
-        result.sort((a, b) => b.views - a.views)
-        break
+        result.sort((a, b) => b.views - a.views);
+        break;
       default:
-        break
+        break;
     }
 
-    setFilteredProducts(result)
-    setCurrentPage(1)
-  }, [searchQuery, selectedCategories, selectedBranches, selectedYears, 
-      selectedConditions, selectedTypes, selectedPostedWithin, 
-      priceRange, availability, sortBy])
+    setFilteredProducts(result);
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedCategories,
+    selectedBranches,
+    selectedYears,
+    selectedConditions,
+    selectedTypes,
+    selectedPostedWithin,
+    priceRange,
+    availability,
+    sortBy
+  ]);
+
+  // Restore scroll position when coming back from product page
+  useEffect(() => {
+    if (location.state?.scrollY) {
+      setTimeout(() => {
+        window.scrollTo(0, location.state.scrollY);
+        // Clear the state after restoring
+        window.history.replaceState({}, document.title);
+      }, 100);
+    }
+  }, [location]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
-  const startIndex = (currentPage - 1) * productsPerPage
-  const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage)
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
 
   return (
     <>
@@ -245,9 +299,11 @@ const Marketplace = () => {
           min-height: 100vh;
         }
 
-        .mono { font-family: 'Space Mono', monospace; }
+        .mono {
+          font-family: 'Space Mono', monospace;
+        }
 
-        /* Noise & Grid */
+        /* Noise Grid */
         .noise-overlay {
           position: absolute;
           inset: 0;
@@ -278,10 +334,12 @@ const Marketplace = () => {
           position: relative;
           transition: all 0.2s;
         }
+
         .brutal-checkbox:checked {
           background: #fff;
           border-color: #fff;
         }
+
         .brutal-checkbox:checked::after {
           content: '';
           position: absolute;
@@ -305,9 +363,11 @@ const Marketplace = () => {
           position: relative;
           transition: all 0.2s;
         }
+
         .brutal-radio:checked {
           border-color: #00D9FF;
         }
+
         .brutal-radio:checked::after {
           content: '';
           position: absolute;
@@ -328,6 +388,7 @@ const Marketplace = () => {
           background: rgba(255,255,255,0.2);
           outline: none;
         }
+
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           width: 12px;
@@ -338,9 +399,17 @@ const Marketplace = () => {
         }
 
         /* Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
+        }
 
         /* Toggle Switch */
         .toggle-switch {
@@ -352,10 +421,12 @@ const Marketplace = () => {
           cursor: pointer;
           transition: background 0.3s;
         }
+
         .toggle-switch.active {
           background: #00D9FF;
           border-color: #00D9FF;
         }
+
         .toggle-switch::after {
           content: '';
           position: absolute;
@@ -366,41 +437,84 @@ const Marketplace = () => {
           left: 2px;
           transition: transform 0.3s;
         }
+
         .toggle-switch.active::after {
           transform: translateX(16px);
         }
 
         /* Animations */
         @keyframes slideInLeft {
-          from { opacity: 0; transform: translateX(-100px); }
-          to { opacity: 1; transform: translateX(0); }
+          from {
+            opacity: 0;
+            transform: translateX(-100px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(100px); }
-          to { opacity: 1; transform: translateX(0); }
+          from {
+            opacity: 0;
+            transform: translateX(100px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
         @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(60px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(60px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.8) rotate(-5deg); }
-          to { opacity: 1; transform: scale(1) rotate(0deg); }
+          from {
+            opacity: 0;
+            transform: scale(0.8) rotate(-5deg);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+          }
         }
 
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
 
-        .anim-slide-left { animation: slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .anim-slide-right { animation: slideInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .anim-slide-up { animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .anim-scale { animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .anim-fade { animation: fadeIn 0.6s ease-out forwards; }
+        .anim-slide-left {
+          animation: slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .anim-slide-right {
+          animation: slideInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .anim-slide-up {
+          animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .anim-scale {
+          animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .anim-fade {
+          animation: fadeIn 0.6s ease-out forwards;
+        }
 
         /* Filter Tag */
         .filter-tag {
@@ -428,9 +542,11 @@ const Marketplace = () => {
           transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
           z-index: 1000;
         }
+
         .filter-drawer.open {
           transform: translateY(0);
         }
+
         .filter-backdrop {
           position: fixed;
           inset: 0;
@@ -441,6 +557,7 @@ const Marketplace = () => {
           transition: opacity 0.3s;
           z-index: 999;
         }
+
         .filter-backdrop.open {
           opacity: 1;
           pointer-events: all;
@@ -448,17 +565,13 @@ const Marketplace = () => {
       `}</style>
 
       <div className="theme-root relative">
-        <div className="noise-overlay" />
-        <div className="grid-lines" />
+        <div className="noise-overlay"></div>
+        <div className="grid-lines"></div>
 
         {/* --- STICKY HEADER --- */}
-        <header 
-          className="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10 anim-fade"
-          style={{ animationDuration: '0.8s' }}
-        >
+        <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10 anim-fade" style={{ animationDuration: '0.8s' }}>
           <div className="max-w-[1800px] mx-auto px-6 py-4">
             <div className="flex items-center gap-4">
-              
               {/* Logo */}
               <Link to="/">
                 <div className="mono text-lg font-bold text-white hidden md:block cursor-pointer">
@@ -476,19 +589,19 @@ const Marketplace = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => {
-                      setSearchQuery(e.target.value)
-                      setShowSearchSuggestions(e.target.value.length >= 2)
+                      setSearchQuery(e.target.value);
+                      setShowSearchSuggestions(e.target.value.length > 2);
                     }}
-                    onFocus={() => setShowSearchSuggestions(searchQuery.length >= 2)}
+                    onFocus={() => setShowSearchSuggestions(searchQuery.length > 2)}
                     onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
-                    placeholder="Search 'CS 3rd sem books', 'Arduino', 'Drafter'..."
+                    placeholder="Search CS 3rd sem books, Arduino, Drafter..."
                     className="w-full h-12 pl-11 pr-10 bg-zinc-900 border border-white/10 text-white text-sm focus:outline-none focus:border-[#00D9FF] transition-colors"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => {
-                        setSearchQuery('')
-                        setShowSearchSuggestions(false)
+                        setSearchQuery('');
+                        setShowSearchSuggestions(false);
                       }}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                     >
@@ -514,7 +627,7 @@ const Marketplace = () => {
 
               {/* List Product Button */}
               <button className="px-6 py-3 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-sm font-bold mono hover:scale-105 transition-transform hidden md:block">
-                ➕ LIST PRODUCT
+                LIST PRODUCT
               </button>
 
               {/* User Icon */}
@@ -528,19 +641,11 @@ const Marketplace = () => {
         {/* --- MAIN LAYOUT --- */}
         <div className="max-w-[1800px] mx-auto relative z-10">
           <div className="grid grid-cols-12">
-            
             {/* LEFT SIDEBAR - Desktop Only */}
-            <aside 
-              className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/40 backdrop-blur-sm p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[73px] h-[calc(100vh-73px)] anim-slide-left"
-              style={{ opacity: 0, animationDelay: '0.2s' }}
-            >
-              
+            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/40 backdrop-blur-sm p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[73px] h-[calc(100vh-73px)] anim-slide-left" style={{ opacity: 0, animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between mb-8">
                 <h3 className="mono text-xs font-bold text-white uppercase tracking-widest">Filters</h3>
-                <button 
-                  onClick={clearAllFilters}
-                  className="mono text-[10px] text-[#00D9FF] hover:underline"
-                >
+                <button onClick={clearAllFilters} className="mono text-[10px] text-[#00D9FF] hover:underline">
                   CLEAR ALL
                 </button>
               </div>
@@ -548,7 +653,9 @@ const Marketplace = () => {
               {/* Active Filters Summary */}
               {getActiveFilterCount() > 0 && (
                 <div className="mb-6 pb-6 border-b border-white/10">
-                  <div className="mono text-[10px] text-white/40 mb-3">ACTIVE: {getActiveFilterCount()} FILTERS</div>
+                  <div className="mono text-[10px] text-white/40 mb-3">
+                    ACTIVE ({getActiveFilterCount()}) FILTERS
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedCategories.map(cat => (
                       <span key={cat} className="filter-tag">
@@ -568,8 +675,8 @@ const Marketplace = () => {
                 <div className="space-y-3">
                   {categories.map(cat => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="brutal-checkbox"
                         checked={selectedCategories.includes(cat.slug)}
                         onChange={() => toggleCategory(cat.slug)}
@@ -589,25 +696,25 @@ const Marketplace = () => {
                   <h4 className="mono text-[10px] text-white/40 uppercase font-bold">Price Range</h4>
                   <span className="mono text-[10px] text-white">₹{priceRange[0]} - ₹{priceRange[1]}</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="10000" 
+                <input
+                  type="range"
+                  min="0"
+                  max="10000"
                   step="100"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
                 />
                 <div className="flex gap-2 mt-3">
-                  <input 
-                    type="number" 
-                    value={priceRange[0]} 
+                  <input
+                    type="number"
+                    value={priceRange[0]}
                     onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
                     className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white"
                     placeholder="Min"
                   />
-                  <input 
-                    type="number" 
-                    value={priceRange[1]} 
+                  <input
+                    type="number"
+                    value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
                     className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white"
                     placeholder="Max"
@@ -621,8 +728,8 @@ const Marketplace = () => {
                 <div className="space-y-3">
                   {branches.map(branch => (
                     <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="brutal-checkbox"
                         checked={selectedBranches.includes(branch.slug)}
                         onChange={() => toggleBranch(branch.slug)}
@@ -642,8 +749,8 @@ const Marketplace = () => {
                 <div className="space-y-3">
                   {years.map(year => (
                     <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="brutal-checkbox"
                         checked={selectedYears.includes(year.value)}
                         onChange={() => toggleYear(year.value)}
@@ -663,8 +770,8 @@ const Marketplace = () => {
                 <div className="space-y-3">
                   {conditions.map(cond => (
                     <label key={cond.value || 'any'} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="radio" 
+                      <input
+                        type="radio"
                         name="condition"
                         className="brutal-radio"
                         checked={selectedPostedWithin === cond.value}
@@ -687,8 +794,8 @@ const Marketplace = () => {
                 <div className="space-y-3">
                   {itemTypes.map(type => (
                     <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="brutal-checkbox"
                         checked={selectedTypes.includes(type.value)}
                         onChange={() => toggleType(type.value)}
@@ -708,24 +815,24 @@ const Marketplace = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-white/70">Available Now</span>
-                    <div 
+                    <div
                       className={`toggle-switch ${availability.availableNow ? 'active' : ''}`}
-                      onClick={() => setAvailability(prev => ({...prev, availableNow: !prev.availableNow}))}
-                    />
+                      onClick={() => setAvailability(prev => ({ ...prev, availableNow: !prev.availableNow }))}
+                    ></div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-white/70">Trending Items</span>
-                    <div 
+                    <div
                       className={`toggle-switch ${availability.trending ? 'active' : ''}`}
-                      onClick={() => setAvailability(prev => ({...prev, trending: !prev.trending}))}
-                    />
+                      onClick={() => setAvailability(prev => ({ ...prev, trending: !prev.trending }))}
+                    ></div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-white/70">Has Photos</span>
-                    <div 
+                    <div
                       className={`toggle-switch ${availability.hasPhotos ? 'active' : ''}`}
-                      onClick={() => setAvailability(prev => ({...prev, hasPhotos: !prev.hasPhotos}))}
-                    />
+                      onClick={() => setAvailability(prev => ({ ...prev, hasPhotos: !prev.hasPhotos }))}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -733,23 +840,20 @@ const Marketplace = () => {
 
             {/* RIGHT CONTENT */}
             <main className="col-span-12 lg:col-span-9 xl:col-span-10 p-6 lg:p-8">
-              
               {/* Sort & View Controls */}
-              <div 
-                className="flex flex-wrap items-center justify-between gap-4 mb-8 anim-slide-up"
-                style={{ opacity: 0, animationDelay: '0.4s' }}
-              >
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8 anim-slide-up" style={{ opacity: 0, animationDelay: '0.4s' }}>
                 <div className="mono text-xs text-white/40">
-                  SHOWING <span className="text-white font-bold">{currentProducts.length}</span> OF <span className="text-white font-bold">{filteredProducts.length}</span> RESULTS
+                  SHOWING <span className="text-white font-bold">{currentProducts.length}</span> OF{' '}
+                  <span className="text-white font-bold">{filteredProducts.length}</span> RESULTS
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   {/* Mobile Filter Button */}
                   <button
                     onClick={() => setMobileFilterOpen(true)}
                     className="lg:hidden flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/10 text-white text-xs mono"
                   >
-                    <FilterIcon /> FILTERS ({getActiveFilterCount()})
+                    <FilterIcon /> FILTERS {getActiveFilterCount() > 0 && `(${getActiveFilterCount()})`}
                   </button>
 
                   {/* View Toggle */}
@@ -770,15 +874,15 @@ const Marketplace = () => {
 
                   {/* Sort Dropdown */}
                   <div className="relative group">
-                    <select 
+                    <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                       className="appearance-none bg-zinc-900 border border-white/10 text-xs mono text-white px-4 py-2 pr-8 focus:outline-none focus:border-white/40"
                     >
                       <option value="newest">SORT: NEWEST FIRST</option>
                       <option value="oldest">SORT: OLDEST FIRST</option>
-                      <option value="price_low">SORT: PRICE LOW → HIGH</option>
-                      <option value="price_high">SORT: PRICE HIGH → LOW</option>
+                      <option value="pricelow">SORT: PRICE LOW→HIGH</option>
+                      <option value="pricehigh">SORT: PRICE HIGH→LOW</option>
                       <option value="popular">SORT: MOST POPULAR</option>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
@@ -795,13 +899,13 @@ const Marketplace = () => {
                   <h3 className="text-xl font-bold text-white mb-2">No products match your filters</h3>
                   <p className="text-white/60 mb-6">Try adjusting your search or filters</p>
                   <div className="flex gap-4 justify-center">
-                    <button 
+                    <button
                       onClick={clearAllFilters}
                       className="px-6 py-2 border border-white/20 text-white hover:bg-white hover:text-black transition-colors"
                     >
                       Clear All Filters
                     </button>
-                    <button 
+                    <button
                       onClick={() => window.location.reload()}
                       className="px-6 py-2 bg-white text-black hover:bg-white/90 transition-colors"
                     >
@@ -813,72 +917,69 @@ const Marketplace = () => {
 
               {/* Product Grid */}
               {filteredProducts.length > 0 && (
-                <>
-                  <div className={`grid gap-6 ${
-                    viewMode === 'grid' 
-                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                      : 'grid-cols-1'
-                  }`}>
-                    {currentProducts.map((product, index) => (
-                      <ProductCard 
-                        key={product.id} 
-                        product={product} 
-                        viewMode={viewMode} 
-                        index={index} 
-                      />
-                    ))}
-                  </div>
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                  {currentProducts.map((product, index) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      viewMode={viewMode}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              )}
 
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex justify-center mt-12 gap-2 anim-fade" style={{ opacity: 0, animationDelay: '1s' }}>
-                      <button 
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        disabled={currentPage === 1}
-                        className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft />
-                      </button>
-                      
-                      {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                        const pageNum = i + 1
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`w-8 h-8 flex items-center justify-center font-mono text-xs font-bold ${
-                              currentPage === pageNum 
-                                ? 'bg-white text-black' 
-                                : 'border border-white/10 hover:border-white/40 text-white/60'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        )
-                      })}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-12 gap-2 anim-fade" style={{ opacity: 0, animationDelay: '1s' }}>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft />
+                  </button>
 
-                      {totalPages > 5 && <span className="flex items-center text-white/40">...</span>}
-                      
-                      <button 
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        disabled={currentPage === totalPages}
-                        className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-8 h-8 flex items-center justify-center font-mono text-xs font-bold ${
+                          currentPage === pageNum
+                            ? 'bg-white text-black'
+                            : 'border border-white/10 hover:border-white/40 text-white/60'
+                        }`}
                       >
-                        <ChevronRight />
+                        {pageNum}
                       </button>
-                    </div>
+                    );
+                  })}
+
+                  {totalPages > 5 && (
+                    <span className="flex items-center text-white/40">...</span>
                   )}
-                </>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
               )}
             </main>
           </div>
         </div>
 
         {/* Mobile Filter Drawer */}
-        <div 
+        <div
           className={`filter-backdrop ${mobileFilterOpen ? 'open' : ''}`}
           onClick={() => setMobileFilterOpen(false)}
-        />
+        ></div>
+
         <div className={`filter-drawer ${mobileFilterOpen ? 'open' : ''} lg:hidden`}>
           <div className="p-6">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
@@ -894,32 +995,32 @@ const Marketplace = () => {
               <div>
                 <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Categories</h4>
                 <div className="space-y-3">
-                    {categories.map(cat => (
-                        <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                        <input 
-                            type="checkbox" 
-                            className="brutal-checkbox"
-                            checked={selectedCategories.includes(cat.slug)}
-                            onChange={() => toggleCategory(cat.slug)}
-                        />
-                        <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
-                            {cat.emoji} {cat.name}
-                        </span>
-                        </label>
-                    ))}
+                  {categories.map(cat => (
+                    <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="brutal-checkbox"
+                        checked={selectedCategories.includes(cat.slug)}
+                        onChange={() => toggleCategory(cat.slug)}
+                      />
+                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
+                        {cat.emoji} {cat.name}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Sticky Footer */}
             <div className="sticky bottom-0 bg-black border-t border-white/10 p-4 flex gap-3 mt-8">
-              <button 
+              <button
                 onClick={clearAllFilters}
                 className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono"
               >
                 CLEAR
               </button>
-              <button 
+              <button
                 onClick={() => setMobileFilterOpen(false)}
                 className="flex-1 px-4 py-3 bg-[#00D9FF] text-black text-sm font-bold mono"
               >
@@ -931,11 +1032,11 @@ const Marketplace = () => {
 
         {/* Floating Action Button (Mobile) */}
         <button className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-2xl flex items-center justify-center shadow-2xl z-40">
-          ➕    
+          +
         </button>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Marketplace
+export default Marketplace;
