@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import ProductCard from '../ui/ProductCard' // Ensure you have this component
-import { products as allProducts } from '/Users/vkgautam/Desktop/GS-MARK-II/sgsits-market/src/components/sections/Products.js' // Importing shared data
+import { products as allProducts } from './Products' // Importing shared data
 
 // --- Internal Icons ---
 const ChevronDown = () => (
