@@ -1,0 +1,43 @@
+{
+  "hash": "7a1b4b70",
+  "configHash": "2863a62a",
+  "lockfileHash": "03cce9b4",
+  "browserHash": "6f779ed3",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "9beae485",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "0eae1844",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "7f42c09b",
+      "needsInterop": false
+    },
+    "tesseract.js": {
+      "src": "../../node_modules/tesseract.js/src/index.js",
+      "file": "tesseract__js.js",
+      "fileHash": "5152ced1",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-6UQLG4H2": {
+      "file": "chunk-6UQLG4H2.js"
+    },
+    "chunk-TXI3HGC7": {
+      "file": "chunk-TXI3HGC7.js"
+    },
+    "chunk-7D4SUZUM": {
+      "file": "chunk-7D4SUZUM.js"
+    }
+  }
+}
