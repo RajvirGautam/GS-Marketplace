@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
 import Footer from './components/layout/Footer'
@@ -11,6 +12,7 @@ import CTA from './components/sections/CTA'
 import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
 import ConnectIdModal from './components/auth/ConnectIdModal'
+import AuthCallback from './pages/AuthCallback'
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -43,25 +45,28 @@ function App() {
   )
 
   return (
-    <Router>
-      <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/product/:id" element={<ProductPage />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
-        </Routes>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+          </Routes>
 
-        {/* Footer stays global */}
-        <Footer />
+          {/* Footer stays global */}
+          <Footer />
 
-        {/* Modal works everywhere */}
-        <ConnectIdModal 
-          isOpen={isLoginOpen} 
-          onClose={() => setIsLoginOpen(false)} 
-        />
-      </div>
-    </Router>
+          {/* Modal works everywhere */}
+          <ConnectIdModal 
+            isOpen={isLoginOpen} 
+            onClose={() => setIsLoginOpen(false)} 
+          />
+        </div>
+      </Router>
+    </AuthProvider>
   )
 }
 

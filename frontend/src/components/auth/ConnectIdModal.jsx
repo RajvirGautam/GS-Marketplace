@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Tesseract from 'tesseract.js'; 
-import { useSignUp, useSignIn } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import Icons from '../../assets/icons/Icons';
 import NeonButton from '../ui/NeonButton';
 import LoginGraphic from './LoginGraphic.png';
@@ -67,8 +67,7 @@ const modalStyles = `
 `;
 
 const ConnectIdModal = ({ isOpen, onClose }) => {
-  const { signUp, setActive: setSignUpActive, isLoaded: signUpLoaded } = useSignUp();
-  const { signIn, setActive: setSignInActive, isLoaded: signInLoaded } = useSignIn();
+  const { register, login, loginWithGoogle } = useAuth();
   
   const [activeTab, setActiveTab] = useState('manual');
   const [dragActive, setDragActive] = useState(false);
@@ -78,15 +77,9 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [fullName, setFullName] = useState('');
   const [enrollment, setEnrollment] = useState('');
-  
-  // Clerk fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(false); // false = signup, true = login
-  
-  // Google States
-  const [googleEmail, setGoogleEmail] = useState('');
-  const [googleError, setGoogleError] = useState('');
+  const [isLogin, setIsLogin] = useState(false);
 
   // Verification Logic States
   const [isProcessing, setIsProcessing] = useState(false);
@@ -106,8 +99,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       setEmail('');
       setPassword('');
       setIsLogin(false);
-      setGoogleEmail('');
-      setGoogleError('');
       setDragActive(false);
       setIsProcessing(false);
       setVerificationStatus('idle');
@@ -325,27 +316,8 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     reader.readAsDataURL(selectedFile);
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setIsProcessing(true);
-      
-      if (isLogin) {
-        await signIn.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: `${window.location.origin}/sso-callback`,
-          redirectUrlComplete: '/marketplace'
-        });
-      } else {
-        await signUp.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: `${window.location.origin}/sso-callback`,
-          redirectUrlComplete: '/marketplace'
-        });
-      }
-    } catch (error) {
-      setGoogleError(`Google ${isLogin ? 'login' : 'signup'} failed: ${error.message}`);
-      setIsProcessing(false);
-    }
+  const handleGoogleLogin = () => {
+    loginWithGoogle();
   };
 
   const addDebugInfo = (message) => {
@@ -365,27 +337,22 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     try {
       addDebugInfo('🔑 Attempting login...');
       
-      const result = await signIn.create({
-        identifier: email,
-        password: password,
-      });
+      const result = await login(email, password);
       
-      addDebugInfo('✅ Credentials verified!');
-      addDebugInfo('Setting session...');
-      
-      await setSignInActive({ session: result.createdSessionId });
-      
-      addDebugInfo('✅ Login successful!');
-      
-      setTimeout(() => {
-        onClose();
-        window.location.href = '/marketplace';
-      }, 500);
-      
+      if (result.success) {
+        addDebugInfo('✅ Login successful!');
+        setTimeout(() => {
+          onClose();
+          window.location.href = '/marketplace';
+        }, 500);
+      } else {
+        addDebugInfo(`❌ Login failed: ${result.error}`);
+        alert(result.error);
+      }
     } catch (error) {
       console.error('Login error:', error);
-      addDebugInfo(`❌ Login failed: ${error.errors?.[0]?.message || error.message}`);
-      alert(`Login failed: ${error.errors?.[0]?.message || error.message}`);
+      addDebugInfo(`❌ Error: ${error.message}`);
+      alert('Login failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -470,94 +437,30 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       if (nameMatch && enrollmentMatch) {
         addDebugInfo('');
         addDebugInfo('🎉 ✅ OCR VERIFICATION SUCCESSFUL! 🎉');
-        addDebugInfo('Creating Clerk account...');
+        addDebugInfo('Creating account...');
         
-        try {
-          // STEP 1: Create account with Clerk
-          const signUpResult = await signUp.create({
-            emailAddress: email,
-            password: password,
-            firstName: fullName.split(' ')[0],
-            lastName: fullName.split(' ').slice(1).join(' ') || fullName.split(' ')[0],
-            unsafeMetadata: {
-              enrollmentNumber: enrollment,
-              isVerified: true
-            }
-          });
-          
-          addDebugInfo('✅ Clerk account created!');
-          addDebugInfo(`   User ID: ${signUpResult.id}`);
-          addDebugInfo(`   Session ID: ${signUpResult.createdSessionId}`);
-          
-          // STEP 2: Check if session was created
-          if (!signUpResult.createdSessionId) {
-            throw new Error('No session was created. Account may need email verification.');
-          }
-          
-          addDebugInfo('Setting active session...');
-          
-          // STEP 3: Set as active session and WAIT for it
-          await setSignUpActive({ session: signUpResult.createdSessionId });
-          
-          // Add a small delay to ensure session is fully set
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          addDebugInfo('✅ Session activated!');
-          addDebugInfo('Syncing to MongoDB...');
-          
-          // STEP 4: Sync to your MongoDB
-          try {
-            const syncResponse = await fetch(`${import.meta.env.VITE_API_URL}/users/sync`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                clerkUserId: signUpResult.id,
-                email: email,
-                fullName: fullName,
-                enrollmentNumber: enrollment,
-                isVerified: true,
-                verificationStatus: 'approved'
-              })
-            });
-            
-            if (syncResponse.ok) {
-              addDebugInfo('✅ Profile synced to database!');
-            } else {
-              addDebugInfo('⚠️  Database sync failed (non-critical)');
-            }
-          } catch (syncError) {
-            console.error('DB sync error:', syncError);
-            addDebugInfo('⚠️  Database sync failed (non-critical)');
-          }
-          
+        const result = await register({
+          email,
+          password,
+          fullName,
+          enrollmentNumber: enrollment,
+          isVerified: true
+        });
+        
+        if (result.success) {
+          addDebugInfo('✅ Account created successfully!');
           addDebugInfo('🚀 Redirecting to marketplace...');
           
           setVerificationStatus('success');
-          
-          // STEP 5: Redirect with a delay
           setTimeout(() => {
             onClose();
             window.location.href = '/marketplace';
           }, 1500);
-          
-        } catch (clerkError) {
-          console.error('Clerk error:', clerkError);
-          addDebugInfo('');
-          addDebugInfo('❌ ACCOUNT CREATION FAILED');
-          addDebugInfo(`Error: ${clerkError.errors?.[0]?.message || clerkError.message}`);
-          
-          // Show specific error to user
-          if (clerkError.errors?.[0]?.code === 'form_identifier_exists') {
-            alert('This email is already registered. Please login instead.');
-          } else {
-            alert(`Account creation failed: ${clerkError.errors?.[0]?.message || clerkError.message}`);
-          }
-          
+        } else {
+          addDebugInfo(`❌ Registration failed: ${result.error}`);
+          alert(result.error);
           setVerificationStatus('failed');
         }
-        
       } else {
         addDebugInfo('');
         addDebugInfo('❌ OCR VERIFICATION FAILED');
@@ -696,29 +599,21 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Google Toggle Section */}
-          <div className="mb-6 relative z-10">
-            <div className={`p-4 border transition-all duration-300 ${activeTab === 'google' ? 'border-[#00D9FF] bg-[#00D9FF]/5' : 'border-white/10 hover:border-white/30 bg-zinc-900/50'}`}>
-              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('google')}>
-                <div className="w-6 h-6 bg-white flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.11c-.22-.66-.35-1.36-.35-2.11s.13-1.45.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                </div>
-                <span className="font-bold text-white mono text-xs uppercase">
-                  {isLogin ? 'Login with Google' : 'Sign Up with Google'}
-                </span>
-              </div>
-              
-              <div className={`overflow-hidden transition-all duration-300 ${activeTab === 'google' ? 'max-h-32 mt-3 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <button 
-                  onClick={handleGoogleLogin}
-                  disabled={isProcessing}
-                  className="w-full bg-[#00D9FF] hover:bg-white text-black px-4 py-3 text-xs font-bold uppercase transition-colors mono disabled:opacity-50"
-                >
-                  {isProcessing ? 'PROCESSING...' : (isLogin ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE')}
-                </button>
-                {googleError && <p className="text-red-500 text-[10px] mt-2 font-bold mono uppercase flex items-center gap-1"><Icons.AlertCircle size={12}/> {googleError}</p>}
-              </div>
-            </div>
+          {/* Google Button */}
+          <div className="mb-6">
+            <button 
+              onClick={handleGoogleLogin}
+              disabled={isProcessing}
+              className="w-full bg-white hover:bg-gray-100 text-black px-4 py-3 text-xs font-bold uppercase transition-colors mono disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.11c-.22-.66-.35-1.36-.35-2.11s.13-1.45.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              {isLogin ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE'}
+            </button>
           </div>
 
           <div className="flex items-center gap-4 mb-6">
@@ -730,16 +625,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Manual Form Container */}
-          <div className={`relative space-y-4 transition-all duration-300 ${activeTab === 'google' ? 'opacity-40' : 'opacity-100'}`}>
-            
-            {activeTab === 'google' && (
-              <div 
-                className="absolute inset-0 z-50 cursor-pointer"
-                onClick={() => setActiveTab('manual')}
-                title="Click to enable manual upload"
-              />
-            )}
-
+          <div className="space-y-4">
             {/* LOGIN MODE - Only Email & Password */}
             {isLogin ? (
               <>
@@ -747,7 +633,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                   <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
                   <input 
                     type="email" 
-                    disabled={activeTab === 'google'} 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full input-brutal px-4 py-3 text-sm" 
@@ -758,7 +643,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                   <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
                   <input 
                     type="password" 
-                    disabled={activeTab === 'google'} 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full input-brutal px-4 py-3 text-sm" 
@@ -774,7 +658,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
                     <input 
                       type="email" 
-                      disabled={activeTab === 'google'} 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full input-brutal px-4 py-3 text-sm" 
@@ -785,7 +668,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
                     <input 
                       type="password" 
-                      disabled={activeTab === 'google'} 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full input-brutal px-4 py-3 text-sm" 
@@ -796,7 +678,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Full Name</label>
                     <input 
                       type="text" 
-                      disabled={activeTab === 'google'} 
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full input-brutal px-4 py-3 text-sm" 
@@ -807,7 +688,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Enrollment No.</label>
                     <input 
                       type="text" 
-                      disabled={activeTab === 'google'} 
                       value={enrollment}
                       onChange={(e) => setEnrollment(e.target.value)}
                       className="w-full input-brutal px-4 py-3 text-sm" 
@@ -819,8 +699,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
                 <div 
                   className={`relative border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition-colors
-                  ${dragActive ? 'border-[#00D9FF] bg-[#00D9FF]/10' : 'border-white/20 hover:border-white/40 bg-zinc-900/50'}
-                  ${activeTab === 'manual' ? 'cursor-pointer' : ''}`}
+                  ${dragActive ? 'border-[#00D9FF] bg-[#00D9FF]/10' : 'border-white/20 hover:border-white/40 bg-zinc-900/50'} cursor-pointer`}
                   onDragEnter={handleDrag} 
                   onDragLeave={handleDrag} 
                   onDragOver={handleDrag} 
@@ -828,7 +707,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                 >
                   <input 
                     type="file" 
-                    disabled={activeTab === 'google'} 
                     accept="image/*"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                     onChange={(e) => handleFileSelect(e.target.files[0])}
@@ -872,7 +750,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     </>
                   )}
                   
-                  {dragActive && activeTab === 'manual' && <div className="absolute left-0 right-0 h-0.5 bg-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.8)] animate-scan-line pointer-events-none"></div>}
+                  {dragActive && <div className="absolute left-0 right-0 h-0.5 bg-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.8)] animate-scan-line pointer-events-none"></div>}
                 </div>
               </>
             )}
@@ -880,7 +758,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             <NeonButton 
               primary={verificationStatus !== 'failed'} 
               className={`w-full justify-center py-4 mt-4 rounded-none font-mono uppercase text-xs font-bold ${verificationStatus === 'failed' ? 'bg-red-900/20 border-red-500 text-red-500 hover:border-red-400' : ''}`}
-              disabled={activeTab === 'google' || isProcessing || verificationStatus === 'success'}
+              disabled={isProcessing || verificationStatus === 'success'}
               onClick={isLogin ? handleManualLogin : handleManualSignup}
             >
               {getButtonContent()}
