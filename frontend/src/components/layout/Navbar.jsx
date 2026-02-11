@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
-import NeonButton from '../ui/NeonButton'
 import { Link } from 'react-router-dom'
+import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react'
 
-const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
+const Navbar = ({ isDark, toggleTheme }) => {
   const [isOpen, setIsOpen] = useState(false)
   const navRef = useRef(null)
 
@@ -24,9 +24,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       const endWidth = 100
       const currentWidth = startWidth + ((endWidth - startWidth) * ratio)
 
-      // 2. POSITION LOGIC (THE FIX)
-      // We start 120px to the left of the center, and decay to 0px (center)
-      // You can change '120' to '200' if you want it even more to the left.
+      // 2. POSITION LOGIC
       const startOffset = 72
       const currentOffset = startOffset * (1 - ratio)
       const currentLeft = `calc(50% - ${currentOffset}px)`
@@ -48,7 +46,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       // 4. APPLY STYLES
       const el = navRef.current
-      el.style.left = currentLeft // Applies the calculation
+      el.style.left = currentLeft
       el.style.width = `${currentWidth}%`
       el.style.top = `${currentTop}px`
       el.style.borderTopLeftRadius = `${currentRadius}px`
@@ -62,7 +60,6 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate)
     
-    // Force run immediately to set initial position
     handleUpdate()
 
     return () => {
@@ -75,25 +72,13 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
     <nav
       ref={navRef}
       className={`
-        /* Positioning & Layout */
         fixed z-50 left-1/2 -translate-x-1/2 top-6
         flex items-center justify-between px-10 py-2
-        
-        /* Shape */
         rounded-full
-        
-        /* Material */
         bg-white/5 
         backdrop-blur-xl
         border border-white/20
-        
-        /* Lighting */
         shadow-[0_20px_50px_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.6)]
-        
-        /* CRITICAL CHANGE: 
-           Removed 'transition-all' so JavaScript can control position instantly without drag.
-           Only animating color/shadow via CSS now.
-        */
         transition-colors duration-200 ease-out
         hover:bg-white/10 
         hover:shadow-[0_20px_50px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.9)]
@@ -137,13 +122,25 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           {isDark ? <Icons.Sun /> : <Icons.Moon />}
         </button>
 
-        <NeonButton 
-            primary 
-            className="!py-1.5 !px-5 !text-xs shadow-lg shadow-violet-500/20"
-            onClick={onConnectClick}
-        >
-          Connect ID
-        </NeonButton>
+        {/* Clerk Auth */}
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button className="py-1.5 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform">
+              CONNECT ID
+            </button>
+          </SignInButton>
+        </SignedOut>
+
+        <SignedIn>
+          <UserButton 
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "w-9 h-9"
+              }
+            }}
+          />
+        </SignedIn>
       </div>
 
       {/* Mobile Menu Toggle */}
@@ -186,23 +183,21 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           >
             About
           </a>
-          <a
-            href="#"
-            className="text-indigo-900 dark:text-white font-bold text-lg"
-            onClick={() => setIsOpen(false)}
-          >
-            Safety
-          </a>
-          <NeonButton 
-            primary 
-            className="w-full justify-center"
-            onClick={() => {
-                setIsOpen(false);
-                onConnectClick();
-            }}
-          >
-            Connect College ID
-          </NeonButton>
+          
+          {/* Clerk Auth Mobile */}
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="w-full py-3 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg">
+                CONNECT COLLEGE ID
+              </button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <div className="flex items-center justify-center">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </SignedIn>
         </div>
       )}
     </nav> 
