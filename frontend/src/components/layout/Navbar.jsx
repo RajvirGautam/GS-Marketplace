@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
 import { Link } from 'react-router-dom'
-import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
 
-const Navbar = ({ isDark, toggleTheme }) => {
+const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [isOpen, setIsOpen] = useState(false)
   const navRef = useRef(null)
 
@@ -19,17 +19,14 @@ const Navbar = ({ isDark, toggleTheme }) => {
 
       const isMobile = window.innerWidth < 768
       
-      // 1. WIDTH LOGIC
       const startWidth = isMobile ? 90 : 55
       const endWidth = 100
       const currentWidth = startWidth + ((endWidth - startWidth) * ratio)
 
-      // 2. POSITION LOGIC
       const startOffset = 72
       const currentOffset = startOffset * (1 - ratio)
       const currentLeft = `calc(50% - ${currentOffset}px)`
 
-      // 3. OTHER VISUALS
       const currentTop = 55 - (55 * ratio)
       const currentRadius = 55 - (55 * ratio)
       
@@ -37,14 +34,12 @@ const Navbar = ({ isDark, toggleTheme }) => {
       const maxOpacity = 0.85
       const currentOpacity = minOpacity + ((maxOpacity - minOpacity) * ratio)
 
-      // Colors
       const lightBg = `rgba(255, 255, 255, ${currentOpacity})`
       const darkBg = `rgba(0, 0, 0, ${currentOpacity})`
 
       const lightBorder = `rgba(255, 255, 255, ${0.4 - (0.2 * ratio)})`
       const darkBorder = `rgba(255, 255, 255, ${0.15 - (0.1 * ratio)})`
 
-      // 4. APPLY STYLES
       const el = navRef.current
       el.style.left = currentLeft
       el.style.width = `${currentWidth}%`
@@ -122,13 +117,14 @@ const Navbar = ({ isDark, toggleTheme }) => {
           {isDark ? <Icons.Sun /> : <Icons.Moon />}
         </button>
 
-        {/* Clerk Auth */}
+        {/* Auth Buttons */}
         <SignedOut>
-          <SignInButton mode="modal">
-            <button className="py-1.5 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform">
-              CONNECT ID
-            </button>
-          </SignInButton>
+          <button 
+            onClick={onConnectClick}
+            className="py-1.5 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
+          >
+            CONNECT ID
+          </button>
         </SignedOut>
 
         <SignedIn>
@@ -184,13 +180,17 @@ const Navbar = ({ isDark, toggleTheme }) => {
             About
           </a>
           
-          {/* Clerk Auth Mobile */}
+          {/* Auth Mobile */}
           <SignedOut>
-            <SignInButton mode="modal">
-              <button className="w-full py-3 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg">
-                CONNECT COLLEGE ID
-              </button>
-            </SignInButton>
+            <button 
+              onClick={() => {
+                setIsOpen(false);
+                onConnectClick();
+              }}
+              className="w-full py-3 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg"
+            >
+              CONNECT COLLEGE ID
+            </button>
           </SignedOut>
 
           <SignedIn>

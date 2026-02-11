@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Tesseract from 'tesseract.js'; 
+import { useSignUp, useSignIn } from '@clerk/clerk-react';
 import Icons from '../../assets/icons/Icons';
 import NeonButton from '../ui/NeonButton';
 import LoginGraphic from './LoginGraphic.png';
@@ -66,6 +67,9 @@ const modalStyles = `
 `;
 
 const ConnectIdModal = ({ isOpen, onClose }) => {
+  const { signUp, setActive: setSignUpActive, isLoaded: signUpLoaded } = useSignUp();
+  const { signIn, setActive: setSignInActive, isLoaded: signInLoaded } = useSignIn();
+  
   const [activeTab, setActiveTab] = useState('manual');
   const [dragActive, setDragActive] = useState(false);
   
@@ -74,6 +78,11 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [fullName, setFullName] = useState('');
   const [enrollment, setEnrollment] = useState('');
+  
+  // Clerk fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(false); // false = signup, true = login
   
   // Google States
   const [googleEmail, setGoogleEmail] = useState('');
@@ -94,6 +103,9 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       setImagePreview(null);
       setFullName('');
       setEnrollment('');
+      setEmail('');
+      setPassword('');
+      setIsLogin(false);
       setGoogleEmail('');
       setGoogleError('');
       setDragActive(false);
@@ -117,7 +129,6 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           
-          // Scale for optimal OCR (higher resolution for text recognition)
           const maxWidth = 1600;
           const scale = Math.min(1, maxWidth / img.width);
           canvas.width = img.width * scale;
@@ -128,16 +139,13 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           
-          // Enhanced preprocessing: grayscale + adaptive thresholding
           for (let i = 0; i < data.length; i += 4) {
             const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
             
-            // Adaptive contrast enhancement
             const contrast = 1.8;
             const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
             let newValue = factor * (avg - 128) + 128;
             
-            // Apply threshold for better text recognition
             if (newValue < 128) {
               newValue = Math.max(0, newValue * 0.7);
             } else {
@@ -161,92 +169,22 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     });
   };
 
-  // --- ENHANCED NORMALIZATION: Character-level substitution map ---
   const createNormalizedVersion = (text) => {
     if (!text) return '';
     
     return text
       .toLowerCase()
-      .replace(/\s+/g, '') // Remove all spaces
-      .replace(/[^a-z0-9]/g, '') // Remove special characters
-      // Common OCR misreads
-      .replace(/[il|!]/g, '1')  // i, l, |, ! → 1
-      .replace(/[o]/g, '0')      // o → 0
-      .replace(/[z]/g, '2')      // z → 2
-      .replace(/[s$]/g, '5')     // s, $ → 5
-      .replace(/[b]/g, '8')      // b → 8
-      .replace(/[g]/g, '9')      // g → 9
-      .replace(/[t]/g, '7');     // t → 7
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .replace(/[il|!]/g, '1')
+      .replace(/[o]/g, '0')
+      .replace(/[z]/g, '2')
+      .replace(/[s$]/g, '5')
+      .replace(/[b]/g, '8')
+      .replace(/[g]/g, '9')
+      .replace(/[t]/g, '7');
   };
 
-  // --- ADVANCED FUZZY MATCHING with multiple strategies ---
-  const fuzzyMatchEnrollment = (scannedText, targetEnrollment, debugLog) => {
-    const target = targetEnrollment.toLowerCase().replace(/\s+/g, '');
-    const scanned = scannedText.toLowerCase();
-    
-    debugLog(`🎯 Target Enrollment: "${targetEnrollment}"`);
-    debugLog(`📄 Searching in ${scanned.length} characters of scanned text`);
-    
-    // Strategy 1: Direct case-insensitive match
-    if (scanned.includes(target)) {
-      debugLog(`✅ Strategy 1: Direct match found`);
-      return true;
-    }
-    
-    // Strategy 2: Normalized match (with OCR character substitutions)
-    const normalizedTarget = createNormalizedVersion(target);
-    const normalizedScanned = createNormalizedVersion(scanned);
-    
-    debugLog(`🔄 Normalized Target: "${normalizedTarget}"`);
-    
-    if (normalizedScanned.includes(normalizedTarget)) {
-      debugLog(`✅ Strategy 2: Normalized match found`);
-      return true;
-    }
-    
-    // Strategy 3: Extract all number sequences and check similarity
-    const scannedNumbers = scanned.match(/[a-z0-9]{6,}/gi) || [];
-    debugLog(`🔢 Found ${scannedNumbers.length} alphanumeric sequences (6+ chars)`);
-    
-    for (const seq of scannedNumbers) {
-      const similarity = calculateSimilarity(seq.toLowerCase(), target);
-      debugLog(`   Checking "${seq}" → similarity: ${(similarity * 100).toFixed(1)}%`);
-      
-      if (similarity >= 0.75) { // 75% similarity threshold
-        debugLog(`✅ Strategy 3: High similarity match (${(similarity * 100).toFixed(1)}%)`);
-        return true;
-      }
-    }
-    
-    // Strategy 4: Check with character-level tolerance
-    const tokens = scanned.split(/\s+/);
-    for (const token of tokens) {
-      if (token.length >= target.length - 2 && token.length <= target.length + 2) {
-        const similarity = calculateSimilarity(token, target);
-        if (similarity >= 0.8) {
-          debugLog(`✅ Strategy 4: Token match with tolerance (${(similarity * 100).toFixed(1)}%)`);
-          return true;
-        }
-      }
-    }
-    
-    // Strategy 5: Sliding window approach with normalized versions
-    const windowSize = normalizedTarget.length;
-    for (let i = 0; i <= normalizedScanned.length - windowSize; i++) {
-      const window = normalizedScanned.substring(i, i + windowSize);
-      const similarity = calculateSimilarity(window, normalizedTarget);
-      
-      if (similarity >= 0.8) {
-        debugLog(`✅ Strategy 5: Sliding window match at position ${i} (${(similarity * 100).toFixed(1)}%)`);
-        return true;
-      }
-    }
-    
-    debugLog(`❌ No match found with any strategy`);
-    return false;
-  };
-
-  // --- LEVENSHTEIN DISTANCE based similarity calculation ---
   const calculateSimilarity = (str1, str2) => {
     const len1 = str1.length;
     const len2 = str2.length;
@@ -259,9 +197,9 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       for (let j = 1; j <= len2; j++) {
         const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
         matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,      // deletion
-          matrix[i][j - 1] + 1,      // insertion
-          matrix[i - 1][j - 1] + cost // substitution
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
         );
       }
     }
@@ -271,7 +209,40 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     return 1 - (distance / maxLen);
   };
 
-  // --- ENHANCED NAME MATCHING (case-insensitive) ---
+  const fuzzyMatchEnrollment = (scannedText, targetEnrollment, debugLog) => {
+    const target = targetEnrollment.toLowerCase().replace(/\s+/g, '');
+    const scanned = scannedText.toLowerCase();
+    
+    debugLog(`🎯 Target Enrollment: "${targetEnrollment}"`);
+    
+    if (scanned.includes(target)) {
+      debugLog(`✅ Strategy 1: Direct match found`);
+      return true;
+    }
+    
+    const normalizedTarget = createNormalizedVersion(target);
+    const normalizedScanned = createNormalizedVersion(scanned);
+    
+    if (normalizedScanned.includes(normalizedTarget)) {
+      debugLog(`✅ Strategy 2: Normalized match found`);
+      return true;
+    }
+    
+    const scannedNumbers = scanned.match(/[a-z0-9]{6,}/gi) || [];
+    
+    for (const seq of scannedNumbers) {
+      const similarity = calculateSimilarity(seq.toLowerCase(), target);
+      
+      if (similarity >= 0.75) {
+        debugLog(`✅ Strategy 3: High similarity match (${(similarity * 100).toFixed(1)}%)`);
+        return true;
+      }
+    }
+    
+    debugLog(`❌ No match found`);
+    return false;
+  };
+
   const fuzzyMatchName = (scannedText, targetName, debugLog) => {
     const scannedLower = scannedText.toLowerCase();
     const nameParts = targetName.trim().toLowerCase().split(/\s+/).filter(part => part.length >= 2);
@@ -282,14 +253,12 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     const requiredMatches = Math.ceil(nameParts.length / 2);
     
     for (const part of nameParts) {
-      // Direct match
       if (scannedLower.includes(part)) {
         matchCount++;
         debugLog(`   ✓ "${part}" found (direct)`);
         continue;
       }
       
-      // Fuzzy match with tolerance
       const words = scannedLower.split(/\s+/);
       for (const word of words) {
         if (word.length >= part.length - 1 && word.length <= part.length + 1) {
@@ -304,11 +273,10 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     }
     
     const matched = matchCount >= requiredMatches;
-    debugLog(`📊 Name Match: ${matchCount}/${nameParts.length} parts (need ${requiredMatches}): ${matched ? '✓ PASS' : '✗ FAIL'}`);
+    debugLog(`📊 Name Match: ${matchCount}/${nameParts.length} parts: ${matched ? '✓ PASS' : '✗ FAIL'}`);
     return matched;
   };
 
-  // --- Handlers ---
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -357,21 +325,75 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     reader.readAsDataURL(selectedFile);
   };
 
-  const handleGoogleLogin = () => {
-    if (!googleEmail.endsWith('@sgsits.ac.in')) {
-      setGoogleError('Access Denied. Official @sgsits.ac.in mail required.');
-      return;
+  const handleGoogleLogin = async () => {
+    try {
+      setIsProcessing(true);
+      
+      if (isLogin) {
+        await signIn.authenticateWithRedirect({
+          strategy: 'oauth_google',
+          redirectUrl: `${window.location.origin}/sso-callback`,
+          redirectUrlComplete: '/marketplace'
+        });
+      } else {
+        await signUp.authenticateWithRedirect({
+          strategy: 'oauth_google',
+          redirectUrl: `${window.location.origin}/sso-callback`,
+          redirectUrlComplete: '/marketplace'
+        });
+      }
+    } catch (error) {
+      setGoogleError(`Google ${isLogin ? 'login' : 'signup'} failed: ${error.message}`);
+      setIsProcessing(false);
     }
-    setGoogleError('');
-    alert(`Redirecting to Google OAuth for ${googleEmail}...`);
   };
 
   const addDebugInfo = (message) => {
     setDebugInfo(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
 
-  const handleVerification = async () => {
-    if (!file || !fullName.trim() || !enrollment.trim()) {
+  // Manual Login Handler
+  const handleManualLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      alert("Please enter email and password.");
+      return;
+    }
+    
+    setIsProcessing(true);
+    setDebugInfo([]);
+    
+    try {
+      addDebugInfo('🔑 Attempting login...');
+      
+      const result = await signIn.create({
+        identifier: email,
+        password: password,
+      });
+      
+      addDebugInfo('✅ Credentials verified!');
+      addDebugInfo('Setting session...');
+      
+      await setSignInActive({ session: result.createdSessionId });
+      
+      addDebugInfo('✅ Login successful!');
+      
+      setTimeout(() => {
+        onClose();
+        window.location.href = '/marketplace';
+      }, 500);
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      addDebugInfo(`❌ Login failed: ${error.errors?.[0]?.message || error.message}`);
+      alert(`Login failed: ${error.errors?.[0]?.message || error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Manual Signup Handler (with OCR verification)
+  const handleManualSignup = async () => {
+    if (!file || !email.trim() || !password.trim() || !fullName.trim() || !enrollment.trim()) {
       alert("Please fill in all fields and upload an ID card.");
       return;
     }
@@ -388,6 +410,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       addDebugInfo('═══════════════════════════════');
       addDebugInfo(`📝 Name Input: "${fullName}"`);
       addDebugInfo(`🔢 Enrollment Input: "${enrollment}"`);
+      addDebugInfo(`📧 Email: "${email}"`);
       addDebugInfo(`📁 File: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
       
       // Preprocess image
@@ -446,15 +469,98 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       
       if (nameMatch && enrollmentMatch) {
         addDebugInfo('');
-        addDebugInfo('🎉 ✅ VERIFICATION SUCCESSFUL! 🎉');
-        addDebugInfo('Redirecting to marketplace...');
-        setVerificationStatus('success');
-        setTimeout(() => {
-          onClose();
-        }, 2000);
+        addDebugInfo('🎉 ✅ OCR VERIFICATION SUCCESSFUL! 🎉');
+        addDebugInfo('Creating Clerk account...');
+        
+        try {
+          // STEP 1: Create account with Clerk
+          const signUpResult = await signUp.create({
+            emailAddress: email,
+            password: password,
+            firstName: fullName.split(' ')[0],
+            lastName: fullName.split(' ').slice(1).join(' ') || fullName.split(' ')[0],
+            unsafeMetadata: {
+              enrollmentNumber: enrollment,
+              isVerified: true
+            }
+          });
+          
+          addDebugInfo('✅ Clerk account created!');
+          addDebugInfo(`   User ID: ${signUpResult.id}`);
+          addDebugInfo(`   Session ID: ${signUpResult.createdSessionId}`);
+          
+          // STEP 2: Check if session was created
+          if (!signUpResult.createdSessionId) {
+            throw new Error('No session was created. Account may need email verification.');
+          }
+          
+          addDebugInfo('Setting active session...');
+          
+          // STEP 3: Set as active session and WAIT for it
+          await setSignUpActive({ session: signUpResult.createdSessionId });
+          
+          // Add a small delay to ensure session is fully set
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          addDebugInfo('✅ Session activated!');
+          addDebugInfo('Syncing to MongoDB...');
+          
+          // STEP 4: Sync to your MongoDB
+          try {
+            const syncResponse = await fetch(`${import.meta.env.VITE_API_URL}/users/sync`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                clerkUserId: signUpResult.id,
+                email: email,
+                fullName: fullName,
+                enrollmentNumber: enrollment,
+                isVerified: true,
+                verificationStatus: 'approved'
+              })
+            });
+            
+            if (syncResponse.ok) {
+              addDebugInfo('✅ Profile synced to database!');
+            } else {
+              addDebugInfo('⚠️  Database sync failed (non-critical)');
+            }
+          } catch (syncError) {
+            console.error('DB sync error:', syncError);
+            addDebugInfo('⚠️  Database sync failed (non-critical)');
+          }
+          
+          addDebugInfo('🚀 Redirecting to marketplace...');
+          
+          setVerificationStatus('success');
+          
+          // STEP 5: Redirect with a delay
+          setTimeout(() => {
+            onClose();
+            window.location.href = '/marketplace';
+          }, 1500);
+          
+        } catch (clerkError) {
+          console.error('Clerk error:', clerkError);
+          addDebugInfo('');
+          addDebugInfo('❌ ACCOUNT CREATION FAILED');
+          addDebugInfo(`Error: ${clerkError.errors?.[0]?.message || clerkError.message}`);
+          
+          // Show specific error to user
+          if (clerkError.errors?.[0]?.code === 'form_identifier_exists') {
+            alert('This email is already registered. Please login instead.');
+          } else {
+            alert(`Account creation failed: ${clerkError.errors?.[0]?.message || clerkError.message}`);
+          }
+          
+          setVerificationStatus('failed');
+        }
+        
       } else {
         addDebugInfo('');
-        addDebugInfo('❌ VERIFICATION FAILED');
+        addDebugInfo('❌ OCR VERIFICATION FAILED');
         if (!nameMatch) addDebugInfo('⚠️  Reason: Name not found or insufficient match');
         if (!enrollmentMatch) addDebugInfo('⚠️  Reason: Enrollment number not found or insufficient match');
         addDebugInfo('');
@@ -466,7 +572,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       }
       
     } catch (error) {
-      console.error("OCR Error:", error);
+      console.error("Verification Error:", error);
       addDebugInfo('');
       addDebugInfo('═══════════════════════════════');
       addDebugInfo(`❌ CRITICAL ERROR: ${error.message}`);
@@ -485,7 +591,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING IMAGE...'}
+          {isLogin ? 'LOGGING IN...' : (ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING IMAGE...')}
         </span>
       );
     }
@@ -503,7 +609,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         </span>
       );
     }
-    return "SUBMIT FOR VERIFICATION";
+    return isLogin ? "LOGIN" : "SUBMIT FOR VERIFICATION";
   };
 
   return (
@@ -574,6 +680,22 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             <p className="text-white mono text-xs mt-2">Verify your identity to start trading.</p>
           </div>
 
+          {/* Login/Signup Toggle */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-2 text-xs font-bold mono uppercase transition ${!isLogin ? 'bg-[#00D9FF] text-black' : 'bg-zinc-900/50 text-white/60 border border-white/10'}`}
+            >
+              SIGN UP
+            </button>
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-2 text-xs font-bold mono uppercase transition ${isLogin ? 'bg-[#00D9FF] text-black' : 'bg-zinc-900/50 text-white/60 border border-white/10'}`}
+            >
+              LOGIN
+            </button>
+          </div>
+
           {/* Google Toggle Section */}
           <div className="mb-6 relative z-10">
             <div className={`p-4 border transition-all duration-300 ${activeTab === 'google' ? 'border-[#00D9FF] bg-[#00D9FF]/5' : 'border-white/10 hover:border-white/30 bg-zinc-900/50'}`}>
@@ -581,25 +703,19 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                 <div className="w-6 h-6 bg-white flex items-center justify-center shrink-0">
                   <svg viewBox="0 0 24 24" className="w-4 h-4"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.11c-.22-.66-.35-1.36-.35-2.11s.13-1.45.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                 </div>
-                <span className="font-bold text-white mono text-xs uppercase">Quick Connect with Google</span>
+                <span className="font-bold text-white mono text-xs uppercase">
+                  {isLogin ? 'Login with Google' : 'Sign Up with Google'}
+                </span>
               </div>
               
               <div className={`overflow-hidden transition-all duration-300 ${activeTab === 'google' ? 'max-h-32 mt-3 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="flex gap-2">
-                  <input 
-                    type="email" 
-                    placeholder="your.name@sgsits.ac.in"
-                    value={googleEmail}
-                    onChange={(e) => setGoogleEmail(e.target.value)}
-                    className="flex-1 input-brutal px-4 py-2 text-xs"
-                  />
-                  <button 
-                    onClick={handleGoogleLogin}
-                    className="bg-[#00D9FF] hover:bg-white text-black px-4 py-2 text-xs font-bold uppercase transition-colors mono"
-                  >
-                    Verify
-                  </button>
-                </div>
+                <button 
+                  onClick={handleGoogleLogin}
+                  disabled={isProcessing}
+                  className="w-full bg-[#00D9FF] hover:bg-white text-black px-4 py-3 text-xs font-bold uppercase transition-colors mono disabled:opacity-50"
+                >
+                  {isProcessing ? 'PROCESSING...' : (isLogin ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE')}
+                </button>
                 {googleError && <p className="text-red-500 text-[10px] mt-2 font-bold mono uppercase flex items-center gap-1"><Icons.AlertCircle size={12}/> {googleError}</p>}
               </div>
             </div>
@@ -607,7 +723,9 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px bg-white/10 flex-1"></div>
-            <span className="text-[10px] font-bold text-white/40 uppercase mono">Or Manual Upload</span>
+            <span className="text-[10px] font-bold text-white/40 uppercase mono">
+              {isLogin ? 'Or Email/Password' : 'Or Manual Upload'}
+            </span>
             <div className="h-px bg-white/10 flex-1"></div>
           </div>
 
@@ -622,95 +740,148 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               />
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Full Name</label>
-                <input 
-                  type="text" 
-                  disabled={activeTab === 'google'} 
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full input-brutal px-4 py-3 text-sm" 
-                  placeholder="Rajvir Gautam" 
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Enrollment No.</label>
-                <input 
-                  type="text" 
-                  disabled={activeTab === 'google'} 
-                  value={enrollment}
-                  onChange={(e) => setEnrollment(e.target.value)}
-                  className="w-full input-brutal px-4 py-3 text-sm" 
-                  placeholder="0801CS211234" 
-                />
-                <p className="text-[9px] text-white/40 mono mt-1">Case insensitive • AI will handle OCR errors</p>
-              </div>
-            </div>
-
-            <div 
-              className={`relative border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition-colors
-              ${dragActive ? 'border-[#00D9FF] bg-[#00D9FF]/10' : 'border-white/20 hover:border-white/40 bg-zinc-900/50'}
-              ${activeTab === 'manual' ? 'cursor-pointer' : ''}`}
-              onDragEnter={handleDrag} 
-              onDragLeave={handleDrag} 
-              onDragOver={handleDrag} 
-              onDrop={handleDrop}
-            >
-              <input 
-                type="file" 
-                disabled={activeTab === 'google'} 
-                accept="image/*"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                onChange={(e) => handleFileSelect(e.target.files[0])}
-              />
-              
-              {file ? (
-                <div className="space-y-3 w-full">
-                  <div className="flex items-center gap-3 text-green-500 font-bold justify-center">
-                    <Icons.CheckCircle />
-                    <span className="mono text-xs uppercase">{file.name}</span>
-                  </div>
-                  {imagePreview && (
-                    <img 
-                      src={imagePreview} 
-                      alt="ID Preview" 
-                      className="max-h-40 mx-auto border border-white/20 shadow-lg"
-                    />
-                  )}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFile(null);
-                      setImagePreview(null);
-                      setExtractedText('');
-                      setDebugInfo([]);
-                    }}
-                    className="text-[10px] text-red-400 hover:text-red-300 mono uppercase"
-                  >
-                    Remove Image
-                  </button>
+            {/* LOGIN MODE - Only Email & Password */}
+            {isLogin ? (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
+                  <input 
+                    type="email" 
+                    disabled={activeTab === 'google'} 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full input-brutal px-4 py-3 text-sm" 
+                    placeholder="your@email.com" 
+                  />
                 </div>
-              ) : (
-                <>
-                  <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center mb-3 text-white">
-                    <Icons.UploadCloud />
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
+                  <input 
+                    type="password" 
+                    disabled={activeTab === 'google'} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full input-brutal px-4 py-3 text-sm" 
+                    placeholder="••••••••" 
+                  />
+                </div>
+              </>
+            ) : (
+              /* SIGNUP MODE - Full Form with ID Upload */
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
+                    <input 
+                      type="email" 
+                      disabled={activeTab === 'google'} 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full input-brutal px-4 py-3 text-sm" 
+                      placeholder="your@email.com" 
+                    />
                   </div>
-                  <p className="text-xs font-bold text-white uppercase mono">
-                    Upload College ID Card
-                  </p>
-                  <p className="text-[10px] text-white/40 mt-1 mono">JPG, PNG • MAX 10MB • CLEAR & WELL-LIT</p>
-                </>
-              )}
-              
-              {dragActive && activeTab === 'manual' && <div className="absolute left-0 right-0 h-0.5 bg-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.8)] animate-scan-line pointer-events-none"></div>}
-            </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
+                    <input 
+                      type="password" 
+                      disabled={activeTab === 'google'} 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full input-brutal px-4 py-3 text-sm" 
+                      placeholder="••••••••" 
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Full Name</label>
+                    <input 
+                      type="text" 
+                      disabled={activeTab === 'google'} 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full input-brutal px-4 py-3 text-sm" 
+                      placeholder="Rajvir Gautam" 
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Enrollment No.</label>
+                    <input 
+                      type="text" 
+                      disabled={activeTab === 'google'} 
+                      value={enrollment}
+                      onChange={(e) => setEnrollment(e.target.value)}
+                      className="w-full input-brutal px-4 py-3 text-sm" 
+                      placeholder="0801CS211234" 
+                    />
+                    <p className="text-[9px] text-white/40 mono mt-1">Case insensitive • AI will handle OCR errors</p>
+                  </div>
+                </div>
+
+                <div 
+                  className={`relative border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition-colors
+                  ${dragActive ? 'border-[#00D9FF] bg-[#00D9FF]/10' : 'border-white/20 hover:border-white/40 bg-zinc-900/50'}
+                  ${activeTab === 'manual' ? 'cursor-pointer' : ''}`}
+                  onDragEnter={handleDrag} 
+                  onDragLeave={handleDrag} 
+                  onDragOver={handleDrag} 
+                  onDrop={handleDrop}
+                >
+                  <input 
+                    type="file" 
+                    disabled={activeTab === 'google'} 
+                    accept="image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    onChange={(e) => handleFileSelect(e.target.files[0])}
+                  />
+                  
+                  {file ? (
+                    <div className="space-y-3 w-full">
+                      <div className="flex items-center gap-3 text-green-500 font-bold justify-center">
+                        <Icons.CheckCircle />
+                        <span className="mono text-xs uppercase">{file.name}</span>
+                      </div>
+                      {imagePreview && (
+                        <img 
+                          src={imagePreview} 
+                          alt="ID Preview" 
+                          className="max-h-40 mx-auto border border-white/20 shadow-lg"
+                        />
+                      )}
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFile(null);
+                          setImagePreview(null);
+                          setExtractedText('');
+                          setDebugInfo([]);
+                        }}
+                        className="text-[10px] text-red-400 hover:text-red-300 mono uppercase"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center mb-3 text-white">
+                        <Icons.UploadCloud />
+                      </div>
+                      <p className="text-xs font-bold text-white uppercase mono">
+                        Upload College ID Card
+                      </p>
+                      <p className="text-[10px] text-white/40 mt-1 mono">JPG, PNG • MAX 10MB • CLEAR & WELL-LIT</p>
+                    </>
+                  )}
+                  
+                  {dragActive && activeTab === 'manual' && <div className="absolute left-0 right-0 h-0.5 bg-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.8)] animate-scan-line pointer-events-none"></div>}
+                </div>
+              </>
+            )}
 
             <NeonButton 
               primary={verificationStatus !== 'failed'} 
               className={`w-full justify-center py-4 mt-4 rounded-none font-mono uppercase text-xs font-bold ${verificationStatus === 'failed' ? 'bg-red-900/20 border-red-500 text-red-500 hover:border-red-400' : ''}`}
               disabled={activeTab === 'google' || isProcessing || verificationStatus === 'success'}
-              onClick={handleVerification}
+              onClick={isLogin ? handleManualLogin : handleManualSignup}
             >
               {getButtonContent()}
             </NeonButton>

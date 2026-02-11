@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
 import Footer from './components/layout/Footer'
-
 import Hero from './components/sections/Hero'
 import Features from './components/sections/Features'
 import Categories from './components/sections/Categories'
@@ -12,8 +10,6 @@ import RecentListings from './components/sections/RecentListings'
 import CTA from './components/sections/CTA'
 import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
-
-
 import ConnectIdModal from './components/auth/ConnectIdModal'
 
 function App() {
@@ -21,7 +17,7 @@ function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
   }
 
   useEffect(() => {
@@ -30,15 +26,14 @@ function App() {
     root.classList.add(theme)
   }, [theme])
 
-  // ✅ HOME PAGE (WITH NAVBAR)
+  // HOME PAGE WITH NAVBAR
   const HomePage = () => (
     <>
-      <Navbar
-        isDark={theme === 'dark'}
-        toggleTheme={toggleTheme}
+      <Navbar 
+        isDark={theme === 'dark'} 
+        toggleTheme={toggleTheme} 
         onConnectClick={() => setIsLoginOpen(true)}
       />
-
       <Hero />
       <Features />
       <Categories />
@@ -50,7 +45,6 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
-        
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/marketplace" element={<Marketplace />} />
@@ -62,10 +56,9 @@ function App() {
         <Footer />
 
         {/* Modal works everywhere */}
-        <ConnectIdModal
-          isOpen={isLoginOpen}
-          onClose={() => setIsLoginOpen(false)}
-          isDark={theme === 'dark'}
+        <ConnectIdModal 
+          isOpen={isLoginOpen} 
+          onClose={() => setIsLoginOpen(false)} 
         />
       </div>
     </Router>
