@@ -1,8 +1,10 @@
 // src/components/modals/AddProductModal.jsx
 import React, { useState, useRef } from 'react';
+import { productAPI } from '../../services/api';
 
 const AddProductModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -14,7 +16,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
     year: '',
     condition: '',
     type: 'sale',
-    location: '',
+    location: 'SGSITS Campus',
     tag: '',
   });
 
@@ -97,7 +99,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = 'Required';
       if (!formData.description.trim()) newErrors.description = 'Required';
-      if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Required';
+      if (formData.type !== 'free' && (!formData.price || parseFloat(formData.price) <= 0)) {
+        newErrors.price = 'Required';
+      }
       if (images.length === 0) newErrors.images = 'At least 1 image required';
     }
     if (step === 2) {
@@ -122,31 +126,51 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setErrors({});
   };
 
-  const handleSubmit = () => {
-    if (!validateStep(2)) return;
+  const handleSubmit = async () => {
+  if (!validateStep(2)) return;
 
+  setIsSubmitting(true);
+
+  try {
     const filteredHighlights = highlights.filter((h) => h.trim());
     const filteredSpecs = specs.filter((s) => s.label.trim() && s.value.trim());
 
-    const productData = {
-      ...formData,
-      highlights: filteredHighlights,
-      specs: filteredSpecs,
-      images: imagePreviews,
-      numericPrice: parseFloat(formData.price),
-      isTrending: false,
-      isVerified: true,
-      timeAgo: 'Just now',
-      views: 0,
-      saves: 0,
-      messages: 0,
-      status: 'active',
-    };
+    // Create FormData
+    const formDataToSend = new FormData();
+    
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('price', formData.type === 'free' ? 0 : formData.price);
+    formDataToSend.append('category', formData.category);
+    formDataToSend.append('condition', formData.condition);
+    formDataToSend.append('type', formData.type);
+    formDataToSend.append('location', formData.location);
+    formDataToSend.append('tag', formData.tag || 'FOR SALE');
+    formDataToSend.append('branch', formData.branch); // ADD THIS
+    formDataToSend.append('year', formData.year); // ADD THIS
+    formDataToSend.append('highlights', JSON.stringify(filteredHighlights));
+    formDataToSend.append('specs', JSON.stringify(filteredSpecs));
 
-    console.log('Product submitted:', productData);
-    alert('Product listed successfully! 🎉');
-    onClose();
-  };
+    // Append images
+    images.forEach((image) => {
+      formDataToSend.append('images', image);
+    });
+
+    const response = await productAPI.create(formDataToSend);
+
+    if (response.success) {
+      alert('Product listed successfully! 🎉');
+      handleClose();
+      window.location.reload(); // Refresh to show new product
+    }
+  } catch (error) {
+    console.error('Error creating product:', error);
+    alert(error.response?.data?.message || 'Failed to create product');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleClose = () => {
     // Reset form
@@ -159,7 +183,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
       year: '',
       condition: '',
       type: 'sale',
-      location: '',
+      location: 'SGSITS Campus',
       tag: '',
     });
     setImages([]);
@@ -168,6 +192,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setSpecs([{ label: '', value: '' }]);
     setCurrentStep(1);
     setErrors({});
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -328,11 +353,16 @@ const AddProductModal = ({ isOpen, onClose }) => {
           font-family: 'Space Mono', monospace;
         }
 
-        .btn-brutal-primary:hover {
+        .btn-brutal-primary:hover:not(:disabled) {
           background: #00D9FF;
           border-color: #00D9FF;
           transform: translate(-2px, -2px);
           box-shadow: 2px 2px 0 #fff;
+        }
+
+        .btn-brutal-primary:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .btn-brutal-secondary {
@@ -550,7 +580,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
           <div className="relative z-10 p-8 md:p-12">
             {/* Close button */}
-            <button onClick={handleClose} className="close-btn">
+            <button onClick={handleClose} className="close-btn" disabled={isSubmitting}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -605,7 +635,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 {/* Price & Tag */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Price (₹) *</label>
+                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">
+                      Price (₹) {formData.type !== 'free' && '*'}
+                    </label>
                     <input
                       type="number"
                       value={formData.price}
@@ -614,6 +646,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                       className="input-brutal"
                       min="0"
                       step="10"
+                      disabled={formData.type === 'free'}
                     />
                     {errors.price && <p className="error-text">{errors.price}</p>}
                   </div>
@@ -875,8 +908,14 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
                 {/* Navigation */}
                 <div className="flex justify-between gap-3 pt-6 border-t border-white border-opacity-10">
-                  <button onClick={handleBack} className="btn-brutal-secondary">← BACK</button>
-                  <button onClick={handleSubmit} className="btn-brutal-primary">PUBLISH LISTING</button>
+                  <button onClick={handleBack} className="btn-brutal-secondary" disabled={isSubmitting}>← BACK</button>
+                  <button 
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                    className="btn-brutal-primary"
+                  >
+                    {isSubmitting ? 'SUBMITTING...' : 'PUBLISH LISTING'}
+                  </button>
                 </div>
               </div>
             )}

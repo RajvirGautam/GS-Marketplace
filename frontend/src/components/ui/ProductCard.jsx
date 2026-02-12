@@ -36,7 +36,7 @@ const LocationIcon = () => (
 )
 
 const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
-  const [isSaved, setIsSaved] = useState(false)
+  const [isSaved, setIsSaved] = useState(product.savedBy?.includes(localStorage.getItem('userId')) || false)
   const [showActions, setShowActions] = useState(false)
   const navigate = useNavigate()
 
@@ -45,21 +45,73 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
     animationDelay: `${0.5 + (index * 0.05)}s`
   }
 
-  // Stop propagation helper — prevents Link navigation when clicking heart/share
-  const stopNav = (e) => e.preventDefault()
+  // Helper functions to safely access data
+  const getSellerName = () => {
+    if (typeof product.seller === 'object' && product.seller?.fullName) {
+      return product.seller.fullName;
+    }
+    return product.user || 'Unknown';
+  };
+
+  const getSellerInitial = () => {
+    const name = getSellerName();
+    return name.charAt(0).toUpperCase();
+  };
+
+  const getProductImage = () => {
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    return product.image || '/placeholder.jpg';
+  };
+
+  const getProductPrice = () => {
+    if (product.type === 'free') return 'FREE';
+    if (product.type === 'barter') return 'BARTER';
+    return `₹${product.price || 0}`;
+  };
+
+  const getTimeAgo = () => {
+    if (product.postedDate) return product.postedDate;
+    if (product.timeAgo) return product.timeAgo;
+    if (product.createdAt) {
+      const date = new Date(product.createdAt);
+      const now = new Date();
+      const diff = now - date;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      if (days === 0) return 'Today';
+      if (days === 1) return '1 day ago';
+      if (days < 7) return `${days} days ago`;
+      if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+      return `${Math.floor(days / 30)} months ago`;
+    }
+    return 'Recently';
+  };
+
+  const getAccentColor = () => {
+    return product.accent || '#00D9FF';
+  };
+
+  const getGradientStart = () => {
+    return product.gradientStart || '#1a1a1a';
+  };
+
+  // Stop propagation helper
+  const stopNav = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   // Handle click with zoom transition
   const handleCardClick = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     
-    // Find the image element
-    const cardElement = e.currentTarget
-    const imgElement = cardElement.querySelector('img')
+    const cardElement = e.currentTarget;
+    const imgElement = cardElement.querySelector('img');
     
     if (imgElement) {
-      const rect = imgElement.getBoundingClientRect()
+      const rect = imgElement.getBoundingClientRect();
       
-      // Store transition data
       sessionStorage.setItem('productTransition', JSON.stringify({
         rect: {
           top: rect.top,
@@ -67,14 +119,13 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           width: rect.width,
           height: rect.height
         },
-        imgSrc: product.image,
+        imgSrc: getProductImage(),
         scrollY: window.scrollY
-      }))
+      }));
     }
     
-    // Navigate to product page
-    navigate(`/product/${product.id}`)
-  }
+    navigate(`/product/${product._id || product.id}`);
+  };
 
   if (viewMode === 'list') {
     return (
@@ -88,10 +139,10 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         <div className="relative w-64 flex-shrink-0 overflow-hidden bg-zinc-900 border-r border-white/10">
           <div 
             className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-            style={{ background: `linear-gradient(to bottom, ${product.gradientStart}, #000)` }} 
+            style={{ background: `linear-gradient(to bottom, ${getGradientStart()}, #000)` }} 
           />
           <img 
-            src={product.image} 
+            src={getProductImage()} 
             alt={product.title}
             className="relative w-full h-full object-cover mix-blend-normal transition-transform duration-700 group-hover:scale-110"
           />
@@ -101,7 +152,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               🔥 TRENDING
             </div>
           )}
-          {product.isVerified && (
+          {(product.isVerified || product.seller?.isVerified) && (
             <div className="absolute top-3 right-3 bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
               Verified
             </div>
@@ -117,19 +168,19 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
                   {product.title}
                 </h3>
                 <div className="mono text-[10px] text-white/40 uppercase tracking-wider">
-                  {product.tag}
+                  {product.tag || product.category?.toUpperCase()}
                 </div>
               </div>
               
               <div className="flex gap-2" onClick={stopNav}>
                 <button 
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsSaved(!isSaved) }}
+                  onClick={(e) => { stopNav(e); setIsSaved(!isSaved) }}
                   className="w-9 h-9 flex items-center justify-center bg-black/60 backdrop-blur border border-white/10 hover:border-white/40 transition-colors"
                 >
                   <HeartIcon filled={isSaved} />
                 </button>
                 <button 
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                  onClick={stopNav}
                   className="w-9 h-9 flex items-center justify-center bg-black/60 backdrop-blur border border-white/10 hover:border-white/40 transition-colors"
                 >
                   <ShareIcon />
@@ -143,33 +194,33 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
 
             <div className="flex items-center gap-4 text-xs text-white/40 mono mb-4">
               <span className="flex items-center gap-1">
-                <LocationIcon /> {product.location}
+                <LocationIcon /> {product.location || 'SGSITS Campus'}
               </span>
               <span className="flex items-center gap-1">
-                <EyeIcon /> {product.views} views
+                <EyeIcon /> {product.views || 0} views
               </span>
-              <span>⏰ {product.timeAgo}</span>
+              <span>⏰ {getTimeAgo()}</span>
             </div>
 
             <div className="flex items-center gap-2 py-3 border-t border-dashed border-white/10">
               <div className="w-8 h-8 rounded-none bg-zinc-800 border border-white/20 flex items-center justify-center text-xs font-bold text-white">
-                {product.user.charAt(0)}
+                {getSellerInitial()}
               </div>
-              <span className="text-sm text-white/70">{product.user}</span>
+              <span className="text-sm text-white/70">{getSellerName()}</span>
             </div>
           </div>
 
           <div className="flex items-end justify-between pt-4 border-t border-white/10">
             <div>
               <div className="mono text-[9px] text-white/30 uppercase mb-1">Price</div>
-              <div className="text-2xl font-black text-white" style={{ color: product.accent }}>
-                {product.price}
+              <div className="text-2xl font-black text-white" style={{ color: getAccentColor() }}>
+                {getProductPrice()}
               </div>
             </div>
             
             <div className="flex gap-2">
               <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+                onClick={stopNav}
                 className="bg-transparent border border-white/20 text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center gap-2"
               >
                 <ChatIcon /> Chat
@@ -197,7 +248,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       {/* Accent Top Line */}
       <div 
         className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
-        style={{ background: product.accent }}
+        style={{ background: getAccentColor() }}
       />
 
       {/* Image Section */}
@@ -205,24 +256,14 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         
         <div 
           className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-          style={{ background: `linear-gradient(to bottom, ${product.gradientStart}, #000)` }} 
+          style={{ background: `linear-gradient(to bottom, ${getGradientStart()}, #000)` }} 
         />
         
         <img 
-          src={product.image} 
+          src={getProductImage()} 
           alt={product.title}
           className="relative w-full h-full object-cover mix-blend-normal transition-transform duration-700 group-hover:scale-110"
         />
-
-        {/* Top Left Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1">
-          {product.stats && product.stats.map((stat, i) => (
-             <div key={i} className="flex items-center gap-1 bg-black/80 backdrop-blur border border-white/10 px-2 py-1">
-               <span className="w-2 h-2 rounded-full" style={{ background: product.accent }}></span>
-               <span className="mono text-[9px] font-bold text-white">{stat.value}</span>
-             </div>
-          ))}
-        </div>
 
         {/* Status Badges */}
         <div className="absolute top-3 right-3 flex flex-col gap-1">
@@ -231,7 +272,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               🔥 TRENDING
             </div>
           )}
-          {product.isVerified && (
+          {(product.isVerified || product.seller?.isVerified) && (
             <div className="bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
               Verified
             </div>
@@ -241,13 +282,13 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col gap-2" onClick={stopNav}>
           <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsSaved(!isSaved) }}
+            onClick={(e) => { stopNav(e); setIsSaved(!isSaved) }}
             className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/90 backdrop-blur shadow-lg transition-all ${isSaved ? 'text-red-500' : 'text-black'} hover:scale-110`}
           >
             <HeartIcon filled={isSaved} />
           </button>
           <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            onClick={stopNav}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-white/90 backdrop-blur shadow-lg transition-all hover:scale-110"
           >
             <ShareIcon />
@@ -257,12 +298,12 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         {/* Metadata Row */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 text-[10px] text-white/80 mono bg-black/60 backdrop-blur px-2 py-1">
           <span className="flex items-center gap-1">
-            <LocationIcon /> {product.location}
+            <LocationIcon /> {product.location || 'Campus'}
           </span>
           <span className="flex items-center gap-1">
-            <EyeIcon /> {product.views}
+            <EyeIcon /> {product.views || 0}
           </span>
-          <span className="ml-auto">⏰ {product.timeAgo}</span>
+          <span className="ml-auto">⏰ {getTimeAgo()}</span>
         </div>
       </div>
 
@@ -270,7 +311,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       <div className="p-4 relative">
         
         <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-200"
-             style={{ background: `linear-gradient(45deg, transparent 40%, ${product.accent}10 40%, transparent 60%)` }}
+             style={{ background: `linear-gradient(45deg, transparent 40%, ${getAccentColor()}10 40%, transparent 60%)` }}
         />
 
         <div className="mb-2">
@@ -278,16 +319,16 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
                 {product.title}
             </h3>
             <div className="mono text-[10px] text-white/40 uppercase tracking-wider mt-1">
-                {product.tag}
+                {product.tag || product.category?.toUpperCase()}
             </div>
         </div>
 
         <div className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-white/10">
             <div className="w-6 h-6 rounded-none bg-zinc-800 border border-white/20 flex items-center justify-center text-[10px] font-bold text-white">
-                {product.user.charAt(0)}
+                {getSellerInitial()}
             </div>
-            <span className="text-xs text-white/70">{product.user.split(' ')[0]}</span>
-            {product.isVerified && (
+            <span className="text-xs text-white/70">{getSellerName().split(' ')[0]}</span>
+            {(product.isVerified || product.seller?.isVerified) && (
               <span className="text-[#00D9FF] text-xs">✓</span>
             )}
         </div>
@@ -296,8 +337,8 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           <div className="flex items-end justify-between">
             <div>
               <div className="mono text-[9px] text-white/30 uppercase mb-0.5">Price</div>
-              <div className="text-xl font-black text-white" style={{ color: product.accent }}>
-                {product.price}
+              <div className="text-xl font-black text-white" style={{ color: getAccentColor() }}>
+                {getProductPrice()}
               </div>
             </div>
             
@@ -310,7 +351,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
 
           <div className={`grid grid-cols-2 gap-2 transition-all duration-300 ${showActions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'} md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto`}>
             <button 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+              onClick={stopNav}
               className="bg-transparent border border-white/20 text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-white/5 transition-all flex items-center justify-center gap-1"
             >
               <ChatIcon /> Chat
