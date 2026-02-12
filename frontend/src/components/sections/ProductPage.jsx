@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { products } from './Products.js';
 
-// Icons
+// --- ICONS ---
 const ArrowLeft = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 12H5" />
@@ -117,9 +116,9 @@ const ProductPage = () => {
       navigate('/login');
       return;
     }
-    // Logic to open chat would go here
-    console.log(`Starting chat with ${product.user} as ${user.fullName}`);
-    alert(`Starting chat with ${product.user}`);
+    const sellerName = typeof product.seller === 'object' ? product.seller.fullName : product.user;
+    console.log(`Starting chat with ${sellerName} as ${user.fullName}`);
+    alert(`Starting chat with ${sellerName}`);
   };
 
   // Handle back navigation with zoom out effect
@@ -139,7 +138,7 @@ const ProductPage = () => {
         
         // Create transition overlay
         const transitionImg = document.createElement('img');
-        transitionImg.src = product.image;
+        transitionImg.src = product.image || (product.images && product.images[0]);
         transitionImg.style.position = 'fixed';
         transitionImg.style.top = `${currentRect.top}px`;
         transitionImg.style.left = `${currentRect.left}px`;
@@ -192,7 +191,6 @@ const ProductPage = () => {
   // Handle browser back button - cleanup only
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Clean up any transition images
       if (transitionImgRef.current) {
         transitionImgRef.current.remove();
         transitionImgRef.current = null;
@@ -200,7 +198,6 @@ const ProductPage = () => {
       sessionStorage.removeItem('productTransition');
     };
 
-    // Listen for browser back/forward
     const handlePopState = () => {
       handleBeforeUnload();
     };
@@ -211,7 +208,6 @@ const ProductPage = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Final cleanup on unmount
       if (transitionImgRef.current) {
         transitionImgRef.current.remove();
         transitionImgRef.current = null;
@@ -220,80 +216,91 @@ const ProductPage = () => {
     };
   }, []);
 
-  // Scroll to top and handle zoom in transition
+  // Fetch product from API
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    setLoading(true);
-    const foundProduct = products.find(p => p.id === parseInt(id));
-    
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setActiveImg(0);
-      
-      setTimeout(() => {
-        setLoading(false);
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        console.log('🔍 Fetching product ID:', id);
+        const response = await fetch(`http://localhost:5001/api/products/${id}`);
+        const data = await response.json();
         
-        const transitionData = sessionStorage.getItem('productTransition');
+        console.log('✅ Product response:', data);
         
-        if (transitionData && mainImgRef.current) {
-          try {
-            const { rect, imgSrc } = JSON.parse(transitionData);
-            const mainImg = mainImgRef.current;
+        if (data.success && data.product) {
+          setProduct(data.product);
+          setActiveImg(0);
+          
+          setTimeout(() => {
+            setLoading(false);
             
-            setTimeout(() => {
-              const finalRect = mainImg.getBoundingClientRect();
-              
-              // Create transition image
-              const transitionImg = document.createElement('img');
-              transitionImg.src = imgSrc;
-              transitionImg.style.position = 'fixed';
-              transitionImg.style.top = `${rect.top}px`;
-              transitionImg.style.left = `${rect.left}px`;
-              transitionImg.style.width = `${rect.width}px`;
-              transitionImg.style.height = `${rect.height}px`;
-              transitionImg.style.objectFit = 'cover';
-              transitionImg.style.zIndex = '9999';
-              transitionImg.style.borderRadius = '12px';
-              transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-              transitionImg.style.pointerEvents = 'none';
-              
-              document.body.appendChild(transitionImg);
-              transitionImgRef.current = transitionImg;
-              
-              // Hide actual image during transition
-              mainImg.style.opacity = '0';
-              
-              // Trigger zoom animation
-              requestAnimationFrame(() => {
-                transitionImg.style.top = `${finalRect.top}px`;
-                transitionImg.style.left = `${finalRect.left}px`;
-                transitionImg.style.width = `${finalRect.width}px`;
-                transitionImg.style.height = `${finalRect.height}px`;
-                transitionImg.style.borderRadius = '24px';
+            // Handle Zoom In Transition from Marketplace
+            const transitionData = sessionStorage.getItem('productTransition');
+            
+            if (transitionData && mainImgRef.current) {
+              try {
+                const { rect, imgSrc } = JSON.parse(transitionData);
+                const mainImg = mainImgRef.current;
                 
-                // Show actual image and remove overlay
                 setTimeout(() => {
-                  mainImg.style.opacity = '1';
-                  if (transitionImgRef.current) {
-                    transitionImgRef.current.remove();
-                    transitionImgRef.current = null;
-                  }
-                  // Keep sessionStorage for back navigation
-                }, 600);
-              });
-            }, 50);
-          } catch (error) {
-            console.error('Zoom transition error:', error);
-          }
+                  const finalRect = mainImg.getBoundingClientRect();
+                  
+                  const transitionImg = document.createElement('img');
+                  transitionImg.src = imgSrc;
+                  transitionImg.style.position = 'fixed';
+                  transitionImg.style.top = `${rect.top}px`;
+                  transitionImg.style.left = `${rect.left}px`;
+                  transitionImg.style.width = `${rect.width}px`;
+                  transitionImg.style.height = `${rect.height}px`;
+                  transitionImg.style.objectFit = 'cover';
+                  transitionImg.style.zIndex = '9999';
+                  transitionImg.style.borderRadius = '12px';
+                  transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+                  transitionImg.style.pointerEvents = 'none';
+                  
+                  document.body.appendChild(transitionImg);
+                  transitionImgRef.current = transitionImg;
+                  
+                  mainImg.style.opacity = '0';
+                  
+                  requestAnimationFrame(() => {
+                    transitionImg.style.top = `${finalRect.top}px`;
+                    transitionImg.style.left = `${finalRect.left}px`;
+                    transitionImg.style.width = `${finalRect.width}px`;
+                    transitionImg.style.height = `${finalRect.height}px`;
+                    transitionImg.style.borderRadius = '24px';
+                    
+                    setTimeout(() => {
+                      mainImg.style.opacity = '1';
+                      if (transitionImgRef.current) {
+                        transitionImgRef.current.remove();
+                        transitionImgRef.current = null;
+                      }
+                    }, 600);
+                  });
+                }, 50);
+              } catch (error) {
+                console.error('Zoom transition error:', error);
+              }
+            }
+          }, 10);
+        } else {
+          setLoading(false);
+          setProduct(null);
         }
-      }, 10);
-    } else {
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error('❌ Error fetching product:', error);
+        setLoading(false);
+        setProduct(null);
+      }
+    };
+    
+    fetchProduct();
   }, [id]);
 
-  // Mouse movement effect
+  // Mouse movement effect for background
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePos({
@@ -330,7 +337,7 @@ const ProductPage = () => {
   }
 
   const bgStyle = {
-    background: `radial-gradient(600px circle at ${mousePos.x}% ${mousePos.y}%, ${product.accent}20 0%, transparent 40%), #050505`
+    background: `radial-gradient(600px circle at ${mousePos.x}% ${mousePos.y}%, ${product.accent || '#4f46e5'}20 0%, transparent 40%), #050505`
   };
 
   return (
@@ -343,7 +350,7 @@ const ProductPage = () => {
           --font-serif: 'Newsreader', serif;
           --bg-card: rgba(20, 20, 20, 0.6);
           --border: rgba(255, 255, 255, 0.08);
-          --accent: ${product.accent};
+          --accent: ${product.accent || '#4f46e5'};
         }
 
         body {
@@ -658,7 +665,10 @@ const ProductPage = () => {
           <div className="card area-main-img fade-in group cursor-zoom-in">
             <img
               ref={mainImgRef}
-              src={product.images && product.images.length > 0 ? product.images[activeImg] : product.image}
+              src={product.images && product.images.length > 0 
+                ? product.images[activeImg] 
+                : (product.image || '/placeholder.jpg')
+              }
               alt={product.title}
               className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             />
@@ -722,12 +732,17 @@ const ProductPage = () => {
           <div className="card area-seller fade-in delay-2 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 p-[2px] mb-3">
               <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xl font-serif italic">
-                {product.user.charAt(0)}
+                {typeof product.seller === 'object' 
+                  ? product.seller.fullName?.charAt(0).toUpperCase() 
+                  : (product.user?.charAt(0) || 'U')
+                }
               </div>
             </div>
-            <div className="font-bold text-lg">{product.user}</div>
+            <div className="font-bold text-lg">
+              {typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}
+            </div>
             <div className="text-xs opacity-50 mb-3">
-              {product.branch} • Year {product.year}
+              {product.branch?.toUpperCase()} • Year {product.year}
             </div>
             <div className="bg-white/5 rounded-full px-3 py-1 text-xs font-bold border border-white/5">
               {product.sellerRating || '⭐ New'} Rating
@@ -743,8 +758,16 @@ const ProductPage = () => {
             </div>
             
             <div className="text-4xl lg:text-5xl font-black tracking-tighter mb-4">
-              <span className="text-xl opacity-50 align-top mr-1">₹</span>
-              {product.price}
+              {product.type === 'free' ? (
+                <span className="text-4xl font-bold text-green-400">FREE</span>
+              ) : product.type === 'barter' ? (
+                <span className="text-3xl font-bold text-purple-400">BARTER</span>
+              ) : (
+                <>
+                  <span className="text-xl opacity-50 align-top mr-1">₹</span>
+                  {product.price}
+                </>
+              )}
             </div>
 
             <button className="btn-ai">

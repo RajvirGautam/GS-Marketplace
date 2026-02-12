@@ -85,7 +85,12 @@ router.get('/', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
+    // ✅ ADDED .populate('seller')
     const products = await Product.find(filter)
+      .populate({
+        path: 'seller',
+        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+      })
       .sort(sort)
       .limit(parseInt(limit))
       .skip(skip);
@@ -115,7 +120,12 @@ router.get('/', async (req, res) => {
 // GET single product by ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    // ✅ ADDED .populate('seller')
+    const product = await Product.findById(req.params.id)
+      .populate({
+        path: 'seller',
+        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+      });
 
     if (!product) {
       return res.status(404).json({
@@ -284,7 +294,7 @@ router.put('/:id', authenticate, async (req, res) => {
     }
 
     // Check ownership
-    if (product.seller._id.toString() !== req.user._id.toString()) {
+    if (product.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this product'
@@ -295,7 +305,10 @@ router.put('/:id', authenticate, async (req, res) => {
       req.params.id,
       req.body,
       { new: true, runValidators: true }
-    );
+    ).populate({
+      path: 'seller',
+      select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+    });
 
     res.json({
       success: true,
@@ -325,7 +338,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
 
     // Check ownership
-    if (product.seller._id.toString() !== req.user._id.toString()) {
+    if (product.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this product'
@@ -357,7 +370,12 @@ router.delete('/:id', authenticate, async (req, res) => {
 // GET user's listings
 router.get('/user/my-listings', authenticate, async (req, res) => {
   try {
+    // ✅ ADDED .populate('seller')
     const products = await Product.find({ seller: req.user._id })
+      .populate({
+        path: 'seller',
+        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+      })
       .sort({ createdAt: -1 });
 
     res.json({
@@ -418,10 +436,16 @@ router.post('/:id/save', authenticate, async (req, res) => {
 // GET saved products
 router.get('/user/saved', authenticate, async (req, res) => {
   try {
+    // ✅ ADDED .populate('seller')
     const products = await Product.find({
       savedBy: req.user._id,
       status: 'active'
-    }).sort({ createdAt: -1 });
+    })
+    .populate({
+      path: 'seller',
+      select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+    })
+    .sort({ createdAt: -1 });
 
     res.json({
       success: true,

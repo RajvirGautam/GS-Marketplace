@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 const HeartIcon = ({ filled }) => (
@@ -38,11 +38,21 @@ const LocationIcon = () => (
 const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const [isSaved, setIsSaved] = useState(product.savedBy?.includes(localStorage.getItem('userId')) || false)
   const [showActions, setShowActions] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
   const navigate = useNavigate()
 
+  // Trigger animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true)
+    }, 50 + (index * 50))
+    return () => clearTimeout(timer)
+  }, [index])
+
   const animationStyle = {
-    opacity: 0,
-    animationDelay: `${0.5 + (index * 0.05)}s`
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+    transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.1 + (index * 0.05)}s`
   }
 
   // Helper functions to safely access data
@@ -106,6 +116,10 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const handleCardClick = (e) => {
     e.preventDefault();
     
+    const productId = product._id || product.id;
+    console.log('🔍 Clicking product:', productId);
+    console.log('🔍 Full product:', product);
+    
     const cardElement = e.currentTarget;
     const imgElement = cardElement.querySelector('img');
     
@@ -124,14 +138,15 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       }));
     }
     
-    navigate(`/product/${product._id || product.id}`);
+    console.log('🚀 Navigating to:', `/product/${productId}`);
+    navigate(`/product/${productId}`);
   };
 
   if (viewMode === 'list') {
     return (
       <div
         onClick={handleCardClick}
-        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex anim-slide-up cursor-pointer"
+        className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:border-white/30 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex cursor-pointer"
         style={animationStyle}
       >
         
@@ -239,7 +254,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] anim-slide-up cursor-pointer"
+      className="group relative bg-[#0F0F0F] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] cursor-pointer"
       style={animationStyle}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}

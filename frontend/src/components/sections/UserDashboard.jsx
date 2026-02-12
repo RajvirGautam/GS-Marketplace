@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Imported Auth
-import { userListings, userChats } from './UserListings';
+import { useAuth } from '../../context/AuthContext';
+import { getUserListings, deleteProduct, updateProductStatus } from '../../services/api';
 import AddProductModal from './AddProductModal';
 
 // Icons
@@ -90,45 +90,112 @@ const ChevronDown = () => (
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  // AUTH INTEGRATION
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   
-  const [listings, setListings] = useState(userListings);
+  // REAL DATA STATE
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
-  
-  // ADD PRODUCT MODAL STATE
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
-  // Dynamic User Name
-  const userName = user?.fullName || "User";
+  // FETCH USER LISTINGS ON MOUNT
+  useEffect(() => {
+    fetchUserListings();
+  }, []);
 
-  // Calculate stats
+  const fetchUserListings = async () => {
+    try {
+      setLoading(true);
+      const response = await getUserListings();
+      
+      if (response.success) {
+        console.log('✅ User listings:', response.products);
+        setListings(response.products || []);
+      } else {
+        console.error('❌ Failed to fetch listings:', response.message);
+        setListings([]);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching listings:', error);
+      setListings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Dynamic User Name
+  const userName = user?.fullName?.split(' ')[0] || "User";
+
+  // Calculate REAL stats from API data
   const totalListings = listings.length;
   const activeListings = listings.filter(l => l.status === 'active').length;
   const soldListings = listings.filter(l => l.status === 'sold').length;
-  const totalViews = listings.reduce((sum, l) => sum + l.views, 0);
-  const totalMessages = listings.reduce((sum, l) => sum + l.messages, 0);
+  const pendingListings = listings.filter(l => l.status === 'pending').length;
+  const totalViews = listings.reduce((sum, l) => sum + (l.views || 0), 0);
+  const totalSaves = listings.reduce((sum, l) => sum + (l.saves || 0), 0);
   const totalRevenue = listings
     .filter(l => l.status === 'sold')
-    .reduce((sum, l) => sum + l.numericPrice, 0);
-  const unreadChats = userChats.filter(c => c.unread > 0).length;
+    .reduce((sum, l) => sum + (l.price || 0), 0);
 
   const filteredListings = activeTab === 'all' 
     ? listings 
     : listings.filter(l => l.status === activeTab);
 
+  // DELETE PRODUCT
   const handleDelete = (id) => {
     setDeleteItemId(id);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setListings(listings.filter(l => l.id !== deleteItemId));
-    setShowDeleteModal(false);
-    setDeleteItemId(null);
+  const confirmDelete = async () => {
+    try {
+      const response = await deleteProduct(deleteItemId);
+      
+      if (response.success) {
+        setListings(listings.filter(l => l._id !== deleteItemId));
+        setShowDeleteModal(false);
+        setDeleteItemId(null);
+        alert('✅ Product deleted successfully!');
+      } else {
+        alert('❌ Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('❌ Failed to delete product');
+    }
+  };
+
+  // MARK AS SOLD
+  const handleMarkAsSold = async (productId) => {
+    try {
+      const response = await updateProductStatus(productId, 'sold');
+      
+      if (response.success) {
+        setListings(listings.map(l => 
+          l._id === productId ? { ...l, status: 'sold' } : l
+        ));
+        alert('✅ Product marked as sold!');
+      } else {
+        alert('❌ Failed to update product');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('❌ Failed to update product');
+    }
+  };
+
+  // NAVIGATE TO PRODUCT PAGE
+  const handleViewProduct = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
+  // NAVIGATE TO EDIT
+  const handleEditProduct = (productId) => {
+    alert(`Edit functionality coming soon for product ${productId}`);
+    // navigate(`/edit-product/${productId}`);
   };
 
   const handleBackClick = () => {
@@ -153,11 +220,50 @@ const UserDashboard = () => {
       pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
     };
     return (
-      <span className={`px-2 py-1 text-[10px] mono font-bold uppercase border ${styles[status]}`}>
+      <span className={`px-2 py-1 text-[10px] mono font-bold uppercase border ${styles[status] || styles.active}`}>
         {status}
       </span>
     );
   };
+
+  // Get time ago helper
+  const getTimeAgo = (createdAt) => {
+    if (!createdAt) return 'Recently';
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diff = now - created;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return 'Today';
+    if (days === 1) return '1 day ago';
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    return `${Math.floor(days / 30)} months ago`;
+  };
+
+  // Get product price display
+  const getPriceDisplay = (product) => {
+    if (product.type === 'free') return 'FREE';
+    if (product.type === 'barter') return 'BARTER';
+    return `₹${product.price || 0}`;
+  };
+
+  // Get product image
+  const getProductImage = (product) => {
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    return '/placeholder.jpg';
+  };
+
+  // LOADING STATE
+  if (loading) {
+    return (
+      <div className="dashboard-root min-h-screen flex items-center justify-center">
+        <div className="text-white mono text-lg">Loading your dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -367,7 +473,6 @@ const UserDashboard = () => {
             <span className="hidden sm:inline">Back</span>
           </button>
 
-          {/* USER MENU INTEGRATION */}
           {user && (
             <div className="relative pointer-events-auto user-menu-container">
               <button
@@ -444,9 +549,9 @@ const UserDashboard = () => {
                 <span className="mono text-xs text-white/40">TOTAL</span>
               </div>
               <div className="text-3xl font-black mb-1">{totalListings}</div>
-              <div className="text-xs text-white/60 uppercase mono">Active Listings</div>
+              <div className="text-xs text-white/60 uppercase mono">Total Listings</div>
               <div className="mt-4 flex gap-4 text-xs">
-                <span className="text-green-400">●  {activeListings} Active</span>
+                <span className="text-green-400">● {activeListings} Active</span>
                 <span className="text-blue-400">● {soldListings} Sold</span>
               </div>
             </div>
@@ -461,26 +566,22 @@ const UserDashboard = () => {
               <div className="text-3xl font-black mb-1">{totalViews}</div>
               <div className="text-xs text-white/60 uppercase mono">Total Views</div>
               <div className="mt-4 text-xs text-white/60">
-                Avg {Math.round(totalViews / totalListings)} views per listing
+                Avg {totalListings > 0 ? Math.round(totalViews / totalListings) : 0} views per listing
               </div>
             </div>
 
             <div className="stat-card p-6 anim-slide-up delay-3">
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 bg-[#7C3AED]/20 flex items-center justify-center">
-                  <MessageIcon />
+                  <HeartIcon />
                 </div>
-                <span className="mono text-xs text-white/40">MESSAGES</span>
+                <span className="mono text-xs text-white/40">SAVED</span>
               </div>
-              <div className="text-3xl font-black mb-1">{totalMessages}</div>
-              <div className="text-xs text-white/60 uppercase mono">Total Inquiries</div>
-              {unreadChats > 0 && (
-                <div className="mt-4 text-xs">
-                  <span className="bg-red-500 text-white px-2 py-1 mono font-bold">
-                    {unreadChats} UNREAD
-                  </span>
-                </div>
-              )}
+              <div className="text-3xl font-black mb-1">{totalSaves}</div>
+              <div className="text-xs text-white/60 uppercase mono">Total Saves</div>
+              <div className="mt-4 text-xs text-white/60">
+                People interested in your items
+              </div>
             </div>
 
             <div className="stat-card p-6 anim-slide-up delay-4">
@@ -526,14 +627,14 @@ const UserDashboard = () => {
                   className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
                   onClick={() => setActiveTab('pending')}
                 >
-                  Pending ({listings.filter(l => l.status === 'pending').length})
+                  Pending ({pendingListings})
                 </button>
               </div>
 
               <div className="space-y-4">
                 {filteredListings.map((listing, index) => (
                   <div 
-                    key={listing.id} 
+                    key={listing._id} 
                     className="listing-card p-4 anim-slide-up"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
@@ -541,7 +642,7 @@ const UserDashboard = () => {
                       
                       <div className="w-24 h-24 flex-shrink-0 bg-zinc-800 overflow-hidden relative">
                         <img 
-                          src={listing.image} 
+                          src={getProductImage(listing)} 
                           alt={listing.title}
                           className="w-full h-full object-cover"
                         />
@@ -560,49 +661,53 @@ const UserDashboard = () => {
                             </h3>
                             <div className="flex items-center gap-2 flex-wrap">
                               {getStatusBadge(listing.status)}
-                              <span className="text-xs text-white/40 mono">{listing.timeAgo}</span>
+                              <span className="text-xs text-white/40 mono">{getTimeAgo(listing.createdAt)}</span>
                             </div>
                           </div>
                           <div className="text-right ml-4">
-                            <div className="text-xl font-black" style={{ color: listing.accent }}>
-                              {listing.price}
+                            <div className="text-xl font-black text-[#00D9FF]">
+                              {getPriceDisplay(listing)}
                             </div>
                             <div className="text-[10px] text-white/40 mono uppercase">
-                              {listing.condition}
+                              {listing.condition || 'Used'}
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-4 text-xs text-white/60 mb-3">
                           <span className="flex items-center gap-1">
-                            <EyeIcon /> {listing.views}
+                            <EyeIcon /> {listing.views || 0}
                           </span>
                           <span className="flex items-center gap-1">
-                            <HeartIcon /> {listing.saves}
+                            <HeartIcon /> {listing.saves || 0}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MessageIcon /> {listing.messages}
-                          </span>
+                          <span className="text-white/40 mono">{listing.category?.toUpperCase()}</span>
                         </div>
 
                         <div className="flex gap-2">
-                          <button className="action-btn flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white">
+                          <button 
+                            onClick={() => handleViewProduct(listing._id)}
+                            className="action-btn flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white"
+                          >
                             <EyeIcon /> VIEW
                           </button>
                           <button 
                             className="action-btn flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white"
-                            onClick={() => alert(`Edit listing: ${listing.title}`)}
+                            onClick={() => handleEditProduct(listing._id)}
                           >
                             <EditIcon /> EDIT
                           </button>
                           <button 
                             className="action-btn delete flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white"
-                            onClick={() => handleDelete(listing.id)}
+                            onClick={() => handleDelete(listing._id)}
                           >
                             <TrashIcon /> DELETE
                           </button>
                           {listing.status === 'active' && (
-                            <button className="action-btn px-3 py-2 text-xs mono font-bold text-white ml-auto">
+                            <button 
+                              onClick={() => handleMarkAsSold(listing._id)}
+                              className="action-btn px-3 py-2 text-xs mono font-bold text-white ml-auto"
+                            >
                               MARK AS SOLD
                             </button>
                           )}
@@ -635,70 +740,12 @@ const UserDashboard = () => {
               <div className="bg-zinc-900/50 border border-white/10 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold">Recent Chats</h2>
-                  {unreadChats > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-1 mono font-bold">
-                      {unreadChats}
-                    </span>
-                  )}
                 </div>
 
-                <div className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-hide">
-                  {userChats.map((chat) => (
-                    <div 
-                      key={chat.id} 
-                      className={`chat-item p-3 ${!chat.isActive ? 'opacity-50' : ''}`}
-                    >
-                      <div className="flex gap-3">
-                        <div className="w-10 h-10 flex-shrink-0 bg-zinc-800 border border-white/20 flex items-center justify-center font-bold text-sm">
-                          {chat.buyerInitial}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-1">
-                            <div className="font-bold text-sm truncate">
-                              {chat.buyerName}
-                            </div>
-                            <span className="text-[10px] text-white/40 mono ml-2">
-                              {chat.timestamp}
-                            </span>
-                          </div>
-                          
-                          <div className="text-xs text-white/60 truncate mb-2">
-                            {chat.lastMessage}
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src={chat.productImage} 
-                              alt="" 
-                              className="w-6 h-6 object-cover"
-                            />
-                            <span className="text-[10px] text-white/40 truncate mono">
-                              {chat.productTitle}
-                            </span>
-                          </div>
-                        </div>
-
-                        {chat.unread > 0 && (
-                          <div className="flex-shrink-0 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                            {chat.unread}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {userChats.length === 0 && (
-                    <div className="text-center py-8 text-white/40">
-                      <MessageIcon />
-                      <p className="text-sm mt-2">No messages yet</p>
-                    </div>
-                  )}
+                <div className="text-center py-8 text-white/40">
+                  <MessageIcon />
+                  <p className="text-sm mt-2">Chat system coming soon!</p>
                 </div>
-
-                <button className="w-full mt-6 bg-white/5 border border-white/10 text-white px-4 py-3 text-sm mono font-bold hover:bg-white/10 transition-colors">
-                  VIEW ALL CHATS →
-                </button>
               </div>
             </div>
 
@@ -731,8 +778,13 @@ const UserDashboard = () => {
           </div>
         )}
 
-        {/* ADD PRODUCT MODAL */}
-        <AddProductModal isOpen={isAddProductOpen} onClose={() => setIsAddProductOpen(false)} />
+        <AddProductModal 
+          isOpen={isAddProductOpen} 
+          onClose={() => {
+            setIsAddProductOpen(false);
+            fetchUserListings(); // Refresh after adding
+          }} 
+        />
 
       </div>
     </>
