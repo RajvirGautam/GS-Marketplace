@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
 import { Link } from 'react-router-dom'
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { useAuth } from '../../context/AuthContext' // Import your auth context
 
 const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [isOpen, setIsOpen] = useState(false)
   const navRef = useRef(null)
+  const { user, logout } = useAuth() // Get user and logout from your auth context
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -118,25 +119,29 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         </button>
 
         {/* Auth Buttons */}
-        <SignedOut>
+        {!user ? (
           <button 
             onClick={onConnectClick}
             className="py-1.5 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
           >
             CONNECT ID
           </button>
-        </SignedOut>
-
-        <SignedIn>
-          <UserButton 
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                avatarBox: "w-9 h-9"
-              }
-            }}
-          />
-        </SignedIn>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold">
+                {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+              </div>
+              <span className="text-sm">{user.name || user.email}</span>
+            </div>
+            <button
+              onClick={logout}
+              className="py-1.5 px-4 text-xs bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile Menu Toggle */}
@@ -181,7 +186,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           </a>
           
           {/* Auth Mobile */}
-          <SignedOut>
+          {!user ? (
             <button 
               onClick={() => {
                 setIsOpen(false);
@@ -191,13 +196,27 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
             >
               CONNECT COLLEGE ID
             </button>
-          </SignedOut>
-
-          <SignedIn>
-            <div className="flex items-center justify-center">
-              <UserButton afterSignOutUrl="/" />
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold">
+                  {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                </div>
+                <span className="text-indigo-900 dark:text-white font-bold">
+                  {user.name || user.email}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  logout();
+                }}
+                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg"
+              >
+                Logout
+              </button>
             </div>
-          </SignedIn>
+          )}
         </div>
       )}
     </nav> 

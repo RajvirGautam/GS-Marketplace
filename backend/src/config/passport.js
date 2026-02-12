@@ -42,7 +42,7 @@ passport.use(
           fullName: profile.displayName,
           profilePicture: profile.photos?.[0]?.value || '',
           authProvider: 'google',
-          isVerified: false, // Still needs ID verification
+          isVerified: false,
           verificationStatus: 'pending'
         });
 

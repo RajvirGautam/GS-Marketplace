@@ -13,6 +13,7 @@ import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
 import ConnectIdModal from './components/auth/ConnectIdModal'
 import AuthCallback from './pages/AuthCallback'
+import VerificationGuard from './components/auth/VerificationGuard' // ← ADD THIS
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -59,11 +60,14 @@ function App() {
           {/* Footer stays global */}
           <Footer />
 
-          {/* Modal works everywhere */}
+          {/* Manual login modal (for login button clicks) */}
           <ConnectIdModal 
             isOpen={isLoginOpen} 
             onClose={() => setIsLoginOpen(false)} 
           />
+
+          {/* Auto verification modal (for unverified users) - ADD THIS */}
+          <VerificationGuard />
         </div>
       </Router>
     </AuthProvider>

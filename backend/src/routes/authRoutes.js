@@ -1,6 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from './utils/jwt.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { authenticate } from '../middleware/auth.js';
 import passport from '../config/passport.js';
 
@@ -11,7 +11,7 @@ const router = express.Router();
 // Register with email/password + ID verification
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, fullName, enrollmentNumber, isVerified } = req.body;
+    const { email, password, fullName, enrollmentNumber, branch, year, isVerified } = req.body;
 
     console.log('📝 Registration attempt:', { email, fullName, enrollmentNumber });
 
@@ -36,9 +36,11 @@ router.post('/register', async (req, res) => {
       password,
       fullName,
       enrollmentNumber,
+      branch,
+      year,
       authProvider: 'local',
-      isVerified: isVerified || false,
-      verificationStatus: isVerified ? 'approved' : 'pending'
+      isVerified: isVerified || true, // Auto-verify local signups
+      verificationStatus: isVerified ? 'approved' : 'approved'
     });
 
     // Generate tokens
@@ -52,6 +54,7 @@ router.post('/register', async (req, res) => {
     console.log('✅ User registered:', user._id);
 
     res.status(201).json({
+      success: true,
       message: 'Registration successful',
       accessToken,
       refreshToken,
@@ -60,6 +63,8 @@ router.post('/register', async (req, res) => {
         email: user.email,
         fullName: user.fullName,
         enrollmentNumber: user.enrollmentNumber,
+        branch: user.branch,
+        year: user.year,
         isVerified: user.isVerified,
         verificationStatus: user.verificationStatus
       }
@@ -109,6 +114,7 @@ router.post('/login', async (req, res) => {
     console.log('✅ Login successful:', user._id);
 
     res.json({
+      success: true,
       message: 'Login successful',
       accessToken,
       refreshToken,
@@ -117,6 +123,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         fullName: user.fullName,
         enrollmentNumber: user.enrollmentNumber,
+        branch: user.branch,
+        year: user.year,
         isVerified: user.isVerified,
         verificationStatus: user.verificationStatus,
         profilePicture: user.profilePicture
@@ -137,7 +145,10 @@ router.get('/google',
 
 // Google OAuth callback
 router.get('/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL}/?error=google_auth_failed` }),
+  passport.authenticate('google', { 
+    session: false, 
+    failureRedirect: `${process.env.FRONTEND_URL}/?error=google_auth_failed` 
+  }),
   async (req, res) => {
     try {
       const user = req.user;
@@ -152,14 +163,89 @@ router.get('/google/callback',
 
       console.log('✅ Google OAuth successful:', user._id);
 
-      // Redirect to frontend with tokens
-      res.redirect(`${process.env.FRONTEND_URL}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+      // Encode user data for URL
+      const userData = encodeURIComponent(JSON.stringify({
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        isVerified: user.isVerified,
+        enrollmentNumber: user.enrollmentNumber,
+        branch: user.branch,
+        year: user.year,
+        profilePicture: user.profilePicture
+      }));
+
+      // Redirect to frontend with tokens AND user data
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`
+      );
     } catch (error) {
       console.error('❌ Google callback error:', error);
       res.redirect(`${process.env.FRONTEND_URL}/?error=auth_failed`);
     }
   }
 );
+
+// ========== ID VERIFICATION (NEW!) ==========
+
+// Verify enrollment ID for Google OAuth users
+router.post('/verify-id', authenticate, async (req, res) => {
+  try {
+    const { fullName, enrollmentNumber, branch, year } = req.body;
+    const userId = req.user._id;
+
+    console.log('🔍 ID Verification attempt:', { userId, fullName, enrollmentNumber });
+
+    // Validation
+    if (!fullName || !enrollmentNumber) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Full name and enrollment number required' 
+      });
+    }
+
+    // Check if already verified
+    if (req.user.isVerified) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Account already verified' 
+      });
+    }
+
+    // Update user
+    req.user.enrollmentNumber = enrollmentNumber;
+    req.user.fullName = fullName;
+    if (branch) req.user.branch = branch;
+    if (year) req.user.year = year;
+    req.user.isVerified = true;
+    req.user.verificationStatus = 'approved';
+    await req.user.save();
+
+    console.log('✅ ID Verification successful:', userId);
+
+    res.json({
+      success: true,
+      message: 'ID verification successful',
+      user: {
+        id: req.user._id,
+        email: req.user.email,
+        fullName: req.user.fullName,
+        enrollmentNumber: req.user.enrollmentNumber,
+        branch: req.user.branch,
+        year: req.user.year,
+        isVerified: req.user.isVerified,
+        verificationStatus: req.user.verificationStatus
+      }
+    });
+  } catch (error) {
+    console.error('❌ Verification error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Verification failed', 
+      error: error.message 
+    });
+  }
+});
 
 // ========== TOKEN REFRESH ==========
 
@@ -184,7 +270,10 @@ router.post('/refresh', async (req, res) => {
     // Generate new access token
     const newAccessToken = generateAccessToken(user._id);
 
-    res.json({ accessToken: newAccessToken });
+    res.json({ 
+      success: true,
+      accessToken: newAccessToken 
+    });
   } catch (error) {
     console.error('❌ Refresh token error:', error);
     res.status(500).json({ error: 'Token refresh failed' });
@@ -197,8 +286,15 @@ router.post('/logout', authenticate, async (req, res) => {
   try {
     req.user.refreshToken = null;
     await req.user.save();
-    res.json({ message: 'Logout successful' });
+    
+    console.log('✅ Logout successful:', req.user._id);
+    
+    res.json({ 
+      success: true,
+      message: 'Logout successful' 
+    });
   } catch (error) {
+    console.error('❌ Logout error:', error);
     res.status(500).json({ error: 'Logout failed' });
   }
 });
@@ -207,15 +303,19 @@ router.post('/logout', authenticate, async (req, res) => {
 
 router.get('/me', authenticate, (req, res) => {
   res.json({
+    success: true,
     user: {
       id: req.user._id,
       email: req.user.email,
       fullName: req.user.fullName,
       enrollmentNumber: req.user.enrollmentNumber,
+      branch: req.user.branch,
+      year: req.user.year,
       isVerified: req.user.isVerified,
       verificationStatus: req.user.verificationStatus,
       profilePicture: req.user.profilePicture,
-      authProvider: req.user.authProvider
+      authProvider: req.user.authProvider,
+      createdAt: req.user.createdAt
     }
   });
 });
