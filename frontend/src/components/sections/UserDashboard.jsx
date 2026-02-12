@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Imported Auth
 import { userListings, userChats } from './UserListings';
 import AddProductModal from './AddProductModal';
 
@@ -81,8 +82,18 @@ const CheckCircleIcon = () => (
   </svg>
 );
 
+const ChevronDown = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
+
 const UserDashboard = () => {
   const navigate = useNavigate();
+  // AUTH INTEGRATION
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
   const [listings, setListings] = useState(userListings);
   const [activeTab, setActiveTab] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -91,7 +102,8 @@ const UserDashboard = () => {
   // ADD PRODUCT MODAL STATE
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
-  const userName = "Rajvir";
+  // Dynamic User Name
+  const userName = user?.fullName || "User";
 
   // Calculate stats
   const totalListings = listings.length;
@@ -120,8 +132,19 @@ const UserDashboard = () => {
   };
 
   const handleBackClick = () => {
-    navigate('/');
+    navigate('/marketplace');
   };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showUserMenu && !e.target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showUserMenu]);
 
   const getStatusBadge = (status) => {
     const styles = {
@@ -343,6 +366,51 @@ const UserDashboard = () => {
             <ArrowLeft />
             <span className="hidden sm:inline">Back</span>
           </button>
+
+          {/* USER MENU INTEGRATION */}
+          {user && (
+            <div className="relative pointer-events-auto user-menu-container">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="btn-glass shadow-lg"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold">
+                  {user.fullName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
+                <ChevronDown />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl">
+                  <div className="p-4 border-b border-white/10">
+                    <div className="text-[10px] text-white/40 mono uppercase mb-1">Logged in as</div>
+                    <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
+                    <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                    {user.enrollmentNumber && (
+                      <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
+                    )}
+                  </div>
+                  <Link 
+                    to="/marketplace"
+                    onClick={() => setShowUserMenu(false)}
+                    className="block px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                  >
+                    Browse Marketplace
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-24 md:py-32">

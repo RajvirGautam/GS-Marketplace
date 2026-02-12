@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { products } from './Products.js';
 
 // Icons
@@ -74,9 +75,19 @@ const SparklesIcon = () => (
   </svg>
 );
 
+const ChevronDown = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
+
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  // AUTH INTEGRATION
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
   
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -87,6 +98,29 @@ const ProductPage = () => {
   
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showUserMenu && !e.target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showUserMenu]);
+
+  // Handle Contact Seller
+  const handleContactSeller = () => {
+    if (!user) {
+      // If not logged in, redirect to login (or show modal)
+      navigate('/login');
+      return;
+    }
+    // Logic to open chat would go here
+    console.log(`Starting chat with ${product.user} as ${user.fullName}`);
+    alert(`Starting chat with ${product.user}`);
+  };
 
   // Handle back navigation with zoom out effect
   const handleBackClick = (e) => {
@@ -564,13 +598,57 @@ const ProductPage = () => {
           <span className="hidden sm:inline">Back</span>
         </button>
         
-        <div className="flex gap-3 pointer-events-auto">
+        <div className="flex gap-3 pointer-events-auto items-center">
           <button className="btn-glass shadow-lg">
             <ShareIcon />
           </button>
           <button className="btn-glass shadow-lg" onClick={() => setSaved(!saved)}>
             <Heart filled={saved} />
           </button>
+
+          {/* USER MENU INTEGRATION */}
+          {user ? (
+            <div className="relative user-menu-container">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="btn-glass shadow-lg pl-2 pr-3"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold">
+                  {user.fullName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <ChevronDown />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-[#141414] border border-white/20 shadow-2xl backdrop-blur-xl rounded-xl overflow-hidden z-50">
+                  <div className="p-4 border-b border-white/10">
+                    <div className="text-[10px] text-white/40 uppercase mb-1 font-bold">Logged in as</div>
+                    <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
+                    <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                  </div>
+                  <Link 
+                    to="/dashboard"
+                    className="block px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+             <Link to="/login" className="btn-glass shadow-lg">
+               Login
+             </Link>
+          )}
         </div>
       </nav>
 
@@ -722,7 +800,10 @@ const ProductPage = () => {
 
           {/* 7. Actions */}
           <div className="card area-actions fade-in delay-3 bg-white/5 border-white/10 flex flex-col gap-4 justify-center">
-            <button className="btn-primary group relative overflow-hidden">
+            <button 
+              className="btn-primary group relative overflow-hidden"
+              onClick={handleContactSeller}
+            >
               <span className="relative z-10 flex items-center gap-2">
                 Contact Seller <Message />
               </span>

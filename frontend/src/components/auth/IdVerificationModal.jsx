@@ -270,28 +270,46 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
     }
   };
 
+  const handleClose = () => {
+    if (!isProcessing) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <style>{modalStyles}</style>
       
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
+      <div 
+        className="absolute inset-0 bg-black/90 backdrop-blur-sm" 
+        onClick={handleClose}
+      />
 
       <div className="relative w-full max-w-2xl bg-[#050505] border border-white/20 shadow-2xl animate-modal-pop overflow-hidden">
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+        {/* Header - Same style as ConnectIdModal */}
+        <div className="bg-zinc-900 border-b border-white/10 p-6 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+          
           <div className="relative z-10 flex items-start justify-between">
             <div>
-              <h2 className="text-2xl font-black uppercase text-white mb-2">One Last Step!</h2>
-              <p className="text-white/80 text-sm mono">Verify your SGSITS enrollment to access the marketplace</p>
-              {userEmail && <p className="text-white/60 text-xs mono mt-1">Logged in as: {userEmail}</p>}
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-[#00D9FF] flex items-center justify-center border border-white/10 text-black">
+                  <Icons.ShieldCheck className="w-5 h-5" />
+                </div>
+                <h2 className="text-2xl font-black uppercase text-white tracking-tight">One Last Step!</h2>
+              </div>
+              <p className="text-white/60 text-xs mono border-l-2 border-[#00D9FF] pl-3">
+                // Verify your SGSITS ID card to access the marketplace
+              </p>
+              {userEmail && <p className="text-white/40 text-[10px] mono mt-2 pl-3">Logged in as: {userEmail}</p>}
             </div>
             <button 
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center border border-white/40 text-white hover:bg-white/20 transition-all"
+              onClick={handleClose}
+              disabled={isProcessing}
+              className="w-8 h-8 flex items-center justify-center border border-white/20 text-white/40 hover:text-white hover:border-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icons.X size={16} />
             </button>
@@ -299,16 +317,19 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-6">
+        <div className="p-8 bg-[#0A0A0A] space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           
           {/* Instructions */}
-          <div className="bg-cyan-500/10 border border-cyan-500/30 p-4">
-            <div className="flex items-start gap-3">
-              <Icons.Info className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-white/80 mono leading-relaxed">
-                <strong className="text-cyan-500">Upload your college ID card</strong> and enter your details. Our AI will verify your enrollment automatically.
-              </div>
+          <div className="bg-black border border-white/20 p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"></div>
+              <span className="text-[10px] font-bold mono text-[#00D9FF] uppercase tracking-wider">
+                ID CARD VERIFICATION REQUIRED
+              </span>
             </div>
+            <p className="text-[10px] text-white/50 mono leading-relaxed">
+              Upload your college ID card and enter your details. Our system will automatically verify your enrollment.
+            </p>
           </div>
 
           {/* Form Fields */}
@@ -398,7 +419,7 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
           {/* Submit Button */}
           <NeonButton 
             primary={verificationStatus !== 'failed'} 
-            className="w-full justify-center py-4 rounded-none font-mono uppercase text-xs font-bold"
+            className={`w-full justify-center py-4 rounded-none font-mono uppercase text-xs font-bold ${verificationStatus === 'failed' ? 'bg-red-900/20 border-red-500 text-red-500 hover:border-red-400' : ''}`}
             disabled={isProcessing || verificationStatus === 'success' || !file || !fullName || !enrollment}
             onClick={handleVerification}
           >
@@ -411,8 +432,12 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
                 {ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING...'}
               </span>
             ) : verificationStatus === 'success' ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-black">
                 <Icons.CheckCircle size={16}/> VERIFIED! REDIRECTING...
+              </span>
+            ) : verificationStatus === 'failed' ? (
+              <span className="flex items-center gap-2">
+                <Icons.AlertCircle size={16} /> VERIFICATION FAILED. TRY AGAIN
               </span>
             ) : (
               'VERIFY MY ID'
@@ -423,7 +448,7 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
           {debugInfo.length > 0 && (
             <div className="debug-panel p-4 space-y-2">
               <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#00D9FF]/20">
-                <span className="font-bold uppercase text-[#00D9FF]">// VERIFICATION LOG</span>
+                <span className="font-bold uppercase text-[#00D9FF]">// AI VERIFICATION LOG</span>
               </div>
               
               <div className="space-y-0.5 max-h-40 overflow-y-auto">

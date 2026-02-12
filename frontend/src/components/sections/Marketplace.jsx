@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import ProductCard from '../ui/ProductCard';
 import { products as allProducts } from './Products';
 import AddProductModal from './AddProductModal';
+
 
 // --- Internal Icons ---
 const ChevronDown = () => (
@@ -63,8 +65,13 @@ const ListIcon = () => (
   </svg>
 );
 
+
 const Marketplace = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  // AUTH INTEGRATION
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // ADD PRODUCT MODAL STATE
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -134,6 +141,15 @@ const Marketplace = () => {
   const [filteredProducts, setFilteredProducts] = useState(allProducts);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 24;
+
+  // Function to handle "List Product" click
+  const handleListProduct = () => {
+    if (user) {
+      setIsAddProductOpen(true);
+    } else {
+      navigate('/login');
+    }
+  };
 
   // Toggle functions
   const toggleCategory = (slug) => {
@@ -273,6 +289,17 @@ const Marketplace = () => {
     }
   }, [location]);
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showUserMenu && !e.target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showUserMenu]);
+
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
@@ -312,6 +339,29 @@ const Marketplace = () => {
           z-index: 1;
         }
 
+        /* ROUND PERFECT GLASS BUTTON */
+        .btn-glass {
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: white;
+          border-radius: 100px; /* Perfect Pill Shape */
+          padding: 10px 20px;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          backdrop-filter: blur(10px);
+        }
+
+        .btn-glass:hover {
+          background: rgba(255,255,255,0.15);
+          border-color: white;
+        }
+
         .brutal-checkbox {
           appearance: none;
           width: 18px;
@@ -321,6 +371,7 @@ const Marketplace = () => {
           cursor: pointer;
           position: relative;
           transition: all 0.2s;
+          border-radius: 4px;
         }
 
         .brutal-checkbox:checked {
@@ -382,6 +433,7 @@ const Marketplace = () => {
           background: #fff;
           border: 1px solid #000;
           cursor: pointer;
+          border-radius: 50%;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -394,6 +446,7 @@ const Marketplace = () => {
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: rgba(255,255,255,0.2);
+          border-radius: 10px;
         }
 
         .toggle-switch {
@@ -404,6 +457,7 @@ const Marketplace = () => {
           border: 1px solid rgba(255,255,255,0.2);
           cursor: pointer;
           transition: background 0.3s;
+          border-radius: 20px;
         }
 
         .toggle-switch.active {
@@ -420,41 +474,11 @@ const Marketplace = () => {
           top: 2px;
           left: 2px;
           transition: transform 0.3s;
+          border-radius: 50%;
         }
 
         .toggle-switch.active::after {
           transform: translateX(16px);
-        }
-
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-100px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(60px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
         }
 
         .anim-slide-left {
@@ -475,9 +499,10 @@ const Marketplace = () => {
           gap: 6px;
           background: rgba(0, 217, 255, 0.1);
           border: 1px solid rgba(0, 217, 255, 0.3);
-          padding: 4px 8px;
+          padding: 6px 12px;
           font-size: 11px;
           font-family: 'Space Mono', monospace;
+          border-radius: 100px;
         }
 
         .filter-drawer {
@@ -513,6 +538,10 @@ const Marketplace = () => {
           opacity: 1;
           pointer-events: all;
         }
+
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
       <div className="theme-root relative">
@@ -543,7 +572,7 @@ const Marketplace = () => {
                     onFocus={() => setShowSearchSuggestions(searchQuery.length > 2)}
                     onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
                     placeholder="Search CS 3rd sem books, Arduino, Drafter..."
-                    className="w-full h-12 pl-11 pr-10 bg-zinc-900 border border-white/10 text-white text-sm focus:outline-none focus:border-[#00D9FF] transition-colors"
+                    className="w-full h-12 pl-11 pr-10 bg-zinc-900 border border-white/10 text-white text-sm rounded-full focus:outline-none focus:border-[#00D9FF] transition-colors"
                   />
                   {searchQuery && (
                     <button
@@ -559,35 +588,86 @@ const Marketplace = () => {
                 </div>
 
                 {showSearchSuggestions && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-white/10 max-h-64 overflow-y-auto custom-scrollbar">
-                    <div className="p-2 text-xs mono text-white/40 uppercase">Searching...</div>
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 max-h-64 overflow-y-auto custom-scrollbar rounded-2xl shadow-xl">
+                    <div className="p-4 text-xs mono text-white/40 uppercase">Searching...</div>
                   </div>
                 )}
               </div>
 
               <div className="relative hidden lg:block">
-                <button className="px-4 py-2 bg-zinc-900 border border-white/10 text-white text-sm mono flex items-center gap-2 hover:border-white/30 transition-colors">
+                <button className="btn-glass">
                   Categories <ChevronDown />
                 </button>
               </div>
 
               <button 
-                onClick={() => setIsAddProductOpen(true)} 
-                className="px-6 py-3 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-sm font-bold mono hover:scale-105 transition-transform hidden md:block"
+                onClick={handleListProduct}
+                className="px-6 py-3 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-sm font-bold mono rounded-full hover:scale-105 transition-transform hidden md:block"
               >
                 LIST PRODUCT
               </button>
 
-              <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/20 flex items-center justify-center text-sm font-bold cursor-pointer hover:border-white/40 transition-colors">
-                A
-              </div>
+              {/* USER MENU INTEGRATION */}
+              {user ? (
+                <div className="relative user-menu-container">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="btn-glass px-2 py-1 pr-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-sm font-bold text-white">
+                      {user.fullName?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="text-white text-sm font-medium hidden md:block max-w-[100px] truncate">
+                      {user.fullName?.split(' ')[0] || 'User'}
+                    </span>
+                    <ChevronDown />
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#141414] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
+                      <div className="p-4 border-b border-white/10">
+                        <div className="text-[10px] text-white/40 uppercase mb-1 font-bold mono">Logged in as</div>
+                        <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
+                        <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                        {user.enrollmentNumber && (
+                          <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
+                        )}
+                      </div>
+                      <Link 
+                        to="/dashboard"
+                        onClick={() => setShowUserMenu(false)}
+                        className="block px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                      >
+                        My Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowUserMenu(false);
+                          navigate('/');
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="btn-glass hover:bg-white/10"
+                >
+                  LOGIN
+                </Link>
+              )}
             </div>
           </div>
         </header>
 
         <div className="max-w-[1800px] mx-auto relative z-10">
           <div className="grid grid-cols-12">
-            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/40 backdrop-blur-sm p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[73px] h-[calc(100vh-73px)] anim-slide-left" style={{ opacity: 0, animationDelay: '0.2s' }}>
+            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/40 backdrop-blur-sm p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)] anim-slide-left" style={{ opacity: 0, animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between mb-8">
                 <h3 className="mono text-xs font-bold text-white uppercase tracking-widest">Filters</h3>
                 <button onClick={clearAllFilters} className="mono text-[10px] text-[#00D9FF] hover:underline">
@@ -651,14 +731,14 @@ const Marketplace = () => {
                     type="number"
                     value={priceRange[0]}
                     onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                    className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white"
+                    className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white rounded-md"
                     placeholder="Min"
                   />
                   <input
                     type="number"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 10000])}
-                    className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white"
+                    className="w-full bg-zinc-900 border border-white/10 px-2 py-1 text-xs text-white rounded-md"
                     placeholder="Max"
                   />
                 </div>
@@ -785,21 +865,21 @@ const Marketplace = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setMobileFilterOpen(true)}
-                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/10 text-white text-xs mono"
+                    className="lg:hidden btn-glass text-xs mono"
                   >
                     <FilterIcon /> FILTERS {getActiveFilterCount() > 0 && `(${getActiveFilterCount()})`}
                   </button>
 
-                  <div className="flex border border-white/10">
+                  <div className="flex border border-white/10 rounded-full overflow-hidden p-0.5 bg-zinc-900">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 ${viewMode === 'grid' ? 'bg-[#00D9FF] text-black' : 'bg-zinc-900 text-white/40'}`}
+                      className={`p-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-[#00D9FF] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                     >
                       <GridIcon />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 ${viewMode === 'list' ? 'bg-[#00D9FF] text-black' : 'bg-zinc-900 text-white/40'}`}
+                      className={`p-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-[#00D9FF] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                     >
                       <ListIcon />
                     </button>
@@ -809,7 +889,7 @@ const Marketplace = () => {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none bg-zinc-900 border border-white/10 text-xs mono text-white px-4 py-2 pr-8 focus:outline-none focus:border-white/40"
+                      className="appearance-none bg-zinc-900 border border-white/10 text-xs mono text-white px-4 py-2 pr-8 rounded-full focus:outline-none focus:border-white/40 cursor-pointer"
                     >
                       <option value="newest">SORT: NEWEST FIRST</option>
                       <option value="oldest">SORT: OLDEST FIRST</option>
@@ -832,13 +912,13 @@ const Marketplace = () => {
                   <div className="flex gap-4 justify-center">
                     <button
                       onClick={clearAllFilters}
-                      className="px-6 py-2 border border-white/20 text-white hover:bg-white hover:text-black transition-colors"
+                      className="btn-glass"
                     >
                       Clear All Filters
                     </button>
                     <button
                       onClick={() => window.location.reload()}
-                      className="px-6 py-2 bg-white text-black hover:bg-white/90 transition-colors"
+                      className="px-6 py-2 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
                     >
                       Browse All
                     </button>
@@ -864,7 +944,7 @@ const Marketplace = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-full"
                   >
                     <ChevronLeft />
                   </button>
@@ -875,7 +955,7 @@ const Marketplace = () => {
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-8 h-8 flex items-center justify-center font-mono text-xs font-bold ${
+                        className={`w-10 h-10 flex items-center justify-center font-mono text-xs font-bold rounded-full transition-all ${
                           currentPage === pageNum
                             ? 'bg-white text-black'
                             : 'border border-white/10 hover:border-white/40 text-white/60'
@@ -887,13 +967,13 @@ const Marketplace = () => {
                   })}
 
                   {totalPages > 5 && (
-                    <span className="flex items-center text-white/40">...</span>
+                    <span className="flex items-center text-white/40 px-2">...</span>
                   )}
 
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="w-8 h-8 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-full"
                   >
                     <ChevronRight />
                   </button>
@@ -941,13 +1021,13 @@ const Marketplace = () => {
             <div className="sticky bottom-0 bg-black border-t border-white/10 p-4 flex gap-3 mt-8">
               <button
                 onClick={clearAllFilters}
-                className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono"
+                className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono rounded-full"
               >
                 CLEAR
               </button>
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 px-4 py-3 bg-[#00D9FF] text-black text-sm font-bold mono"
+                className="flex-1 px-4 py-3 bg-[#00D9FF] text-black text-sm font-bold mono rounded-full"
               >
                 APPLY FILTERS
               </button>
@@ -956,13 +1036,12 @@ const Marketplace = () => {
         </div>
 
         <button 
-          onClick={() => setIsAddProductOpen(true)}
+          onClick={handleListProduct}
           className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-2xl flex items-center justify-center shadow-2xl z-40"
         >
           +
         </button>
 
-        {/* ADD PRODUCT MODAL */}
         <AddProductModal isOpen={isAddProductOpen} onClose={() => setIsAddProductOpen(false)} />
       </div>
     </>
