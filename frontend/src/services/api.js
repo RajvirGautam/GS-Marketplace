@@ -95,6 +95,11 @@ export const productAPI = {
     return data;
   },
 
+  getAnalytics: async () => {
+    const { data } = await api.get('/products/user/analytics');
+    return data;
+  },
+
   toggleSave: async (id) => {
     const { data } = await api.post(`/products/${id}/save`);
     return data;
@@ -120,56 +125,11 @@ export const userAPI = {
   },
 };
 
-// Add these to your existing api.js
+// ==================== LEGACY EXPORTS (for backward compatibility) ====================
 
-// Get user's own listings
-export const getUserListings = async () => {
-  const response = await fetch(`${API_BASE_URL}/products/user/my-listings`, {
-    headers: {
-      'Authorization': `Bearer ${getToken()}`
-    }
-  });
-  return response.json();
-};
-
-// Get user's saved products
-export const getSavedProducts = async () => {
-  const response = await fetch(`${API_BASE_URL}/products/user/saved`, {
-    headers: {
-      'Authorization': `Bearer ${getToken()}`
-    }
-  });
-  return response.json();
-};
-
-// Delete product
-export const deleteProduct = async (productId) => {
-  const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${getToken()}`
-    }
-  });
-  return response.json();
-};
-
-// Update product status (mark as sold, etc.)
-export const updateProductStatus = async (productId, status) => {
-  const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${getToken()}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status })
-  });
-  return response.json();
-};
-
-// Helper to get token from localStorage
-const getToken = () => {
-  return localStorage.getItem('token');
-};
-
+export const getUserListings = () => productAPI.getMyListings();
+export const getSavedProducts = () => productAPI.getSaved();
+export const deleteProduct = (id) => productAPI.delete(id);
+export const updateProductStatus = (id, status) => productAPI.update(id, { status });
 
 export default api;

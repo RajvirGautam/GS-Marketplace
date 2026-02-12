@@ -85,7 +85,6 @@ router.get('/', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    // ✅ ADDED .populate('seller')
     const products = await Product.find(filter)
       .populate({
         path: 'seller',
@@ -120,7 +119,6 @@ router.get('/', async (req, res) => {
 // GET single product by ID
 router.get('/:id', async (req, res) => {
   try {
-    // ✅ ADDED .populate('seller')
     const product = await Product.findById(req.params.id)
       .populate({
         path: 'seller',
@@ -162,6 +160,104 @@ router.post('/:id/view', async (req, res) => {
 });
 
 // ==================== PROTECTED ROUTES ====================
+
+// GET user's listings (MUST BE BEFORE /:id route)
+router.get('/user/my-listings', authenticate, async (req, res) => {
+  try {
+    console.log('📊 Fetching listings for user:', req.user._id);
+
+    const products = await Product.find({ seller: req.user._id })
+      .populate({
+        path: 'seller',
+        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+      })
+      .sort({ createdAt: -1 });
+
+    console.log('✅ Found', products.length, 'products');
+
+    res.json({
+      success: true,
+      products
+    });
+  } catch (error) {
+    console.error('❌ Error fetching user listings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching listings',
+      error: error.message
+    });
+  }
+});
+
+// GET saved products
+router.get('/user/saved', authenticate, async (req, res) => {
+  try {
+    const products = await Product.find({
+      savedBy: req.user._id,
+      status: 'active'
+    })
+    .populate({
+      path: 'seller',
+      select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+    })
+    .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      products
+    });
+  } catch (error) {
+    console.error('Error fetching saved products:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching saved products',
+      error: error.message
+    });
+  }
+});
+
+// GET user analytics (calculated on-the-fly)
+router.get('/user/analytics', authenticate, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Get all user's products
+    const products = await Product.find({ seller: userId });
+
+    // Calculate stats
+    const totalListings = products.length;
+    const activeListings = products.filter(p => p.status === 'active').length;
+    const soldListings = products.filter(p => p.status === 'sold').length;
+    const pendingListings = products.filter(p => p.status === 'pending').length;
+    
+    const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalSaves = products.reduce((sum, p) => sum + (p.saves || 0), 0);
+    
+    const totalRevenue = products
+      .filter(p => p.status === 'sold')
+      .reduce((sum, p) => sum + (p.price || 0), 0);
+
+    res.json({
+      success: true,
+      analytics: {
+        totalListings,
+        activeListings,
+        soldListings,
+        pendingListings,
+        totalViews,
+        totalSaves,
+        totalRevenue
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching analytics',
+      error: error.message
+    });
+  }
+});
 
 // CREATE new product
 router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
@@ -310,6 +406,8 @@ router.put('/:id', authenticate, async (req, res) => {
       select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
     });
 
+    console.log('✅ Product updated:', updatedProduct._id);
+
     res.json({
       success: true,
       message: 'Product updated successfully',
@@ -347,11 +445,17 @@ router.delete('/:id', authenticate, async (req, res) => {
 
     // Delete images from Cloudinary
     for (const imageUrl of product.images) {
-      const publicId = imageUrl.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(`sgsits-marketplace/${publicId}`);
+      try {
+        const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
+      }
     }
 
     await Product.findByIdAndDelete(req.params.id);
+
+    console.log('✅ Product deleted:', req.params.id);
 
     res.json({
       success: true,
@@ -362,31 +466,6 @@ router.delete('/:id', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting product',
-      error: error.message
-    });
-  }
-});
-
-// GET user's listings
-router.get('/user/my-listings', authenticate, async (req, res) => {
-  try {
-    // ✅ ADDED .populate('seller')
-    const products = await Product.find({ seller: req.user._id })
-      .populate({
-        path: 'seller',
-        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
-      })
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      products
-    });
-  } catch (error) {
-    console.error('Error fetching user listings:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching listings',
       error: error.message
     });
   }
@@ -428,34 +507,6 @@ router.post('/:id/save', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error saving product',
-      error: error.message
-    });
-  }
-});
-
-// GET saved products
-router.get('/user/saved', authenticate, async (req, res) => {
-  try {
-    // ✅ ADDED .populate('seller')
-    const products = await Product.find({
-      savedBy: req.user._id,
-      status: 'active'
-    })
-    .populate({
-      path: 'seller',
-      select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
-    })
-    .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      products
-    });
-  } catch (error) {
-    console.error('Error fetching saved products:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching saved products',
       error: error.message
     });
   }

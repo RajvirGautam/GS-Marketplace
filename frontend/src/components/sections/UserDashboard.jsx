@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getUserListings, deleteProduct, updateProductStatus } from '../../services/api';
+import { productAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 
 // Icons
@@ -95,32 +95,50 @@ const UserDashboard = () => {
   
   // REAL DATA STATE
   const [listings, setListings] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
-  // FETCH USER LISTINGS ON MOUNT
+  // FETCH DATA ON MOUNT
   useEffect(() => {
-    fetchUserListings();
+    fetchDashboardData();
   }, []);
 
-  const fetchUserListings = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await getUserListings();
+      console.log('📊 Fetching dashboard data...');
       
-      if (response.success) {
-        console.log('✅ User listings:', response.products);
-        setListings(response.products || []);
+      // Fetch both listings and analytics in parallel
+      const [listingsRes, analyticsRes] = await Promise.all([
+        productAPI.getMyListings(),
+        productAPI.getAnalytics()
+      ]);
+      
+      console.log('✅ Listings Response:', listingsRes);
+      console.log('✅ Analytics Response:', analyticsRes);
+      
+      if (listingsRes.success) {
+        setListings(listingsRes.products || []);
+        console.log('✅ Set', listingsRes.products?.length || 0, 'listings');
       } else {
-        console.error('❌ Failed to fetch listings:', response.message);
+        console.error('❌ Failed to fetch listings');
         setListings([]);
       }
+      
+      if (analyticsRes.success) {
+        setAnalytics(analyticsRes.analytics);
+        console.log('✅ Analytics loaded:', analyticsRes.analytics);
+      } else {
+        console.error('❌ Failed to fetch analytics');
+      }
     } catch (error) {
-      console.error('❌ Error fetching listings:', error);
+      console.error('❌ Error fetching dashboard data:', error);
       setListings([]);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
@@ -129,16 +147,21 @@ const UserDashboard = () => {
   // Dynamic User Name
   const userName = user?.fullName?.split(' ')[0] || "User";
 
-  // Calculate REAL stats from API data
-  const totalListings = listings.length;
-  const activeListings = listings.filter(l => l.status === 'active').length;
-  const soldListings = listings.filter(l => l.status === 'sold').length;
-  const pendingListings = listings.filter(l => l.status === 'pending').length;
-  const totalViews = listings.reduce((sum, l) => sum + (l.views || 0), 0);
-  const totalSaves = listings.reduce((sum, l) => sum + (l.saves || 0), 0);
-  const totalRevenue = listings
-    .filter(l => l.status === 'sold')
-    .reduce((sum, l) => sum + (l.price || 0), 0);
+  // Use analytics from API or calculate from listings as fallback
+  const stats = analytics || {
+    totalListings: listings.length,
+    activeListings: listings.filter(l => l.status === 'active').length,
+    soldListings: listings.filter(l => l.status === 'sold').length,
+    pendingListings: listings.filter(l => l.status === 'pending').length,
+    totalViews: listings.reduce((sum, l) => sum + (l.views || 0), 0),
+    totalSaves: listings.reduce((sum, l) => sum + (l.saves || 0), 0),
+    totalRevenue: listings
+      .filter(l => l.status === 'sold')
+      .reduce((sum, l) => sum + (l.price || 0), 0)
+  };
+
+  console.log('📈 Current Stats:', stats);
+  console.log('📦 Current Listings:', listings.length);
 
   const filteredListings = activeTab === 'all' 
     ? listings 
@@ -152,18 +175,24 @@ const UserDashboard = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await deleteProduct(deleteItemId);
+      console.log('🗑️ Deleting product:', deleteItemId);
+      const response = await productAPI.delete(deleteItemId);
       
       if (response.success) {
+        console.log('✅ Product deleted successfully');
         setListings(listings.filter(l => l._id !== deleteItemId));
         setShowDeleteModal(false);
         setDeleteItemId(null);
         alert('✅ Product deleted successfully!');
+        
+        // Refresh analytics
+        fetchDashboardData();
       } else {
+        console.error('❌ Delete failed:', response);
         alert('❌ Failed to delete product');
       }
     } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error('❌ Error deleting product:', error);
       alert('❌ Failed to delete product');
     }
   };
@@ -171,18 +200,24 @@ const UserDashboard = () => {
   // MARK AS SOLD
   const handleMarkAsSold = async (productId) => {
     try {
-      const response = await updateProductStatus(productId, 'sold');
+      console.log('💰 Marking as sold:', productId);
+      const response = await productAPI.update(productId, { status: 'sold' });
       
       if (response.success) {
+        console.log('✅ Product marked as sold');
         setListings(listings.map(l => 
           l._id === productId ? { ...l, status: 'sold' } : l
         ));
         alert('✅ Product marked as sold!');
+        
+        // Refresh analytics
+        fetchDashboardData();
       } else {
+        console.error('❌ Update failed:', response);
         alert('❌ Failed to update product');
       }
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error('❌ Error updating product:', error);
       alert('❌ Failed to update product');
     }
   };
@@ -195,7 +230,6 @@ const UserDashboard = () => {
   // NAVIGATE TO EDIT
   const handleEditProduct = (productId) => {
     alert(`Edit functionality coming soon for product ${productId}`);
-    // navigate(`/edit-product/${productId}`);
   };
 
   const handleBackClick = () => {
@@ -487,7 +521,7 @@ const UserDashboard = () => {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl z-50">
                   <div className="p-4 border-b border-white/10">
                     <div className="text-[10px] text-white/40 mono uppercase mb-1">Logged in as</div>
                     <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
@@ -521,7 +555,7 @@ const UserDashboard = () => {
         <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-24 md:py-32">
           
           <div className="mb-12 anim-slide-up">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
                   Hey {userName} 👋
@@ -548,11 +582,11 @@ const UserDashboard = () => {
                 </div>
                 <span className="mono text-xs text-white/40">TOTAL</span>
               </div>
-              <div className="text-3xl font-black mb-1">{totalListings}</div>
+              <div className="text-3xl font-black mb-1">{stats.totalListings}</div>
               <div className="text-xs text-white/60 uppercase mono">Total Listings</div>
               <div className="mt-4 flex gap-4 text-xs">
-                <span className="text-green-400">● {activeListings} Active</span>
-                <span className="text-blue-400">● {soldListings} Sold</span>
+                <span className="text-green-400">● {stats.activeListings} Active</span>
+                <span className="text-blue-400">● {stats.soldListings} Sold</span>
               </div>
             </div>
 
@@ -563,10 +597,10 @@ const UserDashboard = () => {
                 </div>
                 <span className="mono text-xs text-white/40">ENGAGEMENT</span>
               </div>
-              <div className="text-3xl font-black mb-1">{totalViews}</div>
+              <div className="text-3xl font-black mb-1">{stats.totalViews}</div>
               <div className="text-xs text-white/60 uppercase mono">Total Views</div>
               <div className="mt-4 text-xs text-white/60">
-                Avg {totalListings > 0 ? Math.round(totalViews / totalListings) : 0} views per listing
+                Avg {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} views per listing
               </div>
             </div>
 
@@ -577,7 +611,7 @@ const UserDashboard = () => {
                 </div>
                 <span className="mono text-xs text-white/40">SAVED</span>
               </div>
-              <div className="text-3xl font-black mb-1">{totalSaves}</div>
+              <div className="text-3xl font-black mb-1">{stats.totalSaves}</div>
               <div className="text-xs text-white/60 uppercase mono">Total Saves</div>
               <div className="mt-4 text-xs text-white/60">
                 People interested in your items
@@ -591,10 +625,10 @@ const UserDashboard = () => {
                 </div>
                 <span className="mono text-xs text-white/40">REVENUE</span>
               </div>
-              <div className="text-3xl font-black mb-1">₹{totalRevenue.toLocaleString()}</div>
+              <div className="text-3xl font-black mb-1">₹{stats.totalRevenue.toLocaleString()}</div>
               <div className="text-xs text-white/60 uppercase mono">Total Sales</div>
               <div className="mt-4 text-xs text-green-400 flex items-center gap-1">
-                <CheckCircleIcon /> {soldListings} items sold
+                <CheckCircleIcon /> {stats.soldListings} items sold
               </div>
             </div>
 
@@ -609,25 +643,25 @@ const UserDashboard = () => {
                   className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
                   onClick={() => setActiveTab('all')}
                 >
-                  All ({totalListings})
+                  All ({stats.totalListings})
                 </button>
                 <button 
                   className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
                   onClick={() => setActiveTab('active')}
                 >
-                  Active ({activeListings})
+                  Active ({stats.activeListings})
                 </button>
                 <button 
                   className={`tab-btn ${activeTab === 'sold' ? 'active' : ''}`}
                   onClick={() => setActiveTab('sold')}
                 >
-                  Sold ({soldListings})
+                  Sold ({stats.soldListings})
                 </button>
                 <button 
                   className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
                   onClick={() => setActiveTab('pending')}
                 >
-                  Pending ({pendingListings})
+                  Pending ({stats.pendingListings})
                 </button>
               </div>
 
@@ -684,7 +718,7 @@ const UserDashboard = () => {
                           <span className="text-white/40 mono">{listing.category?.toUpperCase()}</span>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <button 
                             onClick={() => handleViewProduct(listing._id)}
                             className="action-btn flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white"
@@ -706,7 +740,7 @@ const UserDashboard = () => {
                           {listing.status === 'active' && (
                             <button 
                               onClick={() => handleMarkAsSold(listing._id)}
-                              className="action-btn px-3 py-2 text-xs mono font-bold text-white ml-auto"
+                              className="action-btn px-3 py-2 text-xs mono font-bold text-white"
                             >
                               MARK AS SOLD
                             </button>
@@ -782,7 +816,7 @@ const UserDashboard = () => {
           isOpen={isAddProductOpen} 
           onClose={() => {
             setIsAddProductOpen(false);
-            fetchUserListings(); // Refresh after adding
+            fetchDashboardData(); // Refresh after adding
           }} 
         />
 
