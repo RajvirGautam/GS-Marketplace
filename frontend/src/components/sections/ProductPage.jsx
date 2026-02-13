@@ -742,7 +742,7 @@ const ProductPage = () => {
               {typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}
             </div>
             <div className="text-xs opacity-50 mb-3">
-              {product.branch?.toUpperCase()} • Year {product.year}
+              {product.branch?.toUpperCase()} •  {product.year}th Year
             </div>
             <div className="bg-white/5 rounded-full px-3 py-1 text-xs font-bold border border-white/5">
               {product.sellerRating || '⭐ New'} Rating

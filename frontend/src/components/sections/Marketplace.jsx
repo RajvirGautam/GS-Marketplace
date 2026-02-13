@@ -1,3 +1,4 @@
+// src/pages/Marketplace.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -72,6 +73,7 @@ const Marketplace = () => {
   // State Management
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
@@ -80,8 +82,7 @@ const Marketplace = () => {
 
   // MOUSE & ACCENT STATE
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [activeAccent, setActiveAccent] = useState(null);
-
+  
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBranches, setSelectedBranches] = useState([]);
@@ -104,15 +105,17 @@ const Marketplace = () => {
     { name: 'Stationery', count: 156, emoji: '✏️', slug: 'stationery' },
     { name: 'Electronics', count: 67, emoji: '⚡', slug: 'electronics' },
     { name: 'Hostel Items', count: 43, emoji: '🏠', slug: 'hostel' },
+    { name: 'Tools', count: 28, emoji: '🔧', slug: 'tools' },
     { name: 'Miscellaneous', count: 92, emoji: '📦', slug: 'misc' },
   ];
 
   const branches = [
     { name: 'Computer Science', count: 142, slug: 'cs' },
-    { name: 'Electronics & Comm.', count: 98, slug: 'ece' },
-    { name: 'Mechanical', count: 87, slug: 'mech' },
-    { name: 'Civil', count: 54, slug: 'civil' },
-    { name: 'Electrical', count: 39, slug: 'ee' },
+    { name: 'Information Technology', count: 98, slug: 'it' },
+    { name: 'Electronics & Comm.', count: 87, slug: 'ece' },
+    { name: 'Electrical', count: 54, slug: 'ee' },
+    { name: 'Mechanical', count: 67, slug: 'mech' },
+    { name: 'Civil', count: 39, slug: 'civil' },
   ];
 
   const years = [
@@ -140,11 +143,21 @@ const Marketplace = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Fetch products from backend
   useEffect(() => {
     fetchProducts();
   }, [
-    searchQuery,
+    debouncedSearch,
     selectedCategories,
     selectedBranches,
     selectedYears,
@@ -159,7 +172,7 @@ const Marketplace = () => {
     try {
       setLoading(true);
       const filters = {
-        search: searchQuery,
+        search: debouncedSearch,
         categories: selectedCategories,
         branches: selectedBranches,
         years: selectedYears,
@@ -172,14 +185,17 @@ const Marketplace = () => {
         limit: productsPerPage
       };
 
+      console.log('🔍 Fetching products with filters:', filters);
+
       const response = await productAPI.getAll(filters);
       
       if (response.success) {
         setProducts(response.products);
         setPagination(response.pagination);
+        console.log('✅ Loaded', response.products.length, 'products');
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('❌ Error fetching products:', error);
     } finally {
       setLoading(false);
     }
@@ -207,6 +223,13 @@ const Marketplace = () => {
     setCurrentPage(1);
   };
 
+  const toggleCondition = (cond) => {
+    setSelectedConditions(prev =>
+      prev.includes(cond) ? prev.filter(c => c !== cond) : [...prev, cond]
+    );
+    setCurrentPage(1);
+  };
+
   const toggleType = (value) => {
     setSelectedTypes(prev =>
       prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
@@ -222,19 +245,52 @@ const Marketplace = () => {
     setSelectedTypes([]);
     setPriceRange([0, 10000]);
     setSearchQuery('');
+    setDebouncedSearch('');
     setCurrentPage(1);
   };
 
   const getActiveFilterCount = () => {
     let count = 0;
-    if (selectedCategories.length > 0) count++;
-    if (selectedBranches.length > 0) count++;
-    if (selectedYears.length > 0) count++;
-    if (selectedConditions.length > 0) count++;
-    if (selectedTypes.length > 0) count++;
+    if (selectedCategories.length > 0) count += selectedCategories.length;
+    if (selectedBranches.length > 0) count += selectedBranches.length;
+    if (selectedYears.length > 0) count += selectedYears.length;
+    if (selectedConditions.length > 0) count += selectedConditions.length;
+    if (selectedTypes.length > 0) count += selectedTypes.length;
     if (priceRange[0] !== 0 || priceRange[1] !== 10000) count++;
     return count;
   };
+
+  // Quick filter presets
+  const quickFilters = [
+    { 
+      label: 'Free Items', 
+      action: () => {
+        setSelectedTypes(['free']);
+        setCurrentPage(1);
+      }
+    },
+    { 
+      label: 'Under ₹500', 
+      action: () => {
+        setPriceRange([0, 500]);
+        setCurrentPage(1);
+      }
+    },
+    { 
+      label: 'Barter Only', 
+      action: () => {
+        setSelectedTypes(['barter']);
+        setCurrentPage(1);
+      }
+    },
+    { 
+      label: 'New Condition', 
+      action: () => {
+        setSelectedConditions(['New', 'Like New']);
+        setCurrentPage(1);
+      }
+    },
+  ];
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -262,29 +318,73 @@ const Marketplace = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+        :root {
+          --bg-main: #000000;
+          --bg-card: #141414;
+          --bg-sidebar: #050505;
+          --accent-lime: #B5F94D;
+          --text-primary: #FFFFFF;
+          --text-secondary: #A1A1A1;
+          --border-subtle: #27272A;
+        }
 
         .theme-root {
-          font-family: 'Manrope', sans-serif;
-          background: #0A0A0A;
-          color: #fff;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: var(--bg-main);
+          color: var(--text-primary);
           min-height: 100vh;
         }
 
-        .mono {
-          font-family: 'Space Mono', monospace;
+        /* --- UI COMPONENTS --- */
+        
+        /* Modern Solid Button (Green) */
+        .btn-primary {
+          background: var(--accent-lime);
+          color: #000;
+          border-radius: 100px; /* Updated to match rounded style */
+          padding: 10px 24px;
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border: none;
         }
 
-        .noise-overlay {
-          position: absolute;
-          inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-          opacity: 0.03;
-          pointer-events: none;
-          z-index: 1;
+        .btn-primary:hover {
+          background: #A2E044;
+          transform: translateY(-1px);
         }
 
-        /* --- ROUNDED UI BUTTONS & INPUTS --- */
+        /* Outline/Ghost Button */
+        .btn-ghost {
+          background: transparent;
+          border: 1px solid var(--border-subtle);
+          color: var(--text-secondary);
+          border-radius: 12px;
+          padding: 10px 20px;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .btn-ghost:hover {
+          border-color: #fff;
+          color: #fff;
+          background: rgba(255,255,255,0.05);
+        }
+
+        /* --- NEW: Glass Button for User Menu --- */
         .btn-glass {
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.1);
@@ -307,164 +407,178 @@ const Marketplace = () => {
           border-color: white;
         }
 
-        .brutal-checkbox {
+        /* --- NEW: Search Hint --- */
+        .search-hint {
+          position: absolute;
+          bottom: -20px;
+          left: 0;
+          font-size: 10px;
+          color: rgba(255,255,255,0.3);
+          font-weight: 500;
+        }
+
+        /* Input Fields */
+        .input-modern {
+          background: #18181B;
+          border: 1px solid transparent;
+          color: white;
+          border-radius: 12px;
+          transition: all 0.2s;
+        }
+
+        .input-modern:focus {
+          background: #202023;
+          border-color: var(--accent-lime);
+          outline: none;
+        }
+
+        /* Checkboxes */
+        .modern-checkbox {
           appearance: none;
           width: 18px;
           height: 18px;
-          border: 1px solid rgba(255,255,255,0.3);
-          background: transparent;
+          border: 2px solid #333;
+          background: #18181B;
           cursor: pointer;
           position: relative;
           transition: all 0.2s;
-          border-radius: 4px;
+          border-radius: 6px;
+          flex-shrink: 0;
         }
 
-        .brutal-checkbox:checked {
-          background: #fff;
-          border-color: #fff;
+        .modern-checkbox:checked {
+          background: var(--accent-lime);
+          border-color: var(--accent-lime);
         }
 
-        .brutal-checkbox:checked::after {
-          content: '';
+        .modern-checkbox:checked::after {
+          content: '✓';
           position: absolute;
-          width: 8px;
-          height: 8px;
-          background: #000;
+          font-size: 12px;
+          color: #000;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+          font-weight: bold;
         }
 
+        /* Slider */
         input[type="range"] {
           -webkit-appearance: none;
           width: 100%;
-          height: 2px;
-          background: rgba(255,255,255,0.2);
+          height: 4px;
+          background: #27272A;
           outline: none;
+          border-radius: 10px;
         }
 
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 12px;
-          height: 12px;
-          background: #fff;
-          border: 1px solid #000;
+          width: 16px;
+          height: 16px;
+          background: var(--accent-lime);
           cursor: pointer;
           border-radius: 50%;
+          box-shadow: 0 0 10px rgba(181, 249, 77, 0.3);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.2);
-          border-radius: 10px;
-        }
-
+        /* Tags */
         .filter-tag {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(0, 217, 255, 0.1);
-          border: 1px solid rgba(0, 217, 255, 0.3);
+          background: rgba(181, 249, 77, 0.1);
+          color: var(--accent-lime);
+          border: 1px solid rgba(181, 249, 77, 0.2);
           padding: 6px 12px;
-          font-size: 11px;
-          font-family: 'Space Mono', monospace;
-          border-radius: 100px;
+          font-size: 12px;
+          font-weight: 600;
+          border-radius: 8px;
         }
 
+        .quick-filter-btn {
+          background: #18181B;
+          border: none;
+          color: var(--text-secondary);
+          padding: 8px 16px;
+          font-size: 12px;
+          font-weight: 600;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .quick-filter-btn:hover {
+          background: #27272A;
+          color: white;
+        }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #333;
+          border-radius: 10px;
+        }
+
+        /* Drawer */
         .filter-drawer {
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
-          background: #0F0F0F;
-          border-top: 1px solid rgba(255,255,255,0.2);
+          background: #141414;
+          border-top: 1px solid #333;
           max-height: 70vh;
           overflow-y: auto;
           transform: translateY(100%);
           transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
           z-index: 1000;
         }
-
-        .filter-drawer.open {
-          transform: translateY(0);
-        }
-
+        .filter-drawer.open { transform: translateY(0); }
         .filter-backdrop {
-          position: fixed;
-          inset: 0;
-          background: rgba(0,0,0,0.7);
-          backdrop-filter: blur(4px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s;
-          z-index: 999;
+          position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+          opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999;
         }
-
-        .filter-backdrop.open {
-          opacity: 1;
-          pointer-events: all;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .anim-fade {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
+        .filter-backdrop.open { opacity: 1; pointer-events: all; }
       `}</style>
 
       <div className="theme-root relative">
-        <div className="noise-overlay" style={{ zIndex: 1 }}></div>
         
-        {/* --- DYNAMIC CURSOR GLOW --- */}
-        <div
-          className="fixed inset-0 pointer-events-none transition-colors duration-500 ease-out"
-          style={{
-            zIndex: 0,
-            background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, ${activeAccent ? activeAccent + '20' : 'rgba(255, 255, 255, 0.03)'}, transparent 40%)`
-          }}
-        />
-
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-white/10 anim-fade">
+        {/* Header - UPDATED STYLE */}
+        <header className="sticky top-0 z-50 bg-[#000]/90 backdrop-blur-xl border-b border-[#27272A]">
           <div className="max-w-[1800px] mx-auto px-6 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <Link to="/">
-                <div className="mono text-lg font-bold text-white hidden md:block cursor-pointer">
-                  SGSITS<span className="text-[#00D9FF]">.MKT</span>
+                <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
+                  <div className="w-8 h-8 rounded-lg bg-[#B5F94D] flex items-center justify-center text-black font-extrabold text-sm">S</div>
+                  <span>SGSITS<span className="text-[#B5F94D]">.MKT</span></span>
                 </div>
               </Link>
 
-              {/* Search */}
+              {/* Search - STYLE FROM SOURCE */}
               <div className="flex-1 max-w-2xl relative">
                 <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]">
                     <SearchIcon />
                   </div>
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    placeholder="Search CS 3rd sem books, Arduino, Drafter..."
-                    className="w-full h-12 pl-11 pr-10 bg-zinc-900 border border-white/10 text-white text-sm rounded-full focus:outline-none focus:border-[#00D9FF] transition-colors"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by title, tags, description, specs..."
+                    className="w-full h-12 pl-11 pr-10 bg-[#18181B] border border-[#27272A] text-white text-sm rounded-full focus:outline-none focus:border-[#B5F94D] transition-colors placeholder-[#555]"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => {
                         setSearchQuery('');
-                        setCurrentPage(1);
+                        setDebouncedSearch('');
                       }}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                     >
@@ -472,56 +586,57 @@ const Marketplace = () => {
                     </button>
                   )}
                 </div>
-              </div>
-
-              <div className="hidden lg:block">
-                <button className="btn-glass">
-                  Categories <ChevronDown />
-                </button>
+                {searchQuery && (
+                  <div className="search-hint">
+                    Searching in: title, description, tags, highlights, specs
+                  </div>
+                )}
               </div>
 
               <button
                 onClick={() => setIsAddProductOpen(true)}
-                className="px-6 py-3 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-sm font-bold mono rounded-full hover:scale-105 transition-transform hidden md:block"
+                className="btn-primary hidden md:flex"
               >
-                LIST PRODUCT
+                + List Item
               </button>
 
               {user ? (
                 <div className="relative user-menu-container">
+                  {/* User Menu Trigger - STYLE FROM SOURCE */}
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="btn-glass px-2 py-1 pr-3"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold">
+                    <div className="w-8 h-8 rounded-full bg-[#27272A] border border-[#333] flex items-center justify-center text-xs font-bold text-white">
                       {user.fullName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
                     <ChevronDown />
                   </button>
 
+                  {/* User Menu Dropdown - STYLE FROM SOURCE */}
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#141414] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
-                      <div className="p-4 border-b border-white/10">
-                        <div className="text-[10px] text-white/40 uppercase mb-1 font-bold mono">Logged in as</div>
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#18181B] border border-[#333] shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
+                      <div className="p-4 border-b border-[#333]">
+                        <div className="text-[10px] text-[#777] uppercase mb-1 font-bold">Logged in as</div>
                         <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
-                        <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                        <div className="text-xs text-[#777] truncate mt-0.5">{user.email}</div>
                       </div>
                       <button
                         onClick={() => {
                           navigate('/dashboard');
                           setShowUserMenu(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+                        className="w-full text-left px-4 py-3 text-sm text-[#ccc] hover:bg-[#27272A] transition-colors"
                       >
-                        My Dashboard
+                        Dashboard
                       </button>
                       <button
                         onClick={() => {
                           logout();
                           navigate('/');
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-[#27272A] transition-colors border-t border-[#333]"
                       >
                         Logout
                       </button>
@@ -530,7 +645,7 @@ const Marketplace = () => {
                 </div>
               ) : (
                 <Link to="/login" className="btn-glass hover:bg-white/10">
-                  LOGIN
+                  Login
                 </Link>
               )}
             </div>
@@ -542,27 +657,59 @@ const Marketplace = () => {
           <div className="grid grid-cols-12">
             
             {/* Sidebar Filters */}
-            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/40 backdrop-blur-sm p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
+            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-[#27272A] bg-[#050505] p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="mono text-xs font-bold text-white uppercase tracking-widest">Filters</h3>
+                <h3 className="text-xs font-bold text-[#777] uppercase tracking-widest">Filters</h3>
                 {getActiveFilterCount() > 0 && (
-                  <button onClick={clearAllFilters} className="mono text-[10px] text-[#00D9FF] hover:underline">
-                    CLEAR ALL
+                  <button onClick={clearAllFilters} className="text-[10px] font-bold text-[#B5F94D] hover:underline">
+                    RESET
                   </button>
                 )}
               </div>
 
               {/* Active Filters */}
               {getActiveFilterCount() > 0 && (
-                <div className="mb-6 pb-6 border-b border-white/10">
-                  <div className="mono text-[10px] text-white/40 mb-3">
-                    ACTIVE ({getActiveFilterCount()}) FILTERS
+                <div className="mb-6 pb-6 border-b border-[#27272A]">
+                  <div className="text-[10px] text-[#555] mb-3 uppercase font-bold">
+                    Active
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedCategories.map(cat => (
                       <span key={cat} className="filter-tag">
                         {categories.find(c => c.slug === cat)?.name}
-                        <button onClick={() => toggleCategory(cat)} className="text-white/60 hover:text-white">
+                        <button onClick={() => toggleCategory(cat)} className="hover:text-white">
+                          <XIcon />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedBranches.map(branch => (
+                      <span key={branch} className="filter-tag">
+                        {branches.find(b => b.slug === branch)?.name}
+                        <button onClick={() => toggleBranch(branch)} className="hover:text-white">
+                          <XIcon />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedYears.map(year => (
+                      <span key={year} className="filter-tag">
+                        {years.find(y => y.value === year)?.label}
+                        <button onClick={() => toggleYear(year)} className="hover:text-white">
+                          <XIcon />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedConditions.map(cond => (
+                      <span key={cond} className="filter-tag">
+                        {cond}
+                        <button onClick={() => toggleCondition(cond)} className="hover:text-white">
+                          <XIcon />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedTypes.map(type => (
+                      <span key={type} className="filter-tag">
+                        {itemTypes.find(t => t.value === type)?.label}
+                        <button onClick={() => toggleType(type)} className="hover:text-white">
                           <XIcon />
                         </button>
                       </span>
@@ -573,29 +720,30 @@ const Marketplace = () => {
 
               {/* Categories */}
               <div className="mb-8">
-                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Categories</h4>
+                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Categories</h4>
                 <div className="space-y-3">
                   {categories.map(cat => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
-                        className="brutal-checkbox"
+                        className="modern-checkbox"
                         checked={selectedCategories.includes(cat.slug)}
                         onChange={() => toggleCategory(cat.slug)}
                       />
-                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
-                        {cat.emoji} {cat.name}
+                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                         {cat.name}
                       </span>
+                      <span className="text-xs text-[#333] font-mono">{cat.count}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               {/* Price Range */}
-              <div className="mb-8 pt-6 border-t border-white/10">
+              <div className="mb-8 pt-6 border-t border-[#27272A]">
                 <div className="flex justify-between mb-4">
-                  <h4 className="mono text-[10px] text-white/40 uppercase font-bold">Price Range</h4>
-                  <span className="mono text-[10px] text-white">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+                  <h4 className="text-[11px] text-[#555] uppercase font-bold">Price Range</h4>
+                  <span className="text-[11px] text-[#B5F94D] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
                 </div>
                 <input
                   type="range"
@@ -611,18 +759,18 @@ const Marketplace = () => {
               </div>
 
               {/* Branches */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Seller's Branch</h4>
+              <div className="mb-8 pt-6 border-t border-[#27272A]">
+                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Seller's Branch</h4>
                 <div className="space-y-3">
                   {branches.map(branch => (
                     <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
-                        className="brutal-checkbox"
+                        className="modern-checkbox"
                         checked={selectedBranches.includes(branch.slug)}
                         onChange={() => toggleBranch(branch.slug)}
                       />
-                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
+                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
                         {branch.name}
                       </span>
                     </label>
@@ -631,39 +779,19 @@ const Marketplace = () => {
               </div>
 
               {/* Years */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Seller's Year</h4>
+              <div className="mb-8 pt-6 border-t border-[#27272A]">
+                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Seller's Year</h4>
                 <div className="space-y-3">
                   {years.map(year => (
                     <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
-                        className="brutal-checkbox"
+                        className="modern-checkbox"
                         checked={selectedYears.includes(year.value)}
                         onChange={() => toggleYear(year.value)}
                       />
-                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
+                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
                         {year.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Item Type */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Item Type</h4>
-                <div className="space-y-3">
-                  {itemTypes.map(type => (
-                    <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="brutal-checkbox"
-                        checked={selectedTypes.includes(type.value)}
-                        onChange={() => toggleType(type.value)}
-                      />
-                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
-                        {type.label}
                       </span>
                     </label>
                   ))}
@@ -673,31 +801,56 @@ const Marketplace = () => {
 
             {/* Main Content Area */}
             <main className="col-span-12 lg:col-span-9 xl:col-span-10 p-6 lg:p-8">
+              
+              {/* Quick Filters */}
+              <div className="mb-6 overflow-x-auto">
+                <div className="flex gap-3 pb-2">
+                  {quickFilters.map((filter, index) => (
+                    <button
+                      key={index}
+                      onClick={filter.action}
+                      className="quick-filter-btn"
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-                <div className="mono text-xs text-white/40">
-                  SHOWING <span className="text-white font-bold">{products.length}</span> OF{' '}
-                  <span className="text-white font-bold">{pagination.total || 0}</span> RESULTS
+                <div className="text-sm text-[#777]">
+                  Showing <span className="text-white font-bold">{products.length}</span> results
+                  {debouncedSearch && (
+                    <span className="ml-1 text-[#B5F94D]">
+                       for "{debouncedSearch}"
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-4">
                   
                   <button
                     onClick={() => setMobileFilterOpen(true)}
-                    className="lg:hidden btn-glass text-xs mono"
+                    className="lg:hidden btn-ghost text-xs"
                   >
-                    <FilterIcon /> FILTERS
+                    <FilterIcon /> Filters
+                    {getActiveFilterCount() > 0 && (
+                      <span className="ml-2 w-5 h-5 bg-[#B5F94D] text-black text-[10px] rounded-full flex items-center justify-center font-bold">
+                        {getActiveFilterCount()}
+                      </span>
+                    )}
                   </button>
 
-                  <div className="flex border border-white/10 rounded-full overflow-hidden p-0.5 bg-zinc-900">
+                  <div className="flex bg-[#18181B] rounded-xl p-1">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-[#00D9FF] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
+                      className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#27272A] text-white shadow-sm' : 'text-[#555] hover:text-white'}`}
                     >
                       <GridIcon />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-[#00D9FF] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
+                      className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#27272A] text-white shadow-sm' : 'text-[#555] hover:text-white'}`}
                     >
                       <ListIcon />
                     </button>
@@ -707,15 +860,14 @@ const Marketplace = () => {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none bg-zinc-900 border border-white/10 text-xs mono text-white px-4 py-2 pr-8 rounded-full focus:outline-none focus:border-white/40 cursor-pointer"
+                      className="appearance-none bg-[#18181B] text-sm text-white px-4 py-2.5 pr-8 rounded-xl focus:outline-none cursor-pointer font-medium hover:bg-[#202023]"
                     >
-                      <option value="newest">SORT: NEWEST FIRST</option>
-                      <option value="oldest">SORT: OLDEST FIRST</option>
-                      <option value="pricelow">SORT: PRICE LOW→HIGH</option>
-                      <option value="pricehigh">SORT: PRICE HIGH→LOW</option>
-                      <option value="popular">SORT: MOST POPULAR</option>
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="pricelow">Price: Low to High</option>
+                      <option value="pricehigh">Price: High to Low</option>
                     </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777] pointer-events-none">
                       <ChevronDown />
                     </div>
                   </div>
@@ -725,15 +877,17 @@ const Marketplace = () => {
               {/* Products Grid */}
               {loading ? (
                 <div className="text-center py-20">
-                  <div className="mono text-sm text-white/60">LOADING PRODUCTS...</div>
+                  <div className="text-sm text-[#555] animate-pulse">Loading products...</div>
                 </div>
               ) : products.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="text-6xl mb-4">📦</div>
-                  <h3 className="text-xl font-bold text-white mb-2">No products found</h3>
-                  <p className="text-white/60 mb-6">Try adjusting your search or filters</p>
-                  <button onClick={clearAllFilters} className="btn-glass">
-                    Clear All Filters
+                <div className="text-center py-20 bg-[#141414] rounded-2xl border border-[#222]">
+                  <div className="text-4xl mb-4 grayscale opacity-50">📦</div>
+                  <h3 className="text-lg font-bold text-white mb-2">No products found</h3>
+                  <p className="text-[#555] mb-6 text-sm">
+                    We couldn't find what you're looking for.
+                  </p>
+                  <button onClick={clearAllFilters} className="text-[#B5F94D] text-sm font-bold hover:underline">
+                    Clear all filters
                   </button>
                 </div>
               ) : (
@@ -741,11 +895,11 @@ const Marketplace = () => {
                   {products.map((product, index) => (
                     <div 
                       key={product._id} 
-                      className="h-full"
-                      onMouseEnter={() => setActiveAccent(product.accent || '#7C3AED')} 
-                      onMouseLeave={() => setActiveAccent(null)}
+                      className="h-full group"
                     >
-                      <ProductCard product={product} viewMode={viewMode} index={index} />
+                       <div className="bg-[#141414] border border-[#27272A] hover:border-[#B5F94D] rounded-2xl overflow-hidden h-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(181,249,77,0.1)]">
+                          <ProductCard product={product} viewMode={viewMode} index={index} />
+                       </div>
                     </div>
                   ))}
                 </div>
@@ -757,7 +911,7 @@ const Marketplace = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-full"
+                    className="w-10 h-10 flex items-center justify-center bg-[#18181B] rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#27272A] transition-colors"
                   >
                     <ChevronLeft />
                   </button>
@@ -768,10 +922,10 @@ const Marketplace = () => {
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 flex items-center justify-center font-mono text-xs font-bold rounded-full transition-all ${
+                        className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${
                           currentPage === pageNum
-                            ? 'bg-white text-black'
-                            : 'border border-white/10 hover:border-white/40 text-white/60'
+                            ? 'bg-[#B5F94D] text-black'
+                            : 'bg-[#18181B] text-[#777] hover:bg-[#27272A] hover:text-white'
                         }`}
                       >
                         {pageNum}
@@ -779,12 +933,12 @@ const Marketplace = () => {
                     );
                   })}
 
-                  {totalPages > 5 && <span className="flex items-center text-white/40 px-2">...</span>}
+                  {totalPages > 5 && <span className="flex items-center text-[#555] px-2">...</span>}
 
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="w-10 h-10 flex items-center justify-center border border-white/10 hover:border-white/40 transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-full"
+                    className="w-10 h-10 flex items-center justify-center bg-[#18181B] rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#27272A] transition-colors"
                   >
                     <ChevronRight />
                   </button>
@@ -797,7 +951,7 @@ const Marketplace = () => {
         {/* Mobile Add Button */}
         <button
           onClick={() => setIsAddProductOpen(true)}
-          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white text-2xl flex items-center justify-center shadow-2xl z-40"
+          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[#B5F94D] text-black text-3xl flex items-center justify-center shadow-lg shadow-lime-900/20 z-40"
         >
           +
         </button>
@@ -810,27 +964,48 @@ const Marketplace = () => {
 
         <div className={`filter-drawer ${mobileFilterOpen ? 'open' : ''} lg:hidden`}>
           <div className="p-6">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-              <h3 className="mono text-sm font-bold text-white uppercase">Filters</h3>
-              <button onClick={() => setMobileFilterOpen(false)}>
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#27272A]">
+              <h3 className="text-sm font-bold text-white uppercase">Filters</h3>
+              <button onClick={() => setMobileFilterOpen(false)} className="text-[#777]">
                 <XIcon />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-[50vh] overflow-y-auto custom-scrollbar">
+              {/* Categories */}
               <div>
-                <h4 className="mono text-[10px] text-white/40 uppercase mb-4 font-bold">Categories</h4>
+                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Categories</h4>
                 <div className="space-y-3">
                   {categories.map(cat => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
-                        className="brutal-checkbox"
+                        className="modern-checkbox"
                         checked={selectedCategories.includes(cat.slug)}
                         onChange={() => toggleCategory(cat.slug)}
                       />
-                      <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors flex-1">
-                        {cat.emoji} {cat.name}
+                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                        {cat.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Condition */}
+              <div className="pt-6 border-t border-[#27272A]">
+                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Condition</h4>
+                <div className="space-y-3">
+                  {conditions.map(cond => (
+                    <label key={cond} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedConditions.includes(cond)}
+                        onChange={() => toggleCondition(cond)}
+                      />
+                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                        {cond}
                       </span>
                     </label>
                   ))}
@@ -838,18 +1013,18 @@ const Marketplace = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-black border-t border-white/10 p-4 flex gap-3 mt-8">
+            <div className="sticky bottom-0 bg-[#141414] border-t border-[#27272A] p-4 flex gap-3 mt-8 -mx-6 -mb-6">
               <button
                 onClick={clearAllFilters}
-                className="flex-1 px-4 py-3 border border-white/20 text-white text-sm mono rounded-full"
+                className="flex-1 px-4 py-3 bg-[#18181B] text-white text-sm font-bold rounded-xl"
               >
-                CLEAR
+                Clear
               </button>
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 px-4 py-3 bg-[#00D9FF] text-black text-sm font-bold mono rounded-full"
+                className="flex-1 px-4 py-3 bg-[#B5F94D] text-black text-sm font-bold rounded-xl"
               >
-                APPLY FILTERS
+                Show Results
               </button>
             </div>
           </div>

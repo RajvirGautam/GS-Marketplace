@@ -1,10 +1,12 @@
-// src/components/modals/AddProductModal.jsx
+// src/components/dashboard/AddProductModal.jsx
 import React, { useState, useRef } from 'react';
 import { productAPI } from '../../services/api';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddProductModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -58,6 +60,15 @@ const AddProductModal = ({ isOpen, onClose }) => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + images.length > 5) {
+      toast.error('Maximum 5 images allowed', {
+        style: {
+          background: '#0F0F0F',
+          color: '#fff',
+          border: '1px solid rgba(239,68,68,0.3)',
+          fontFamily: 'Space Mono, monospace',
+          fontSize: '12px',
+        },
+      });
       setErrors({ ...errors, images: 'Maximum 5 images allowed' });
       return;
     }
@@ -127,50 +138,96 @@ const AddProductModal = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async () => {
-  if (!validateStep(2)) return;
+    if (!validateStep(2)) return;
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
+    setUploadProgress(0);
 
-  try {
-    const filteredHighlights = highlights.filter((h) => h.trim());
-    const filteredSpecs = specs.filter((s) => s.label.trim() && s.value.trim());
-
-    // Create FormData
-    const formDataToSend = new FormData();
-    
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('price', formData.type === 'free' ? 0 : formData.price);
-    formDataToSend.append('category', formData.category);
-    formDataToSend.append('condition', formData.condition);
-    formDataToSend.append('type', formData.type);
-    formDataToSend.append('location', formData.location);
-    formDataToSend.append('tag', formData.tag || 'FOR SALE');
-    formDataToSend.append('branch', formData.branch); // ADD THIS
-    formDataToSend.append('year', formData.year); // ADD THIS
-    formDataToSend.append('highlights', JSON.stringify(filteredHighlights));
-    formDataToSend.append('specs', JSON.stringify(filteredSpecs));
-
-    // Append images
-    images.forEach((image) => {
-      formDataToSend.append('images', image);
+    const toastId = toast.loading('Creating product listing...', {
+      style: {
+        background: '#0F0F0F',
+        color: '#fff',
+        border: '1px solid rgba(0,217,255,0.3)',
+        fontFamily: 'Space Mono, monospace',
+        fontSize: '12px',
+      },
     });
 
-    const response = await productAPI.create(formDataToSend);
+    try {
+      const filteredHighlights = highlights.filter((h) => h.trim());
+      const filteredSpecs = specs.filter((s) => s.label.trim() && s.value.trim());
 
-    if (response.success) {
-      alert('Product listed successfully! 🎉');
-      handleClose();
-      window.location.reload(); // Refresh to show new product
+      // Simulate progress
+      setUploadProgress(20);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Create FormData
+      const formDataToSend = new FormData();
+      
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', formData.type === 'free' ? 0 : formData.price);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('condition', formData.condition);
+      formDataToSend.append('type', formData.type);
+      formDataToSend.append('location', formData.location);
+      formDataToSend.append('tag', formData.tag || 'FOR SALE');
+      formDataToSend.append('branch', formData.branch);
+      formDataToSend.append('year', formData.year);
+      formDataToSend.append('highlights', JSON.stringify(filteredHighlights));
+      formDataToSend.append('specs', JSON.stringify(filteredSpecs));
+
+      setUploadProgress(40);
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Append images
+      images.forEach((image) => {
+        formDataToSend.append('images', image);
+      });
+
+      setUploadProgress(60);
+
+      const response = await productAPI.create(formDataToSend);
+
+      setUploadProgress(100);
+
+      if (response.success) {
+        toast.success('🎉 PRODUCT LISTED SUCCESSFULLY!', {
+          id: toastId,
+          style: {
+            background: '#0F0F0F',
+            color: '#00D9FF',
+            border: '2px solid #00D9FF',
+            fontFamily: 'Space Mono, monospace',
+            fontSize: '11px',
+            fontWeight: '700',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
+          },
+        });
+        handleClose();
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast.error(error.response?.data?.message || 'FAILED TO CREATE PRODUCT', {
+        id: toastId,
+        style: {
+          background: '#0F0F0F',
+          color: '#EF4444',
+          border: '2px solid rgba(239,68,68,0.5)',
+          fontFamily: 'Space Mono, monospace',
+          fontSize: '11px',
+          fontWeight: '700',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+        },
+      });
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(0);
     }
-  } catch (error) {
-    console.error('Error creating product:', error);
-    alert(error.response?.data?.message || 'Failed to create product');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   const handleClose = () => {
     // Reset form
@@ -193,6 +250,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setCurrentStep(1);
     setErrors({});
     setIsSubmitting(false);
+    setUploadProgress(0);
     onClose();
   };
 
@@ -200,6 +258,24 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
   return (
     <>
+      {/* Custom Toaster with higher z-index */}
+      <Toaster 
+        position="bottom-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#0F0F0F',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.2)',
+            fontFamily: 'Space Mono, monospace',
+            fontSize: '12px',
+          },
+        }}
+        containerStyle={{
+          zIndex: 99999, // Higher than modal
+        }}
+      />
+      
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -259,6 +335,23 @@ const AddProductModal = ({ isOpen, onClose }) => {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+
+        /* Progress bar */
+        .progress-bar-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: rgba(255,255,255,0.1);
+          z-index: 99999;
+        }
+
+        .progress-bar {
+          height: 100%;
+          background: linear-gradient(to right, #00D9FF, #7C3AED);
+          transition: width 0.3s ease;
         }
 
         /* Scrollbar */
@@ -351,6 +444,8 @@ const AddProductModal = ({ isOpen, onClose }) => {
           transition: all 0.2s;
           cursor: pointer;
           font-family: 'Space Mono', monospace;
+          position: relative;
+          overflow: hidden;
         }
 
         .btn-brutal-primary:hover:not(:disabled) {
@@ -361,7 +456,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
         }
 
         .btn-brutal-primary:disabled {
-          opacity: 0.5;
+          opacity: 0.7;
           cursor: not-allowed;
         }
 
@@ -569,8 +664,15 @@ const AddProductModal = ({ isOpen, onClose }) => {
         }
       `}</style>
 
+      {/* Progress bar */}
+      {isSubmitting && (
+        <div className="progress-bar-container">
+          <div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div>
+        </div>
+      )}
+
       {/* Backdrop */}
-      <div className="modal-backdrop" onClick={handleClose}></div>
+      <div className="modal-backdrop" onClick={!isSubmitting ? handleClose : undefined}></div>
 
       {/* Modal */}
       <div className="modal-container">
@@ -727,7 +829,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                         className={`category-card ${formData.category === cat.value ? 'selected' : ''}`}
                       >
                         <div className="text-2xl mb-2">{cat.emoji}</div>
-                        <div className="mono text-10px text-white opacity-70 uppercase">{cat.label}</div>
+                        <div className="mono text-[10px] text-white opacity-70 uppercase">{cat.label}</div>
                       </div>
                     ))}
                   </div>
@@ -914,7 +1016,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     disabled={isSubmitting}
                     className="btn-brutal-primary"
                   >
-                    {isSubmitting ? 'SUBMITTING...' : 'PUBLISH LISTING'}
+                    {isSubmitting ? `UPLOADING ${uploadProgress}%...` : 'PUBLISH LISTING'}
                   </button>
                 </div>
               </div>
