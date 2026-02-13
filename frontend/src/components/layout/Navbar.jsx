@@ -1,13 +1,57 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext' // Import your auth context
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+
+// --- LOCAL ICONS ---
+const ChevronDown = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
+
+const LogOutIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+// -------------------
 
 const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const navRef = useRef(null)
-  const { user, logout } = useAuth() // Get user and logout from your auth context
+  const dropdownRef = useRef(null)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
+  // Helper to get the display name
+  const getDisplayName = () => {
+    if (!user) return "";
+    const rawName = user.fullName || user.name || user.email?.split('@')[0];
+    return rawName ? rawName.split(' ')[0] : "Student";
+  };
+
+  const getInitials = () => {
+    if (!user) return "U";
+    const rawName = user.fullName || user.name || user.email;
+    return rawName ? rawName.charAt(0).toUpperCase() : "U";
+  };
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Scroll animation
   useEffect(() => {
     const handleUpdate = () => {
       if (!navRef.current) return
@@ -38,7 +82,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       const lightBg = `rgba(255, 255, 255, ${currentOpacity})`
       const darkBg = `rgba(0, 0, 0, ${currentOpacity})`
 
-      const lightBorder = `rgba(255, 255, 255, ${0.4 - (0.2 * ratio)})`
+      const lightBorder = `rgba(0, 0, 0, ${0.05 + (0.05 * ratio)})`
       const darkBorder = `rgba(255, 255, 255, ${0.15 - (0.1 * ratio)})`
 
       const el = navRef.current
@@ -55,7 +99,6 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate)
-    
     handleUpdate()
 
     return () => {
@@ -69,7 +112,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       ref={navRef}
       className={`
         fixed z-50 left-1/2 -translate-x-1/2 top-6
-        flex items-center justify-between px-10 py-2
+        flex items-center justify-between px-6 py-2
         rounded-full
         bg-white/5 
         backdrop-blur-xl
@@ -81,11 +124,11 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       `}
     >
       {/* Logo Section */}
-      <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-        <div className="w-10 h-10 bg-gradient-to-tr from-cyan-600 to-violet-700 dark:from-cyan-500 dark:to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
+      <Link to="/" className="flex items-center gap-2 flex-shrink-0 pl-2">
+        <div className="w-9 h-9 bg-gradient-to-tr from-cyan-600 to-violet-700 dark:from-cyan-500 dark:to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
           <Icons.Zap />
         </div>
-        <span className="text-xl md:text-2xl font-black text-indigo-950 dark:text-white tracking-tighter whitespace-nowrap">
+        <span className="text-xl font-black text-indigo-950 dark:text-white tracking-tighter whitespace-nowrap hidden sm:inline">
           SGSITS<span className="text-cyan-700 dark:text-cyan-400">.MKT</span>
         </span>
       </Link>
@@ -104,16 +147,12 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         >
           Dashboard
         </Link>
-        <a
-          href="#"
-          className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm"
-        >
-          About
-        </a>
+        
+        <div className="h-4 w-[1px] bg-indigo-950/10 dark:bg-white/10 mx-1"></div>
 
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-indigo-800 dark:text-yellow-300 ring-1 ring-black/5 dark:ring-white/10 transition-colors"
+          className="p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-yellow-300 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors"
         >
           {isDark ? <Icons.Sun /> : <Icons.Moon />}
         </button>
@@ -122,23 +161,69 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         {!user ? (
           <button 
             onClick={onConnectClick}
-            className="py-1.5 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
+            className="py-2 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
           >
             CONNECT ID
           </button>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold">
-                {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
-              </div>
-              <span className="text-sm">{user.name || user.email}</span>
+            {/* WRAPPER FOR USER MENU */}
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="group flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/15 hover:border-black/20 dark:hover:border-white text-indigo-900 dark:text-white transition-all backdrop-blur-md cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                  {getInitials()}
+                </div>
+                <span className="text-xs font-bold tracking-wide">
+                  {getDisplayName()}
+                </span>
+                <div className={`opacity-50 group-hover:opacity-100 transition-all duration-200 ${showUserMenu ? 'rotate-180' : ''}`}>
+                   <ChevronDown />
+                </div>
+              </button>
+
+              {/* DARK BRUTALIST DROPDOWN */}
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-3 w-60 rounded-xl bg-[#0F0F0F] border border-white/10 shadow-2xl backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right z-50">
+                  {/* Info Header */}
+                  <div className="p-4 border-b border-white/10">
+                    <div className="text-[9px] text-white/40 font-mono uppercase mb-1 tracking-widest">
+                      Account
+                    </div>
+                    <div className="text-sm text-white font-bold truncate">
+                      {user.fullName || user.name || "Student"}
+                    </div>
+                    {user.enrollmentNumber && (
+                      <div className="text-[10px] text-cyan-400 font-mono mt-1">
+                        {user.enrollmentNumber}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Minimalist Links */}
+                  <Link 
+                    to="/dashboard"
+                    onClick={() => setShowUserMenu(false)}
+                    className="block w-full px-4 py-3 text-xs font-mono uppercase font-bold text-white/70 hover:text-white hover:bg-white/5 transition-colors text-left tracking-wide"
+                  >
+                     View Dashboard
+                  </Link>
+                </div>
+              )}
             </div>
+
+            {/* LOGOUT BUTTON - Separated from dropdown */}
             <button
-              onClick={logout}
-              className="py-1.5 px-4 text-xs bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
+              className="p-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/10 transition-all backdrop-blur-md"
+              title="Logout"
             >
-              Logout
+              <LogOutIcon />
             </button>
           </div>
         )}
@@ -146,6 +231,14 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       {/* Mobile Menu Toggle */}
       <div className="flex items-center gap-3 md:hidden">
+        {!user && (
+            <button 
+                onClick={onConnectClick}
+                className="py-1.5 px-3 text-[10px] bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg"
+            >
+                CONNECT
+            </button>
+        )}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-lg bg-gray-100/50 dark:bg-white/5 text-indigo-900 dark:text-yellow-300 backdrop-blur-md"
@@ -162,28 +255,21 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+10px)] left-0 w-full p-4 rounded-2xl glass border border-white/20 flex flex-col gap-4 md:hidden animate-fade-in-up bg-white/60 dark:bg-black/80 backdrop-blur-2xl">
+        <div className="absolute top-[calc(100%+12px)] left-0 w-full p-4 rounded-3xl border border-white/20 flex flex-col gap-2 animate-fade-in-up bg-white/80 dark:bg-black/80 backdrop-blur-2xl shadow-2xl">
           <Link
             to="/marketplace"
-            className="text-indigo-900 dark:text-white font-bold text-lg"
+            className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors"
             onClick={() => setIsOpen(false)}
           >
             Marketplace
           </Link>
           <Link
             to="/dashboard"
-            className="text-indigo-900 dark:text-white font-bold text-lg"
+            className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors"
             onClick={() => setIsOpen(false)}
           >
             Dashboard
           </Link>
-          <a
-            href="#"
-            className="text-indigo-900 dark:text-white font-bold text-lg"
-            onClick={() => setIsOpen(false)}
-          >
-            About
-          </a>
           
           {/* Auth Mobile */}
           {!user ? (
@@ -192,28 +278,32 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
                 setIsOpen(false);
                 onConnectClick();
               }}
-              className="w-full py-3 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg"
+              className="mt-2 w-full py-4 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-xl shadow-lg"
             >
               CONNECT COLLEGE ID
             </button>
           ) : (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3 justify-center">
+            <div className="mt-2 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold">
-                  {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                  {getInitials()}
                 </div>
-                <span className="text-indigo-900 dark:text-white font-bold">
-                  {user.name || user.email}
-                </span>
+                <div className="overflow-hidden">
+                    <div className="text-indigo-900 dark:text-white font-bold truncate">
+                    {user.fullName || user.name || "Student"}
+                    </div>
+                    <div className="text-xs text-indigo-900/50 dark:text-white/50 truncate">{user.email}</div>
+                </div>
               </div>
               <button
                 onClick={() => {
                   setIsOpen(false);
                   logout();
+                  navigate('/');
                 }}
-                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg"
+                className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/10 font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
               >
-                Logout
+                <LogOutIcon /> Logout
               </button>
             </div>
           )}

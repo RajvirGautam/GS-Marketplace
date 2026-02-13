@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
+import EditProductModal from './dashboard/EditProductModal';
 
 // Icons
 const ArrowLeft = () => (
@@ -101,6 +102,10 @@ const UserDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  
+  // EDIT MODAL STATE
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // FETCH DATA ON MOUNT
   useEffect(() => {
@@ -227,9 +232,11 @@ const UserDashboard = () => {
     navigate(`/product/${productId}`);
   };
 
-  // NAVIGATE TO EDIT
-  const handleEditProduct = (productId) => {
-    alert(`Edit functionality coming soon for product ${productId}`);
+  // OPEN EDIT MODAL
+  const handleEditProduct = (product) => {
+    console.log('✏️ Editing product:', product);
+    setEditingProduct(product);
+    setIsEditProductOpen(true);
   };
 
   const handleBackClick = () => {
@@ -727,7 +734,7 @@ const UserDashboard = () => {
                           </button>
                           <button 
                             className="action-btn flex items-center gap-2 px-3 py-2 text-xs mono font-bold text-white"
-                            onClick={() => handleEditProduct(listing._id)}
+                            onClick={() => handleEditProduct(listing)}
                           >
                             <EditIcon /> EDIT
                           </button>
@@ -787,6 +794,7 @@ const UserDashboard = () => {
 
         </div>
 
+        {/* DELETE MODAL */}
         {showDeleteModal && (
           <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -812,12 +820,26 @@ const UserDashboard = () => {
           </div>
         )}
 
+        {/* ADD PRODUCT MODAL */}
         <AddProductModal 
           isOpen={isAddProductOpen} 
           onClose={() => {
             setIsAddProductOpen(false);
             fetchDashboardData(); // Refresh after adding
           }} 
+        />
+
+        {/* EDIT PRODUCT MODAL */}
+        <EditProductModal 
+          isOpen={isEditProductOpen}
+          onClose={(success) => {
+            setIsEditProductOpen(false);
+            setEditingProduct(null);
+            if (success) {
+              fetchDashboardData(); // Refresh if edit was successful
+            }
+          }}
+          product={editingProduct}
         />
 
       </div>

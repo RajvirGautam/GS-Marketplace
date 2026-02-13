@@ -380,23 +380,46 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
 // UPDATE product
 router.put('/:id', authenticate, async (req, res) => {
   try {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📝 UPDATE REQUEST');
+    console.log('Product ID:', req.params.id);
+    console.log('User ID:', req.user?._id);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+    // Find product WITHOUT populate to avoid issues
     const product = await Product.findById(req.params.id);
 
     if (!product) {
+      console.log('❌ Product not found');
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       });
     }
 
-    // Check ownership
-    if (product.seller.toString() !== req.user._id.toString()) {
+    console.log('✅ Product found');
+    console.log('Seller (raw):', product.seller);
+    console.log('User (raw):', req.user._id);
+
+    // ✅ FIX: Extract _id if seller is populated, otherwise use as-is
+    const sellerId = (product.seller._id || product.seller).toString();
+    const userId = req.user._id.toString();
+
+    console.log('Seller ID (extracted):', sellerId);
+    console.log('User ID (extracted):', userId);
+    console.log('Match:', sellerId === userId);
+
+    if (sellerId !== userId) {
+      console.log('❌ Not authorized');
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this product'
       });
     }
 
+    console.log('✅ Authorized, updating...');
+
+    // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -406,15 +429,21 @@ router.put('/:id', authenticate, async (req, res) => {
       select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
     });
 
-    console.log('✅ Product updated:', updatedProduct._id);
+    console.log('✅ Product updated!');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     res.json({
       success: true,
       message: 'Product updated successfully',
       product: updatedProduct
     });
+
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('❌ ERROR IN UPDATE ROUTE:');
+    console.error('Error message:', error.message);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    
     res.status(500).json({
       success: false,
       message: 'Error updating product',
@@ -422,6 +451,8 @@ router.put('/:id', authenticate, async (req, res) => {
     });
   }
 });
+
+
 
 // DELETE product
 router.delete('/:id', authenticate, async (req, res) => {
