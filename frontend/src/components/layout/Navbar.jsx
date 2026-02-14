@@ -51,7 +51,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Scroll animation
+  // Scroll animation (SHAPE AND POSITION ONLY)
   useEffect(() => {
     const handleUpdate = () => {
       if (!navRef.current) return
@@ -75,15 +75,9 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       const currentTop = 55 - (55 * ratio)
       const currentRadius = 55 - (55 * ratio)
       
-      const minOpacity = 0.25
-      const maxOpacity = 0.85
-      const currentOpacity = minOpacity + ((maxOpacity - minOpacity) * ratio)
-
-      const lightBg = `rgba(255, 255, 255, ${currentOpacity})`
-      const darkBg = `rgba(0, 0, 0, ${currentOpacity})`
-
-      const lightBorder = `rgba(0, 0, 0, ${0.05 + (0.05 * ratio)})`
-      const darkBorder = `rgba(255, 255, 255, ${0.15 - (0.1 * ratio)})`
+      // --- REMOVED JS COLOR/OPACITY CALCULATION HERE ---
+      // The JS was overriding the Tailwind glass classes.
+      // We now rely solely on CSS for the glass effect.
 
       const el = navRef.current
       el.style.left = currentLeft
@@ -93,19 +87,22 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       el.style.borderTopRightRadius = `${currentRadius}px`
       el.style.borderBottomLeftRadius = `${currentRadius}px`
       el.style.borderBottomRightRadius = `${currentRadius}px`
-      el.style.backgroundColor = isDark ? darkBg : lightBg
-      el.style.borderColor = isDark ? darkBorder : lightBorder
+      
+      // --- REMOVED JS STYLE OVERRIDES HERE ---
+      // el.style.backgroundColor = ...
+      // el.style.borderColor = ...
     }
 
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate)
+    // Trigger once on mount to set initial shape
     handleUpdate()
 
     return () => {
       window.removeEventListener('scroll', handleUpdate)
       window.removeEventListener('resize', handleUpdate)
     }
-  }, [isDark])
+  }, [isDark]) // isDark dependency remains if you ever want to re-add JS theming
 
   return (
     <nav
@@ -114,12 +111,16 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         fixed z-50 left-1/2 -translate-x-1/2 top-6
         flex items-center justify-between px-6 py-2
         rounded-full
-        bg-white/5 
+        
+        /* --- GLASSY EFFECT STYLES --- */
+        bg-white/10 dark:bg-black/20
         backdrop-blur-xl
-        border border-white/20
+        border border-white/20 dark:border-white/10
+        /* --------------------------- */
+        
         shadow-[0_20px_50px_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.6)]
-        transition-colors duration-200 ease-out
-        hover:bg-white/10 
+        transition-all duration-200 ease-out
+        hover:bg-white/20 dark:hover:bg-white/5
         hover:shadow-[0_20px_50px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.9)]
       `}
     >
