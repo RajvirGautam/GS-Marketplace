@@ -9,6 +9,23 @@ const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
+  const today = new Date();
+
+const day = today.getDate();
+
+const getOrdinal = (n) => {
+  if (n > 3 && n < 21) return "th";
+  switch (n % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+};
+
+const month = today.toLocaleString("en-US", { month: "short" });
+const year = today.getFullYear();
+
 
   const cards = [
     {
@@ -51,7 +68,6 @@ const Hero = () => {
         });
       }
     };
-    
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
@@ -302,7 +318,10 @@ const Hero = () => {
             <div className="col-span-12 lg:col-span-2 space-y-8 anim-slide-left" style={{ opacity: 0, animationDelay: '0.2s' }}>
               
               <div className="space-y-2">
-                <div className="mono text-xs text-white/40 tracking-wider">ISSUE #01</div>
+  <div className="mono text-xl text-white font-black tracking-wider">
+    {day}
+    <sup>{getOrdinal(day)}</sup> {month}
+  </div>
                 <div className="text-6xl font-black text-white">2026</div>
               </div>
 
