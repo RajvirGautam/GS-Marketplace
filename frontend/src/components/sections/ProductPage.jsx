@@ -834,7 +834,7 @@ const ProductPage = () => {
             </button>
             
             <div className="text-center text-[10px] uppercase tracking-widest opacity-30">
-              🎓 Campus Handover • Verified Student • Safe
+               Campus Handover • Verified Student • Safe
             </div>
           </div>
         </div>

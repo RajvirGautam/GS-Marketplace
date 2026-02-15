@@ -22,16 +22,16 @@ const upload = multer({
 
 // ==================== PUBLIC ROUTES ====================
 
-// GET all products with filters
+// GET all products with filters (ENHANCED SEARCH)
 router.get('/', async (req, res) => {
   try {
     const {
       search,
-      category,
-      branch,
-      year,
-      condition,
-      type,
+      categories, // Now accepts array
+      branches,   // Now accepts array
+      years,      // Now accepts array
+      conditions, // Now accepts array
+      types,      // Now accepts array
       minPrice,
       maxPrice,
       sortBy = 'newest',
@@ -42,26 +42,63 @@ router.get('/', async (req, res) => {
 
     const filter = { status };
 
+    // ENHANCED SEARCH - Search in title, description, tags, highlights, and specs
     if (search) {
+      const searchRegex = { $regex: search, $options: 'i' };
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { tag: { $regex: search, $options: 'i' } }
+        { title: searchRegex },
+        { description: searchRegex },
+        { tag: searchRegex },
+        { highlights: searchRegex },
+        { 'specs.label': searchRegex },
+        { 'specs.value': searchRegex }
       ];
     }
 
-    if (category) filter.category = category;
-    if (branch) filter.branch = branch;
-    if (year) filter.year = parseInt(year);
-    if (condition) filter.condition = condition;
-    if (type) filter.type = type;
+    // Handle array filters
+    if (categories) {
+      const categoryArray = Array.isArray(categories) ? categories : [categories];
+      if (categoryArray.length > 0) {
+        filter.category = { $in: categoryArray };
+      }
+    }
 
+    if (branches) {
+      const branchArray = Array.isArray(branches) ? branches : [branches];
+      if (branchArray.length > 0) {
+        filter.branch = { $in: branchArray };
+      }
+    }
+
+    if (years) {
+      const yearArray = Array.isArray(years) ? years : [years];
+      if (yearArray.length > 0) {
+        filter.year = { $in: yearArray.map(y => parseInt(y)) };
+      }
+    }
+
+    if (conditions) {
+      const conditionArray = Array.isArray(conditions) ? conditions : [conditions];
+      if (conditionArray.length > 0) {
+        filter.condition = { $in: conditionArray };
+      }
+    }
+
+    if (types) {
+      const typeArray = Array.isArray(types) ? types : [types];
+      if (typeArray.length > 0) {
+        filter.type = { $in: typeArray };
+      }
+    }
+
+    // Price range filter
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = parseFloat(minPrice);
       if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
     }
 
+    // Sorting
     let sort = {};
     switch(sortBy) {
       case 'newest':
@@ -85,6 +122,8 @@ router.get('/', async (req, res) => {
 
     const skip = (page - 1) * limit;
 
+    console.log('🔍 Search filter:', JSON.stringify(filter, null, 2));
+
     const products = await Product.find(filter)
       .populate({
         path: 'seller',
@@ -95,6 +134,8 @@ router.get('/', async (req, res) => {
       .skip(skip);
 
     const total = await Product.countDocuments(filter);
+
+    console.log('✅ Found', products.length, 'products out of', total, 'total');
 
     res.json({
       success: true,
@@ -192,6 +233,8 @@ router.get('/user/my-listings', authenticate, async (req, res) => {
 // GET saved products
 router.get('/user/saved', authenticate, async (req, res) => {
   try {
+    console.log('💝 Fetching saved products for user:', req.user._id);
+
     const products = await Product.find({
       savedBy: req.user._id,
       status: 'active'
@@ -202,12 +245,14 @@ router.get('/user/saved', authenticate, async (req, res) => {
     })
     .sort({ createdAt: -1 });
 
+    console.log('✅ Found', products.length, 'saved products');
+
     res.json({
       success: true,
       products
     });
   } catch (error) {
-    console.error('Error fetching saved products:', error);
+    console.error('❌ Error fetching saved products:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching saved products',
@@ -452,8 +497,6 @@ router.put('/:id', authenticate, async (req, res) => {
   }
 });
 
-
-
 // DELETE product
 router.delete('/:id', authenticate, async (req, res) => {
   try {
@@ -502,7 +545,7 @@ router.delete('/:id', authenticate, async (req, res) => {
   }
 });
 
-// SAVE/UNSAVE product
+// SAVE/UNSAVE product (TOGGLE)
 router.post('/:id/save', authenticate, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -517,16 +560,20 @@ router.post('/:id/save', authenticate, async (req, res) => {
     const isSaved = product.savedBy.includes(req.user._id);
 
     if (isSaved) {
+      // Unsave
       product.savedBy = product.savedBy.filter(
         id => id.toString() !== req.user._id.toString()
       );
       product.saves = Math.max(0, product.saves - 1);
     } else {
+      // Save
       product.savedBy.push(req.user._id);
       product.saves += 1;
     }
 
     await product.save();
+
+    console.log(isSaved ? '💔 Product unsaved' : '💝 Product saved');
 
     res.json({
       success: true,

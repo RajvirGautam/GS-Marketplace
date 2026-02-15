@@ -6,6 +6,7 @@ import { productAPI } from '../../services/api';
 import ProductCard from '../ui/ProductCard';
 import AddProductModal from './AddProductModal';
 
+
 // --- Internal Icons ---
 const ChevronDown = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,6 +66,7 @@ const ListIcon = () => (
   </svg>
 );
 
+
 const Marketplace = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,9 +82,6 @@ const Marketplace = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // MOUSE & ACCENT STATE
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBranches, setSelectedBranches] = useState([]);
@@ -134,21 +133,12 @@ const Marketplace = () => {
     { label: 'Free (Giveaway)', count: 6, value: 'free' },
   ];
 
-  // Mouse Move Handler
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
       setCurrentPage(1);
-    }, 300); // Wait 300ms after user stops typing
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -318,32 +308,44 @@ const Marketplace = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
-        :root {
-          --bg-main: #000000;
-          --bg-card: #141414;
-          --bg-sidebar: #050505;
-          --accent-lime: #B5F94D;
-          --text-primary: #FFFFFF;
-          --text-secondary: #A1A1A1;
-          --border-subtle: #27272A;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
         .theme-root {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          background: var(--bg-main);
-          color: var(--text-primary);
+          font-family: 'Manrope', sans-serif;
+          background: #0A0A0A;
+          color: #fff;
           min-height: 100vh;
         }
 
-        /* --- UI COMPONENTS --- */
-        
-        /* Modern Solid Button (Green) */
+        .mono {
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Noise & Grid Overlays */
+        .noise-overlay {
+          position: fixed;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.03;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .grid-lines {
+          position: fixed;
+          inset: 0;
+          background-image: 
+            repeating-linear-gradient(0deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px),
+            repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* Buttons */
         .btn-primary {
-          background: var(--accent-lime);
-          color: #000;
-          border-radius: 100px; /* Updated to match rounded style */
+          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          color: #fff;
+          border-radius: 50px;
           padding: 10px 24px;
           font-weight: 700;
           font-size: 14px;
@@ -357,15 +359,14 @@ const Marketplace = () => {
         }
 
         .btn-primary:hover {
-          background: #A2E044;
           transform: translateY(-1px);
+          box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
         }
 
-        /* Outline/Ghost Button */
         .btn-ghost {
           background: transparent;
-          border: 1px solid var(--border-subtle);
-          color: var(--text-secondary);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.6);
           border-radius: 12px;
           padding: 10px 20px;
           font-weight: 600;
@@ -384,12 +385,11 @@ const Marketplace = () => {
           background: rgba(255,255,255,0.05);
         }
 
-        /* --- NEW: Glass Button for User Menu --- */
         .btn-glass {
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.1);
           color: white;
-          border-radius: 100px;
+          border-radius: 50px;
           padding: 10px 20px;
           font-weight: 600;
           font-size: 13px;
@@ -407,28 +407,18 @@ const Marketplace = () => {
           border-color: white;
         }
 
-        /* --- NEW: Search Hint --- */
-        .search-hint {
-          position: absolute;
-          bottom: -20px;
-          left: 0;
-          font-size: 10px;
-          color: rgba(255,255,255,0.3);
-          font-weight: 500;
-        }
-
         /* Input Fields */
         .input-modern {
-          background: #18181B;
-          border: 1px solid transparent;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.1);
           color: white;
-          border-radius: 12px;
+          border-radius: 50px;
           transition: all 0.2s;
         }
 
         .input-modern:focus {
-          background: #202023;
-          border-color: var(--accent-lime);
+          background: rgba(255,255,255,0.05);
+          border-color: #00D9FF;
           outline: none;
         }
 
@@ -437,8 +427,8 @@ const Marketplace = () => {
           appearance: none;
           width: 18px;
           height: 18px;
-          border: 2px solid #333;
-          background: #18181B;
+          border: 2px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.02);
           cursor: pointer;
           position: relative;
           transition: all 0.2s;
@@ -447,15 +437,15 @@ const Marketplace = () => {
         }
 
         .modern-checkbox:checked {
-          background: var(--accent-lime);
-          border-color: var(--accent-lime);
+          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          border-color: #00D9FF;
         }
 
         .modern-checkbox:checked::after {
           content: '✓';
           position: absolute;
           font-size: 12px;
-          color: #000;
+          color: #fff;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
@@ -467,7 +457,7 @@ const Marketplace = () => {
           -webkit-appearance: none;
           width: 100%;
           height: 4px;
-          background: #27272A;
+          background: rgba(255,255,255,0.1);
           outline: none;
           border-radius: 10px;
         }
@@ -476,10 +466,10 @@ const Marketplace = () => {
           -webkit-appearance: none;
           width: 16px;
           height: 16px;
-          background: var(--accent-lime);
+          background: linear-gradient(135deg, #00D9FF, #7C3AED);
           cursor: pointer;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(181, 249, 77, 0.3);
+          box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
         }
 
         /* Tags */
@@ -487,9 +477,9 @@ const Marketplace = () => {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(181, 249, 77, 0.1);
-          color: var(--accent-lime);
-          border: 1px solid rgba(181, 249, 77, 0.2);
+          background: rgba(0, 217, 255, 0.1);
+          color: #00D9FF;
+          border: 1px solid rgba(0, 217, 255, 0.2);
           padding: 6px 12px;
           font-size: 12px;
           font-weight: 600;
@@ -497,9 +487,9 @@ const Marketplace = () => {
         }
 
         .quick-filter-btn {
-          background: #18181B;
-          border: none;
-          color: var(--text-secondary);
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.6);
           padding: 8px 16px;
           font-size: 12px;
           font-weight: 600;
@@ -510,8 +500,9 @@ const Marketplace = () => {
         }
 
         .quick-filter-btn:hover {
-          background: #27272A;
+          background: rgba(255,255,255,0.05);
           color: white;
+          border-color: rgba(255,255,255,0.3);
         }
 
         /* Scrollbar */
@@ -522,7 +513,7 @@ const Marketplace = () => {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #333;
+          background: rgba(255,255,255,0.2);
           border-radius: 10px;
         }
 
@@ -532,8 +523,8 @@ const Marketplace = () => {
           bottom: 0;
           left: 0;
           right: 0;
-          background: #141414;
-          border-top: 1px solid #333;
+          background: #0F0F0F;
+          border-top: 1px solid rgba(255,255,255,0.1);
           max-height: 70vh;
           overflow-y: auto;
           transform: translateY(100%);
@@ -544,27 +535,31 @@ const Marketplace = () => {
         .filter-backdrop {
           position: fixed; inset: 0; background: rgba(0,0,0,0.8);
           opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999;
+          backdrop-filter: blur(8px);
         }
         .filter-backdrop.open { opacity: 1; pointer-events: all; }
       `}</style>
 
       <div className="theme-root relative">
-        
-        {/* Header - UPDATED STYLE */}
-        <header className="sticky top-0 z-50 bg-[#000]/90 backdrop-blur-xl border-b border-[#27272A]">
+        {/* Noise & Grid */}
+        <div className="noise-overlay"></div>
+        <div className="grid-lines"></div>
+
+        {/* Header */}
+        <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10">
           <div className="max-w-[1800px] mx-auto px-6 py-4">
             <div className="flex items-center gap-6">
               <Link to="/">
                 <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
-                  <div className="w-8 h-8 rounded-lg bg-[#B5F94D] flex items-center justify-center text-black font-extrabold text-sm">S</div>
-                  <span>SGSITS<span className="text-[#B5F94D]">.MKT</span></span>
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">S</div>
+                  <span>SGSITS<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
                 </div>
               </Link>
 
-              {/* Search - STYLE FROM SOURCE */}
+              {/* Search */}
               <div className="flex-1 max-w-2xl relative">
                 <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
                     <SearchIcon />
                   </div>
                   <input
@@ -572,7 +567,7 @@ const Marketplace = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by title, tags, description, specs..."
-                    className="w-full h-12 pl-11 pr-10 bg-[#18181B] border border-[#27272A] text-white text-sm rounded-full focus:outline-none focus:border-[#B5F94D] transition-colors placeholder-[#555]"
+                    className="w-full h-12 pl-12 pr-10 bg-white/5 border border-white/10 text-white text-sm rounded-full focus:outline-none focus:border-[#00D9FF] transition-colors placeholder-white/40 input-modern"
                   />
                   {searchQuery && (
                     <button
@@ -580,17 +575,12 @@ const Marketplace = () => {
                         setSearchQuery('');
                         setDebouncedSearch('');
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                     >
                       <XIcon />
                     </button>
                   )}
                 </div>
-                {searchQuery && (
-                  <div className="search-hint">
-                    Searching in: title, description, tags, highlights, specs
-                  </div>
-                )}
               </div>
 
               <button
@@ -602,32 +592,33 @@ const Marketplace = () => {
 
               {user ? (
                 <div className="relative user-menu-container">
-                  {/* User Menu Trigger - STYLE FROM SOURCE */}
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="btn-glass px-2 py-1 pr-3"
+                    className="btn-glass"
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#27272A] border border-[#333] flex items-center justify-center text-xs font-bold text-white">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white">
                       {user.fullName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
                     <ChevronDown />
                   </button>
 
-                  {/* User Menu Dropdown - STYLE FROM SOURCE */}
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#18181B] border border-[#333] shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
-                      <div className="p-4 border-b border-[#333]">
-                        <div className="text-[10px] text-[#777] uppercase mb-1 font-bold">Logged in as</div>
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
+                      <div className="p-4 border-b border-white/10">
+                        <div className="text-[10px] text-white/40 mono uppercase mb-1 font-bold">Logged in as</div>
                         <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
-                        <div className="text-xs text-[#777] truncate mt-0.5">{user.email}</div>
+                        <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                        {user.enrollmentNumber && (
+                          <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
+                        )}
                       </div>
                       <button
                         onClick={() => {
                           navigate('/dashboard');
                           setShowUserMenu(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-[#ccc] hover:bg-[#27272A] transition-colors"
+                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
                       >
                         Dashboard
                       </button>
@@ -636,7 +627,7 @@ const Marketplace = () => {
                           logout();
                           navigate('/');
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-[#27272A] transition-colors border-t border-[#333]"
+                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
                       >
                         Logout
                       </button>
@@ -657,11 +648,11 @@ const Marketplace = () => {
           <div className="grid grid-cols-12">
             
             {/* Sidebar Filters */}
-            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-[#27272A] bg-[#050505] p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
+            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/30 backdrop-blur-xl p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-bold text-[#777] uppercase tracking-widest">Filters</h3>
+                <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mono">Filters</h3>
                 {getActiveFilterCount() > 0 && (
-                  <button onClick={clearAllFilters} className="text-[10px] font-bold text-[#B5F94D] hover:underline">
+                  <button onClick={clearAllFilters} className="text-[10px] font-bold text-[#00D9FF] hover:underline mono">
                     RESET
                   </button>
                 )}
@@ -669,8 +660,8 @@ const Marketplace = () => {
 
               {/* Active Filters */}
               {getActiveFilterCount() > 0 && (
-                <div className="mb-6 pb-6 border-b border-[#27272A]">
-                  <div className="text-[10px] text-[#555] mb-3 uppercase font-bold">
+                <div className="mb-6 pb-6 border-b border-white/10">
+                  <div className="text-[10px] text-white/40 mb-3 uppercase font-bold mono">
                     Active
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -720,7 +711,7 @@ const Marketplace = () => {
 
               {/* Categories */}
               <div className="mb-8">
-                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Categories</h4>
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
                 <div className="space-y-3">
                   {categories.map(cat => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
@@ -730,20 +721,20 @@ const Marketplace = () => {
                         checked={selectedCategories.includes(cat.slug)}
                         onChange={() => toggleCategory(cat.slug)}
                       />
-                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
-                         {cat.name}
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {cat.emoji} {cat.name}
                       </span>
-                      <span className="text-xs text-[#333] font-mono">{cat.count}</span>
+                      <span className="text-xs text-white/20 font-mono">{cat.count}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               {/* Price Range */}
-              <div className="mb-8 pt-6 border-t border-[#27272A]">
+              <div className="mb-8 pt-6 border-t border-white/10">
                 <div className="flex justify-between mb-4">
-                  <h4 className="text-[11px] text-[#555] uppercase font-bold">Price Range</h4>
-                  <span className="text-[11px] text-[#B5F94D] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+                  <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
+                  <span className="text-[11px] text-[#00D9FF] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
                 </div>
                 <input
                   type="range"
@@ -759,8 +750,8 @@ const Marketplace = () => {
               </div>
 
               {/* Branches */}
-              <div className="mb-8 pt-6 border-t border-[#27272A]">
-                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Seller's Branch</h4>
+              <div className="mb-8 pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
                 <div className="space-y-3">
                   {branches.map(branch => (
                     <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
@@ -770,7 +761,7 @@ const Marketplace = () => {
                         checked={selectedBranches.includes(branch.slug)}
                         onChange={() => toggleBranch(branch.slug)}
                       />
-                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
                         {branch.name}
                       </span>
                     </label>
@@ -779,8 +770,8 @@ const Marketplace = () => {
               </div>
 
               {/* Years */}
-              <div className="mb-8 pt-6 border-t border-[#27272A]">
-                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Seller's Year</h4>
+              <div className="mb-8 pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
                 <div className="space-y-3">
                   {years.map(year => (
                     <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
@@ -790,8 +781,48 @@ const Marketplace = () => {
                         checked={selectedYears.includes(year.value)}
                         onChange={() => toggleYear(year.value)}
                       />
-                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
                         {year.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Condition */}
+              <div className="mb-8 pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
+                <div className="space-y-3">
+                  {conditions.map(cond => (
+                    <label key={cond} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedConditions.includes(cond)}
+                        onChange={() => toggleCondition(cond)}
+                      />
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {cond}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Item Types */}
+              <div className="mb-8 pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
+                <div className="space-y-3">
+                  {itemTypes.map(type => (
+                    <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedTypes.includes(type.value)}
+                        onChange={() => toggleType(type.value)}
+                      />
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {type.label}
                       </span>
                     </label>
                   ))}
@@ -818,11 +849,11 @@ const Marketplace = () => {
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-                <div className="text-sm text-[#777]">
+                <div className="text-sm text-white/60">
                   Showing <span className="text-white font-bold">{products.length}</span> results
                   {debouncedSearch && (
-                    <span className="ml-1 text-[#B5F94D]">
-                       for "{debouncedSearch}"
+                    <span className="ml-1 text-[#00D9FF]">
+                      for "{debouncedSearch}"
                     </span>
                   )}
                 </div>
@@ -835,22 +866,22 @@ const Marketplace = () => {
                   >
                     <FilterIcon /> Filters
                     {getActiveFilterCount() > 0 && (
-                      <span className="ml-2 w-5 h-5 bg-[#B5F94D] text-black text-[10px] rounded-full flex items-center justify-center font-bold">
+                      <span className="ml-2 w-5 h-5 bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                         {getActiveFilterCount()}
                       </span>
                     )}
                   </button>
 
-                  <div className="flex bg-[#18181B] rounded-xl p-1">
+                  <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#27272A] text-white shadow-sm' : 'text-[#555] hover:text-white'}`}
+                      className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
                     >
                       <GridIcon />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#27272A] text-white shadow-sm' : 'text-[#555] hover:text-white'}`}
+                      className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
                     >
                       <ListIcon />
                     </button>
@@ -860,14 +891,14 @@ const Marketplace = () => {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none bg-[#18181B] text-sm text-white px-4 py-2.5 pr-8 rounded-xl focus:outline-none cursor-pointer font-medium hover:bg-[#202023]"
+                      className="appearance-none bg-white/5 border border-white/10 text-sm text-white px-4 py-2.5 pr-8 rounded-xl focus:outline-none cursor-pointer font-medium hover:bg-white/10"
                     >
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
                       <option value="pricelow">Price: Low to High</option>
                       <option value="pricehigh">Price: High to Low</option>
                     </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777] pointer-events-none">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
                       <ChevronDown />
                     </div>
                   </div>
@@ -877,16 +908,16 @@ const Marketplace = () => {
               {/* Products Grid */}
               {loading ? (
                 <div className="text-center py-20">
-                  <div className="text-sm text-[#555] animate-pulse">Loading products...</div>
+                  <div className="text-sm text-white/40 animate-pulse mono">Loading products...</div>
                 </div>
               ) : products.length === 0 ? (
-                <div className="text-center py-20 bg-[#141414] rounded-2xl border border-[#222]">
+                <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
                   <div className="text-4xl mb-4 grayscale opacity-50">📦</div>
                   <h3 className="text-lg font-bold text-white mb-2">No products found</h3>
-                  <p className="text-[#555] mb-6 text-sm">
+                  <p className="text-white/60 mb-6 text-sm">
                     We couldn't find what you're looking for.
                   </p>
-                  <button onClick={clearAllFilters} className="text-[#B5F94D] text-sm font-bold hover:underline">
+                  <button onClick={clearAllFilters} className="text-[#00D9FF] text-sm font-bold hover:underline">
                     Clear all filters
                   </button>
                 </div>
@@ -897,9 +928,9 @@ const Marketplace = () => {
                       key={product._id} 
                       className="h-full group"
                     >
-                       <div className="bg-[#141414] border border-[#27272A] hover:border-[#B5F94D] rounded-2xl overflow-hidden h-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(181,249,77,0.1)]">
-                          <ProductCard product={product} viewMode={viewMode} index={index} />
-                       </div>
+                      <div className="bg-white/5 border border-white/10 hover:border-[#00D9FF] rounded-2xl overflow-hidden h-full transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,217,255,0.2)] backdrop-blur-xl">
+                        <ProductCard product={product} viewMode={viewMode} index={index} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -911,7 +942,7 @@ const Marketplace = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="w-10 h-10 flex items-center justify-center bg-[#18181B] rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#27272A] transition-colors"
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
                   >
                     <ChevronLeft />
                   </button>
@@ -924,8 +955,8 @@ const Marketplace = () => {
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${
                           currentPage === pageNum
-                            ? 'bg-[#B5F94D] text-black'
-                            : 'bg-[#18181B] text-[#777] hover:bg-[#27272A] hover:text-white'
+                            ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
+                            : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         {pageNum}
@@ -933,12 +964,12 @@ const Marketplace = () => {
                     );
                   })}
 
-                  {totalPages > 5 && <span className="flex items-center text-[#555] px-2">...</span>}
+                  {totalPages > 5 && <span className="flex items-center text-white/40 px-2">...</span>}
 
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="w-10 h-10 flex items-center justify-center bg-[#18181B] rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#27272A] transition-colors"
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
                   >
                     <ChevronRight />
                   </button>
@@ -951,7 +982,7 @@ const Marketplace = () => {
         {/* Mobile Add Button */}
         <button
           onClick={() => setIsAddProductOpen(true)}
-          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[#B5F94D] text-black text-3xl flex items-center justify-center shadow-lg shadow-lime-900/20 z-40"
+          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-3xl flex items-center justify-center shadow-lg shadow-cyan-900/50 z-40"
         >
           +
         </button>
@@ -964,9 +995,9 @@ const Marketplace = () => {
 
         <div className={`filter-drawer ${mobileFilterOpen ? 'open' : ''} lg:hidden`}>
           <div className="p-6">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#27272A]">
-              <h3 className="text-sm font-bold text-white uppercase">Filters</h3>
-              <button onClick={() => setMobileFilterOpen(false)} className="text-[#777]">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+              <h3 className="text-sm font-bold text-white uppercase mono">Filters</h3>
+              <button onClick={() => setMobileFilterOpen(false)} className="text-white/60">
                 <XIcon />
               </button>
             </div>
@@ -974,7 +1005,7 @@ const Marketplace = () => {
             <div className="space-y-6 max-h-[50vh] overflow-y-auto custom-scrollbar">
               {/* Categories */}
               <div>
-                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Categories</h4>
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
                 <div className="space-y-3">
                   {categories.map(cat => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
@@ -984,8 +1015,8 @@ const Marketplace = () => {
                         checked={selectedCategories.includes(cat.slug)}
                         onChange={() => toggleCategory(cat.slug)}
                       />
-                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
-                        {cat.name}
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {cat.emoji} {cat.name}
                       </span>
                     </label>
                   ))}
@@ -993,8 +1024,8 @@ const Marketplace = () => {
               </div>
 
               {/* Condition */}
-              <div className="pt-6 border-t border-[#27272A]">
-                <h4 className="text-[11px] text-[#555] uppercase mb-4 font-bold">Condition</h4>
+              <div className="pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
                 <div className="space-y-3">
                   {conditions.map(cond => (
                     <label key={cond} className="flex items-center gap-3 cursor-pointer group">
@@ -1004,7 +1035,7 @@ const Marketplace = () => {
                         checked={selectedConditions.includes(cond)}
                         onChange={() => toggleCondition(cond)}
                       />
-                      <span className="text-sm font-medium text-[#A1A1A1] group-hover:text-white transition-colors flex-1">
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
                         {cond}
                       </span>
                     </label>
@@ -1013,16 +1044,16 @@ const Marketplace = () => {
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-[#141414] border-t border-[#27272A] p-4 flex gap-3 mt-8 -mx-6 -mb-6">
+            <div className="sticky bottom-0 bg-[#0F0F0F] border-t border-white/10 p-4 flex gap-3 mt-8 -mx-6 -mb-6">
               <button
                 onClick={clearAllFilters}
-                className="flex-1 px-4 py-3 bg-[#18181B] text-white text-sm font-bold rounded-xl"
+                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl"
               >
                 Clear
               </button>
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 px-4 py-3 bg-[#B5F94D] text-black text-sm font-bold rounded-xl"
+                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-sm font-bold rounded-xl"
               >
                 Show Results
               </button>
