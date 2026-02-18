@@ -2,4 +2,4 @@ backend/.env
 frontend/.env
 PRD.md
 backend/seed-products.js
-backend/rant.md
+frontend/src/components/sections/UserDashboardv2.jsx
