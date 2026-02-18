@@ -72,8 +72,8 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       const currentOffset = startOffset * (1 - ratio)
       const currentLeft = `calc(50% - ${currentOffset}px)`
 
-      const currentTop = 55 - (55 * ratio)
-      const currentRadius = 55 - (55 * ratio)
+      const currentTop = 65 - (65 * ratio)
+      const currentRadius = 65 - (65 * ratio)
       
       // --- REMOVED JS COLOR/OPACITY CALCULATION HERE ---
       // The JS was overriding the Tailwind glass classes.
