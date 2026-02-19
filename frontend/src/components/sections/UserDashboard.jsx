@@ -9,181 +9,181 @@ import EditProductModal from './dashboard/EditProductModal';
 // Icons (keeping original - they're good!)
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/>
-    <path d="m21 21-4.35-4.35"/>
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
   </svg>
 );
 
 const HomeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="3" width="7" height="7" rx="1"/>
-    <rect x="14" y="3" width="7" height="7" rx="1"/>
-    <rect x="3" y="14" width="7" height="7" rx="1"/>
-    <rect x="14" y="14" width="7" height="7" rx="1"/>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
   </svg>
 );
 
 const CartIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="9" cy="21" r="1"/>
-    <circle cx="20" cy="21" r="1"/>
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
 
 const BarChartIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="18" y1="20" x2="18" y2="10"/>
-    <line x1="12" y1="20" x2="12" y2="4"/>
-    <line x1="6" y1="20" x2="6" y2="14"/>
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
   </svg>
 );
 
 const UsersIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-    <circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
 
 const MessageIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 
 const StarIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 );
 
 const SettingsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
 
 const HelpIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
 
 const BellIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
 );
 
 const MoonIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
 
 const GlobeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="2" y1="12" x2="22" y2="12"/>
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
   </svg>
 );
 
 const ChevronRight = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m9 18 6-6-6-6"/>
+    <path d="m9 18 6-6-6-6" />
   </svg>
 );
 
 const MoreVert = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="5" r="1"/>
-    <circle cx="12" cy="12" r="1"/>
-    <circle cx="12" cy="19" r="1"/>
+    <circle cx="12" cy="5" r="1" />
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="12" cy="19" r="1" />
   </svg>
 );
 
 const ArrowUp = ({ color = "currentColor" }) => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3">
-    <path d="M12 19V5"/>
-    <path d="m5 12 7-7 7 7"/>
+    <path d="M12 19V5" />
+    <path d="m5 12 7-7 7 7" />
   </svg>
 );
 
 const PlusIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
 const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
   </svg>
 );
 
 const TrashIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="3 6 5 6 21 6"/>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
   </svg>
 );
 
 const EyeIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
 const HeartIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
   </svg>
 );
 
 const PackageIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-    <line x1="12" y1="22.08" x2="12" y2="12"/>
+    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
   </svg>
 );
 
 const TrendingIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-    <polyline points="17 6 23 6 23 12"/>
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
   </svg>
 );
 
 const DollarIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="1" x2="12" y2="23"/>
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
   </svg>
 );
 
 const CheckCircleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22 4 12 14.01 9 11.01"/>
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
   </svg>
 );
 
 const ZapIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
 
@@ -384,8 +384,7 @@ const UserDashboard = () => {
   const sidebarDashItems = [
     { label: 'Overview', icon: <HomeIcon /> },
     { label: 'Marketplace', icon: <CartIcon />, action: () => navigate('/marketplace') },
-    { label: 'Analytics', icon: <BarChartIcon /> },
-    { label: 'My Products', icon: <PackageIcon /> },
+    { label: 'My Listings', icon: <PackageIcon /> },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon /> },
@@ -396,7 +395,7 @@ const UserDashboard = () => {
 
   if (loading) {
     return (
-      <div style={{ background:'#0A0A0A', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontFamily:'Manrope, sans-serif' }}>
+      <div style={{ background: '#0A0A0A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'Manrope, sans-serif' }}>
         <div>Loading your dashboard...</div>
       </div>
     );
@@ -1120,14 +1119,15 @@ const UserDashboard = () => {
         {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-profile">
-            <div className="sidebar-avatar">{userName.charAt(0).toUpperCase()}</div>
-            <span className="sidebar-name">{userName.split(' ').slice(0,2).join(' ')}</span>
-          </div>
-
-          <div className="sidebar-search">
-            <SearchIcon />
-            <input placeholder="Search..." readOnly />
-            <span className="kbd">⌘K</span>
+            <div className="sidebar-avatar">S</div>
+            <Link
+              to="/"
+              style={{ textDecoration: 'none' }}
+            >
+              <span className="sidebar-name" style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: 15, letterSpacing: '-0.3px' }}>
+                SGSITS.mkt
+              </span>
+            </Link>
           </div>
 
           <div className="sidebar-section-label">Dashboards</div>
@@ -1196,195 +1196,294 @@ const UserDashboard = () => {
           <div className="content-wrapper">
             {/* CENTER CONTENT */}
             <div className="content-main">
-              {/* OVERVIEW HEADER */}
-              <div className="overview-header">
-                <h1>Overview</h1>
-                <button className="today-btn">
-                  Today ▾
-                </button>
-              </div>
-
-              {/* STAT CARDS */}
-              <div className="stat-row">
-                <div className="stat-card">
-                  <div className="stat-label">Total Listings</div>
-                  <div className="stat-value">{stats.totalListings}</div>
-                  <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    {stats.activeListings} active, {stats.soldListings} sold
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Total Views</div>
-                  <div className="stat-value">{stats.totalViews}</div>
-                  <div className="stat-change up">
-                    <ArrowUp color="#00D9FF" /> 
-                    {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per item
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Total Saves</div>
-                  <div className="stat-value">{stats.totalSaves}</div>
-                  <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    People interested
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Revenue</div>
-                  <div className="stat-value">₹{stats.totalRevenue.toLocaleString()}</div>
-                  <div className="stat-change up">
-                    <ArrowUp color="#00D9FF" /> {stats.soldListings} items sold
-                  </div>
-                </div>
-              </div>
-
-              {/* SALES OVERVIEW + SIDE STATS */}
-              <div className="mid-row">
-                <div className="card">
-                  <div className="card-header">
-                    <span className="card-title">Category Distribution</span>
-                    <button style={{ background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer' }}><MoreVert /></button>
-                  </div>
-                  <div className="sales-info">
-                    <div className="sales-icon-circle"><PackageIcon /></div>
+              {sidebarActive === 'My Listings' ? (
+                /* ── MY LISTINGS FULL CRUD VIEW ── */
+                <>
+                  <div className="overview-header">
                     <div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Total Listed Items</div>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{stats.totalListings}</div>
+                      <h1>My Listings</h1>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                        {stats.totalListings} total · {stats.activeListings} active · {stats.soldListings} sold
+                      </div>
                     </div>
+                    <button
+                      className="pricing-cta"
+                      style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+                      onClick={() => setIsAddProductOpen(true)}
+                    >
+                      <PlusIcon /> Add New Listing
+                    </button>
                   </div>
-                  <div className="sales-content">
-                    <DonutChart data={donutData} size={170} />
-                    <div className="sales-legend" style={{ minWidth: 160 }}>
-                      {donutData.map((d, i) => (
-                        <div className="legend-item" key={i}>
-                          <span className="legend-dot" style={{ background: d.color }} />
-                          <span>{d.label}</span>
-                          <span className="amount">{d.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="side-stats">
-                  <div className="mini-stat-card">
-                    <div className="mini-stat-label">Active Listings</div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                      <span className="mini-stat-value">{stats.activeListings}</span>
-                      <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
-                    </div>
-                    <div className="mini-stat-sub">Available now</div>
-                  </div>
-                  <div className="mini-stat-card">
-                    <div className="mini-stat-label">Pending Approval</div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                      <span className="mini-stat-value">{stats.pendingListings}</span>
-                      <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
-                    </div>
-                    <div className="mini-stat-sub">Awaiting review</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PROFIT CHART + LISTINGS */}
-              <div className="bottom-row" style={{ gridTemplateColumns: '2fr 3fr' }}>
-                {/* TOTAL PROFIT */}
-                <div className="profit-card">
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Engagement Growth</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Last 20 periods</div>
-                  </div>
-                  <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
-                    {stats.totalViews + stats.totalSaves} Total
-                  </div>
-                  <MiniLineChart data={profitData} width={260} height={90} color="#00D9FF" />
-                </div>
-
-                {/* MY LISTINGS */}
-                <div className="card" style={{ maxHeight: 420, overflow: 'auto' }}>
-                  <div className="card-header">
-                    <span className="card-title">My Listings</span>
-                  </div>
-                  <div className="listing-tabs">
-                    {['all','active','sold','pending'].map(tab => (
-                      <button
-                        key={tab}
-                        className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab)}
-                      >
-                        {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
-                      </button>
+                  {/* QUICK STATS ROW */}
+                  <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+                    {[
+                      { label: 'Total', value: stats.totalListings, color: '#fff' },
+                      { label: 'Active', value: stats.activeListings, color: '#00D9FF' },
+                      { label: 'Sold', value: stats.soldListings, color: '#10B981' },
+                      { label: 'Pending', value: stats.pendingListings, color: '#F59E0B' },
+                    ].map(s => (
+                      <div className="stat-card" key={s.label}>
+                        <div className="stat-label">{s.label}</div>
+                        <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+                      </div>
                     ))}
                   </div>
-                  {filteredListings.length > 0 ? filteredListings.slice(0, 5).map((listing) => (
-                    <div className="listing-item" key={listing._id}>
-                      <div className="listing-img">
-                        <img src={getProductImage(listing)} alt={listing.title} />
+
+                  {/* FILTER TABS + LISTINGS GRID */}
+                  <div className="card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <div className="listing-tabs" style={{ marginBottom: 0 }}>
+                        {['all', 'active', 'sold', 'pending'].map(tab => (
+                          <button
+                            key={tab}
+                            className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
+                            onClick={() => setActiveTab(tab)}
+                          >
+                            {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                          </button>
+                        ))}
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <div>
-                            <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {getStatusBadge(listing.status)}
-                              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                    </div>
+
+                    {filteredListings.length > 0 ? filteredListings.map((listing) => (
+                      <div className="listing-item" key={listing._id}>
+                        <div className="listing-img">
+                          <img src={getProductImage(listing)} alt={listing.title} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                              <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{listing.category || 'Uncategorised'}</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {getStatusBadge(listing.status)}
+                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                                👁 {listing.views || 0} views · 🤍 {listing.saves || 0} saves
+                              </div>
                             </div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
+                          <div className="listing-actions" style={{ marginTop: 10 }}>
+                            <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
+                            <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
+                            <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
+                            {listing.status === 'active' && (
+                              <button className="listing-action-btn" style={{ color: '#10B981', borderColor: 'rgba(16,185,129,0.3)' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
+                            )}
                           </div>
                         </div>
-                        <div className="listing-actions">
-                          <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
-                          <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
-                          <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DEL</button>
-                          {listing.status === 'active' && (
-                            <button className="listing-action-btn" onClick={() => handleMarkAsSold(listing._id)}>SOLD</button>
-                          )}
+                      </div>
+                    )) : (
+                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>📦</div>
+                        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                        <div style={{ fontSize: 13, marginBottom: 20 }}>Start selling by adding your first product</div>
+                        <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>
+                          <PlusIcon /> Add Your First Listing
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* ── OVERVIEW ── */
+                <>
+                  {/* OVERVIEW HEADER */}
+                  <div className="overview-header">
+                    <h1>Overview</h1>
+                    <button className="today-btn">
+                      Today ▾
+                    </button>
+                  </div>
+
+                  {/* STAT CARDS */}
+                  <div className="stat-row">
+                    <div className="stat-card">
+                      <div className="stat-label">Total Listings</div>
+                      <div className="stat-value">{stats.totalListings}</div>
+                      <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        {stats.activeListings} active, {stats.soldListings} sold
+                      </div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-label">Total Views</div>
+                      <div className="stat-value">{stats.totalViews}</div>
+                      <div className="stat-change up">
+                        <ArrowUp color="#00D9FF" />
+                        {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per item
+                      </div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-label">Total Saves</div>
+                      <div className="stat-value">{stats.totalSaves}</div>
+                      <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        People interested
+                      </div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-label">Revenue</div>
+                      <div className="stat-value">₹{stats.totalRevenue.toLocaleString()}</div>
+                      <div className="stat-change up">
+                        <ArrowUp color="#00D9FF" /> {stats.soldListings} items sold
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SALES OVERVIEW + SIDE STATS */}
+                  <div className="mid-row">
+                    <div className="card">
+                      <div className="card-header">
+                        <span className="card-title">Category Distribution</span>
+                        <button style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}><MoreVert /></button>
+                      </div>
+                      <div className="sales-info">
+                        <div className="sales-icon-circle"><PackageIcon /></div>
+                        <div>
+                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Total Listed Items</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{stats.totalListings}</div>
+                        </div>
+                      </div>
+                      <div className="sales-content">
+                        <DonutChart data={donutData} size={170} />
+                        <div className="sales-legend" style={{ minWidth: 160 }}>
+                          {donutData.map((d, i) => (
+                            <div className="legend-item" key={i}>
+                              <span className="legend-dot" style={{ background: d.color }} />
+                              <span>{d.label}</span>
+                              <span className="amount">{d.value}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
-                  )) : (
-                    <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
-                      <div style={{ fontSize: 36, marginBottom: 8, opacity: 0.3 }}>📦</div>
-                      <div style={{ fontSize: 13 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+
+                    <div className="side-stats">
+                      <div className="mini-stat-card">
+                        <div className="mini-stat-label">Active Listings</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                          <span className="mini-stat-value">{stats.activeListings}</span>
+                          <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
+                        </div>
+                        <div className="mini-stat-sub">Available now</div>
+                      </div>
+                      <div className="mini-stat-card">
+                        <div className="mini-stat-label">Pending Approval</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                          <span className="mini-stat-value">{stats.pendingListings}</span>
+                          <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
+                        </div>
+                        <div className="mini-stat-sub">Awaiting review</div>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* PRICING CARD */}
-              <div className="bottom-row">
-                <div className="card">
-                  <div className="card-header">
-                    <span className="card-title">All Your Products</span>
-                  </div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>
-                    Manage all your listings here. You have {stats.totalListings} total products.
-                  </div>
-                  <button 
-                    className="pricing-cta" 
-                    style={{ width: '100%' }}
-                    onClick={() => navigate('/marketplace')}
-                  >
-                    View All Listings
-                  </button>
-                </div>
+                  {/* PROFIT CHART + LISTINGS */}
+                  <div className="bottom-row" style={{ gridTemplateColumns: '2fr 3fr' }}>
+                    {/* TOTAL PROFIT */}
+                    <div className="profit-card">
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Engagement Growth</div>
+                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Last 20 periods</div>
+                      </div>
+                      <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
+                        {stats.totalViews + stats.totalSaves} Total
+                      </div>
+                      <MiniLineChart data={profitData} width={260} height={90} color="#00D9FF" />
+                    </div>
 
-                {/* PRICING */}
-                <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div className="pricing-badge">
-                    <ZapIcon /> Premium Seller
+                    {/* MY LISTINGS */}
+                    <div className="card" style={{ maxHeight: 420, overflow: 'auto' }}>
+                      <div className="card-header">
+                        <span className="card-title">My Listings</span>
+                      </div>
+                      <div className="listing-tabs">
+                        {['all', 'active', 'sold', 'pending'].map(tab => (
+                          <button
+                            key={tab}
+                            className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
+                            onClick={() => setActiveTab(tab)}
+                          >
+                            {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                          </button>
+                        ))}
+                      </div>
+                      {filteredListings.length > 0 ? filteredListings.slice(0, 5).map((listing) => (
+                        <div className="listing-item" key={listing._id}>
+                          <div className="listing-img">
+                            <img src={getProductImage(listing)} alt={listing.title} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  {getStatusBadge(listing.status)}
+                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
+                              </div>
+                            </div>
+                            <div className="listing-actions">
+                              <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
+                              <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
+                              <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DEL</button>
+                              {listing.status === 'active' && (
+                                <button className="listing-action-btn" onClick={() => handleMarkAsSold(listing._id)}>SOLD</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
+                          <div style={{ fontSize: 36, marginBottom: 8, opacity: 0.3 }}>📦</div>
+                          <div style={{ fontSize: 13 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                    <span className="pricing-amount">{stats.soldListings}</span>
-                    <span className="pricing-per">Items<br/>Sold</span>
+
+                  {/* PRICING CARD */}
+                  <div className="bottom-row">
+                    <div className="card">
+                      <div className="card-header">
+                        <span className="card-title">All Your Products</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>
+                        Manage all your listings here. You have {stats.totalListings} total products.
+                      </div>
+                      <button
+                        className="pricing-cta"
+                        style={{ width: '100%' }}
+                        onClick={() => { setSidebarActive('My Listings'); }}
+                      >
+                        Manage My Listings
+                      </button>
+                    </div>
+
+                    {/* PRICING */}
+                    <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="pricing-badge">
+                        <ZapIcon /> Premium Seller
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                        <span className="pricing-amount">{stats.soldListings}</span>
+                        <span className="pricing-per">Items<br />Sold</span>
+                      </div>
+                      <div className="pricing-desc">
+                        Keep selling to unlock premium<br />features and seller badges 🚀
+                      </div>
+                      <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>Add New Product</button>
+                    </div>
                   </div>
-                  <div className="pricing-desc">
-                    Keep selling to unlock premium<br/>features and seller badges 🚀
-                  </div>
-                  <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>Add New Product</button>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             {/* RIGHT PANEL */}
