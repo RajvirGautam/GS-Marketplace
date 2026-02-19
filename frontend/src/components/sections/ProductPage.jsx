@@ -76,25 +76,25 @@ const SparklesIcon = () => (
 
 const ChevronDown = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m6 9 6 6 6-6"/>
+    <path d="m6 9 6 6 6-6" />
   </svg>
 );
 
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   // AUTH INTEGRATION
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const [saved, setSaved] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isNavigating, setIsNavigating] = useState(false);
-  
+
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
 
@@ -124,18 +124,18 @@ const ProductPage = () => {
   // Handle back navigation with zoom out effect
   const handleBackClick = (e) => {
     e.preventDefault();
-    
+
     if (isNavigating) return; // Prevent double clicks
     setIsNavigating(true);
-    
+
     const transitionData = sessionStorage.getItem('productTransition');
-    
+
     if (transitionData && mainImgRef.current && product) {
       try {
         const { rect, scrollY } = JSON.parse(transitionData);
         const mainImg = mainImgRef.current;
         const currentRect = mainImg.getBoundingClientRect();
-        
+
         // Create transition overlay
         const transitionImg = document.createElement('img');
         transitionImg.src = product.image || (product.images && product.images[0]);
@@ -149,10 +149,10 @@ const ProductPage = () => {
         transitionImg.style.borderRadius = '24px';
         transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
         transitionImg.style.pointerEvents = 'none';
-        
+
         document.body.appendChild(transitionImg);
         transitionImgRef.current = transitionImg;
-        
+
         // Start zoom out animation
         requestAnimationFrame(() => {
           transitionImg.style.top = `${rect.top}px`;
@@ -160,7 +160,7 @@ const ProductPage = () => {
           transitionImg.style.width = `${rect.width}px`;
           transitionImg.style.height = `${rect.height}px`;
           transitionImg.style.borderRadius = '12px';
-          
+
           // After animation completes, navigate
           setTimeout(() => {
             // Clean up
@@ -169,9 +169,9 @@ const ProductPage = () => {
               transitionImgRef.current = null;
             }
             sessionStorage.removeItem('productTransition');
-            
+
             // Navigate back with scroll position
-            navigate('/marketplace', { 
+            navigate('/marketplace', {
               state: { scrollY: scrollY },
               replace: false
             });
@@ -204,7 +204,7 @@ const ProductPage = () => {
 
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -219,34 +219,34 @@ const ProductPage = () => {
   // Fetch product from API
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const fetchProduct = async () => {
       setLoading(true);
       try {
         console.log('🔍 Fetching product ID:', id);
         const response = await fetch(`http://localhost:5001/api/products/${id}`);
         const data = await response.json();
-        
+
         console.log('✅ Product response:', data);
-        
+
         if (data.success && data.product) {
           setProduct(data.product);
           setActiveImg(0);
-          
+
           setTimeout(() => {
             setLoading(false);
-            
+
             // Handle Zoom In Transition from Marketplace
             const transitionData = sessionStorage.getItem('productTransition');
-            
+
             if (transitionData && mainImgRef.current) {
               try {
                 const { rect, imgSrc } = JSON.parse(transitionData);
                 const mainImg = mainImgRef.current;
-                
+
                 setTimeout(() => {
                   const finalRect = mainImg.getBoundingClientRect();
-                  
+
                   const transitionImg = document.createElement('img');
                   transitionImg.src = imgSrc;
                   transitionImg.style.position = 'fixed';
@@ -259,19 +259,19 @@ const ProductPage = () => {
                   transitionImg.style.borderRadius = '12px';
                   transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
                   transitionImg.style.pointerEvents = 'none';
-                  
+
                   document.body.appendChild(transitionImg);
                   transitionImgRef.current = transitionImg;
-                  
+
                   mainImg.style.opacity = '0';
-                  
+
                   requestAnimationFrame(() => {
                     transitionImg.style.top = `${finalRect.top}px`;
                     transitionImg.style.left = `${finalRect.left}px`;
                     transitionImg.style.width = `${finalRect.width}px`;
                     transitionImg.style.height = `${finalRect.height}px`;
                     transitionImg.style.borderRadius = '24px';
-                    
+
                     setTimeout(() => {
                       mainImg.style.opacity = '1';
                       if (transitionImgRef.current) {
@@ -296,7 +296,7 @@ const ProductPage = () => {
         setProduct(null);
       }
     };
-    
+
     fetchProduct();
   }, [id]);
 
@@ -308,7 +308,7 @@ const ProductPage = () => {
         y: (e.clientY / window.innerHeight) * 100
       });
     };
-    
+
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
@@ -326,8 +326,8 @@ const ProductPage = () => {
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white">
         <h1 className="text-4xl font-bold mb-4">404</h1>
         <p className="text-white/60 mb-8">Product not found in the mainframe.</p>
-        <button 
-          onClick={() => navigate('/marketplace')} 
+        <button
+          onClick={() => navigate('/marketplace')}
           className="px-6 py-2 bg-white text-black font-bold rounded-full"
         >
           Back to Market
@@ -604,7 +604,7 @@ const ProductPage = () => {
           <ArrowLeft />
           <span className="hidden sm:inline">Back</span>
         </button>
-        
+
         <div className="flex gap-3 pointer-events-auto items-center">
           <button className="btn-glass shadow-lg">
             <ShareIcon />
@@ -633,7 +633,7 @@ const ProductPage = () => {
                     <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
                     <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
                   </div>
-                  <Link 
+                  <Link
                     to="/dashboard"
                     className="block px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
                   >
@@ -652,9 +652,9 @@ const ProductPage = () => {
               )}
             </div>
           ) : (
-             <Link to="/login" className="btn-glass shadow-lg">
-               Login
-             </Link>
+            <Link to="/login" className="btn-glass shadow-lg">
+              Login
+            </Link>
           )}
         </div>
       </nav>
@@ -665,14 +665,14 @@ const ProductPage = () => {
           <div className="card area-main-img fade-in group cursor-zoom-in">
             <img
               ref={mainImgRef}
-              src={product.images && product.images.length > 0 
-                ? product.images[activeImg] 
+              src={product.images && product.images.length > 0
+                ? product.images[activeImg]
                 : (product.image || '/placeholder.jpg')
               }
               alt={product.title}
               className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             />
-            
+
             <div className="absolute top-6 left-6 flex gap-2 z-10">
               {product.isVerified && (
                 <span className="bg-black/60 backdrop-blur text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10 flex items-center gap-1">
@@ -717,7 +717,7 @@ const ProductPage = () => {
                 {product.title}
               </h1>
             </div>
-            
+
             <div className="flex gap-6 opacity-60 text-sm mt-6 border-t border-white/10 pt-4">
               <span className="flex items-center gap-2">
                 <Clock /> Posted {product.timeAgo}
@@ -729,16 +729,23 @@ const ProductPage = () => {
           </div>
 
           {/* 3. Seller */}
-          <div className="card area-seller fade-in delay-2 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 p-[2px] mb-3">
+          <div
+            className="card area-seller fade-in delay-2 flex flex-col items-center justify-center text-center cursor-pointer group/sellercard hover:border-white/30 transition-all"
+            onClick={() => {
+              const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+              if (sellerId) navigate(`/seller/${sellerId}`);
+            }}
+            title="View Seller Profile"
+          >
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#00D9FF] to-[#7C3AED] p-[2px] mb-3 group-hover/sellercard:scale-105 transition-transform">
               <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xl font-serif italic">
-                {typeof product.seller === 'object' 
-                  ? product.seller.fullName?.charAt(0).toUpperCase() 
+                {typeof product.seller === 'object'
+                  ? product.seller.fullName?.charAt(0).toUpperCase()
                   : (product.user?.charAt(0) || 'U')
                 }
               </div>
             </div>
-            <div className="font-bold text-lg">
+            <div className="font-bold text-lg group-hover/sellercard:text-[#00D9FF] transition-colors">
               {typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}
             </div>
             <div className="text-xs opacity-50 mb-3">
@@ -747,16 +754,19 @@ const ProductPage = () => {
             <div className="bg-white/5 rounded-full px-3 py-1 text-xs font-bold border border-white/5">
               {product.sellerRating || '⭐ New'} Rating
             </div>
+            <div className="mt-3 text-[10px] text-[#00D9FF]/60 group-hover/sellercard:text-[#00D9FF] transition-colors font-semibold uppercase tracking-widest">
+              View Profile →
+            </div>
           </div>
 
           {/* 4. Price & AI */}
           <div className="card area-price fade-in delay-2 flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent)] rounded-full blur-[80px] opacity-20"></div>
-            
+
             <div className="card-title mb-2">
               <Zap /> Asking Price
             </div>
-            
+
             <div className="text-4xl lg:text-5xl font-black tracking-tighter mb-4">
               {product.type === 'free' ? (
                 <span className="text-4xl font-bold text-green-400">FREE</span>
@@ -781,7 +791,7 @@ const ProductPage = () => {
             <div className="card-header">
               <div className="card-title">Analysis</div>
             </div>
-            
+
             <p className="text-lg font-light leading-relaxed opacity-90 mb-8">
               <span className="serif-italic text-2xl opacity-60 mr-1">"</span>
               {product.description}
@@ -807,7 +817,7 @@ const ProductPage = () => {
                   <GridIcon /> Specifications
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 {product.specs.map((s, i) => (
                   <div key={i} className="flex flex-col p-3 border-b border-white/10 last:border-0">
@@ -823,7 +833,7 @@ const ProductPage = () => {
 
           {/* 7. Actions */}
           <div className="card area-actions fade-in delay-3 bg-white/5 border-white/10 flex flex-col gap-4 justify-center">
-            <button 
+            <button
               className="btn-primary group relative overflow-hidden"
               onClick={handleContactSeller}
             >
@@ -832,9 +842,9 @@ const ProductPage = () => {
               </span>
               <div className="absolute inset-0 bg-[var(--accent)] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
-            
+
             <div className="text-center text-[10px] uppercase tracking-widest opacity-30">
-               Campus Handover • Verified Student • Safe
+              Campus Handover • Verified Student • Safe
             </div>
           </div>
         </div>

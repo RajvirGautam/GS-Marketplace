@@ -4,52 +4,52 @@ import { useAuth } from '../../context/AuthContext';
 import { productAPI } from '../../services/api';
 
 const HeartIcon = ({ filled }) => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 24 24" 
-    fill={filled ? "currentColor" : "none"} 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
   </svg>
 );
 
 const ShareIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-    <polyline points="16 6 12 2 8 6"/>
-    <line x1="12" y1="2" x2="12" y2="15"/>
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+    <polyline points="16 6 12 2 8 6" />
+    <line x1="12" y1="2" x2="12" y2="15" />
   </svg>
 );
 
 const ChatIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 
 const EyeIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
 const LocationIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-    <circle cx="12" cy="10" r="3"/>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
   </svg>
 );
 
 const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [isSaved, setIsSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(product.saves || 0);
   const [showActions, setShowActions] = useState(false);
@@ -127,7 +127,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   // Handle save/unsave
   const handleSaveClick = async (e) => {
     stopNav(e);
-    
+
     if (!user) {
       navigate('/login');
       return;
@@ -137,7 +137,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       console.log('🔄 Toggling save for product:', product._id);
       const response = await productAPI.toggleSave(product._id);
       console.log('✅ Save response:', response);
-      
+
       if (response.success) {
         setIsSaved(response.saved);
         setSaveCount(prev => response.saved ? prev + 1 : Math.max(0, prev - 1));
@@ -151,10 +151,10 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const handleCardClick = (e) => {
     e.preventDefault();
     const productId = product._id || product.id;
-    
+
     const cardElement = e.currentTarget;
     const imgElement = cardElement.querySelector('img');
-    
+
     if (imgElement) {
       const rect = imgElement.getBoundingClientRect();
       sessionStorage.setItem('productTransition', JSON.stringify({
@@ -168,21 +168,21 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         scrollY: window.scrollY
       }));
     }
-    
+
     navigate(`/product/${productId}`);
   };
 
   // LIST VIEW
   if (viewMode === 'list') {
     return (
-      <div 
+      <div
         onClick={handleCardClick}
         className="group relative bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] transition-all duration-300 hover:border-[rgba(255,255,255,0.3)] hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,1)] flex cursor-pointer"
         style={animationStyle}
       >
         {/* Image Section */}
         <div className="relative w-64 flex-shrink-0 overflow-hidden bg-zinc-900 border-r border-[rgba(255,255,255,0.1)]">
-          <div 
+          <div
             className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
             style={{ background: `linear-gradient(to bottom, ${getGradientStart()}, #000)` }}
           />
@@ -246,11 +246,19 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               <span>{getTimeAgo()}</span>
             </div>
 
-            <div className="flex items-center gap-2 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)]">
-              <div className="w-8 h-8 rounded-none bg-zinc-800 border border-[rgba(255,255,255,0.2)] flex items-center justify-center text-xs font-bold text-white">
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+                if (sellerId) navigate(`/seller/${sellerId}`);
+              }}
+              className="flex items-center gap-2 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)] cursor-pointer hover:opacity-80 transition-opacity group/seller"
+            >
+              <div className="w-8 h-8 rounded-none bg-zinc-800 border border-[rgba(255,255,255,0.2)] flex items-center justify-center text-xs font-bold text-white group-hover/seller:border-[#00D9FF] transition-colors">
                 {getSellerInitial()}
               </div>
-              <span className="text-sm text-[rgba(255,255,255,0.7)]">{getSellerName()}</span>
+              <span className="text-sm text-[rgba(255,255,255,0.7)] group-hover/seller:text-[#00D9FF] transition-colors">{getSellerName()}</span>
             </div>
           </div>
 
@@ -324,7 +332,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           <button
             onClick={handleSaveClick}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-[rgba(255,255,255,0.9)] backdrop-blur shadow-lg transition-all hover:scale-110"
-            style={{ 
+            style={{
               color: isSaved ? '#EF4444' : 'black'
             }}
             title={isSaved ? 'Remove from saved' : 'Save for later'}
@@ -367,11 +375,19 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)]">
-          <div className="w-6 h-6 rounded-none bg-zinc-800 border border-[rgba(255,255,255,0.2)] flex items-center justify-center text-[10px] font-bold text-white">
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+            if (sellerId) navigate(`/seller/${sellerId}`);
+          }}
+          className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)] cursor-pointer hover:opacity-80 transition-opacity group/seller"
+        >
+          <div className="w-6 h-6 rounded-none bg-zinc-800 border border-[rgba(255,255,255,0.2)] flex items-center justify-center text-[10px] font-bold text-white group-hover/seller:border-[#00D9FF] transition-colors">
             {getSellerInitial()}
           </div>
-          <span className="text-xs text-[rgba(255,255,255,0.7)]">{getSellerName().split(' ')[0]}</span>
+          <span className="text-xs text-[rgba(255,255,255,0.7)] group-hover/seller:text-[#00D9FF] transition-colors">{getSellerName().split(' ')[0]}</span>
           {(product.isVerified || product.seller?.isVerified) && (
             <span className="text-[#00D9FF] text-xs">✓</span>
           )}
@@ -393,9 +409,8 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           </div>
 
           <div
-            className={`grid grid-cols-2 gap-2 transition-all duration-300 ${
-              showActions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto'
-            }`}
+            className={`grid grid-cols-2 gap-2 transition-all duration-300 ${showActions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto'
+              }`}
           >
             <button
               onClick={stopNav}

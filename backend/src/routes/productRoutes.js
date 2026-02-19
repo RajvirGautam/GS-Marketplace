@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -100,7 +100,7 @@ router.get('/', async (req, res) => {
 
     // Sorting
     let sort = {};
-    switch(sortBy) {
+    switch (sortBy) {
       case 'newest':
         sort = { createdAt: -1 };
         break;
@@ -154,6 +154,82 @@ router.get('/', async (req, res) => {
       message: 'Error fetching products',
       error: error.message
     });
+  }
+});
+
+// GET public seller profile with stats (MUST BE BEFORE /:id)
+router.get('/seller/:sellerId', async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+
+    // Validate ObjectId
+    if (!sellerId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: 'Invalid seller ID' });
+    }
+
+    // Get all products for this seller
+    const allProducts = await Product.find({ seller: sellerId })
+      .populate({
+        path: 'seller',
+        select: 'fullName enrollmentNumber isVerified branch year profilePicture createdAt authProvider'
+      })
+      .sort({ createdAt: -1 });
+
+    if (allProducts.length === 0) {
+      // Seller might exist but have no products — try fetching user directly
+      const User = (await import('../models/User.js')).default;
+      const user = await User.findById(sellerId).select('fullName enrollmentNumber isVerified branch year profilePicture createdAt');
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Seller not found' });
+      }
+      return res.json({
+        success: true,
+        seller: user,
+        stats: {
+          totalListings: 0, activeListings: 0, soldListings: 0,
+          totalViews: 0, totalSaves: 0, categoryBreakdown: []
+        },
+        recentListings: []
+      });
+    }
+
+    const seller = typeof allProducts[0].seller === 'object' ? allProducts[0].seller : null;
+
+    // Compute stats
+    const activeProducts = allProducts.filter(p => p.status === 'active');
+    const soldProducts = allProducts.filter(p => p.status === 'sold');
+
+    const totalViews = allProducts.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalSaves = allProducts.reduce((sum, p) => sum + (p.saves || 0), 0);
+
+    // Category breakdown from active listings
+    const categoryMap = {};
+    activeProducts.forEach(p => {
+      categoryMap[p.category] = (categoryMap[p.category] || 0) + 1;
+    });
+    const categoryBreakdown = Object.entries(categoryMap)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Recent 6 active listings for display
+    const recentListings = activeProducts.slice(0, 6);
+
+    res.json({
+      success: true,
+      seller,
+      stats: {
+        totalListings: allProducts.length,
+        activeListings: activeProducts.length,
+        soldListings: soldProducts.length,
+        totalViews,
+        totalSaves,
+        categoryBreakdown
+      },
+      recentListings
+    });
+  } catch (error) {
+    console.error('Error fetching seller profile:', error);
+    res.status(500).json({ success: false, message: 'Error fetching seller profile', error: error.message });
   }
 });
 
@@ -239,11 +315,11 @@ router.get('/user/saved', authenticate, async (req, res) => {
       savedBy: req.user._id,
       status: 'active'
     })
-    .populate({
-      path: 'seller',
-      select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
-    })
-    .sort({ createdAt: -1 });
+      .populate({
+        path: 'seller',
+        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+      })
+      .sort({ createdAt: -1 });
 
     console.log('✅ Found', products.length, 'saved products');
 
@@ -274,10 +350,10 @@ router.get('/user/analytics', authenticate, async (req, res) => {
     const activeListings = products.filter(p => p.status === 'active').length;
     const soldListings = products.filter(p => p.status === 'sold').length;
     const pendingListings = products.filter(p => p.status === 'pending').length;
-    
+
     const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
     const totalSaves = products.reduce((sum, p) => sum + (p.saves || 0), 0);
-    
+
     const totalRevenue = products
       .filter(p => p.status === 'sold')
       .reduce((sum, p) => sum + (p.price || 0), 0);
@@ -345,7 +421,7 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
     // Upload images to Cloudinary
     console.log('📤 Uploading images to Cloudinary...');
     const imageUrls = [];
-    
+
     for (const file of req.files) {
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -364,7 +440,7 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
         );
         uploadStream.end(file.buffer);
       });
-      
+
       imageUrls.push(result.secure_url);
     }
 
@@ -375,14 +451,14 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
     let parsedSpecs = [];
 
     if (highlights) {
-      parsedHighlights = typeof highlights === 'string' 
-        ? JSON.parse(highlights) 
+      parsedHighlights = typeof highlights === 'string'
+        ? JSON.parse(highlights)
         : highlights;
     }
 
     if (specs) {
-      parsedSpecs = typeof specs === 'string' 
-        ? JSON.parse(specs) 
+      parsedSpecs = typeof specs === 'string'
+        ? JSON.parse(specs)
         : specs;
     }
 
@@ -488,7 +564,7 @@ router.put('/:id', authenticate, async (req, res) => {
     console.error('❌ ERROR IN UPDATE ROUTE:');
     console.error('Error message:', error.message);
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-    
+
     res.status(500).json({
       success: false,
       message: 'Error updating product',

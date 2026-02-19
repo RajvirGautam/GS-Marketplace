@@ -31,7 +31,7 @@ const Hero = () => {
 
   const cards = [
     {
-      id: 1, user: "Shivani (CSE)", price: "₹8,000", title: "Raspberry Pi 4 Model B", tag: "Electronics",
+      id: 1, user: "Ved1nsh EI", price: "₹8,000", title: "Raspberry Pi 4 Model B", tag: "Electronics",
       image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
       accent: "#FF6B35",
       gradient: "from-orange-500 to-red-500",
@@ -208,11 +208,11 @@ const Hero = () => {
         }
 
         .marquee {
-          animation: marquee 30s linear infinite;
+          animation: marquee 40s linear infinite;
         }
 
         .top-ticker {
-          position: fixed;
+          position: absolute;
           top: 0;
           left: 0;
           right: 0;
@@ -519,7 +519,7 @@ const Hero = () => {
         }
       `}</style>
 
-      {/* ===== FIXED TOP TICKER BAR ===== */}
+      {/* ===== ABSOLUTE TOP TICKER BAR ===== */}
       <div className="top-ticker">
         <div className="flex items-center h-12 text-white/70 text-xs mono tracking-wider">
           <div className="marquee flex items-center gap-16 whitespace-nowrap">
@@ -870,7 +870,7 @@ const Hero = () => {
                     <div className="flex-1">
                       <h4 className="font-bold text-white text-lg mb-2">Verified Only</h4>
                       <p className="text-sm text-white/70 leading-relaxed">
-                        SGSITS student authentication. Every user verified through college credentials.
+                        Student authentication. Every user verified through college credentials.
                       </p>
                     </div>
                   </div>

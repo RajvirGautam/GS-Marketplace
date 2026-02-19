@@ -39,7 +39,7 @@ api.interceptors.response.use(
 export const productAPI = {
   getAll: async (filters = {}) => {
     const params = new URLSearchParams();
-    
+
     if (filters.search) params.append('search', filters.search);
     if (filters.categories && filters.categories.length > 0) {
       filters.categories.forEach(cat => params.append('category', cat));
@@ -61,7 +61,7 @@ export const productAPI = {
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.page) params.append('page', filters.page);
     if (filters.limit) params.append('limit', filters.limit);
-    
+
     const { data } = await api.get(`/products?${params}`);
     return data;
   },
@@ -151,6 +151,15 @@ export const productAPI = {
 export const userAPI = {
   getMe: async () => {
     const { data } = await api.get('/auth/me');
+    return data;
+  },
+};
+
+// ==================== SELLER APIs ====================
+
+export const sellerAPI = {
+  getProfile: async (sellerId) => {
+    const { data } = await api.get(`/products/seller/${sellerId}`);
     return data;
   },
 };

@@ -14,6 +14,7 @@ import UserDashboard from './components/sections/UserDashboard'
 import ConnectIdModal from './components/auth/ConnectIdModal'
 import AuthCallback from './pages/AuthCallback'
 import VerificationGuard from './components/auth/VerificationGuard' // ← ADD THIS
+import SellerProfile from './components/sections/SellerProfile'
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -32,9 +33,9 @@ function App() {
   // HOME PAGE WITH NAVBAR
   const HomePage = () => (
     <>
-      <Navbar 
-        isDark={theme === 'dark'} 
-        toggleTheme={toggleTheme} 
+      <Navbar
+        isDark={theme === 'dark'}
+        toggleTheme={toggleTheme}
         onConnectClick={() => setIsLoginOpen(true)}
       />
       <Hero />
@@ -55,15 +56,16 @@ function App() {
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/seller/:id" element={<SellerProfile />} />
           </Routes>
 
           {/* Footer stays global */}
           <Footer />
 
           {/* Manual login modal (for login button clicks) */}
-          <ConnectIdModal 
-            isOpen={isLoginOpen} 
-            onClose={() => setIsLoginOpen(false)} 
+          <ConnectIdModal
+            isOpen={isLoginOpen}
+            onClose={() => setIsLoginOpen(false)}
           />
 
           {/* Auto verification modal (for unverified users) - ADD THIS */}
