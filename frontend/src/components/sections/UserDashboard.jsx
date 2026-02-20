@@ -278,6 +278,17 @@ const UserDashboard = () => {
   const [sidebarActive, setSidebarActive] = useState('Overview');
   const [savedProducts, setSavedProducts] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+
+  // Mouse glow effect
+  useEffect(() => {
+    const handler = (e) => setMousePos({
+      x: (e.clientX / window.innerWidth) * 100,
+      y: (e.clientY / window.innerHeight) * 100
+    });
+    window.addEventListener('mousemove', handler);
+    return () => window.removeEventListener('mousemove', handler);
+  }, []);
 
   useEffect(() => { fetchDashboardData(); }, []);
 
@@ -401,19 +412,64 @@ const UserDashboard = () => {
     return points;
   })();
 
-  const notifications = [
-    { text: `${stats.totalViews} Total product views`, time: 'Today', color: '#00D9FF' },
-    { text: `${stats.soldListings} Items sold`, time: 'This week', color: '#10B981' },
-    { text: `${stats.totalSaves} Products saved by users`, time: 'This month', color: '#7C3AED' },
-    { text: `${stats.activeListings} Active listings`, time: 'Current', color: '#F59E0B' },
-  ];
+  // ── ACTIVITY: real per-listing events ──
+  const activityItems = (() => {
+    const items = [];
+    // Most recent listing
+    const newest = [...listings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+    if (newest) items.push({
+      text: `"${newest.title}" listed`,
+      time: getTimeAgo(newest.createdAt),
+      color: '#00D9FF'
+    });
+    // Most viewed listing
+    const topViewed = [...listings].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+    if (topViewed && topViewed.views > 0) items.push({
+      text: `"${topViewed.title}" · ${topViewed.views} views`,
+      time: 'Top viewed',
+      color: '#7C3AED'
+    });
+    // Sold count
+    if (stats.soldListings > 0) items.push({
+      text: `${stats.soldListings} item${stats.soldListings > 1 ? 's' : ''} sold`,
+      time: 'All time',
+      color: '#10B981'
+    });
+    // Pending
+    if (stats.pendingListings > 0) items.push({
+      text: `${stats.pendingListings} listing${stats.pendingListings > 1 ? 's' : ''} pending review`,
+      time: 'Needs action',
+      color: '#F59E0B'
+    });
+    // Total saves received
+    if (stats.totalSaves > 0) items.push({
+      text: `${stats.totalSaves} saves from buyers`,
+      time: 'Total',
+      color: '#EF4444'
+    });
+    if (items.length === 0) items.push({ text: 'No activity yet', time: 'Add your first listing!', color: 'rgba(255,255,255,0.2)' });
+    return items;
+  })();
 
-  const activities = [
-    { text: 'Dashboard theme updated', time: 'Just now', color: '#7C3AED' },
-    { text: `${stats.totalListings} Total products listed`, time: 'Overview', color: '#00D9FF' },
-    { text: `${stats.pendingListings} Pending approvals`, time: 'Action needed', color: '#F59E0B' },
-    { text: 'System running smoothly', time: 'Status', color: '#10B981' },
-  ];
+  // ── QUICK STATS: real computed metrics ──
+  const quickStatsItems = (() => {
+    const sellThrough = stats.totalListings > 0
+      ? Math.round((stats.soldListings / stats.totalListings) * 100)
+      : 0;
+    const avgViews = stats.totalListings > 0
+      ? Math.round(stats.totalViews / stats.totalListings)
+      : 0;
+    const saveRate = stats.totalViews > 0
+      ? ((stats.totalSaves / stats.totalViews) * 100).toFixed(1)
+      : '0.0';
+    const healthyListings = listings.filter(l => l.status === 'active').length;
+    return [
+      { icon: '📈', label: 'Sell-through rate', value: `${sellThrough}%`, sub: `${stats.soldListings}/${stats.totalListings} sold`, color: '#00D9FF' },
+      { icon: '👁', label: 'Avg views / listing', value: avgViews, sub: `${stats.totalViews} total views`, color: '#7C3AED' },
+      { icon: '🤍', label: 'Save rate', value: `${saveRate}%`, sub: `of viewers save`, color: '#F59E0B' },
+      { icon: '✅', label: 'Active listings', value: healthyListings, sub: `of ${stats.totalListings} total`, color: '#10B981' },
+    ];
+  })();
 
   const sidebarDashItems = [
     { label: 'Overview', icon: <HomeIcon /> },
@@ -1146,7 +1202,12 @@ const UserDashboard = () => {
         }
       `}</style>
 
-      <div className="dash-root">
+      <div
+        className="dash-root"
+        style={{
+          background: `radial-gradient(800px circle at ${mousePos.x}% ${mousePos.y}%, rgba(0,217,255,0.06) 0%, transparent 50%), #080808`
+        }}
+      >
         {/* NOISE & GRID */}
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
@@ -1634,9 +1695,9 @@ const UserDashboard = () => {
 
             {/* RIGHT PANEL */}
             <div className="content-right">
-              {/* NOTIFICATIONS */}
+              {/* ACTIVITY */}
               <div className="right-section-title">Activity</div>
-              {notifications.map((n, i) => (
+              {activityItems.map((n, i) => (
                 <div className="notif-item" key={i}>
                   <div className="notif-dot" style={{ background: n.color }} />
                   <div>
@@ -1648,16 +1709,17 @@ const UserDashboard = () => {
 
               <hr className="divider" />
 
-              {/* ACTIVITIES */}
+              {/* QUICK STATS */}
               <div className="right-section-title">Quick Stats</div>
-              {activities.map((a, i) => (
-                <div className="activity-item" key={i}>
-                  <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 12, fontWeight: 700 }}>
-                    {['📊', '📦', '⏳', '✅'][i]}
+              {quickStatsItems.map((a, i) => (
+                <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
+                  <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
+                    {a.icon}
                   </div>
-                  <div>
-                    <div className="notif-text">{a.text}</div>
-                    <div className="notif-time">{a.time}</div>
+                  <div style={{ flex: 1 }}>
+                    <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
+                    <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
+                    <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
                   </div>
                 </div>
               ))}
