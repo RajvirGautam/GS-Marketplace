@@ -391,7 +391,15 @@ const UserDashboard = () => {
     { label: 'Others', value: stats.totalListings > 0 ? Math.floor(stats.totalListings * 0.1) : 1, color: '#10B981' },
   ];
 
-  const profitData = [20, 35, 25, 45, 38, 55, 48, 62, 55, 70, 65, 78, 72, 85, 80, 90, 88, 95, 100, 105];
+  // Real engagement data: views+saves per listing, chronological
+  const engagementData = (() => {
+    const sorted = [...listings].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    const points = sorted.map(l => (l.views || 0) + (l.saves || 0));
+    // Need at least 2 points for a line; pad or return fallback
+    if (points.length === 0) return [0, 0];
+    if (points.length === 1) return [0, points[0]];
+    return points;
+  })();
 
   const notifications = [
     { text: `${stats.totalViews} Total product views`, time: 'Today', color: '#00D9FF' },
@@ -1494,12 +1502,18 @@ const UserDashboard = () => {
                     <div className="profit-card">
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Engagement Growth</div>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Last 20 periods</div>
+                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Views + Saves per listing · chronological</div>
                       </div>
                       <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
-                        {stats.totalViews + stats.totalSaves} Total
+                        {stats.totalViews + stats.totalSaves} <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>interactions</span>
                       </div>
-                      <MiniLineChart data={profitData} width={260} height={90} color="#00D9FF" />
+                      {engagementData.some(v => v > 0) ? (
+                        <MiniLineChart data={engagementData} width={260} height={90} color="#00D9FF" />
+                      ) : (
+                        <div style={{ height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
+                          Add listings to see your growth curve
+                        </div>
+                      )}
                     </div>
 
                     {/* MY LISTINGS */}
@@ -1555,22 +1569,48 @@ const UserDashboard = () => {
                     </div>
                   </div>
 
-                  {/* PRICING CARD */}
+                  {/* BOTTOM ROW: TOP PERFORMING + PREMIUM SELLER */}
                   <div className="bottom-row">
                     <div className="card">
                       <div className="card-header">
-                        <span className="card-title">All Your Products</span>
+                        <span className="card-title">Top Performing</span>
+                        <button
+                          style={{ background: 'none', border: 'none', color: '#00D9FF', fontSize: 11, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
+                          onClick={() => setSidebarActive('My Listings')}
+                        >
+                          See All →
+                        </button>
                       </div>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>
-                        Manage all your listings here. You have {stats.totalListings} total products.
-                      </div>
-                      <button
-                        className="pricing-cta"
-                        style={{ width: '100%' }}
-                        onClick={() => { setSidebarActive('My Listings'); }}
-                      >
-                        Manage My Listings
-                      </button>
+                      {listings.length > 0 ? (() => {
+                        const maxViews = Math.max(...listings.map(l => l.views || 0), 1);
+                        return [...listings]
+                          .sort((a, b) => (b.views || 0) - (a.views || 0))
+                          .slice(0, 3)
+                          .map((l, i) => (
+                            <div key={l._id} style={{ marginBottom: 16 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: ['#00D9FF', '#7C3AED', '#F59E0B'][i], flexShrink: 0 }}>#{i + 1}</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
+                                </div>
+                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 8 }}>👁 {l.views || 0} · 🤍 {l.saves || 0}</span>
+                              </div>
+                              <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                                <div style={{
+                                  height: '100%',
+                                  width: `${Math.round(((l.views || 0) / maxViews) * 100)}%`,
+                                  background: `linear-gradient(90deg, ${['#00D9FF', '#7C3AED', '#F59E0B'][i]}, ${['#7C3AED', '#F59E0B', '#10B981'][i]})`,
+                                  borderRadius: 2,
+                                  transition: 'width 0.8s ease'
+                                }} />
+                              </div>
+                            </div>
+                          ));
+                      })() : (
+                        <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+                          No listings yet — add one to see top performers
+                        </div>
+                      )}
                     </div>
 
                     {/* PRICING */}
