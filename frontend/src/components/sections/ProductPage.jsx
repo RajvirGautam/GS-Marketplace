@@ -99,6 +99,7 @@ const ProductPage = () => {
 
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
+  const viewTracked = useRef(false); // guard against StrictMode double-fire
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -245,6 +246,7 @@ const ProductPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    viewTracked.current = false; // reset when product ID changes
     const fetchProduct = async () => {
       setLoading(true);
       try {
@@ -257,6 +259,12 @@ const ProductPage = () => {
         if (data.success && data.product) {
           setProduct(data.product);
           setActiveImg(0);
+
+          // ── Increment view count (once per product open) ──
+          if (!viewTracked.current) {
+            viewTracked.current = true;
+            productAPI.trackView(id).catch(() => { });
+          }
 
           setTimeout(() => {
             setLoading(false);

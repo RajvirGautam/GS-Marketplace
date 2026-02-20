@@ -10,19 +10,19 @@ import AddProductModal from './AddProductModal';
 // --- Internal Icons ---
 const ChevronDown = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m6 9 6 6 6-6"/>
+    <path d="m6 9 6 6 6-6" />
   </svg>
 );
 
 const ChevronLeft = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m15 18-6-6 6-6"/>
+    <path d="m15 18-6-6 6-6" />
   </svg>
 );
 
 const ChevronRight = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m9 18 6-6-6-6"/>
+    <path d="m9 18 6-6-6-6" />
   </svg>
 );
 
@@ -96,16 +96,26 @@ const Marketplace = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const productsPerPage = 24;
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+
+  useEffect(() => {
+    const handler = (e) => setMousePos({
+      x: (e.clientX / window.innerWidth) * 100,
+      y: (e.clientY / window.innerHeight) * 100
+    });
+    window.addEventListener('mousemove', handler);
+    return () => window.removeEventListener('mousemove', handler);
+  }, []);
 
   // Category data with counts
   const categories = [
-    { name: 'Books & Notes', count: 245, emoji: '📚', slug: 'books' },
-    { name: 'Lab Equipment', count: 89, emoji: '🔬', slug: 'lab' },
-    { name: 'Stationery', count: 156, emoji: '✏️', slug: 'stationery' },
-    { name: 'Electronics', count: 67, emoji: '⚡', slug: 'electronics' },
-    { name: 'Hostel Items', count: 43, emoji: '🏠', slug: 'hostel' },
-    { name: 'Tools', count: 28, emoji: '🔧', slug: 'tools' },
-    { name: 'Miscellaneous', count: 92, emoji: '📦', slug: 'misc' },
+    { name: 'Books & Notes', count: 245, slug: 'books' },
+    { name: 'Lab Equipment', count: 89, slug: 'lab' },
+    { name: 'Stationery', count: 156, slug: 'stationery' },
+    { name: 'Electronics', count: 67, slug: 'electronics' },
+    { name: 'Hostel Items', count: 43, slug: 'hostel' },
+    { name: 'Tools', count: 28, slug: 'tools' },
+    { name: 'Miscellaneous', count: 92, slug: 'misc' },
   ];
 
   const branches = [
@@ -178,7 +188,7 @@ const Marketplace = () => {
       console.log('🔍 Fetching products with filters:', filters);
 
       const response = await productAPI.getAll(filters);
-      
+
       if (response.success) {
         setProducts(response.products);
         setPagination(response.pagination);
@@ -252,29 +262,29 @@ const Marketplace = () => {
 
   // Quick filter presets
   const quickFilters = [
-    { 
-      label: 'Free Items', 
+    {
+      label: 'Free Items',
       action: () => {
         setSelectedTypes(['free']);
         setCurrentPage(1);
       }
     },
-    { 
-      label: 'Under ₹500', 
+    {
+      label: 'Under ₹500',
       action: () => {
         setPriceRange([0, 500]);
         setCurrentPage(1);
       }
     },
-    { 
-      label: 'Barter Only', 
+    {
+      label: 'Barter Only',
       action: () => {
         setSelectedTypes(['barter']);
         setCurrentPage(1);
       }
     },
-    { 
-      label: 'New Condition', 
+    {
+      label: 'New Condition',
       action: () => {
         setSelectedConditions(['New', 'Like New']);
         setCurrentPage(1);
@@ -541,6 +551,11 @@ const Marketplace = () => {
       `}</style>
 
       <div className="theme-root relative">
+        {/* Mouse-tracking glow overlay */}
+        <div
+          className="fixed inset-0 pointer-events-none z-0 transition-all duration-700 ease-out"
+          style={{ background: `radial-gradient(900px circle at ${mousePos.x}% ${mousePos.y}%, rgba(0,217,255,0.07) 0%, transparent 50%)` }}
+        />
         {/* Noise & Grid */}
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
@@ -646,7 +661,7 @@ const Marketplace = () => {
         {/* Main Content */}
         <div className="max-w-[1800px] mx-auto relative z-10">
           <div className="grid grid-cols-12">
-            
+
             {/* Sidebar Filters */}
             <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/30 backdrop-blur-xl p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
               <div className="flex items-center justify-between mb-8">
@@ -722,7 +737,7 @@ const Marketplace = () => {
                         onChange={() => toggleCategory(cat.slug)}
                       />
                       <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {cat.emoji} {cat.name}
+                        {cat.name}
                       </span>
                       <span className="text-xs text-white/20 font-mono">{cat.count}</span>
                     </label>
@@ -832,7 +847,7 @@ const Marketplace = () => {
 
             {/* Main Content Area */}
             <main className="col-span-12 lg:col-span-9 xl:col-span-10 p-6 lg:p-8">
-              
+
               {/* Quick Filters */}
               <div className="mb-6 overflow-x-auto">
                 <div className="flex gap-3 pb-2">
@@ -859,7 +874,7 @@ const Marketplace = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  
+
                   <button
                     onClick={() => setMobileFilterOpen(true)}
                     className="lg:hidden btn-ghost text-xs"
@@ -924,8 +939,8 @@ const Marketplace = () => {
               ) : (
                 <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                   {products.map((product, index) => (
-                    <div 
-                      key={product._id} 
+                    <div
+                      key={product._id}
                       className="h-full group"
                     >
                       <div className="bg-white/5 border border-white/10 hover:border-[#00D9FF] rounded-2xl overflow-hidden h-full transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,217,255,0.2)] backdrop-blur-xl">
@@ -953,11 +968,10 @@ const Marketplace = () => {
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${
-                          currentPage === pageNum
-                            ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
-                            : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
-                        }`}
+                        className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${currentPage === pageNum
+                          ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
+                          : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                          }`}
                       >
                         {pageNum}
                       </button>
