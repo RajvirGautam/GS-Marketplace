@@ -48,19 +48,21 @@ const LocationIcon = () => (
 
 const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, savedProductIds, toggleSavedId } = useAuth();
 
   const [isSaved, setIsSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(product.saves || 0);
   const [showActions, setShowActions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Initialize saved state
+  // Initialize saved state from global context
   useEffect(() => {
-    if (user && product.savedBy) {
-      setIsSaved(product.savedBy.includes(user._id));
+    if (user && product._id) {
+      setIsSaved(savedProductIds.has(product._id.toString()));
+    } else {
+      setIsSaved(false);
     }
-  }, [user, product.savedBy]);
+  }, [user, product._id, savedProductIds]);
 
   // Trigger animation on mount
   useEffect(() => {
@@ -134,13 +136,11 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
     }
 
     try {
-      console.log('🔄 Toggling save for product:', product._id);
       const response = await productAPI.toggleSave(product._id);
-      console.log('✅ Save response:', response);
-
       if (response.success) {
         setIsSaved(response.saved);
         setSaveCount(prev => response.saved ? prev + 1 : Math.max(0, prev - 1));
+        toggleSavedId(product._id);
       }
     } catch (error) {
       console.error('❌ Error saving product:', error);

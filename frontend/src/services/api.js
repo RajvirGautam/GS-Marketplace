@@ -114,35 +114,6 @@ export const productAPI = {
     const { data } = await api.post(`/products/${id}/view`);
     return data;
   },
-
-  toggleSave: async (productId) => {
-    try {
-      const response = await axios.post(
-        `${API_URL}/products/${productId}/save`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error toggling save:', error);
-      throw error.response?.data || { success: false, message: 'Failed to save product' };
-    }
-  },
-
-  // Get saved products
-  getSaved: async () => {
-    try {
-      const response = await axios.get(`${API_URL}/products/user/saved`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching saved products:', error);
-      throw error.response?.data || { success: false, message: 'Failed to fetch saved items' };
-    }
-  }
 };
 
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { productAPI } from '../../services/api';
 
 // --- ICONS ---
 const ArrowLeft = () => (
@@ -85,13 +86,14 @@ const ProductPage = () => {
   const navigate = useNavigate();
 
   // AUTH INTEGRATION
-  const { user, logout } = useAuth();
+  const { user, logout, savedProductIds, toggleSavedId } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [saveCount, setSaveCount] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -108,6 +110,29 @@ const ProductPage = () => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showUserMenu]);
+
+  // Sync heart state from global savedProductIds whenever product or set changes
+  useEffect(() => {
+    if (product?._id) {
+      setSaved(savedProductIds.has(product._id.toString()));
+      setSaveCount(product.saves || 0);
+    }
+  }, [product, savedProductIds]);
+
+  // Handle save toggle
+  const handleSaveToggle = async () => {
+    if (!user) return;
+    try {
+      const response = await productAPI.toggleSave(product._id);
+      if (response.success) {
+        setSaved(response.saved);
+        setSaveCount(prev => response.saved ? prev + 1 : Math.max(0, prev - 1));
+        toggleSavedId(product._id);
+      }
+    } catch (err) {
+      console.error('Error toggling save:', err);
+    }
+  };
 
   // Handle Contact Seller
   const handleContactSeller = () => {
@@ -609,8 +634,9 @@ const ProductPage = () => {
           <button className="btn-glass shadow-lg">
             <ShareIcon />
           </button>
-          <button className="btn-glass shadow-lg" onClick={() => setSaved(!saved)}>
+          <button className="btn-glass shadow-lg" onClick={handleSaveToggle} title={saved ? 'Unsave' : 'Save'}>
             <Heart filled={saved} />
+            {saveCount > 0 && <span style={{ fontSize: 11, opacity: 0.7 }}>{saveCount}</span>}
           </button>
 
           {/* USER MENU INTEGRATION */}

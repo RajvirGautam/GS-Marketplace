@@ -5,6 +5,12 @@ import { productAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
 
+const HeartFilledIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+  </svg>
+);
+
 
 // Icons (keeping original - they're good!)
 const SearchIcon = () => (
@@ -258,7 +264,7 @@ const MiniLineChart = ({ data, width = 280, height = 100, color = "#00D9FF" }) =
 // Main Component
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, toggleSavedId } = useAuth();
 
   const [listings, setListings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -270,8 +276,28 @@ const UserDashboard = () => {
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [sidebarActive, setSidebarActive] = useState('Overview');
+  const [savedProducts, setSavedProducts] = useState([]);
+  const [savedLoading, setSavedLoading] = useState(false);
 
   useEffect(() => { fetchDashboardData(); }, []);
+
+  const fetchSavedProducts = async () => {
+    try {
+      setSavedLoading(true);
+      const res = await productAPI.getSaved();
+      if (res.success) setSavedProducts(res.products || []);
+      else setSavedProducts([]);
+    } catch (e) {
+      setSavedProducts([]);
+    } finally {
+      setSavedLoading(false);
+    }
+  };
+
+  // Fetch saved products when tab becomes active
+  useEffect(() => {
+    if (sidebarActive === 'Saved Products') fetchSavedProducts();
+  }, [sidebarActive]);
 
   const fetchDashboardData = async () => {
     try {
@@ -385,6 +411,7 @@ const UserDashboard = () => {
     { label: 'Overview', icon: <HomeIcon /> },
     { label: 'Marketplace', icon: <CartIcon />, action: () => navigate('/marketplace') },
     { label: 'My Listings', icon: <PackageIcon /> },
+    { label: 'Saved Products', icon: <HeartFilledIcon /> },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon /> },
@@ -1285,6 +1312,85 @@ const UserDashboard = () => {
                         <div style={{ fontSize: 13, marginBottom: 20 }}>Start selling by adding your first product</div>
                         <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>
                           <PlusIcon /> Add Your First Listing
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : sidebarActive === 'Saved Products' ? (
+                /* ── SAVED PRODUCTS VIEW ── */
+                <>
+                  <div className="overview-header">
+                    <div>
+                      <h1>Saved Products</h1>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                        Products you've hearted across the marketplace
+                      </div>
+                    </div>
+                    <button
+                      className="pricing-cta"
+                      style={{ padding: '10px 20px', fontSize: 13 }}
+                      onClick={() => navigate('/marketplace')}
+                    >
+                      Browse Marketplace
+                    </button>
+                  </div>
+
+                  <div className="card" style={{ padding: 20 }}>
+                    {savedLoading ? (
+                      <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                        Loading saved products...
+                      </div>
+                    ) : savedProducts.length > 0 ? savedProducts.map((item) => (
+                      <div className="listing-item" key={item._id}>
+                        <div className="listing-img">
+                          <img src={getProductImage(item)} alt={item.title} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                              <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{item.title}</div>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                {item.category} · by {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}
+                              </div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(item.createdAt)}</div>
+                            </div>
+                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                              <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(item)}</div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                                {item.saves || 0} saves · {item.views || 0} views
+                              </div>
+                            </div>
+                          </div>
+                          <div className="listing-actions" style={{ marginTop: 10 }}>
+                            <button className="listing-action-btn" onClick={() => handleViewProduct(item._id)}>
+                              <EyeIcon /> VIEW
+                            </button>
+                            <button
+                              className="listing-action-btn del"
+                              style={{ color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                              onClick={async () => {
+                                try {
+                                  const res = await productAPI.toggleSave(item._id);
+                                  if (res.success && !res.saved) {
+                                    setSavedProducts(prev => prev.filter(p => p._id !== item._id));
+                                    toggleSavedId(item._id);
+                                  }
+                                } catch (e) { console.error(e); }
+                              }}
+                            >
+                              <HeartFilledIcon /> UNSAVE
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤍</div>
+                        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No saved products yet</div>
+                        <div style={{ fontSize: 13, marginBottom: 20 }}>Heart products in the marketplace to save them here</div>
+                        <button className="pricing-cta" onClick={() => navigate('/marketplace')}>
+                          Browse Marketplace
                         </button>
                       </div>
                     )}

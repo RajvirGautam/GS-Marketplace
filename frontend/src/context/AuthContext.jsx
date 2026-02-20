@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { productAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = useState(Cookies.get('accessToken') || null);
+  const [savedProductIds, setSavedProductIds] = useState(new Set());
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -50,10 +52,10 @@ export const AuthProvider = ({ children }) => {
           if (!refreshToken) throw new Error('No refresh token');
 
           const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
-          
+
           Cookies.set('accessToken', data.accessToken, { expires: 7 });
           setAccessToken(data.accessToken);
-          
+
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
           return authAxios(originalRequest);
         } catch (refreshError) {
@@ -66,6 +68,31 @@ export const AuthProvider = ({ children }) => {
     }
   );
 
+  // Fetch saved product IDs for global heart state
+  const fetchSavedIds = async () => {
+    try {
+      const res = await productAPI.getSaved();
+      if (res.success && res.products) {
+        setSavedProductIds(new Set(res.products.map(p => p._id?.toString())));
+      }
+    } catch (e) {
+      // silently ignore — user might be unauthenticated
+    }
+  };
+
+  // Toggle a saved product ID in the global set (optimistic)
+  const toggleSavedId = (productId) => {
+    setSavedProductIds(prev => {
+      const next = new Set(prev);
+      if (next.has(productId.toString())) {
+        next.delete(productId.toString());
+      } else {
+        next.add(productId.toString());
+      }
+      return next;
+    });
+  };
+
   // Fetch current user
   const fetchUser = async () => {
     try {
@@ -77,6 +104,8 @@ export const AuthProvider = ({ children }) => {
 
       const { data } = await authAxios.get('/auth/me');
       setUser(data.user);
+      // Load saved IDs after user is confirmed
+      fetchSavedIds();
     } catch (error) {
       console.error('Failed to fetch user:', error);
       Cookies.remove('accessToken');
@@ -91,18 +120,19 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const { data } = await axios.post(`${API_URL}/auth/register`, userData);
-      
+
       // Save tokens
       Cookies.set('accessToken', data.accessToken, { expires: 7 });
       Cookies.set('refreshToken', data.refreshToken, { expires: 30 });
       setAccessToken(data.accessToken);
       setUser(data.user);
-      
+      fetchSavedIds();
+
       return { success: true, user: data.user };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Registration failed' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Registration failed'
       };
     }
   };
@@ -111,18 +141,19 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await axios.post(`${API_URL}/auth/login`, { email, password });
-      
+
       // Save tokens
       Cookies.set('accessToken', data.accessToken, { expires: 7 });
       Cookies.set('refreshToken', data.refreshToken, { expires: 30 });
       setAccessToken(data.accessToken);
       setUser(data.user);
-      
+      fetchSavedIds();
+
       return { success: true, user: data.user };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Login failed' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Login failed'
       };
     }
   };
@@ -138,6 +169,7 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('refreshToken');
       setAccessToken(null);
       setUser(null);
+      setSavedProductIds(new Set());
     }
   };
 
@@ -155,6 +187,9 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     accessToken,
+    savedProductIds,
+    toggleSavedId,
+    fetchSavedIds,
     register,
     login,
     logout,
