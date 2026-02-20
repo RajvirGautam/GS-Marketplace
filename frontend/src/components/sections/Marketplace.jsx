@@ -605,6 +605,16 @@ const Marketplace = () => {
                 + List Item
               </button>
 
+              {user && (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="btn-ghost hidden md:flex"
+                  style={{ fontSize: 13, padding: '9px 18px' }}
+                >
+                  Dashboard
+                </button>
+              )}
+
               {user ? (
                 <div className="relative user-menu-container">
                   <button

@@ -533,19 +533,18 @@ const UserDashboard = () => {
         /* ═══════════ SIDEBAR - SOFT BRUTALISM ═══════════ */
         .sidebar {
           width: 240px;
-          min-height: 100vh;
           background: rgba(15,15,15,0.8);
           border-right: 2px solid rgba(255,255,255,0.08);
           padding: 20px 16px;
           display: flex;
           flex-direction: column;
-          position: fixed;
-          left: 0;
+          position: sticky;
           top: 0;
-          bottom: 0;
+          height: 100vh;
           z-index: 50;
           overflow-y: auto;
           backdrop-filter: blur(20px);
+          flex-shrink: 0;
         }
 
         .sidebar-profile {
@@ -665,7 +664,7 @@ const UserDashboard = () => {
         /* ═══════════ MAIN ═══════════ */
         .main-area {
           flex: 1;
-          margin-left: 240px;
+          min-width: 0;
           display: flex;
           flex-direction: column;
           min-height: 100vh;
@@ -1261,7 +1260,10 @@ const UserDashboard = () => {
 
           <div className="sidebar-spacer" />
           <div className="sidebar-brand">
-            <span style={{ fontSize: 18 }}>🎓</span> Campus Market
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, color: '#fff' }}>S</div>
+              <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+            </Link>
           </div>
         </aside>
 
@@ -1270,8 +1272,8 @@ const UserDashboard = () => {
           {/* TOP BAR */}
           <header className="topbar">
             <div className="topbar-breadcrumb">
-              <span>🏠</span>
-              <span>Dashboards /</span>
+
+              <span>Dashboard /</span>
               <span className="current">Overview</span>
             </div>
             <div className="topbar-actions">
@@ -1279,12 +1281,11 @@ const UserDashboard = () => {
               <button className="topbar-icon-btn" title="Notifications"><BellIcon /></button>
               <button className="topbar-icon-btn" title="Language"><GlobeIcon /></button>
               <button
-                className="topbar-icon-btn"
-                style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none' }}
+                style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
                 onClick={() => setIsAddProductOpen(true)}
-                title="Add Product"
+                title="List a Product"
               >
-                <PlusIcon />
+                <PlusIcon /> List Product
               </button>
             </div>
           </header>
@@ -1471,9 +1472,7 @@ const UserDashboard = () => {
                   {/* OVERVIEW HEADER */}
                   <div className="overview-header">
                     <h1>Overview</h1>
-                    <button className="today-btn">
-                      Today ▾
-                    </button>
+
                   </div>
 
                   {/* STAT CARDS */}
