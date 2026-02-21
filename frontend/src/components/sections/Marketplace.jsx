@@ -621,8 +621,11 @@ const Marketplace = () => {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="btn-glass"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white">
-                      {user.fullName?.charAt(0).toUpperCase() || 'U'}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                      {user?.profilePicture
+                        ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : user.fullName?.charAt(0).toUpperCase() || 'U'
+                      }
                     </div>
                     <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
                     <ChevronDown />

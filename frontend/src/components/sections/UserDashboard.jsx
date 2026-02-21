@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { productAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
+import MyAccount from './dashboard/MyAccount';
 
 const HeartFilledIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
@@ -480,6 +481,7 @@ const UserDashboard = () => {
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon /> },
     { label: 'Reviews', icon: <StarIcon /> },
+    { label: 'My Account', icon: <UsersIcon /> },
     { label: 'Settings', icon: <SettingsIcon /> },
     { label: 'Logout', icon: <HelpIcon />, action: () => { logout(); navigate('/'); } },
   ];
@@ -1214,7 +1216,12 @@ const UserDashboard = () => {
         {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-profile">
-            <div className="sidebar-avatar">S</div>
+            <div className="sidebar-avatar" style={user?.profilePicture ? { padding: 0, overflow: 'hidden' } : {}}>
+              {user?.profilePicture
+                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : (user?.fullName?.charAt(0).toUpperCase() || 'S')
+              }
+            </div>
             <Link
               to="/"
               style={{ textDecoration: 'none' }}
@@ -1246,7 +1253,7 @@ const UserDashboard = () => {
           {sidebarSettItems.map(item => (
             <button
               key={item.label}
-              className={`sidebar-item`}
+              className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
               onClick={() => {
                 setSidebarActive(item.label);
                 if (item.action) item.action();
@@ -1286,6 +1293,20 @@ const UserDashboard = () => {
                 title="List a Product"
               >
                 <PlusIcon /> List Product
+              </button>
+              {/* User avatar + name in topbar */}
+              <button
+                onClick={() => setSidebarActive('My Account')}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '6px 12px 6px 6px', cursor: 'pointer' }}
+                title="My Account"
+              >
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#0A0A0A' }}>
+                  {user?.profilePicture
+                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : (user?.fullName?.charAt(0).toUpperCase() || 'U')
+                  }
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{userName?.split(' ')[0]}</span>
               </button>
             </div>
           </header>
@@ -1466,6 +1487,9 @@ const UserDashboard = () => {
                     )}
                   </div>
                 </>
+              ) : sidebarActive === 'My Account' ? (
+                /* ── MY ACCOUNT VIEW ── */
+                <MyAccount />
               ) : (
                 /* ── OVERVIEW ── */
                 <>

@@ -145,9 +145,9 @@ router.get('/google',
 
 // Google OAuth callback
 router.get('/google/callback',
-  passport.authenticate('google', { 
-    session: false, 
-    failureRedirect: `${process.env.FRONTEND_URL}/?error=google_auth_failed` 
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL}/?error=google_auth_failed`
   }),
   async (req, res) => {
     try {
@@ -198,17 +198,17 @@ router.post('/verify-id', authenticate, async (req, res) => {
 
     // Validation
     if (!fullName || !enrollmentNumber) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Full name and enrollment number required' 
+        message: 'Full name and enrollment number required'
       });
     }
 
     // Check if already verified
     if (req.user.isVerified) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Account already verified' 
+        message: 'Account already verified'
       });
     }
 
@@ -239,10 +239,10 @@ router.post('/verify-id', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Verification error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Verification failed', 
-      error: error.message 
+      message: 'Verification failed',
+      error: error.message
     });
   }
 });
@@ -270,9 +270,9 @@ router.post('/refresh', async (req, res) => {
     // Generate new access token
     const newAccessToken = generateAccessToken(user._id);
 
-    res.json({ 
+    res.json({
       success: true,
-      accessToken: newAccessToken 
+      accessToken: newAccessToken
     });
   } catch (error) {
     console.error('❌ Refresh token error:', error);
@@ -286,16 +286,55 @@ router.post('/logout', authenticate, async (req, res) => {
   try {
     req.user.refreshToken = null;
     await req.user.save();
-    
+
     console.log('✅ Logout successful:', req.user._id);
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: 'Logout successful' 
+      message: 'Logout successful'
     });
   } catch (error) {
     console.error('❌ Logout error:', error);
     res.status(500).json({ error: 'Logout failed' });
+  }
+});
+
+// ========== UPDATE PROFILE ==========
+
+router.put('/update-profile', authenticate, async (req, res) => {
+  try {
+    const { year, branch, profilePicture } = req.body;
+    const user = req.user;
+
+    if (year !== undefined) user.year = year;
+    if (branch !== undefined) user.branch = branch;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+    user.updatedAt = Date.now();
+
+    await user.save();
+
+    console.log('✅ Profile updated:', user._id);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        enrollmentNumber: user.enrollmentNumber,
+        branch: user.branch,
+        year: user.year,
+        isVerified: user.isVerified,
+        verificationStatus: user.verificationStatus,
+        profilePicture: user.profilePicture,
+        authProvider: user.authProvider,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('❌ Profile update error:', error);
+    res.status(500).json({ error: 'Profile update failed', details: error.message });
   }
 });
 

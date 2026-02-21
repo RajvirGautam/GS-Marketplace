@@ -158,6 +158,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Update user state (for profile edits)
+  const updateUser = (updatedFields) => {
+    setUser(prev => prev ? { ...prev, ...updatedFields } : prev);
+  };
+
   // Logout
   const logout = async () => {
     try {
@@ -194,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loginWithGoogle,
+    updateUser,
     authAxios,
     isAuthenticated: !!user
   };

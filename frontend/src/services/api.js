@@ -124,7 +124,13 @@ export const userAPI = {
     const { data } = await api.get('/auth/me');
     return data;
   },
+
+  updateProfile: async (profileData) => {
+    const { data } = await api.put('/auth/update-profile', profileData);
+    return data;
+  },
 };
+
 
 // ==================== SELLER APIs ====================
 

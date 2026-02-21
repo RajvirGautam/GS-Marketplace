@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 // --- LOCAL ICONS ---
 const ChevronDown = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m6 9 6 6 6-6"/>
+    <path d="m6 9 6 6 6-6" />
   </svg>
 );
 
@@ -55,7 +55,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   useEffect(() => {
     const handleUpdate = () => {
       if (!navRef.current) return
-      
+
       const scrollY = window.scrollY
       const maxScroll = 200
       let ratio = scrollY / maxScroll
@@ -63,7 +63,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       if (ratio < 0) ratio = 0
 
       const isMobile = window.innerWidth < 768
-      
+
       const startWidth = isMobile ? 90 : 55
       const endWidth = 100
       const currentWidth = startWidth + ((endWidth - startWidth) * ratio)
@@ -74,7 +74,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       const currentTop = 65 - (65 * ratio)
       const currentRadius = 65 - (65 * ratio)
-      
+
       // --- REMOVED JS COLOR/OPACITY CALCULATION HERE ---
       // The JS was overriding the Tailwind glass classes.
       // We now rely solely on CSS for the glass effect.
@@ -87,7 +87,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       el.style.borderTopRightRadius = `${currentRadius}px`
       el.style.borderBottomLeftRadius = `${currentRadius}px`
       el.style.borderBottomRightRadius = `${currentRadius}px`
-      
+
       // --- REMOVED JS STYLE OVERRIDES HERE ---
       // el.style.backgroundColor = ...
       // el.style.borderColor = ...
@@ -148,7 +148,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         >
           Dashboard
         </Link>
-        
+
         <div className="h-4 w-[1px] bg-indigo-950/10 dark:bg-white/10 mx-1"></div>
 
         <button
@@ -160,7 +160,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
         {/* Auth Buttons */}
         {!user ? (
-          <button 
+          <button
             onClick={onConnectClick}
             className="py-2 px-5 text-xs bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
           >
@@ -170,18 +170,21 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           <div className="flex items-center gap-3">
             {/* WRAPPER FOR USER MENU */}
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="group flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/15 hover:border-black/20 dark:hover:border-white text-indigo-900 dark:text-white transition-all backdrop-blur-md cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
-                  {getInitials()}
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shadow-sm overflow-hidden">
+                  {user?.profilePicture
+                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : getInitials()
+                  }
                 </div>
                 <span className="text-xs font-bold tracking-wide">
                   {getDisplayName()}
                 </span>
                 <div className={`opacity-50 group-hover:opacity-100 transition-all duration-200 ${showUserMenu ? 'rotate-180' : ''}`}>
-                   <ChevronDown />
+                  <ChevronDown />
                 </div>
               </button>
 
@@ -202,14 +205,14 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Minimalist Links */}
-                  <Link 
+                  <Link
                     to="/dashboard"
                     onClick={() => setShowUserMenu(false)}
                     className="block w-full px-4 py-3 text-xs font-mono uppercase font-bold text-white/70 hover:text-white hover:bg-white/5 transition-colors text-left tracking-wide"
                   >
-                     View Dashboard
+                    View Dashboard
                   </Link>
                 </div>
               )}
@@ -233,12 +236,12 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       {/* Mobile Menu Toggle */}
       <div className="flex items-center gap-3 md:hidden">
         {!user && (
-            <button 
-                onClick={onConnectClick}
-                className="py-1.5 px-3 text-[10px] bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg"
-            >
-                CONNECT
-            </button>
+          <button
+            onClick={onConnectClick}
+            className="py-1.5 px-3 text-[10px] bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-lg"
+          >
+            CONNECT
+          </button>
         )}
         <button
           onClick={toggleTheme}
@@ -271,10 +274,10 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           >
             Dashboard
           </Link>
-          
+
           {/* Auth Mobile */}
           {!user ? (
-            <button 
+            <button
               onClick={() => {
                 setIsOpen(false);
                 onConnectClick();
@@ -286,14 +289,17 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           ) : (
             <div className="mt-2 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold">
-                  {getInitials()}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold overflow-hidden">
+                  {user?.profilePicture
+                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : getInitials()
+                  }
                 </div>
                 <div className="overflow-hidden">
-                    <div className="text-indigo-900 dark:text-white font-bold truncate">
+                  <div className="text-indigo-900 dark:text-white font-bold truncate">
                     {user.fullName || user.name || "Student"}
-                    </div>
-                    <div className="text-xs text-indigo-900/50 dark:text-white/50 truncate">{user.email}</div>
+                  </div>
+                  <div className="text-xs text-indigo-900/50 dark:text-white/50 truncate">{user.email}</div>
                 </div>
               </div>
               <button
@@ -310,7 +316,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           )}
         </div>
       )}
-    </nav> 
+    </nav>
   )
 }
 
