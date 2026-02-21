@@ -49,6 +49,19 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     { value: 'free', label: 'FREE', desc: 'Giveaway' },
   ];
 
+  const meetupSpots = [
+    'Library Main Gate',
+    'ATC Building Entrance',
+    'LT Hall (Lecture Theatre)',
+    'Main Gate (Opposite Lantern)',
+    'College Canteen',
+    'Diamond Jubilee Hall',
+    'Hostel Block A/B/C',
+    'Sports Ground Pavilion',
+    'Workshop Area',
+    'Admin Block'
+  ];
+
   // Populate form when product changes
   useEffect(() => {
     if (product) {
@@ -241,7 +254,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
   return (
     <>
       {/* Custom Toaster with higher z-index */}
-      <Toaster 
+      <Toaster
         position="bottom-center"
         toastOptions={{
           duration: 3000,
@@ -632,7 +645,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="modal-body">
-            
+
             {/* Basic Info */}
             <div className="form-section">
               <label className="form-label">Product Title *</label>
@@ -770,26 +783,35 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
             {/* Location & Tag */}
             <div className="form-row">
               <div className="form-section">
-                <label className="form-label">Location</label>
-                <input
-                  type="text"
+                <label className="form-label">Meetup Spot</label>
+                <select
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="SGSITS Campus"
-                />
+                >
+                  <option value="SGSITS Campus">SGSITS Campus (General)</option>
+                  {meetupSpots.map(spot => (
+                    <option key={spot} value={spot}>{spot}</option>
+                  ))}
+                  <option value="Other">Other (Specify in description)</option>
+                </select>
+                <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.1)', borderRadius: 4 }}>
+                  <p style={{ fontSize: '10px', color: '#00D9FF', fontStyle: 'italic' }}>
+                    Tip: Meet in public campus areas for safety.
+                  </p>
+                </div>
               </div>
 
               <div className="form-section">
-                <label className="form-label">Tag</label>
+                <label className="form-label">Dept. Tag</label>
                 <input
                   type="text"
                   name="tag"
                   value={formData.tag}
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="FOR SALE"
+                  placeholder="e.g. CS-Senior"
                 />
               </div>
             </div>

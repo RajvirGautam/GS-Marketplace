@@ -171,14 +171,14 @@ router.get('/seller/:sellerId', async (req, res) => {
     const allProducts = await Product.find({ seller: sellerId })
       .populate({
         path: 'seller',
-        select: 'fullName enrollmentNumber isVerified branch year profilePicture createdAt authProvider'
+        select: 'fullName enrollmentNumber isVerified branch year profilePicture createdAt authProvider rating reviewCount totalSales'
       })
       .sort({ createdAt: -1 });
 
     if (allProducts.length === 0) {
       // Seller might exist but have no products — try fetching user directly
       const User = (await import('../models/User.js')).default;
-      const user = await User.findById(sellerId).select('fullName enrollmentNumber isVerified branch year profilePicture createdAt');
+      const user = await User.findById(sellerId).select('fullName enrollmentNumber isVerified branch year profilePicture createdAt rating reviewCount totalSales');
       if (!user) {
         return res.status(404).json({ success: false, message: 'Seller not found' });
       }
@@ -216,20 +216,135 @@ router.get('/seller/:sellerId', async (req, res) => {
 
     res.json({
       success: true,
-      seller,
-      stats: {
-        totalListings: allProducts.length,
-        activeListings: activeProducts.length,
-        soldListings: soldProducts.length,
+      analytics: {
+        totalListings,
+        activeListings,
+        soldListings,
+        pendingListings,
         totalViews,
         totalSaves,
+        totalRevenue,
         categoryBreakdown
-      },
-      recentListings
+      }
     });
   } catch (error) {
     console.error('Error fetching seller profile:', error);
     res.status(500).json({ success: false, message: 'Error fetching seller profile', error: error.message });
+  }
+});
+
+// POST /api/products/analyze - Simple AI Categorization
+router.post('/analyze', authenticate, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image provided' });
+    }
+
+    // Convert to base64 for Cloudinary
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+    // Upload with categorization (using Cloudinary's built-in analysis if available)
+    const uploadRes = await cloudinary.uploader.upload(dataURI, {
+      folder: 'gs-marketplace-analysis',
+      categorization: 'google_tagging', // This is a common add-on
+      auto_tagging: 0.6
+    });
+
+    console.log('🤖 AI Analysis Result:', uploadRes.tags);
+
+    // Heuristic-based categorization based on tags
+    const tags = (uploadRes.tags || []).map(t => t.toLowerCase());
+    let suggestedCategory = 'misc';
+
+    const categoryKeywords = {
+      electronics: ['phone', 'laptop', 'computer', 'circuit', 'gadget', 'tech', 'electronic', 'cable', 'battery'],
+      books: ['book', 'paper', 'text', 'notebook', 'library', 'publication', 'magazine'],
+      stationery: ['pen', 'pencil', 'marker', 'desk', 'office'],
+      lab: ['microscope', 'test tube', 'beaker', 'laboratory', 'tool', 'scientific'],
+      hostel: ['bed', 'mattress', 'kettle', 'fan', 'furniture', 'room']
+    };
+
+    for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+      if (tags.some(tag => keywords.some(k => tag.includes(k)))) {
+        suggestedCategory = cat;
+        break;
+      }
+    }
+
+    res.json({
+      success: true,
+      suggestion: {
+        category: suggestedCategory,
+        tags: uploadRes.tags,
+        confidence: 0.85
+      }
+    });
+
+  } catch (error) {
+    console.error('AI Analysis Error:', error);
+    res.status(500).json({ success: false, message: 'AI Analysis failed', error: error.message });
+  }
+});
+
+// GET /api/products/price-suggestion - Historical data based pricing
+router.get('/price-suggestion', async (req, res) => {
+  try {
+    const { category, condition } = req.query;
+
+    if (!category) {
+      return res.status(400).json({ success: false, message: 'Category is required' });
+    }
+
+    // Get average price for similar items
+    const similarProducts = await Product.find({
+      category,
+      status: { $in: ['active', 'sold'] }
+    }).select('price condition');
+
+    if (similarProducts.length === 0) {
+      // Fallback prices for campus items
+      const fallbacks = { electronics: 5000, books: 250, lab: 800, stationery: 50, hostel: 1200, tools: 600, misc: 300 };
+      return res.json({
+        success: true,
+        suggestedPrice: fallbacks[category] || 500,
+        isFallback: true
+      });
+    }
+
+    // Calculate weighted average based on condition
+    let total = 0;
+    let count = 0;
+
+    similarProducts.forEach(p => {
+      if (p.price) {
+        total += p.price;
+        count++;
+      }
+    });
+
+    let avgPrice = total / count;
+
+    // Adjust for condition
+    const conditionMultipliers = {
+      'New': 1.2,
+      'Like New': 1.0,
+      'Good': 0.8,
+      'Fair': 0.6,
+      'Poor': 0.4
+    };
+
+    const suggestedPrice = Math.round(avgPrice * (conditionMultipliers[condition] || 0.8));
+
+    res.json({
+      success: true,
+      suggestedPrice: Math.max(5, suggestedPrice), // Min 5 rupees
+      sampleSize: count
+    });
+
+  } catch (error) {
+    console.error('Price Suggestion Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate price suggestion' });
   }
 });
 
@@ -358,6 +473,20 @@ router.get('/user/analytics', authenticate, async (req, res) => {
       .filter(p => p.status === 'sold')
       .reduce((sum, p) => sum + (p.price || 0), 0);
 
+    // Category breakdown from all listings
+    const categoryMap = {};
+    products.forEach(p => {
+      categoryMap[p.category] = (categoryMap[p.category] || 0) + 1;
+    });
+    const categoryBreakdown = Object.entries(categoryMap)
+      .map(([category, count]) => ({
+        label: category.charAt(0).toUpperCase() + category.slice(1),
+        count,
+        // Calculate percentage for frontend or let frontend do it
+        value: count
+      }))
+      .sort((a, b) => b.count - a.count);
+
     res.json({
       success: true,
       analytics: {
@@ -367,7 +496,8 @@ router.get('/user/analytics', authenticate, async (req, res) => {
         pendingListings,
         totalViews,
         totalSaves,
-        totalRevenue
+        totalRevenue,
+        categoryBreakdown
       }
     });
   } catch (error) {

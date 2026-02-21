@@ -59,6 +59,19 @@ const CalendarIcon = () => (
     </svg>
 );
 
+const StarIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+);
+
+const AwardIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="7" />
+        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+    </svg>
+);
+
 // ─── Category display helpers ─────────────────────────────────────────────────
 
 const CATEGORY_META = {
@@ -442,15 +455,14 @@ const SellerProfile = () => {
                         </div>
                     </div>
 
-                    {/* ── Stats Row ── */}
                     <div className="h-animate h-animate-d4 mb-12">
-                        <div className="section-title"><PackageIcon /> Activity Stats</div>
+                        <div className="section-title"><PackageIcon /> Seller Reputation</div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                            <StatCard icon={<GridIcon />} label="Total" value={stats.totalListings} accent="#00D9FF" delay={100} />
-                            <StatCard icon={<TagIcon />} label="Active" value={stats.activeListings} accent="#10B981" delay={150} />
-                            <StatCard icon={<PackageIcon />} label="Sold" value={stats.soldListings} accent="#F59E0B" delay={200} />
-                            <StatCard icon={<EyeIcon />} label="Views" value={stats.totalViews} accent="#8B5CF6" delay={250} />
-                            <StatCard icon={<HeartIcon />} label="Saves" value={stats.totalSaves} accent="#EF4444" delay={300} />
+                            <StatCard icon={<StarIcon />} label="Reputation" value={`${seller?.rating || 5.0} / 5`} accent="#F59E0B" delay={100} />
+                            <StatCard icon={<ShieldCheck />} label="Verified" value={seller?.isVerified ? 'YES' : 'NO'} accent="#00D9FF" delay={150} />
+                            <StatCard icon={<AwardIcon />} label="Sales" value={seller?.totalSales || 0} accent="#10B981" delay={200} />
+                            <StatCard icon={<HeartIcon />} label="Reviews" value={seller?.reviewCount || 0} accent="#EC4899" delay={250} />
+                            <StatCard icon={<EyeIcon />} label="Profile Views" value={stats.totalViews} accent="#8B5CF6" delay={300} />
                         </div>
                     </div>
 
@@ -513,6 +525,20 @@ const SellerProfile = () => {
                                 )}
                             </>
                         )}
+                    </div>
+
+                    {/* ── Reviews Placeholder ── */}
+                    <div className="mt-16 h-animate h-animate-d4" style={{ animationDelay: '0.6s', opacity: 0 }}>
+                        <div className="section-title">Verified Reviews</div>
+                        <div className="bg-[rgba(255,255,255,0.02)] border border-dashed border-white/10 rounded-2xl p-12 text-center">
+                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                <StarIcon />
+                            </div>
+                            <h3 className="text-lg font-bold text-white mb-2">No Reviews Yet</h3>
+                            <p className="text-sm text-white/40 max-w-sm mx-auto">
+                                Once this seller completes more transactions, their verified student reviews will appear here.
+                            </p>
+                        </div>
                     </div>
 
                     {/* ── Footer space ── */}

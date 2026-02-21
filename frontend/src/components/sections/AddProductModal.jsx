@@ -28,6 +28,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
   const [specs, setSpecs] = useState([{ label: '', value: '' }]);
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [isAIAnalyzing, setIsAIAnalyzing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
 
   const categories = [
     { value: 'books', label: 'Books & Notes', emoji: '📚' },
@@ -54,6 +57,19 @@ const AddProductModal = ({ isOpen, onClose }) => {
     { value: 'barter', label: 'FOR BARTER', desc: 'Exchange item' },
     { value: 'rent', label: 'FOR RENT', desc: 'Temporary use' },
     { value: 'free', label: 'FREE', desc: 'Giveaway' },
+  ];
+
+  const meetupSpots = [
+    'Library Main Gate',
+    'ATC Building Entrance',
+    'LT Hall (Lecture Theatre)',
+    'Main Gate (Opposite Lantern)',
+    'College Canteen',
+    'Diamond Jubilee Hall',
+    'Hostel Block A/B/C',
+    'Sports Ground Pavilion',
+    'Workshop Area',
+    'Admin Block'
   ];
 
   // Handle file upload
@@ -85,9 +101,53 @@ const AddProductModal = ({ isOpen, onClose }) => {
   };
 
   const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+    const newImages = [...images];
+    const newPreviews = [...imagePreviews];
+    newImages.splice(index, 1);
+    newPreviews.splice(index, 1);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
   };
+
+  const handleAIFill = async () => {
+    if (images.length === 0) {
+      toast.error('Upload an image first for AI analysis');
+      return;
+    }
+
+    setIsAIAnalyzing(true);
+    setAiSuggestion(null);
+
+    try {
+      const res = await productAPI.analyzeImage(images[0]);
+      if (res.success) {
+        setFormData(prev => ({ ...prev, category: res.suggestion.category }));
+        setAiSuggestion(res.suggestion);
+        toast.success(`AI suggests: ${res.suggestion.category.toUpperCase()}`);
+
+        // After category is set, get a price suggestion
+        setIsPriceLoading(true);
+        const priceRes = await productAPI.getPriceSuggestion(res.suggestion.category, formData.condition || 'Good');
+        if (priceRes.success) {
+          setAiSuggestion(prev => ({ ...prev, suggestedPrice: priceRes.suggestedPrice }));
+          toast.success(`Fair price suggested: ₹${priceRes.suggestedPrice}`);
+        }
+      }
+    } catch (err) {
+      console.error('AI Fill error:', err);
+      toast.error('AI Analysis failed. Try manual input.');
+    } finally {
+      setIsAIAnalyzing(false);
+      setIsPriceLoading(false);
+    }
+  };
+
+  const applyAIPricing = () => {
+    if (aiSuggestion?.suggestedPrice) {
+      setFormData(prev => ({ ...prev, price: aiSuggestion.suggestedPrice }));
+    }
+  };
+
 
   const addHighlight = () => setHighlights([...highlights, '']);
   const updateHighlight = (index, value) => {
@@ -163,7 +223,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
       // Create FormData
       const formDataToSend = new FormData();
-      
+
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('price', formData.type === 'free' ? 0 : formData.price);
@@ -259,7 +319,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Custom Toaster with higher z-index */}
-      <Toaster 
+      <Toaster
         position="bottom-center"
         toastOptions={{
           duration: 3000,
@@ -275,7 +335,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
           zIndex: 99999, // Higher than modal
         }}
       />
-      
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -734,40 +794,55 @@ const AddProductModal = ({ isOpen, onClose }) => {
                   {errors.description && <p className="error-text">{errors.description}</p>}
                 </div>
 
-                {/* Price & Tag */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                {/* Location & Tag */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                   <div>
-                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">
-                      Price (₹) {formData.type !== 'free' && '*'}
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="1200"
+                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Meetup Spot *</label>
+                    <select
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       className="input-brutal"
-                      min="0"
-                      step="10"
-                      disabled={formData.type === 'free'}
-                    />
-                    {errors.price && <p className="error-text">{errors.price}</p>}
+                    >
+                      <option value="SGSITS Campus">SGSITS Campus (General)</option>
+                      {meetupSpots.map(spot => (
+                        <option key={spot} value={spot}>{spot}</option>
+                      ))}
+                      <option value="Other">Other (Specify in description)</option>
+                    </select>
+                    <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.1)', borderRadius: 4 }}>
+                      <p style={{ fontSize: '10px', color: '#00D9FF', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <ZapIcon /> <span>SGSITS TIP: Preferred spots are well-lit and public.</span>
+                      </p>
+                    </div>
                   </div>
                   <div>
-                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Tag</label>
+                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Department Tag</label>
                     <input
                       type="text"
                       value={formData.tag}
                       onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
-                      placeholder="Electronics"
+                      placeholder="e.g. CS-2026"
                       className="input-brutal"
                     />
                   </div>
                 </div>
 
-                {/* Images */}
-                <div className="mb-6">
-                  <label className="block mono text-xs text-white opacity-60 mb-3 uppercase tracking-wider">Images * (Max 5)</label>
-                  
+                {/* Image Upload Area */}
+                <div style={{ marginBottom: 32 }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block mono text-[10px] text-white/40 uppercase tracking-widest">Product Images (Min 1) *</label>
+                    {imagePreviews.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleAIFill}
+                        disabled={isAIAnalyzing}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded text-[10px] font-bold text-cyan-400 hover:bg-cyan-500/20 transition-all disabled:opacity-50"
+                      >
+                        {isAIAnalyzing ? '✨ ANALYZING...' : '✨ SNAP & FILL (AI)'}
+                      </button>
+                    )}
+                  </div>
+
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -834,6 +909,33 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     ))}
                   </div>
                   {errors.category && <p className="error-text mt-2">{errors.category}</p>}
+                </div>
+
+                {/* Price */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block mono text-xs text-white opacity-60 uppercase tracking-wider">Price (₹) *</label>
+                    {aiSuggestion?.suggestedPrice && (
+                      <button
+                        type="button"
+                        onClick={applyAIPricing}
+                        className="text-[10px] font-bold text-cyan-400 border-b border-cyan-400/30 hover:text-cyan-300 transition-colors"
+                      >
+                        APPLY AI PRICE: ₹{aiSuggestion.suggestedPrice}
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 font-bold">₹</span>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      className="input-brutal pl-8"
+                    />
+                  </div>
+                  {errors.price && <p className="error-text">{errors.price}</p>}
                 </div>
 
                 {/* Type */}
@@ -1011,8 +1113,8 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 {/* Navigation */}
                 <div className="flex justify-between gap-3 pt-6 border-t border-white border-opacity-10">
                   <button onClick={handleBack} className="btn-brutal-secondary" disabled={isSubmitting}>← BACK</button>
-                  <button 
-                    onClick={handleSubmit} 
+                  <button
+                    onClick={handleSubmit}
                     disabled={isSubmitting}
                     className="btn-brutal-primary"
                   >

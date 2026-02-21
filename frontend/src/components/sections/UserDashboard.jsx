@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { productAPI } from '../../services/api';
+import { productAPI, offerAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
 import MyAccount from './dashboard/MyAccount';
@@ -280,6 +280,9 @@ const UserDashboard = () => {
   const [savedProducts, setSavedProducts] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [offersReceived, setOffersReceived] = useState([]);
+  const [offersSent, setOffersSent] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(false);
 
   // Mouse glow effect
   useEffect(() => {
@@ -309,7 +312,36 @@ const UserDashboard = () => {
   // Fetch saved products when tab becomes active
   useEffect(() => {
     if (sidebarActive === 'Saved Products') fetchSavedProducts();
+    if (sidebarActive === 'Negotiations') fetchOffers();
   }, [sidebarActive]);
+
+  const fetchOffers = async () => {
+    try {
+      setOffersLoading(true);
+      const [receivedRes, sentRes] = await Promise.all([
+        offerAPI.getReceived(),
+        offerAPI.getSent()
+      ]);
+      if (receivedRes.success) setOffersReceived(receivedRes.offers);
+      if (sentRes.success) setOffersSent(sentRes.offers);
+    } catch (err) {
+      console.error('Error fetching offers:', err);
+    } finally {
+      setOffersLoading(false);
+    }
+  };
+
+  const handleOfferStatus = async (offerId, status) => {
+    try {
+      const res = await offerAPI.updateStatus(offerId, status);
+      if (res.success) {
+        // Optimistic update or refetch
+        fetchOffers();
+      }
+    } catch (err) {
+      console.error('Error updating offer status:', err);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -396,12 +428,18 @@ const UserDashboard = () => {
     );
   };
 
-  const donutData = [
-    { label: 'Electronics', value: stats.totalListings > 0 ? Math.floor(stats.totalListings * 0.4) : 5, color: '#00D9FF' },
-    { label: 'Books', value: stats.totalListings > 0 ? Math.floor(stats.totalListings * 0.3) : 3, color: '#7C3AED' },
-    { label: 'Clothes', value: stats.totalListings > 0 ? Math.floor(stats.totalListings * 0.2) : 2, color: '#F59E0B' },
-    { label: 'Others', value: stats.totalListings > 0 ? Math.floor(stats.totalListings * 0.1) : 1, color: '#10B981' },
-  ];
+  const donutData = stats.categoryBreakdown && stats.categoryBreakdown.length > 0
+    ? stats.categoryBreakdown.map((item, idx) => ({
+      label: item.label,
+      value: item.count,
+      color: ['#00D9FF', '#7C3AED', '#F59E0B', '#10B981', '#EF4444', '#EC4899'][idx % 6]
+    }))
+    : [
+      { label: 'Electronics', value: 5, color: '#00D9FF' },
+      { label: 'Books', value: 3, color: '#7C3AED' },
+      { label: 'Clothes', value: 2, color: '#F59E0B' },
+      { label: 'Others', value: 1, color: '#10B981' },
+    ];
 
   // Real engagement data: views+saves per listing, chronological
   const engagementData = (() => {
@@ -477,6 +515,7 @@ const UserDashboard = () => {
     { label: 'Marketplace', icon: <CartIcon />, action: () => navigate('/marketplace') },
     { label: 'My Listings', icon: <PackageIcon /> },
     { label: 'Saved Products', icon: <HeartFilledIcon /> },
+    { label: 'Negotiations', icon: <TrendingIcon /> },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon /> },
@@ -1407,6 +1446,134 @@ const UserDashboard = () => {
                       </div>
                     )}
                   </div>
+                </>
+              ) : sidebarActive === 'Negotiations' ? (
+                /* ── NEGOTIATIONS VIEW ── */
+                <>
+                  <div className="overview-header">
+                    <div>
+                      <h1>Negotiations</h1>
+                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                        Track offers you've received as a seller and sent as a buyer.
+                      </div>
+                    </div>
+                  </div>
+
+                  {offersLoading ? (
+                    <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                      Loading offers...
+                    </div>
+                  ) : (
+                    <div className="grid" style={{ gridTemplateColumns: '1fr', gap: 24 }}>
+                      {/* Received Offers */}
+                      <div className="card" style={{ padding: 20 }}>
+                        <div className="card-header" style={{ marginBottom: 16 }}>
+                          <span className="card-title"><BellIcon /> Received Offers</span>
+                        </div>
+                        {offersReceived.length > 0 ? offersReceived.map((offer) => (
+                          <div className="listing-item" key={offer._id} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', marginBottom: 12, borderRadius: 12 }}>
+                            <div className="listing-img" style={{ width: 50, height: 50 }}>
+                              <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <div>
+                                  <div style={{ fontSize: 13, fontWeight: 700 }}>{offer.product?.title}</div>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Buyer: {offer.buyer?.fullName} ({offer.buyer?.branch})</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: 15, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>List: ₹{offer.product?.price}</div>
+                                </div>
+                              </div>
+                              {offer.message && (
+                                <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', marginTop: 4, background: 'rgba(255,255,255,0.03)', padding: 6, borderRadius: 6 }}>
+                                  "{offer.message}"
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                                <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                    offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                      'bg-red-500/10 text-red-500 border-red-500/20'
+                                  }`}>
+                                  {offer.status}
+                                </span>
+                                {offer.status === 'pending' && (
+                                  <div style={{ display: 'flex', gap: 6 }}>
+                                    <button
+                                      className="listing-action-btn"
+                                      style={{ padding: '4px 8px', fontSize: 10, borderColor: 'rgba(16,185,129,0.3)', color: '#10B981' }}
+                                      onClick={() => handleOfferStatus(offer._id, 'accepted')}
+                                    >
+                                      ACCEPT
+                                    </button>
+                                    <button
+                                      className="listing-action-btn"
+                                      style={{ padding: '4px 8px', fontSize: 10, borderColor: 'rgba(239,68,68,0.3)', color: '#EF4444' }}
+                                      onClick={() => handleOfferStatus(offer._id, 'rejected')}
+                                    >
+                                      REJECT
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )) : (
+                          <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+                            No offers received yet.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Sent Offers */}
+                      <div className="card" style={{ padding: 20 }}>
+                        <div className="card-header" style={{ marginBottom: 16 }}>
+                          <span className="card-title"><GlobeIcon /> Sent Offers</span>
+                        </div>
+                        {offersSent.length > 0 ? offersSent.map((offer) => (
+                          <div className="listing-item" key={offer._id} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', marginBottom: 12, borderRadius: 12 }}>
+                            <div className="listing-img" style={{ width: 50, height: 50 }}>
+                              <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <div>
+                                  <div style={{ fontSize: 13, fontWeight: 700 }}>{offer.product?.title}</div>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Seller: {offer.seller?.fullName}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: 15, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>List: ₹{offer.product?.price}</div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                                <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                    offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                      'bg-red-500/10 text-red-500 border-red-500/20'
+                                  }`}>
+                                  {offer.status}
+                                </span>
+                                {offer.status === 'pending' && (
+                                  <button
+                                    className="listing-action-btn"
+                                    style={{ padding: '4px 8px', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}
+                                    onClick={() => handleOfferStatus(offer._id, 'cancelled')}
+                                  >
+                                    CANCEL
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )) : (
+                          <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+                            No offers sent yet.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : sidebarActive === 'Saved Products' ? (
                 /* ── SAVED PRODUCTS VIEW ── */

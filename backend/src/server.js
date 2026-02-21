@@ -8,6 +8,7 @@ import passport from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
 import './config/cloudinary.js';
 
 dotenv.config();
@@ -46,6 +47,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/offers', offerRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

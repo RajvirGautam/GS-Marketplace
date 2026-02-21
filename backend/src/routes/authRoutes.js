@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { authenticate } from '../middleware/auth.js';
 import passport from '../config/passport.js';
+import cloudinary from '../config/cloudinary.js';
 
 const router = express.Router();
 
@@ -296,6 +297,57 @@ router.post('/logout', authenticate, async (req, res) => {
   } catch (error) {
     console.error('❌ Logout error:', error);
     res.status(500).json({ error: 'Logout failed' });
+  }
+});
+
+// ========== UPLOAD AVATAR TO CLOUDINARY ==========
+
+router.post('/upload-avatar', authenticate, async (req, res) => {
+  try {
+    const { imageData } = req.body; // base64 data URL
+    if (!imageData) {
+      return res.status(400).json({ success: false, error: 'No image data provided' });
+    }
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(imageData, {
+      folder: 'avatars',
+      public_id: `user_${req.user._id}`,
+      overwrite: true,
+      resource_type: 'image',
+      transformation: [
+        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+        { quality: 'auto', fetch_format: 'auto' }
+      ]
+    });
+
+    // Save URL to user
+    req.user.profilePicture = result.secure_url;
+    req.user.updatedAt = Date.now();
+    await req.user.save();
+
+    console.log('✅ Avatar uploaded for user:', req.user._id);
+
+    res.json({
+      success: true,
+      profilePicture: result.secure_url,
+      user: {
+        id: req.user._id,
+        email: req.user.email,
+        fullName: req.user.fullName,
+        enrollmentNumber: req.user.enrollmentNumber,
+        branch: req.user.branch,
+        year: req.user.year,
+        isVerified: req.user.isVerified,
+        verificationStatus: req.user.verificationStatus,
+        profilePicture: result.secure_url,
+        authProvider: req.user.authProvider,
+        createdAt: req.user.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('❌ Avatar upload error:', error);
+    res.status(500).json({ success: false, error: 'Avatar upload failed', details: error.message });
   }
 });
 

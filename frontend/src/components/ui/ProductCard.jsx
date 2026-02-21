@@ -120,6 +120,12 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const getAccentColor = () => product.accent || '#00D9FF';
   const getGradientStart = () => product.gradientStart || '#1a1a1a';
 
+  const getDeptBadge = () => {
+    if (!product.branch) return null;
+    const yearLabel = product.year ? `${product.year}` : '';
+    return `${product.branch.toUpperCase()}${yearLabel ? ` '${yearLabel.slice(-2)}` : ''}`;
+  };
+
   // Stop propagation helper
   const stopNav = (e) => {
     e.preventDefault();
@@ -197,8 +203,15 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
           )}
           {(product.isVerified || product.seller?.isVerified) && (
-            <div className="absolute top-3 right-3 bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
-              Verified
+            <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+              <div className="bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
+                Verified
+              </div>
+              {getDeptBadge() && (
+                <div className="bg-white/10 backdrop-blur text-white px-2 py-1 border border-white/20 mono text-[8px] font-bold">
+                  {getDeptBadge()}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -323,6 +336,11 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           {(product.isVerified || product.seller?.isVerified) && (
             <div className="bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
               Verified
+            </div>
+          )}
+          {getDeptBadge() && (
+            <div className="bg-white/10 backdrop-blur text-white px-2 py-1 border border-white/20 mono text-[8px] font-bold">
+              {getDeptBadge()}
             </div>
           )}
         </div>

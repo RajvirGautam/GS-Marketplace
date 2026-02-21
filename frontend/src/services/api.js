@@ -114,6 +114,20 @@ export const productAPI = {
     const { data } = await api.post(`/products/${id}/view`);
     return data;
   },
+
+  analyzeImage: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    const { data } = await api.post('/products/analyze', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data;
+  },
+
+  getPriceSuggestion: async (category, condition) => {
+    const { data } = await api.get(`/products/price-suggestion?category=${category}&condition=${condition}`);
+    return data;
+  },
 };
 
 
@@ -129,6 +143,11 @@ export const userAPI = {
     const { data } = await api.put('/auth/update-profile', profileData);
     return data;
   },
+
+  uploadAvatar: async (imageData) => {
+    const { data } = await api.post('/auth/upload-avatar', { imageData });
+    return data;
+  },
 };
 
 
@@ -137,6 +156,27 @@ export const userAPI = {
 export const sellerAPI = {
   getProfile: async (sellerId) => {
     const { data } = await api.get(`/products/seller/${sellerId}`);
+    return data;
+  },
+};
+
+// ==================== OFFER APIs ====================
+
+export const offerAPI = {
+  create: async (offerData) => {
+    const { data } = await api.post('/offers', offerData);
+    return data;
+  },
+  getReceived: async () => {
+    const { data } = await api.get('/offers/received');
+    return data;
+  },
+  getSent: async () => {
+    const { data } = await api.get('/offers/sent');
+    return data;
+  },
+  updateStatus: async (id, status) => {
+    const { data } = await api.patch(`/offers/${id}/status`, { status });
     return data;
   },
 };

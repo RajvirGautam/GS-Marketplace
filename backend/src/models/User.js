@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: function() {
+    required: function () {
       return !this.googleId; // Password required only if not using Google
     }
   },
@@ -56,6 +56,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  branch: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  year: {
+    type: Number,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -63,16 +72,28 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  rating: {
+    type: Number,
+    default: 5.0
+  },
+  reviewCount: {
+    type: Number,
+    default: 0
+  },
+  totalSales: {
+    type: Number,
+    default: 0
   }
 });
 
 // Hash password before saving (only for local auth)
-userSchema.pre('save', async function() {
+userSchema.pre('save', async function () {
   // Skip if password is not modified or doesn't exist
   if (!this.isModified('password') || !this.password) {
     return; // Don't call next(), just return
   }
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -82,7 +103,7 @@ userSchema.pre('save', async function() {
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };

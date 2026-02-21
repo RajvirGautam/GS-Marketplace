@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { productAPI } from '../../services/api';
+import { productAPI, offerAPI } from '../../services/api';
 
 // --- ICONS ---
 const ArrowLeft = () => (
@@ -96,6 +96,12 @@ const ProductPage = () => {
   const [saveCount, setSaveCount] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerMessage, setOfferMessage] = useState('');
+  const [offerSubmitting, setOfferSubmitting] = useState(false);
+  const [offerError, setOfferError] = useState('');
+  const [offerSuccess, setOfferSuccess] = useState(false);
 
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
@@ -145,6 +151,36 @@ const ProductPage = () => {
     const sellerName = typeof product.seller === 'object' ? product.seller.fullName : product.user;
     console.log(`Starting chat with ${sellerName} as ${user.fullName}`);
     alert(`Starting chat with ${sellerName}`);
+  };
+
+  const handleMakeOffer = async (e) => {
+    e.preventDefault();
+    if (!user) return navigate('/login');
+
+    setOfferSubmitting(true);
+    setOfferError('');
+
+    try {
+      const res = await offerAPI.create({
+        productId: product._id,
+        offerPrice: Number(offerAmount),
+        message: offerMessage
+      });
+
+      if (res.success) {
+        setOfferSuccess(true);
+        setTimeout(() => {
+          setShowOfferModal(false);
+          setOfferSuccess(false);
+          setOfferAmount('');
+          setOfferMessage('');
+        }, 2000);
+      }
+    } catch (err) {
+      setOfferError(err.response?.data?.message || 'Failed to send offer. You might already have a pending offer.');
+    } finally {
+      setOfferSubmitting(false);
+    }
   };
 
   // Handle back navigation with zoom out effect
@@ -846,6 +882,20 @@ const ProductPage = () => {
           {/* 6. Specs */}
           {product.specs && (
             <div className="card area-specs fade-in delay-3">
+              <div className="flex gap-4 mb-6">
+                <button className="btn-primary flex-1" onClick={handleContactSeller}>
+                  <Message /> Chat with Seller
+                </button>
+                {user?._id !== (typeof product.seller === 'object' ? product.seller._id : product.seller) && (
+                  <button
+                    className="btn-glass flex-1 border-[#00D9FF]/20 text-[#00D9FF] hover:bg-[#00D9FF]/10"
+                    onClick={() => setShowOfferModal(true)}
+                  >
+                    <SparklesIcon /> Make Offer
+                  </button>
+                )}
+              </div>
+
               <div className="card-header">
                 <div className="card-title">
                   <GridIcon /> Specifications
@@ -883,6 +933,81 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Make Offer Modal ── */}
+      {showOfferModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !offerSubmitting && setShowOfferModal(false)}></div>
+          <div className="relative w-full max-w-md bg-[#141414] border border-white/10 rounded-3xl p-8 shadow-2xl fade-in overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00D9FF] rounded-full blur-[80px] opacity-10"></div>
+
+            <h2 className="text-2xl font-black mb-1">Make an Offer</h2>
+            <p className="text-white/40 text-sm mb-6">Negotiate a fair price for this item.</p>
+
+            {offerSuccess ? (
+              <div className="py-8 text-center">
+                <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
+                  <Shield />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Offer Sent Successfully!</h3>
+                <p className="text-sm text-white/40">The seller will be notified of your offer.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleMakeOffer} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Proposed Price</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold">₹</span>
+                    <input
+                      type="number"
+                      required
+                      value={offerAmount}
+                      onChange={(e) => setOfferAmount(e.target.value)}
+                      placeholder={product.price}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-8 pr-4 text-white font-bold focus:border-[#00D9FF] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Message (Optional)</label>
+                  <textarea
+                    value={offerMessage}
+                    onChange={(e) => setOfferMessage(e.target.value)}
+                    placeholder="Hi, I'm interested and can meet today..."
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white text-sm focus:border-[#00D9FF] outline-none transition-all min-h-[100px] resize-none"
+                  />
+                </div>
+
+                {offerError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-medium">
+                    {offerError}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    disabled={offerSubmitting}
+                    onClick={() => setShowOfferModal(false)}
+                    className="flex-1 px-6 py-4 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={offerSubmitting || !offerAmount}
+                    className="flex-[2] btn-primary"
+                    style={{ borderRadius: '1rem', padding: '1rem' }}
+                  >
+                    {offerSubmitting ? 'Sending...' : 'Send Offer'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };
