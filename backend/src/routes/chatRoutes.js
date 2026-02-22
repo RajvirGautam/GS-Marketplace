@@ -6,6 +6,7 @@ import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
 import Product from '../models/Product.js';
 import { authenticate } from '../middleware/auth.js';
+import { io } from '../server.js';
 
 const router = express.Router();
 
@@ -34,6 +35,38 @@ const uploadToCloudinary = (buffer, folder = 'chat', resourceType = 'auto') => {
     });
 };
 
+// Helper: emit new_message to the recipient(s) in a conversation
+const emitToRecipients = (conversation, senderId, message) => {
+    conversation.participants.forEach(participantId => {
+        if (participantId.toString() !== senderId.toString()) {
+            io.to(`user:${participantId}`).emit('new_message', {
+                conversationId: conversation._id.toString(),
+                message
+            });
+        }
+    });
+};
+
+// ─────────────────────────────────────────────
+// GET /api/chat/unread-count
+// Total unread message count for the current user
+// ─────────────────────────────────────────────
+router.get('/unread-count', authenticate, async (req, res) => {
+    try {
+        const count = await Message.countDocuments({
+            readBy: { $ne: req.user._id },
+            sender: { $ne: req.user._id },
+            conversation: {
+                $in: await Conversation.distinct('_id', { participants: req.user._id })
+            }
+        });
+        res.json({ success: true, count });
+    } catch (err) {
+        console.error('Error fetching unread count:', err);
+        res.status(500).json({ success: false, count: 0 });
+    }
+});
+
 // ─────────────────────────────────────────────
 // POST /api/chat/conversations
 // Start or get an existing conversation for a product
@@ -51,7 +84,6 @@ router.post('/conversations', authenticate, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot start a conversation with yourself' });
         }
 
-        // Find existing conversation between these two for this product
         const participants = [buyerId, sellerId].sort((a, b) => a.toString().localeCompare(b.toString()));
 
         let conversation = await Conversation.findOne({
@@ -152,13 +184,16 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
             readBy: [req.user._id]
         });
 
-        // Update conversation's lastMessage
         await Conversation.findByIdAndUpdate(req.params.id, {
             lastMessage: message._id,
             lastMessageAt: new Date()
         });
 
         const populated = await Message.findById(message._id).populate('sender', 'fullName profilePicture');
+
+        // 🔴 Real-time: notify recipient(s)
+        emitToRecipients(conversation, req.user._id, populated);
+
         res.status(201).json({ success: true, message: populated });
     } catch (err) {
         console.error('Error sending message:', err);
@@ -180,7 +215,6 @@ router.post('/conversations/:id/media', authenticate, upload.single('media'), as
 
         if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
-        // Determine Cloudinary resource type
         const isVideo = req.file.mimetype.startsWith('video/');
         const isImage = req.file.mimetype.startsWith('image/');
         const resourceType = isVideo ? 'video' : isImage ? 'image' : 'raw';
@@ -204,6 +238,10 @@ router.post('/conversations/:id/media', authenticate, upload.single('media'), as
         });
 
         const populated = await Message.findById(message._id).populate('sender', 'fullName profilePicture');
+
+        // 🔴 Real-time: notify recipient(s)
+        emitToRecipients(conversation, req.user._id, populated);
+
         res.status(201).json({ success: true, message: populated });
     } catch (err) {
         console.error('Error uploading media:', err);
@@ -243,6 +281,10 @@ router.post('/conversations/:id/offer', authenticate, async (req, res) => {
         });
 
         const populated = await Message.findById(message._id).populate('sender', 'fullName profilePicture');
+
+        // 🔴 Real-time: notify recipient(s)
+        emitToRecipients(conversation, req.user._id, populated);
+
         res.status(201).json({ success: true, message: populated });
     } catch (err) {
         console.error('Error sending offer:', err);
@@ -256,7 +298,7 @@ router.post('/conversations/:id/offer', authenticate, async (req, res) => {
 // ─────────────────────────────────────────────
 router.patch('/messages/:msgId/offer', authenticate, async (req, res) => {
     try {
-        const { status } = req.body; // 'accepted' | 'rejected'
+        const { status } = req.body;
         if (!['accepted', 'rejected'].includes(status)) {
             return res.status(400).json({ success: false, message: 'Status must be accepted or rejected' });
         }
@@ -266,7 +308,6 @@ router.patch('/messages/:msgId/offer', authenticate, async (req, res) => {
             return res.status(404).json({ success: false, message: 'Offer message not found' });
         }
 
-        // Only the counterparty (not the sender) can respond
         if (message.sender.toString() === req.user._id.toString()) {
             return res.status(403).json({ success: false, message: 'Cannot respond to your own offer' });
         }

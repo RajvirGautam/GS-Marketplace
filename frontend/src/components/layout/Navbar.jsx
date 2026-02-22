@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useSocket } from '../../context/SocketContext'
 
 // --- LOCAL ICONS ---
 const ChevronDown = () => (
@@ -19,6 +20,14 @@ const LogOutIcon = () => (
 );
 // -------------------
 
+// ── DM Icon with badge ──────────────────────────────────────────────────────
+const DMIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+// ────────────────────────────────────────────────────────────────────────────
+
 const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -26,6 +35,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const dropdownRef = useRef(null)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { unreadCount } = useSocket()
 
   // Helper to get the display name
   const getDisplayName = () => {
@@ -151,6 +161,22 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
         <div className="h-4 w-[1px] bg-indigo-950/10 dark:bg-white/10 mx-1"></div>
 
+        {/* DM Icon — always visible when logged in */}
+        {user && (
+          <Link
+            to="/chat"
+            className="relative p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-slate-200 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors"
+            title="Messages"
+          >
+            <DMIcon />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-[3px] rounded-full bg-gradient-to-br from-fuchsia-500 to-red-500 text-white text-[9px] font-black flex items-center justify-center shadow-md shadow-fuchsia-500/40 ring-2 ring-black/20 animate-pulse">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
+
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-yellow-300 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors"
@@ -274,6 +300,20 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           >
             Dashboard
           </Link>
+          {user && (
+            <Link
+              to="/chat"
+              className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors flex items-center gap-3"
+              onClick={() => setIsOpen(false)}
+            >
+              Messages
+              {unreadCount > 0 && (
+                <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-gradient-to-br from-fuchsia-500 to-red-500 text-white text-[10px] font-black flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {/* Auth Mobile */}
           {!user ? (

@@ -1,9 +1,12 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import passport from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -15,6 +18,41 @@ import './config/cloudinary.js';
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
+
+// ─── Socket.IO Setup ───────────────────────────────────────────────────────────
+export const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true
+  }
+});
+
+// Socket auth middleware — validate JWT from handshake
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('Authentication required'));
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.userId || decoded.id || decoded._id;
+    next();
+  } catch (err) {
+    next(new Error('Invalid token'));
+  }
+});
+
+io.on('connection', (socket) => {
+  // Each user joins their own private room for targeted notifications
+  socket.join(`user:${socket.userId}`);
+  console.log(`🔌 Socket connected: user ${socket.userId}`);
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Socket disconnected: user ${socket.userId}`);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 // Middleware
 app.use(cors({
@@ -28,7 +66,7 @@ app.use(session({
   secret: process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true in production with HTTPS
+  cookie: { secure: false }
 }));
 
 // Passport
@@ -62,7 +100,7 @@ app.get('/', (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 

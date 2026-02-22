@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { SocketProvider } from './context/SocketContext'
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
 import Footer from './components/layout/Footer'
@@ -16,6 +17,7 @@ import AuthCallback from './pages/AuthCallback'
 import VerificationGuard from './components/auth/VerificationGuard'
 import SellerProfile from './components/sections/SellerProfile'
 import Chat from './components/sections/Chat'
+import ChatNotificationToast from './components/ui/ChatNotificationToast'
 
 // Only show footer on non-chat pages
 function ConditionalFooter() {
@@ -57,30 +59,35 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/dashboard" element={<UserDashboard />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/seller/:id" element={<SellerProfile />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/chat/:conversationId" element={<Chat />} />
-          </Routes>
+        <SocketProvider>
+          <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/seller/:id" element={<SellerProfile />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/chat/:conversationId" element={<Chat />} />
+            </Routes>
 
-          {/* Footer hidden on /chat routes */}
-          <ConditionalFooter />
+            {/* Footer hidden on /chat routes */}
+            <ConditionalFooter />
 
-          {/* Manual login modal */}
-          <ConnectIdModal
-            isOpen={isLoginOpen}
-            onClose={() => setIsLoginOpen(false)}
-          />
+            {/* Manual login modal */}
+            <ConnectIdModal
+              isOpen={isLoginOpen}
+              onClose={() => setIsLoginOpen(false)}
+            />
 
-          {/* Auto verification modal */}
-          <VerificationGuard />
-        </div>
+            {/* Auto verification modal */}
+            <VerificationGuard />
+
+            {/* 🔴 Global real-time chat toast notifications */}
+            <ChatNotificationToast />
+          </div>
+        </SocketProvider>
       </Router>
     </AuthProvider>
   )
