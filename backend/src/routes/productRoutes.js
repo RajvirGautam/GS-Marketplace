@@ -198,6 +198,9 @@ router.get('/seller/:sellerId', async (req, res) => {
     // Compute stats
     const activeProducts = allProducts.filter(p => p.status === 'active');
     const soldProducts = allProducts.filter(p => p.status === 'sold');
+    const totalListings = allProducts.length;
+    const activeListings = activeProducts.length;
+    const soldListings = soldProducts.length;
 
     const totalViews = allProducts.reduce((sum, p) => sum + (p.views || 0), 0);
     const totalSaves = allProducts.reduce((sum, p) => sum + (p.saves || 0), 0);
@@ -216,16 +219,16 @@ router.get('/seller/:sellerId', async (req, res) => {
 
     res.json({
       success: true,
-      analytics: {
+      seller,
+      stats: {
         totalListings,
         activeListings,
         soldListings,
-        pendingListings,
         totalViews,
         totalSaves,
-        totalRevenue,
         categoryBreakdown
-      }
+      },
+      recentListings
     });
   } catch (error) {
     console.error('Error fetching seller profile:', error);

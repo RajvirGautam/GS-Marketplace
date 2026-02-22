@@ -263,7 +263,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+                const sellerId = typeof product.seller === 'object' ? product.seller?._id : product.seller;
                 if (sellerId) navigate(`/seller/${sellerId}`);
               }}
               className="flex items-center gap-2 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)] cursor-pointer hover:opacity-80 transition-opacity group/seller"
@@ -397,7 +397,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+            const sellerId = typeof product.seller === 'object' ? product.seller?._id : product.seller;
             if (sellerId) navigate(`/seller/${sellerId}`);
           }}
           className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)] cursor-pointer hover:opacity-80 transition-opacity group/seller"

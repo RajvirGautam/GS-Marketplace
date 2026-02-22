@@ -811,7 +811,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     </select>
                     <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.1)', borderRadius: 4 }}>
                       <p style={{ fontSize: '10px', color: '#00D9FF', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <ZapIcon /> <span>SGSITS TIP: Preferred spots are well-lit and public.</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#00D9FF"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> <span>SGSITS TIP: Preferred spots are well-lit and public.</span>
                       </p>
                     </div>
                   </div>
