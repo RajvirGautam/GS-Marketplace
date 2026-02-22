@@ -181,6 +181,44 @@ export const offerAPI = {
   },
 };
 
+// ==================== CHAT APIs ====================
+
+export const chatAPI = {
+  startConversation: async (productId) => {
+    const { data } = await api.post('/chat/conversations', { productId });
+    return data;
+  },
+  getConversations: async () => {
+    const { data } = await api.get('/chat/conversations');
+    return data;
+  },
+  getMessages: async (conversationId, page = 1) => {
+    const { data } = await api.get(`/chat/conversations/${conversationId}/messages?page=${page}`);
+    return data;
+  },
+  sendMessage: async (conversationId, content) => {
+    const { data } = await api.post(`/chat/conversations/${conversationId}/messages`, { content });
+    return data;
+  },
+  sendMedia: async (conversationId, file, caption = '') => {
+    const formData = new FormData();
+    formData.append('media', file);
+    formData.append('caption', caption);
+    const { data } = await api.post(`/chat/conversations/${conversationId}/media`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data;
+  },
+  sendOffer: async (conversationId, amount, note = '') => {
+    const { data } = await api.post(`/chat/conversations/${conversationId}/offer`, { amount, note });
+    return data;
+  },
+  respondToOffer: async (messageId, status) => {
+    const { data } = await api.patch(`/chat/messages/${messageId}/offer`, { status });
+    return data;
+  },
+};
+
 // ==================== LEGACY EXPORTS (for backward compatibility) ====================
 
 export const getUserListings = () => productAPI.getMyListings();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { productAPI } from '../../services/api';
+import { productAPI, chatAPI } from '../../services/api';
 
 const HeartIcon = ({ filled }) => (
   <svg
@@ -54,6 +54,7 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   const [saveCount, setSaveCount] = useState(product.saves || 0);
   const [showActions, setShowActions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
 
   // Initialize saved state from global context
   useEffect(() => {
@@ -178,7 +179,25 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
     navigate(`/product/${productId}`);
   };
 
-  // LIST VIEW
+  // Handle chat button click
+  const handleChatClick = async (e) => {
+    stopNav(e);
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    try {
+      setChatLoading(true);
+      const res = await chatAPI.startConversation(product._id);
+      if (res.success && res.conversation?._id) {
+        navigate(`/chat/${res.conversation._id}`);
+      }
+    } catch (err) {
+      console.error('Failed to start conversation:', err);
+    } finally {
+      setChatLoading(false);
+    }
+  };
   if (viewMode === 'list') {
     return (
       <div
@@ -284,10 +303,11 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={stopNav}
-                className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center gap-2"
+                onClick={handleChatClick}
+                disabled={chatLoading}
+                className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center gap-2 disabled:opacity-50"
               >
-                <ChatIcon /> Chat
+                <ChatIcon /> {chatLoading ? '…' : 'Chat'}
               </button>
               <span className="bg-white text-black border border-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all">
                 View Details
@@ -431,10 +451,11 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               }`}
           >
             <button
-              onClick={stopNav}
-              className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center justify-center gap-1"
+              onClick={handleChatClick}
+              disabled={chatLoading}
+              className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center justify-center gap-1 disabled:opacity-50"
             >
-              <ChatIcon /> Chat
+              <ChatIcon /> {chatLoading ? '…' : 'Chat'}
             </button>
             <span className="bg-white text-black border border-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all text-center">
               View

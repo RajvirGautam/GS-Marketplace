@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { productAPI, offerAPI } from '../../services/api';
+import { productAPI, offerAPI, chatAPI } from '../../services/api';
 
 // --- ICONS ---
 const ArrowLeft = () => (
@@ -102,6 +102,7 @@ const ProductPage = () => {
   const [offerSubmitting, setOfferSubmitting] = useState(false);
   const [offerError, setOfferError] = useState('');
   const [offerSuccess, setOfferSuccess] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
 
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
@@ -141,16 +142,23 @@ const ProductPage = () => {
     }
   };
 
-  // Handle Contact Seller
-  const handleContactSeller = () => {
+  // Handle Contact Seller → create/fetch conversation then navigate to /chat
+  const handleContactSeller = async () => {
     if (!user) {
-      // If not logged in, redirect to login (or show modal)
-      navigate('/login');
+      navigate('/');
       return;
     }
-    const sellerName = typeof product.seller === 'object' ? product.seller.fullName : product.user;
-    console.log(`Starting chat with ${sellerName} as ${user.fullName}`);
-    alert(`Starting chat with ${sellerName}`);
+    try {
+      setChatLoading(true);
+      const res = await chatAPI.startConversation(product._id);
+      if (res.success && res.conversation?._id) {
+        navigate(`/chat/${res.conversation._id}`);
+      }
+    } catch (err) {
+      console.error('Failed to start conversation:', err);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const handleMakeOffer = async (e) => {
@@ -883,8 +891,8 @@ const ProductPage = () => {
           {product.specs && (
             <div className="card area-specs fade-in delay-3">
               <div className="flex gap-4 mb-6">
-                <button className="btn-primary flex-1" onClick={handleContactSeller}>
-                  <Message /> Chat with Seller
+                <button className="btn-primary flex-1" onClick={handleContactSeller} disabled={chatLoading}>
+                  <Message /> {chatLoading ? 'Opening Chat…' : 'Chat with Seller'}
                 </button>
                 {user?._id !== (typeof product.seller === 'object' ? product.seller._id : product.seller) && (
                   <button
@@ -920,9 +928,10 @@ const ProductPage = () => {
             <button
               className="btn-primary group relative overflow-hidden"
               onClick={handleContactSeller}
+              disabled={chatLoading}
             >
               <span className="relative z-10 flex items-center gap-2">
-                Contact Seller <Message />
+                {chatLoading ? 'Opening Chat…' : 'Contact Seller'} <Message />
               </span>
               <div className="absolute inset-0 bg-[var(--accent)] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>

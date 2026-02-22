@@ -518,7 +518,7 @@ const UserDashboard = () => {
     { label: 'Negotiations', icon: <TrendingIcon /> },
   ];
   const sidebarSettItems = [
-    { label: 'Messages', icon: <MessageIcon /> },
+    { label: 'Messages', icon: <MessageIcon />, action: () => navigate('/chat') },
     { label: 'Reviews', icon: <StarIcon /> },
     { label: 'My Account', icon: <UsersIcon /> },
     { label: 'Settings', icon: <SettingsIcon /> },
@@ -1493,8 +1493,8 @@ const UserDashboard = () => {
                               )}
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                                 <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                    offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                      'bg-red-500/10 text-red-500 border-red-500/20'
+                                  offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                    'bg-red-500/10 text-red-500 border-red-500/20'
                                   }`}>
                                   {offer.status}
                                 </span>
@@ -1549,8 +1549,8 @@ const UserDashboard = () => {
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                                 <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                    offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                      'bg-red-500/10 text-red-500 border-red-500/20'
+                                  offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                    'bg-red-500/10 text-red-500 border-red-500/20'
                                   }`}>
                                   {offer.status}
                                 </span>

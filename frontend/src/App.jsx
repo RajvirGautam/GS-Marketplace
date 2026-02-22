@@ -15,6 +15,7 @@ import ConnectIdModal from './components/auth/ConnectIdModal'
 import AuthCallback from './pages/AuthCallback'
 import VerificationGuard from './components/auth/VerificationGuard' // ← ADD THIS
 import SellerProfile from './components/sections/SellerProfile'
+import Chat from './components/sections/Chat'
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -57,6 +58,8 @@ function App() {
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/seller/:id" element={<SellerProfile />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/chat/:conversationId" element={<Chat />} />
           </Routes>
 
           {/* Footer stays global */}
