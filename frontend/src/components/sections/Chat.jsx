@@ -424,8 +424,10 @@ const Chat = () => {
     const [uploading, setUploading] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const messagesAreaRef = useRef(null);
     const fileInputRef = useRef(null);
     const pollRef = useRef(null);
+    const shouldScrollRef = useRef(false); // true only when we explicitly want to jump to bottom
 
     // Derived: active conversation object
     const activeConv = conversations.find(c => c._id === activeConvId);
@@ -467,6 +469,7 @@ const Chat = () => {
     useEffect(() => {
         if (!activeConvId) return;
         setMsgsLoading(true);
+        shouldScrollRef.current = true; // jump to bottom on initial load
         fetchMessages(activeConvId).finally(() => setMsgsLoading(false));
 
         // Start polling
@@ -484,9 +487,21 @@ const Chat = () => {
         if (conversationId) setActiveConvId(conversationId);
     }, [conversationId]);
 
-    // ── Scroll to bottom ──
+    // ── Scroll to bottom (only when near bottom or explicitly triggered) ──
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const area = messagesAreaRef.current;
+        if (!area) return;
+        if (shouldScrollRef.current) {
+            // Explicit jump (conversation switch or message sent by us)
+            messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+            shouldScrollRef.current = false;
+        } else {
+            // Poll update: only scroll if already near the bottom
+            const distFromBottom = area.scrollHeight - area.scrollTop - area.clientHeight;
+            if (distFromBottom < 150) {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     }, [messages]);
 
     // ── Send text message ──
@@ -495,6 +510,7 @@ const Chat = () => {
         const text = inputText.trim();
         setInputText('');
         setSending(true);
+        shouldScrollRef.current = true; // scroll to bottom after sending
         try {
             const res = await chatAPI.sendMessage(activeConvId, text);
             if (res.success) {
@@ -513,6 +529,7 @@ const Chat = () => {
     const handleMediaSend = async () => {
         if (!mediaPreview || !activeConvId) return;
         setUploading(true);
+        shouldScrollRef.current = true; // scroll to bottom after sending media
         try {
             const res = await chatAPI.sendMedia(activeConvId, mediaPreview.file);
             if (res.success) {
@@ -839,7 +856,7 @@ const Chat = () => {
                                 </div>
 
                                 {/* Messages */}
-                                <div className="messages-area">
+                                <div className="messages-area" ref={messagesAreaRef}>
                                     {msgsLoading && messages.length === 0 ? (
                                         <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, paddingTop: 40 }}>
                                             Loading messages…

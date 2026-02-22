@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
@@ -13,9 +13,16 @@ import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
 import ConnectIdModal from './components/auth/ConnectIdModal'
 import AuthCallback from './pages/AuthCallback'
-import VerificationGuard from './components/auth/VerificationGuard' // ← ADD THIS
+import VerificationGuard from './components/auth/VerificationGuard'
 import SellerProfile from './components/sections/SellerProfile'
 import Chat from './components/sections/Chat'
+
+// Only show footer on non-chat pages
+function ConditionalFooter() {
+  const location = useLocation()
+  if (location.pathname.startsWith('/chat')) return null
+  return <Footer />
+}
 
 function App() {
   const [theme, setTheme] = useState('dark')
@@ -62,16 +69,16 @@ function App() {
             <Route path="/chat/:conversationId" element={<Chat />} />
           </Routes>
 
-          {/* Footer stays global */}
-          <Footer />
+          {/* Footer hidden on /chat routes */}
+          <ConditionalFooter />
 
-          {/* Manual login modal (for login button clicks) */}
+          {/* Manual login modal */}
           <ConnectIdModal
             isOpen={isLoginOpen}
             onClose={() => setIsLoginOpen(false)}
           />
 
-          {/* Auto verification modal (for unverified users) - ADD THIS */}
+          {/* Auto verification modal */}
           <VerificationGuard />
         </div>
       </Router>
