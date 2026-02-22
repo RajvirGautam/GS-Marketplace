@@ -1,7 +1,8 @@
 // src/pages/Marketplace.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { productAPI } from '../../services/api';
 import ProductCard from '../ui/ProductCard';
 import AddProductModal from './AddProductModal';
@@ -71,6 +72,7 @@ const Marketplace = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { unreadCount } = useSocket();
 
   // State Management
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -96,15 +98,26 @@ const Marketplace = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const productsPerPage = 24;
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const glowRef = useRef(null);
 
   useEffect(() => {
-    const handler = (e) => setMousePos({
-      x: (e.clientX / window.innerWidth) * 100,
-      y: (e.clientY / window.innerHeight) * 100
-    });
+    let animationFrameId;
+    const handler = (e) => {
+      if (glowRef.current) {
+        // Use animation frame to throttle style updates for maximum smoothness
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(() => {
+          if (glowRef.current) {
+            glowRef.current.style.background = `radial-gradient(900px circle at ${e.clientX}px ${e.clientY}px, rgba(0,217,255,0.07) 0%, transparent 50%)`;
+          }
+        });
+      }
+    };
     window.addEventListener('mousemove', handler);
-    return () => window.removeEventListener('mousemove', handler);
+    return () => {
+      window.removeEventListener('mousemove', handler);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   // Category data with counts
@@ -553,8 +566,9 @@ const Marketplace = () => {
       <div className="theme-root relative">
         {/* Mouse-tracking glow overlay */}
         <div
-          className="fixed inset-0 pointer-events-none z-0 transition-all duration-700 ease-out"
-          style={{ background: `radial-gradient(900px circle at ${mousePos.x}% ${mousePos.y}%, rgba(0,217,255,0.07) 0%, transparent 50%)` }}
+          ref={glowRef}
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{ background: 'radial-gradient(900px circle at 50% 50%, rgba(0,217,255,0.07) 0%, transparent 50%)' }}
         />
         {/* Noise & Grid */}
         <div className="noise-overlay"></div>
@@ -606,9 +620,29 @@ const Marketplace = () => {
               </button>
 
               {user && (
+                <Link
+                  to="/chat"
+                  className="btn-glass hidden md:flex relative"
+                  style={{ padding: '9px 16px' }}
+                  title="Messages"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-[3px] rounded-full flex items-center justify-center text-[9px] font-black text-white"
+                      style={{ background: 'linear-gradient(135deg, #c026d3, #ef4444)', boxShadow: '0 0 8px rgba(192,38,211,0.5)' }}
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+
+              {user && (
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="btn-ghost hidden md:flex"
+                  className="btn-glass hidden md:flex"
                   style={{ fontSize: 13, padding: '9px 18px' }}
                 >
                   Dashboard

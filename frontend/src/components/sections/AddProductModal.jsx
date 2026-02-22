@@ -18,8 +18,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
     year: '',
     condition: '',
     type: 'sale',
-    location: 'SGSITS Campus',
-    tag: '',
   });
 
   const [images, setImages] = useState([]);
@@ -170,9 +168,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = 'Required';
       if (!formData.description.trim()) newErrors.description = 'Required';
-      if (formData.type !== 'free' && (!formData.price || parseFloat(formData.price) <= 0)) {
-        newErrors.price = 'Required';
-      }
       if (images.length === 0) newErrors.images = 'At least 1 image required';
     }
     if (step === 2) {
@@ -180,7 +175,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
       if (!formData.branch) newErrors.branch = 'Required';
       if (!formData.year) newErrors.year = 'Required';
       if (!formData.condition) newErrors.condition = 'Required';
-      if (!formData.location.trim()) newErrors.location = 'Required';
+      if (formData.type !== 'free' && (!formData.price || parseFloat(formData.price) <= 0)) {
+        newErrors.price = 'Required';
+      }
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -230,8 +227,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('condition', formData.condition);
       formDataToSend.append('type', formData.type);
-      formDataToSend.append('location', formData.location);
-      formDataToSend.append('tag', formData.tag || 'FOR SALE');
       formDataToSend.append('branch', formData.branch);
       formDataToSend.append('year', formData.year);
       formDataToSend.append('highlights', JSON.stringify(filteredHighlights));
@@ -300,8 +295,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
       year: '',
       condition: '',
       type: 'sale',
-      location: 'SGSITS Campus',
-      tag: '',
     });
     setImages([]);
     setImagePreviews([]);
@@ -792,39 +785,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     className="input-brutal"
                   />
                   {errors.description && <p className="error-text">{errors.description}</p>}
-                </div>
-
-                {/* Location & Tag */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                  <div>
-                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Meetup Spot *</label>
-                    <select
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="input-brutal"
-                    >
-                      <option value="SGSITS Campus">SGSITS Campus (General)</option>
-                      {meetupSpots.map(spot => (
-                        <option key={spot} value={spot}>{spot}</option>
-                      ))}
-                      <option value="Other">Other (Specify in description)</option>
-                    </select>
-                    <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.1)', borderRadius: 4 }}>
-                      <p style={{ fontSize: '10px', color: '#00D9FF', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#00D9FF"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> <span>SGSITS TIP: Preferred spots are well-lit and public.</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Department Tag</label>
-                    <input
-                      type="text"
-                      value={formData.tag}
-                      onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
-                      placeholder="e.g. CS-2026"
-                      className="input-brutal"
-                    />
-                  </div>
                 </div>
 
                 {/* Image Upload Area */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, offerAPI } from '../../services/api';
@@ -279,19 +279,29 @@ const UserDashboard = () => {
   const [sidebarActive, setSidebarActive] = useState('Overview');
   const [savedProducts, setSavedProducts] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const glowRef = useRef(null);
   const [offersReceived, setOffersReceived] = useState([]);
   const [offersSent, setOffersSent] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
 
   // Mouse glow effect
   useEffect(() => {
-    const handler = (e) => setMousePos({
-      x: (e.clientX / window.innerWidth) * 100,
-      y: (e.clientY / window.innerHeight) * 100
-    });
+    let animationFrameId;
+    const handler = (e) => {
+      if (glowRef.current) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(() => {
+          if (glowRef.current) {
+            glowRef.current.style.background = `radial-gradient(800px circle at ${e.clientX}px ${e.clientY}px, rgba(0,217,255,0.06) 0%, transparent 50%)`;
+          }
+        });
+      }
+    };
     window.addEventListener('mousemove', handler);
-    return () => window.removeEventListener('mousemove', handler);
+    return () => {
+      window.removeEventListener('mousemove', handler);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   useEffect(() => { fetchDashboardData(); }, []);
@@ -1242,12 +1252,13 @@ const UserDashboard = () => {
         }
       `}</style>
 
-      <div
-        className="dash-root"
-        style={{
-          background: `radial-gradient(800px circle at ${mousePos.x}% ${mousePos.y}%, rgba(0,217,255,0.06) 0%, transparent 50%), #080808`
-        }}
-      >
+      <div className="dash-root" style={{ background: '#080808' }}>
+        <div
+          ref={glowRef}
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{ background: 'radial-gradient(800px circle at 50% 50%, rgba(0,217,255,0.06) 0%, transparent 50%)' }}
+        />
+
         {/* NOISE & GRID */}
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
@@ -1255,20 +1266,25 @@ const UserDashboard = () => {
         {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-profile">
-            <div className="sidebar-avatar" style={user?.profilePicture ? { padding: 0, overflow: 'hidden' } : {}}>
-              {user?.profilePicture
-                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : (user?.fullName?.charAt(0).toUpperCase() || 'S')
-              }
+            <div className="sidebar-profile flex items-center gap-3">
+
+
+              {/* Logo / Branding */}
+              <Link to="/">
+                <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">
+                    S
+                  </div>
+                  <span>
+                    SGSITS
+                    <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
+                      .MKT
+                    </span>
+                  </span>
+                </div>
+              </Link>
+
             </div>
-            <Link
-              to="/"
-              style={{ textDecoration: 'none' }}
-            >
-              <span className="sidebar-name" style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: 15, letterSpacing: '-0.3px' }}>
-                SGSITS.mkt
-              </span>
-            </Link>
           </div>
 
           <div className="sidebar-section-label">Dashboards</div>
@@ -1680,7 +1696,7 @@ const UserDashboard = () => {
                       <div className="stat-value">{stats.totalViews}</div>
                       <div className="stat-change up">
                         <ArrowUp color="#00D9FF" />
-                        {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per item
+                        {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per listing
                       </div>
                     </div>
                     <div className="stat-card">

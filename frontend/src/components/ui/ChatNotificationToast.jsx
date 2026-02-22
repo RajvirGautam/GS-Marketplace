@@ -4,29 +4,9 @@ import { useSocket } from '../../context/SocketContext';
 
 const TOAST_DURATION = 5000; // ms
 
-// ── Mini avatar ───────────────────────────────────────────────────────────────
-const Avatar = ({ user, size = 36 }) => {
-    const initial = (user?.fullName || user?.name || '?').charAt(0).toUpperCase();
-    return user?.profilePicture ? (
-        <img
-            src={user.profilePicture}
-            alt={user.fullName}
-            style={{ width: size, height: size }}
-            className="rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
-        />
-    ) : (
-        <div
-            style={{ width: size, height: size }}
-            className="rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ring-2 ring-white/10"
-        >
-            {initial}
-        </div>
-    );
-};
-
 // ── Message preview text ───────────────────────────────────────────────────────
 const getPreview = (message) => {
-    if (message.type === 'offer') return `💰 Offer: ₹${message.offerData?.amount?.toLocaleString('en-IN') ?? ''}`;
+    if (message.type === 'offer') return `Offer: ₹${message.offerData?.amount?.toLocaleString('en-IN') ?? ''}`;
     if (message.type === 'media') {
         if (message.mediaType === 'image') return '📷 Image';
         if (message.mediaType === 'video') return '🎥 Video';
@@ -67,7 +47,8 @@ const ToastCard = ({ toast, onDismiss }) => {
         return () => cancelAnimationFrame(timerRef.current);
     }, []);
 
-    const handleDismiss = () => {
+    const handleDismiss = (e) => {
+        if (e) e.stopPropagation();
         cancelAnimationFrame(timerRef.current);
         setExiting(true);
         setTimeout(() => onDismiss(toast.id), 350);
@@ -91,69 +72,58 @@ const ToastCard = ({ toast, onDismiss }) => {
                 transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease',
                 willChange: 'transform, opacity'
             }}
-            className="relative w-[340px] rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-[340px] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.8)] cursor-pointer group"
+            onClick={handleReply}
         >
-            {/* Glass background */}
-            <div className="absolute inset-0 bg-[#0d0d14]/90 backdrop-blur-2xl border border-white/10" />
+            {/* Black Theme Background with Subtle Cyan Tint */}
+            <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md border border-zinc-800/50" />
+            {/* Subtle cyan gradient overlay at the top - Changed from violet to cyan */}
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/15 to-transparent pointer-events-none" />
+             {/* Subtle top cyan accent glow line - Changed from violet to cyan */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
 
-            {/* Gradient accent line top */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500" />
 
             {/* Content */}
             <div className="relative p-4">
-                {/* Header row */}
-                <div className="flex items-start gap-3">
-                    <Avatar user={sender} size={40} />
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                            <span className="text-sm font-bold text-white truncate">{senderName}</span>
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                                {/* Live pulse dot */}
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
-                                </span>
-                                <button
-                                    onClick={handleDismiss}
-                                    className="ml-1 p-0.5 rounded-full text-white/40 hover:text-white/80 transition-colors"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                        <path d="M18 6 6 18M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Label */}
-                        <div className="text-[10px] font-mono text-cyan-400/70 uppercase tracking-widest mb-1">
-                            New Message
-                        </div>
-
-                        {/* Message preview */}
-                        <p className="text-sm text-white/70 truncate leading-snug">{preview}</p>
+                {/* Header */}
+                <div className="flex items-center justify-between text-zinc-400 text-sm mb-3">
+                    <div className="flex items-center gap-2">
+                        {/* Icon - Changed color to cyan-300 */}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-cyan-300">
+                            <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.74c0-1.946 1.37-3.678 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-zinc-300 font-medium">New Message</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleReply}
+                            // Added slight cyan tint to hover state - Changed from violet
+                            className="px-2 py-1 rounded-md bg-zinc-800 hover:bg-cyan-900/30 text-[10px] font-medium text-zinc-200 transition-all flex items-center gap-1"
+                        >
+                            Reply
+                        </button>
+                        <button onClick={handleDismiss} className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                {/* Reply button */}
-                <button
-                    onClick={handleReply}
-                    className="mt-3 w-full py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-violet-600 text-white text-xs font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
-                >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 10 4 15 9 20" />
-                        <path d="M20 4v7a4 4 0 0 1-4 4H4" />
-                    </svg>
-                    Reply
-                </button>
-            </div>
+                {/* Body */}
+                <div>
+                    <h3 className="text-base font-semibold text-white truncate">{senderName}</h3>
+                    <p className="text-zinc-400 text-sm line-clamp-1 leading-snug">{preview}</p>
+                </div>
 
-            {/* Progress bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5">
-                <div
-                    style={{ width: `${progress}%`, transition: 'width 0.1s linear' }}
-                    className="h-full bg-gradient-to-r from-cyan-500 to-violet-500"
-                />
+                {/* Progress Bar - Changed to Cyan Gradient */}
+                <div className="relative h-0.5 bg-zinc-800/50 rounded-full mt-3 overflow-hidden">
+                    <div
+                        style={{ width: `${progress}%`, transition: 'width 0.1s linear' }}
+                        // Changed gradient from violet/fuchsia to cyan/sky
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-600 to-sky-500 rounded-full"
+                    />
+                </div>
             </div>
         </div>
     );
@@ -166,8 +136,9 @@ const ChatNotificationToast = () => {
     if (!toasts.length) return null;
 
     return (
+        // Positioned bottom-right
         <div
-            className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-3 pointer-events-none"
+            className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-2 pointer-events-none"
             aria-live="polite"
         >
             {toasts.map(toast => (

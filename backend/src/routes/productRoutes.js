@@ -10,7 +10,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -528,8 +527,6 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
       barterFor,
       category,
       condition,
-      location,
-      tag,
       highlights,
       specs,
       branch,
@@ -604,8 +601,8 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
       barterFor,
       category,
       condition,
-      location: location || 'SGSITS Campus',
-      tag: tag || 'FOR SALE',
+      location: 'SGSITS Campus',
+      tag: 'FOR SALE',
       images: imageUrls,
       seller: req.user._id,
       branch: branch,
