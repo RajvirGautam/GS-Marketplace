@@ -323,95 +323,41 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-2 hover:border-[rgba(255,255,255,0.3)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,1)] cursor-pointer"
+      className="group relative bg-[#121214] rounded-[32px] overflow-hidden cursor-pointer"
       style={animationStyle}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
     >
-      {/* Accent Top Line */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
-        style={{ background: getAccentColor() }}
-      />
-
       {/* Image Section */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-zinc-900 border-b border-[rgba(255,255,255,0.1)]">
-        <div
-          className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-          style={{ background: `linear-gradient(to bottom, ${getGradientStart()}, #000)` }}
-        />
+      <div className="relative aspect-[4/4.5] w-full bg-zinc-900 overflow-hidden">
         <img
           src={getProductImage()}
           alt={product.title}
-          className="relative w-full h-full object-cover mix-blend-normal transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover border-none transition-transform duration-700 group-hover:scale-105"
         />
 
-        {/* Status Badges */}
-        <div className="absolute top-3 right-3 flex flex-col gap-1">
-          {product.isTrending && (
-            <div className="bg-[#F59E0B] text-black px-2 py-0.5 mono text-[9px] font-bold">
-              TRENDING
-            </div>
-          )}
-          {(product.isVerified || product.seller?.isVerified) && (
-            <div className="bg-[#00D9FF] text-black px-2 py-0.5 mono text-[9px] font-bold uppercase tracking-wider">
-              Verified
-            </div>
-          )}
-          {getDeptBadge() && (
-            <div className="bg-white/10 backdrop-blur text-white px-2 py-1 border border-white/20 mono text-[8px] font-bold">
-              {getDeptBadge()}
-            </div>
-          )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2" onClick={stopNav}>
+        {/* Top Right Actions */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10" onClick={stopNav}>
           <button
             onClick={handleSaveClick}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[rgba(255,255,255,0.9)] backdrop-blur shadow-lg transition-all hover:scale-110"
-            style={{
-              color: isSaved ? '#EF4444' : 'black'
-            }}
-            title={isSaved ? 'Remove from saved' : 'Save for later'}
+            className="w-10 h-10 rounded-[12px] flex items-center justify-center bg-[rgba(0,0,0,0.4)] backdrop-blur-md border border-[rgba(37,99,235,0.4)] text-white transition-all hover:bg-white/20"
+            style={{ color: isSaved ? '#EF4444' : 'white' }}
           >
             <HeartIcon filled={isSaved} />
           </button>
-          <button
-            onClick={stopNav}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-[rgba(255,255,255,0.9)] backdrop-blur shadow-lg transition-all hover:scale-110"
-          >
-            <ShareIcon />
-          </button>
         </div>
+      </div>
 
-        {/* Metadata Row */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 text-[10px] text-[rgba(255,255,255,0.8)] mono bg-[rgba(0,0,0,0.6)] backdrop-blur px-2 py-1">
-          <span className="flex items-center gap-1">
-            <LocationIcon /> {product.location || 'Campus'}
-          </span>
-          <span className="flex items-center gap-1">
-            <EyeIcon /> {product.views || 0}
-          </span>
-          <span className="ml-auto">{getTimeAgo()}</span>
+      {/* Floating Price Pill */}
+      <div className="flex justify-center -mt-5 relative z-20">
+        <div className="bg-[#1E1F23] text-white px-8 py-2 rounded-[16px] text-[15px] font-bold whitespace-nowrap shadow-[0_-4px_20px_rgba(0,0,0,0.5)] border-t border-[rgba(255,255,255,0.05)]">
+          {getProductPrice()}
         </div>
       </div>
 
       {/* Content Section */}
-      <div className="p-4 relative">
-        <div
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-200"
-          style={{ background: `linear-gradient(45deg, transparent 40%, ${getAccentColor()}10 40%, transparent 60%)` }}
-        />
-
-        <div className="mb-2">
-          <h3 className="text-white font-bold text-lg leading-tight group-hover:text-[#00D9FF] transition-colors truncate">
-            {product.title}
-          </h3>
-          <div className="mono text-[10px] text-[rgba(255,255,255,0.4)] uppercase tracking-wider mt-1">
-            {product.tag || product.category?.toUpperCase()}
-          </div>
-        </div>
+      <div className="px-5 pb-5 pt-3">
+        <h3 className="text-white font-bold text-[16px] line-clamp-2 leading-snug mb-2">
+          {product.title}
+        </h3>
 
         <div
           onClick={(e) => {
@@ -420,46 +366,39 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
             const sellerId = typeof product.seller === 'object' ? product.seller?._id : product.seller;
             if (sellerId) navigate(`/seller/${sellerId}`);
           }}
-          className="flex items-center gap-2 mb-4 py-3 border-t border-dashed border-[rgba(255,255,255,0.1)] cursor-pointer hover:opacity-80 transition-opacity group/seller"
+          className="flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity"
         >
-          <div className="w-6 h-6 rounded-none bg-zinc-800 border border-[rgba(255,255,255,0.2)] flex items-center justify-center text-[10px] font-bold text-white group-hover/seller:border-[#00D9FF] transition-colors">
-            {getSellerInitial()}
-          </div>
-          <span className="text-xs text-[rgba(255,255,255,0.7)] group-hover/seller:text-[#00D9FF] transition-colors">{getSellerName().split(' ')[0]}</span>
+          {typeof product.seller === 'object' && product.seller?.profilePicture ? (
+            <img src={product.seller.profilePicture} alt={getSellerName()} className="w-6 h-6 rounded-full object-cover border border-[rgba(255,255,255,0.2)]" />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center text-[10px] font-black">
+              {getSellerInitial()}
+            </div>
+          )}
+          <span className="text-[12px] font-semibold text-[rgba(255,255,255,0.7)] tracking-wide">
+            {getSellerName().toUpperCase()}
+          </span>
           {(product.isVerified || product.seller?.isVerified) && (
-            <span className="text-[#00D9FF] text-xs">✓</span>
+            <span className="text-[#00D9FF] text-xs ml-1">✓</span>
           )}
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="mono text-[9px] text-[rgba(255,255,255,0.3)] uppercase mb-0.5">Price</div>
-              <div className="text-xl font-black text-white" style={{ color: getAccentColor() }}>
-                {getProductPrice()}
-              </div>
+        {/* Bottom Stats Box */}
+        <div className="bg-[#1C1D21] rounded-[16px] p-4 flex justify-between items-center">
+          <div>
+            <div className="text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-1">Condition</div>
+            <div className="text-[13px] font-bold text-white tracking-wide">
+              {product.condition ? product.condition.toUpperCase() : 'NEW'}
             </div>
-            {product.condition && (
-              <span className="px-2 py-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] text-[10px] mono text-[rgba(255,255,255,0.6)]">
-                {product.condition.toUpperCase()}
-              </span>
-            )}
           </div>
 
-          <div
-            className={`grid grid-cols-2 gap-2 transition-all duration-300 ${showActions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none md:group-hover:opacity-100 md:group-hover:translate-y-0 md:group-hover:pointer-events-auto'
-              }`}
-          >
-            <button
-              onClick={handleChatClick}
-              disabled={chatLoading}
-              className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center justify-center gap-1 disabled:opacity-50"
-            >
-              <ChatIcon /> {chatLoading ? '…' : 'Chat'}
-            </button>
-            <span className="bg-white text-black border border-white px-3 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all text-center">
-              View
-            </span>
+          <div className="text-left">
+            <div className="text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-1">Views & Saves</div>
+            <div className="flex items-center gap-2 text-[13px] font-bold text-white tracking-wide">
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span> {product.views || 0}
+              <span className="w-[1px] h-3 bg-[rgba(255,255,255,0.2)] mx-1"></span>
+              {saveCount} <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]"></span>
+            </div>
           </div>
         </div>
       </div>

@@ -990,9 +990,7 @@ const Marketplace = () => {
                       key={product._id}
                       className="h-full group"
                     >
-                      <div className="bg-white/5 border border-white/10 hover:border-[#00D9FF] rounded-2xl overflow-hidden h-full transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,217,255,0.2)] backdrop-blur-xl">
-                        <ProductCard product={product} viewMode={viewMode} index={index} />
-                      </div>
+                      <ProductCard product={product} viewMode={viewMode} index={index} />
                     </div>
                   ))}
                 </div>
