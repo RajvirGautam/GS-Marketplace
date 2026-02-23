@@ -338,7 +338,14 @@ const UserDashboard = () => {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [sidebarActive, setSidebarActive] = useState('Overview');
+  const [sidebarActive, _setSidebarActive] = useState(
+    () => sessionStorage.getItem('dash_tab') || 'Overview'
+  );
+  // Wrapper that also persists to sessionStorage
+  const setSidebarActive = (tab) => {
+    sessionStorage.setItem('dash_tab', tab);
+    _setSidebarActive(tab);
+  };
   const [savedProducts, setSavedProducts] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const glowRef = useRef(null);
@@ -396,6 +403,16 @@ const UserDashboard = () => {
       fetchDeals();
       fetchOffers();
     }
+  }, [sidebarActive]);
+
+  // Auto-refresh deals + offers every 15s while on My Deals tab
+  useEffect(() => {
+    if (sidebarActive !== 'My Deals') return;
+    const interval = setInterval(() => {
+      fetchDeals();
+      fetchOffers();
+    }, 5000);
+    return () => clearInterval(interval);
   }, [sidebarActive]);
 
   const fetchOffers = async () => {
