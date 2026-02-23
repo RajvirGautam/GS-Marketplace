@@ -181,6 +181,23 @@ export const offerAPI = {
   },
 };
 
+// ==================== DEAL APIs ====================
+
+export const dealAPI = {
+  getAll: async () => {
+    const { data } = await api.get('/deals');
+    return data;
+  },
+  confirmSold: async (id) => {
+    const { data } = await api.patch(`/deals/${id}/confirm-sold`);
+    return data;
+  },
+  submitReview: async (id, rating, comment) => {
+    const { data } = await api.patch(`/deals/${id}/review`, { rating, comment });
+    return data;
+  },
+};
+
 // ==================== CHAT APIs ====================
 
 export const chatAPI = {

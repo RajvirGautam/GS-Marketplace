@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { productAPI, offerAPI } from '../../services/api';
+import { productAPI, offerAPI, dealAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
 import MyAccount from './dashboard/MyAccount';
@@ -261,6 +261,68 @@ const MiniLineChart = ({ data, width = 280, height = 100, color = "#00D9FF" }) =
   );
 };
 
+// ─── Confetti Celebration ────────────────────────────────────────────────────
+const ConfettiOverlay = ({ active }) => {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#00D9FF', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#fff'];
+    const particles = Array.from({ length: 120 }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 80,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 2 + Math.random() * 3,
+      rotate: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 6,
+      size: 7 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      opacity: 1,
+    }));
+
+    let raf;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = 0;
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.07; // gravity
+        p.rotate += p.rotSpeed;
+        if (p.y > canvas.height * 0.7) p.opacity -= 0.02;
+        if (p.opacity <= 0) return;
+        alive++;
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotate * Math.PI) / 180);
+        if (p.shape === 'rect') ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+      });
+      if (alive > 0) raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [active]);
+
+  if (!active) return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }}
+    />
+  );
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 // Main Component
 const UserDashboard = () => {
@@ -283,6 +345,14 @@ const UserDashboard = () => {
   const [offersReceived, setOffersReceived] = useState([]);
   const [offersSent, setOffersSent] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
+  const [deals, setDeals] = useState([]);
+  const [dealsLoading, setDealsLoading] = useState(false);
+  const [dealsSubTab, setDealsSubTab] = useState('negotiations');
+  const [reviewState, setReviewState] = useState({});
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Robust current-user ID — works whether auth returns id or _id
+  const currentUserId = (user?._id || user?.id || '').toString();
 
   // Mouse glow effect
   useEffect(() => {
@@ -319,10 +389,13 @@ const UserDashboard = () => {
     }
   };
 
-  // Fetch saved products when tab becomes active
+  // Fetch when tab becomes active
   useEffect(() => {
     if (sidebarActive === 'Saved Products') fetchSavedProducts();
-    if (sidebarActive === 'Negotiations') fetchOffers();
+    if (sidebarActive === 'My Deals') {
+      fetchDeals();
+      fetchOffers();
+    }
   }, [sidebarActive]);
 
   const fetchOffers = async () => {
@@ -345,11 +418,56 @@ const UserDashboard = () => {
     try {
       const res = await offerAPI.updateStatus(offerId, status);
       if (res.success) {
-        // Optimistic update or refetch
         fetchOffers();
+        // If accepted, a new Deal was created on backend — refresh deals too
+        if (status === 'accepted') fetchDeals();
       }
     } catch (err) {
       console.error('Error updating offer status:', err);
+    }
+  };
+
+  const fetchDeals = async () => {
+    try {
+      setDealsLoading(true);
+      const res = await dealAPI.getAll();
+      if (res.success) setDeals(res.deals);
+      else setDeals([]);
+    } catch (err) {
+      console.error('Error fetching deals:', err);
+      setDeals([]);
+    } finally {
+      setDealsLoading(false);
+    }
+  };
+
+  const handleConfirmSold = async (dealId) => {
+    try {
+      const res = await dealAPI.confirmSold(dealId);
+      if (res.success) {
+        fetchDeals();
+        // Fire confetti celebration
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3500);
+      }
+    } catch (err) {
+      console.error('Error confirming sold:', err);
+    }
+  };
+
+  const handleSubmitReview = async (dealId) => {
+    const r = reviewState[dealId] || {};
+    if (!r.rating) return;
+    try {
+      setReviewState(prev => ({ ...prev, [dealId]: { ...r, submitting: true } }));
+      const res = await dealAPI.submitReview(dealId, r.rating, r.comment || '');
+      if (res.success) {
+        fetchDeals();
+        setReviewState(prev => ({ ...prev, [dealId]: {} }));
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      setReviewState(prev => ({ ...prev, [dealId]: { ...r, submitting: false } }));
     }
   };
 
@@ -525,7 +643,7 @@ const UserDashboard = () => {
     { label: 'Marketplace', icon: <CartIcon />, action: () => navigate('/marketplace') },
     { label: 'My Listings', icon: <PackageIcon /> },
     { label: 'Saved Products', icon: <HeartFilledIcon /> },
-    { label: 'Negotiations', icon: <TrendingIcon /> },
+    { label: 'My Deals', icon: <TrendingIcon /> },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon />, action: () => navigate('/chat') },
@@ -1252,6 +1370,8 @@ const UserDashboard = () => {
         }
       `}</style>
 
+      <ConfettiOverlay active={showConfetti} />
+
       <div className="dash-root" style={{ background: '#080808' }}>
         <div
           ref={glowRef}
@@ -1463,135 +1583,434 @@ const UserDashboard = () => {
                     )}
                   </div>
                 </>
-              ) : sidebarActive === 'Negotiations' ? (
-                /* ── NEGOTIATIONS VIEW ── */
+              ) : sidebarActive === 'My Deals' ? (
+                /* ── MY DEALS VIEW ── */
                 <>
                   <div className="overview-header">
                     <div>
-                      <h1>Negotiations</h1>
+                      <h1>My Deals</h1>
                       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                        Track offers you've received as a seller and sent as a buyer.
+                        Accepted negotiations and confirmed sales
                       </div>
                     </div>
                   </div>
 
-                  {offersLoading ? (
+                  {/* Sub-tab pills */}
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                    {[['negotiations', '🤝 Negotiations'], ['confirmed', '✅ Confirmed Deals']].map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => setDealsSubTab(key)}
+                        style={{
+                          padding: '8px 20px',
+                          borderRadius: 30,
+                          border: `1.5px solid ${dealsSubTab === key ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                          background: dealsSubTab === key ? 'rgba(0,217,255,0.1)' : 'transparent',
+                          color: dealsSubTab === key ? '#00D9FF' : 'rgba(255,255,255,0.4)',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          fontFamily: 'inherit',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(dealsLoading || offersLoading) ? (
                     <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
-                      Loading offers...
+                      Loading...
                     </div>
-                  ) : (
-                    <div className="grid" style={{ gridTemplateColumns: '1fr', gap: 24 }}>
-                      {/* Received Offers */}
-                      <div className="card" style={{ padding: 20 }}>
-                        <div className="card-header" style={{ marginBottom: 16 }}>
-                          <span className="card-title"><BellIcon /> Received Offers</span>
-                        </div>
-                        {offersReceived.length > 0 ? offersReceived.map((offer) => (
-                          <div className="listing-item" key={offer._id} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', marginBottom: 12, borderRadius: 12 }}>
-                            <div className="listing-img" style={{ width: 50, height: 50 }}>
-                              <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <div>
-                                  <div style={{ fontSize: 13, fontWeight: 700 }}>{offer.product?.title}</div>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Buyer: {offer.buyer?.fullName} ({offer.buyer?.branch})</div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontSize: 15, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
-                                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>List: ₹{offer.product?.price}</div>
-                                </div>
+                  ) : (() => {
+                    // Negotiations sub-tab: pending offers + active deals
+                    if (dealsSubTab === 'negotiations') {
+                      // Pending offer cards the current user is involved in
+                      const pendingReceived = offersReceived.filter(o => o.status === 'pending');
+                      const pendingSent = offersSent.filter(o => o.status === 'pending');
+                      // Active deals (offer accepted, seller hasn't confirmed sold yet)
+                      const activeDeals = deals.filter(d => d.dealStatus === 'active');
+
+                      const hasAnything = pendingReceived.length > 0 || pendingSent.length > 0 || activeDeals.length > 0;
+
+                      if (!hasAnything) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤝</div>
+                            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No negotiations yet</div>
+                            <div style={{ fontSize: 13 }}>Make or receive an offer to start negotiating</div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+                          {/* ── PENDING OFFERS RECEIVED (seller) ── */}
+                          {pendingReceived.length > 0 && (
+                            <div className="card" style={{ padding: 20 }}>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                Incoming Offers
                               </div>
-                              {offer.message && (
-                                <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', marginTop: 4, background: 'rgba(255,255,255,0.03)', padding: 6, borderRadius: 6 }}>
-                                  "{offer.message}"
-                                </div>
-                              )}
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                                <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                  offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                    'bg-red-500/10 text-red-500 border-red-500/20'
-                                  }`}>
-                                  {offer.status}
-                                </span>
-                                {offer.status === 'pending' && (
-                                  <div style={{ display: 'flex', gap: 6 }}>
+                              {pendingReceived.map(offer => (
+                                <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                    <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                      <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
+                                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                        Buyer: {offer.buyer?.fullName}{offer.buyer?.branch ? ` · ${offer.buyer.branch.toUpperCase()}` : ''}
+                                      </div>
+                                      {offer.message && (
+                                        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', padding: '4px 8px', borderRadius: 5 }}>
+                                          "{offer.message}"
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                      <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                      {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
+                                    </div>
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                                     <button
                                       className="listing-action-btn"
-                                      style={{ padding: '4px 8px', fontSize: 10, borderColor: 'rgba(16,185,129,0.3)', color: '#10B981' }}
+                                      style={{ padding: '6px 14px', fontSize: 11, borderColor: 'rgba(16,185,129,0.4)', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
                                       onClick={() => handleOfferStatus(offer._id, 'accepted')}
                                     >
-                                      ACCEPT
+                                      ✓ Accept
                                     </button>
                                     <button
-                                      className="listing-action-btn"
-                                      style={{ padding: '4px 8px', fontSize: 10, borderColor: 'rgba(239,68,68,0.3)', color: '#EF4444' }}
+                                      className="listing-action-btn del"
+                                      style={{ padding: '6px 14px', fontSize: 11 }}
                                       onClick={() => handleOfferStatus(offer._id, 'rejected')}
                                     >
-                                      REJECT
+                                      ✕ Reject
                                     </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* ── PENDING OFFERS SENT (buyer) ── */}
+                          {pendingSent.length > 0 && (
+                            <div className="card" style={{ padding: 20 }}>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                Offers You Sent
+                              </div>
+                              {pendingSent.map(offer => (
+                                <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                    <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                      <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
+                                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                        Seller: {offer.seller?.fullName}
+                                      </div>
+                                    </div>
+                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                      <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                      {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
+                                      <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
+                                    </div>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                      className="listing-action-btn"
+                                      style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', borderColor: 'rgba(239,68,68,0.3)' }}
+                                      onClick={() => handleOfferStatus(offer._id, 'cancelled')}
+                                    >
+                                      Cancel Offer
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* ── ACCEPTED DEALS (awaiting seller confirm) ── */}
+                          {activeDeals.length > 0 && (
+                            <div className="card" style={{ padding: 20 }}>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                Accepted — Awaiting Handoff
+                              </div>
+                              {activeDeals.map((deal) => {
+                                const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                                const isSeller = sellerId?.toString() === currentUserId;
+                                const otherParty = isSeller ? deal.buyer : deal.seller;
+                                return (
+                                  <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                        <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                      </div>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{deal.product?.title}</div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                          {isSeller
+                                            ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
+                                            : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
+                                          {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+                                        </div>
+                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>via {deal.source === 'chat' ? 'Chat' : 'Offer'}</div>
+                                      </div>
+                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                        {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</div>
+                                        )}
+                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
+                                      </div>
+                                    </div>
+                                    {/* Seller: Mark as Handed Over */}
+                                    {isSeller && (
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '11px 14px' }}>
+                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                          Ready to hand over the item?
+                                        </div>
+                                        <button
+                                          onClick={() => handleConfirmSold(deal._id)}
+                                          style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                        >
+                                          📦 Handed Over
+                                        </button>
+                                      </div>
+                                    )}
+                                    {/* Buyer: Mark as Received */}
+                                    {!isSeller && (
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)', borderRadius: 8, padding: '11px 14px' }}>
+                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                          Got the item? Confirm receipt here.
+                                        </div>
+                                        <button
+                                          onClick={() => handleConfirmSold(deal._id)}
+                                          style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(0,217,255,0.4)', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                        >
+                                          ✓ Received Item
+                                        </button>
+                                      </div>
+                                    )}
+
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                        </div>
+                      );
+                    }
+
+                    // ── CONFIRMED DEALS sub-tab ──
+                    const confirmedDeals = deals.filter(d => d.dealStatus === 'sold');
+                    if (confirmedDeals.length === 0) {
+                      return (
+                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>✅</div>
+                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No confirmed deals yet</div>
+                          <div style={{ fontSize: 13 }}>Deals move here once the seller confirms them as sold</div>
+                        </div>
+                      );
+                    }
+
+                    return confirmedDeals.map((deal) => {
+                      const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                      const userId = user?._id;
+                      const isSeller = sellerId?.toString() === currentUserId;
+                      const isBuyer = !isSeller;
+                      const otherParty = isSeller ? deal.buyer : deal.seller;
+                      const r = reviewState[deal._id] || {};
+
+                      return (
+                        <div
+                          key={deal._id}
+                          className="listing-item"
+                          style={{ flexDirection: 'column', gap: 12, padding: 16, marginBottom: 12, borderRadius: 12 }}
+                        >
+                          {/* Deal header row */}
+                          <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                            <div className="listing-img" style={{ width: 60, height: 60 }}>
+                              <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                  <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3 }}>
+                                    {deal.product?.title}
+                                  </div>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 5 }}>
+                                    {isSeller
+                                      ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
+                                      : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
+                                    {typeof otherParty === 'object' && otherParty?.branch
+                                      ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{
+                                      fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                                      textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px',
+                                      borderRadius: 4,
+                                      border: `1px solid ${deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.3)' : 'rgba(0,217,255,0.3)'}`,
+                                      background: deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.1)' : 'rgba(0,217,255,0.1)',
+                                      color: deal.dealStatus === 'sold' ? '#10B981' : '#00D9FF'
+                                    }}>
+                                      {deal.dealStatus === 'sold' ? 'SOLD' : 'ACTIVE'}
+                                    </span>
+                                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                                      via {deal.source === 'chat' ? 'Chat' : 'Offer'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                  <div style={{ fontSize: 18, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                  {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
+                                      ₹{deal.product.price}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SELLER: Confirm as Sold button (Negotiations tab) */}
+                          {isSeller && deal.dealStatus === 'active' && (
+                            <div style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)',
+                              borderRadius: 8, padding: '10px 14px'
+                            }}>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                Hand off the item? Confirm the sale to finalise.
+                              </div>
+                              <button
+                                onClick={() => handleConfirmSold(deal._id)}
+                                style={{
+                                  padding: '7px 16px', borderRadius: 6,
+                                  border: '1.5px solid rgba(16,185,129,0.5)',
+                                  background: 'rgba(16,185,129,0.15)', color: '#10B981',
+                                  fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
+                                  cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
+                                }}
+                              >
+                                ✓ Confirm as Sold
+                              </button>
+                            </div>
+                          )}
+
+                          {/* BUYER: Review form or submitted review (Confirmed Deals tab) */}
+                          {isBuyer && deal.dealStatus === 'sold' && (
+                            deal.review?.submittedAt ? (
+                              <div style={{
+                                background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                                borderRadius: 8, padding: '10px 14px'
+                              }}>
+                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review</div>
+                                <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
+                                  {[1, 2, 3, 4, 5].map(s => (
+                                    <span key={s} style={{ fontSize: 14, color: s <= deal.review.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                  ))}
+                                </div>
+                                {deal.review.comment && (
+                                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                    "{deal.review.comment}"
                                   </div>
                                 )}
                               </div>
-                            </div>
-                          </div>
-                        )) : (
-                          <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
-                            No offers received yet.
-                          </div>
-                        )}
-                      </div>
+                            ) : (
+                              <div style={{
+                                background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                                borderRadius: 8, padding: '12px 14px'
+                              }}>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+                                  Rate your experience with the seller
+                                </div>
+                                <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <button
+                                      key={star}
+                                      onClick={() => setReviewState(prev => ({
+                                        ...prev,
+                                        [deal._id]: { ...prev[deal._id], rating: star }
+                                      }))}
+                                      style={{
+                                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                                        fontSize: 24, lineHeight: 1,
+                                        color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
+                                        transition: 'color 0.15s'
+                                      }}
+                                    >
+                                      ★
+                                    </button>
+                                  ))}
+                                </div>
+                                <textarea
+                                  value={r.comment || ''}
+                                  onChange={(e) => setReviewState(prev => ({
+                                    ...prev,
+                                    [deal._id]: { ...prev[deal._id], comment: e.target.value }
+                                  }))}
+                                  placeholder="Share your experience (optional)..."
+                                  rows={2}
+                                  style={{
+                                    width: '100%', background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
+                                    color: '#fff', fontSize: 12, padding: '8px 10px',
+                                    fontFamily: 'inherit', resize: 'none', outline: 'none',
+                                    marginBottom: 10
+                                  }}
+                                />
+                                <button
+                                  onClick={() => handleSubmitReview(deal._id)}
+                                  disabled={!r.rating || r.submitting}
+                                  style={{
+                                    padding: '7px 18px', borderRadius: 6, border: 'none',
+                                    background: r.rating
+                                      ? 'linear-gradient(135deg, #7C3AED, #00D9FF)'
+                                      : 'rgba(255,255,255,0.08)',
+                                    color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
+                                    fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
+                                    cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
+                                  }}
+                                >
+                                  {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                </button>
+                              </div>
+                            )
+                          )}
 
-                      {/* Sent Offers */}
-                      <div className="card" style={{ padding: 20 }}>
-                        <div className="card-header" style={{ marginBottom: 16 }}>
-                          <span className="card-title"><GlobeIcon /> Sent Offers</span>
+                          {/* SELLER: sees buyer's submitted review */}
+                          {isSeller && deal.review?.submittedAt && (
+                            <div style={{
+                              background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+                              borderRadius: 8, padding: '10px 14px'
+                            }}>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review</div>
+                              <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                {[1, 2, 3, 4, 5].map(s => (
+                                  <span key={s} style={{ fontSize: 14, color: s <= deal.review.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                ))}
+                              </div>
+                              {deal.review.comment && (
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                  "{deal.review.comment}"
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {offersSent.length > 0 ? offersSent.map((offer) => (
-                          <div className="listing-item" key={offer._id} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', marginBottom: 12, borderRadius: 12 }}>
-                            <div className="listing-img" style={{ width: 50, height: 50 }}>
-                              <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <div>
-                                  <div style={{ fontSize: 13, fontWeight: 700 }}>{offer.product?.title}</div>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Seller: {offer.seller?.fullName}</div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontSize: 15, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
-                                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>List: ₹{offer.product?.price}</div>
-                                </div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                                <span className={`px-2 py-0.5 text-[9px] mono font-bold uppercase border ${offer.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                  offer.status === 'accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                    'bg-red-500/10 text-red-500 border-red-500/20'
-                                  }`}>
-                                  {offer.status}
-                                </span>
-                                {offer.status === 'pending' && (
-                                  <button
-                                    className="listing-action-btn"
-                                    style={{ padding: '4px 8px', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}
-                                    onClick={() => handleOfferStatus(offer._id, 'cancelled')}
-                                  >
-                                    CANCEL
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )) : (
-                          <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
-                            No offers sent yet.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                      );
+                    });
+                  })()}
                 </>
               ) : sidebarActive === 'Saved Products' ? (
+
                 /* ── SAVED PRODUCTS VIEW ── */
                 <>
                   <div className="overview-header">
@@ -1897,67 +2316,73 @@ const UserDashboard = () => {
                   </div>
                 </>
               )}
-            </div>
+            </div >
 
             {/* RIGHT PANEL */}
-            <div className="content-right">
+            < div className="content-right" >
               {/* ACTIVITY */}
-              <div className="right-section-title">Activity</div>
-              {activityItems.map((n, i) => (
-                <div className="notif-item" key={i}>
-                  <div className="notif-dot" style={{ background: n.color }} />
-                  <div>
-                    <div className="notif-text">{n.text}</div>
-                    <div className="notif-time">{n.time}</div>
+              < div className="right-section-title" > Activity</div >
+              {
+                activityItems.map((n, i) => (
+                  <div className="notif-item" key={i}>
+                    <div className="notif-dot" style={{ background: n.color }} />
+                    <div>
+                      <div className="notif-text">{n.text}</div>
+                      <div className="notif-time">{n.time}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              }
 
-              <hr className="divider" />
+              < hr className="divider" />
 
               {/* QUICK STATS */}
-              <div className="right-section-title">Quick Stats</div>
-              {quickStatsItems.map((a, i) => (
-                <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
-                  <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
-                    {a.icon}
+              < div className="right-section-title" > Quick Stats</div >
+              {
+                quickStatsItems.map((a, i) => (
+                  <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
+                    <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
+                      {a.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
+                      <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
-                    <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
-                    <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                ))
+              }
+            </div >
+          </div >
+        </div >
 
         {/* DELETE MODAL */}
-        {showDeleteModal && (
-          <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
-            <div className="modal-box" onClick={e => e.stopPropagation()}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Delete Listing?</h3>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 }}>
-                Are you sure you want to delete this listing? This action cannot be undone.
-              </p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  style={{ flex: 1, padding: '10px', background: '#EF4444', border: 'none', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
-                >
-                  Delete
-                </button>
+        {
+          showDeleteModal && (
+            <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
+              <div className="modal-box" onClick={e => e.stopPropagation()}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Delete Listing?</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 }}>
+                  Are you sure you want to delete this listing? This action cannot be undone.
+                </p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    style={{ flex: 1, padding: '10px', background: '#EF4444', border: 'none', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        }
 
         {/* ADD PRODUCT MODAL */}
         <AddProductModal
@@ -1971,7 +2396,7 @@ const UserDashboard = () => {
           onClose={(success) => { setIsEditProductOpen(false); setEditingProduct(null); if (success) fetchDashboardData(); }}
           product={editingProduct}
         />
-      </div>
+      </div >
     </>
   );
 };

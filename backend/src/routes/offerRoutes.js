@@ -1,6 +1,10 @@
 import express from 'express';
 import Offer from '../models/Offer.js';
 import Product from '../models/Product.js';
+import Deal from '../models/Deal.js';
+import Conversation from '../models/Conversation.js';
+import Message from '../models/Message.js';
+import { io } from '../server.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -98,11 +102,92 @@ router.patch('/:id/status', authenticate, async (req, res) => {
         offer.status = status;
         await offer.save();
 
+        // Auto-create a Deal when the seller accepts
+        if (status === 'accepted') {
+            const existingDeal = await Deal.findOne({ sourceId: offer._id, source: 'offer' });
+            if (!existingDeal) {
+                await Deal.create({
+                    product: offer.product,
+                    buyer: offer.buyer,
+                    seller: offer.seller,
+                    agreedPrice: offer.offerPrice,
+                    source: 'offer',
+                    sourceId: offer._id
+                });
+            }
+            // Fire-and-forget: open/reuse a chat and send a preset acceptance message
+            autoSendAcceptanceChat(offer);
+        }
+
         res.json({ success: true, offer });
     } catch (error) {
         console.error('Error updating offer status:', error);
         res.status(500).json({ success: false, message: 'Error updating status' });
     }
 });
+
+// ─── Helper: auto-send acceptance chat message ────────────────────────────────
+async function autoSendAcceptanceChat(offer) {
+    try {
+        const product = await Product.findById(offer.product).select('title price seller');
+        if (!product) return;
+
+        const buyerId = offer.buyer;
+        const sellerId = offer.seller;
+
+        // Sort participants the same way chatRoutes does
+        const participants = [buyerId, sellerId]
+            .map(id => id.toString())
+            .sort()
+            .map(id => id);
+
+        // Find or create conversation
+        let conv = await Conversation.findOne({
+            product: offer.product,
+            participants: { $all: participants, $size: 2 }
+        });
+
+        if (!conv) {
+            conv = await Conversation.create({ participants, product: offer.product });
+        }
+
+        const discount = product.price - offer.offerPrice;
+        const pct = product.price > 0 ? Math.round((discount / product.price) * 100) : 0;
+
+        const text = [
+            `🎉 Offer accepted for "${product.title}"!`,
+            ``,
+            ``,
+            `✅ Agreed price: ₹${offer.offerPrice}${pct > 0 ? ` (${pct}% off ₹${product.price})` : ''}`,
+            ``,
+            ``,
+            `Please coordinate where and when to meet to complete the handover.`,
+            ``,
+            `Once done, mark it as ✓ Received in My Deals.`,
+        ].join('\n');
+
+        const msg = await Message.create({
+            conversation: conv._id,
+            sender: sellerId,
+            type: 'text',
+            content: text,
+            readBy: [sellerId],
+        });
+
+        // Update conversation's last message
+        await Conversation.findByIdAndUpdate(conv._id, {
+            lastMessage: msg._id,
+            lastMessageAt: new Date(),
+        });
+
+        // Emit to buyer in real-time
+        io.to(`user:${buyerId}`).emit('new_message', {
+            conversationId: conv._id.toString(),
+            message: msg,
+        });
+    } catch (err) {
+        console.error('Auto-chat error on offer acceptance:', err);
+    }
+}
 
 export default router;

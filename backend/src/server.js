@@ -13,6 +13,7 @@ import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import dealRoutes from './routes/dealRoutes.js';
 import './config/cloudinary.js';
 
 dotenv.config();
@@ -88,6 +89,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/deals', dealRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

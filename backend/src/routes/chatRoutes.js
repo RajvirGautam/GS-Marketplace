@@ -5,6 +5,7 @@ import streamifier from 'streamifier';
 import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
 import Product from '../models/Product.js';
+import Deal from '../models/Deal.js';
 import { authenticate } from '../middleware/auth.js';
 import { io } from '../server.js';
 
@@ -318,6 +319,31 @@ router.patch('/messages/:msgId/offer', authenticate, async (req, res) => {
 
         message.offerData.status = status;
         await message.save();
+
+        // Auto-create a Deal when accepted via chat
+        if (status === 'accepted') {
+            const existingDeal = await Deal.findOne({ sourceId: message._id, source: 'chat' });
+            if (!existingDeal) {
+                // Determine the buyer/seller:
+                // The offer sender is the buyer; the other participant is the seller
+                const product = await Product.findById(conversation.product).select('seller');
+                const sellerId = product?.seller;
+                const buyerId = conversation.participants.find(
+                    p => p.toString() !== sellerId?.toString()
+                );
+
+                if (buyerId && sellerId) {
+                    await Deal.create({
+                        product: conversation.product,
+                        buyer: buyerId,
+                        seller: sellerId,
+                        agreedPrice: message.offerData.amount,
+                        source: 'chat',
+                        sourceId: message._id
+                    });
+                }
+            }
+        }
 
         const populated = await Message.findById(message._id).populate('sender', 'fullName profilePicture');
         res.json({ success: true, message: populated });
