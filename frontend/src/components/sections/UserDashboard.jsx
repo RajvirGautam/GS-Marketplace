@@ -399,20 +399,10 @@ const UserDashboard = () => {
   // Fetch when tab becomes active
   useEffect(() => {
     if (sidebarActive === 'Saved Products') fetchSavedProducts();
-    if (sidebarActive === 'My Deals') {
+    if (sidebarActive === 'My Deals' || sidebarActive === 'Overview') {
       fetchDeals();
       fetchOffers();
     }
-  }, [sidebarActive]);
-
-  // Auto-refresh deals + offers every 15s while on My Deals tab
-  useEffect(() => {
-    if (sidebarActive !== 'My Deals') return;
-    const interval = setInterval(() => {
-      fetchDeals();
-      fetchOffers();
-    }, 5000);
-    return () => clearInterval(interval);
   }, [sidebarActive]);
 
   const fetchOffers = async () => {
@@ -596,41 +586,100 @@ const UserDashboard = () => {
     return points;
   })();
 
-  // ── ACTIVITY: real per-listing events ──
+  // ── ACTIVITY: real per-listing + offer/deal events ──
   const activityItems = (() => {
-    const items = [];
-    // Most recent listing
-    const newest = [...listings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-    if (newest) items.push({
-      text: `"${newest.title}" listed`,
-      time: getTimeAgo(newest.createdAt),
-      color: '#00D9FF'
+    const all = [];
+
+    // Each listing: "New listing" event + "Marked as sold" event
+    listings.forEach(l => {
+      all.push({
+        text: `"${l.title}" new listing`,
+        ts: new Date(l.createdAt),
+        time: getTimeAgo(l.createdAt),
+        color: '#00D9FF'
+      });
+      if (l.status === 'sold') {
+        all.push({
+          text: `"${l.title}" marked as sold`,
+          ts: new Date(l.updatedAt || l.createdAt),
+          time: getTimeAgo(l.updatedAt || l.createdAt),
+          color: '#10B981'
+        });
+      }
     });
-    // Most viewed listing
-    const topViewed = [...listings].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
-    if (topViewed && topViewed.views > 0) items.push({
-      text: `"${topViewed.title}" · ${topViewed.views} views`,
-      time: 'Top viewed',
-      color: '#7C3AED'
+
+    // Offers sent by me
+    offersSent.forEach(o => {
+      const title = o.product?.title || 'a product';
+      const toName = o.seller?.fullName || o.seller?.username || 'seller';
+      all.push({
+        text: `Price offer of \u20b9${o.offerPrice} sent to ${toName} for "${title}"`,
+        ts: new Date(o.createdAt),
+        time: getTimeAgo(o.createdAt),
+        color: '#00D9FF'
+      });
     });
-    // Sold count
-    if (stats.soldListings > 0) items.push({
-      text: `${stats.soldListings} item${stats.soldListings > 1 ? 's' : ''} sold`,
-      time: 'All time',
-      color: '#10B981'
+
+    // Incoming pending offers
+    offersReceived.filter(o => o.status === 'pending').forEach(o => {
+      const title = o.product?.title || 'your listing';
+      const fromName = o.buyer?.fullName || o.buyer?.username || 'buyer';
+      all.push({
+        text: `${fromName} offered \u20b9${o.offerPrice} for "${title}"`,
+        ts: new Date(o.createdAt),
+        time: getTimeAgo(o.createdAt),
+        color: '#F59E0B'
+      });
     });
-    // Pending
-    if (stats.pendingListings > 0) items.push({
-      text: `${stats.pendingListings} listing${stats.pendingListings > 1 ? 's' : ''} pending review`,
-      time: 'Needs action',
-      color: '#F59E0B'
+
+    // Accepted negotiations
+    [...offersReceived, ...offersSent].filter(o => o.status === 'accepted').forEach(o => {
+      const title = o.product?.title || 'a product';
+      all.push({
+        text: `Negotiation accepted \u2014 \u20b9${o.offerPrice} for "${title}"`,
+        ts: new Date(o.updatedAt || o.createdAt),
+        time: getTimeAgo(o.updatedAt || o.createdAt),
+        color: '#10B981'
+      });
     });
-    // Total saves received
-    if (stats.totalSaves > 0) items.push({
-      text: `${stats.totalSaves} saves from buyers`,
-      time: 'Total',
-      color: '#EF4444'
+
+    // Rejected offers
+    [...offersReceived, ...offersSent].filter(o => o.status === 'rejected').forEach(o => {
+      const title = o.product?.title || 'a product';
+      all.push({
+        text: `Offer rejected for "${title}"`,
+        ts: new Date(o.updatedAt || o.createdAt),
+        time: getTimeAgo(o.updatedAt || o.createdAt),
+        color: '#EF4444'
+      });
     });
+
+    // Completed deals
+    deals.filter(d => d.status === 'completed').forEach(d => {
+      const title = d.product?.title || 'a product';
+      all.push({
+        text: `Deal done \u2014 "${title}" sold for \u20b9${d.finalPrice || d.agreedPrice}`,
+        ts: new Date(d.updatedAt || d.createdAt),
+        time: getTimeAgo(d.updatedAt || d.createdAt),
+        color: '#10B981'
+      });
+    });
+
+    // Active deals
+    deals.filter(d => d.status !== 'completed').forEach(d => {
+      const title = d.product?.title || 'a product';
+      all.push({
+        text: `Deal in progress for "${title}" at \u20b9${d.agreedPrice}`,
+        ts: new Date(d.createdAt),
+        time: getTimeAgo(d.createdAt),
+        color: '#7C3AED'
+      });
+    });
+
+    // Sort all events newest-first, take top 4
+    all.sort((a, b) => b.ts - a.ts);
+    const items = all.slice(0, 4);
+
     if (items.length === 0) items.push({ text: 'No activity yet', time: 'Add your first listing!', color: 'rgba(255,255,255,0.2)' });
     return items;
   })();
