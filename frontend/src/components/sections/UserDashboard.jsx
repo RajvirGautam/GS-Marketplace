@@ -323,6 +323,216 @@ const ConfettiOverlay = ({ active }) => {
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── DEAL HISTORY MODAL ────────────────────────────────────────────────────────
+const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
+  if (!deal) return null;
+
+  const fmt = (dateStr) => {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  };
+
+  const isSeller = (typeof deal.seller === 'object' ? deal.seller?._id : deal.seller)?.toString() === currentUserId;
+  const otherParty = isSeller ? deal.buyer : deal.seller;
+  const otherName = typeof otherParty === 'object' ? otherParty?.fullName : '—';
+
+  // Build timeline steps from available timestamps
+  const steps = [
+    {
+      icon: '💬',
+      label: deal.source === 'chat' ? 'Price negotiated via Chat' : 'Offer Submitted',
+      desc: deal.source === 'chat'
+        ? `A price of ₹${deal.agreedPrice} was negotiated in chat`
+        : `An offer of ₹${deal.agreedPrice} was submitted${isSeller ? ` by ${otherName}` : ` to ${otherName}`}`,
+      time: deal.createdAt,
+      color: '#00D9FF',
+      done: true,
+    },
+    {
+      icon: '✅',
+      label: 'Offer Accepted',
+      desc: deal.source === 'chat'
+        ? `Agreed price locked via chat negotiation`
+        : `${isSeller ? 'You accepted' : `${otherName} accepted`} the offer — deal was created`,
+      time: deal.createdAt,
+      color: '#10B981',
+      done: true,
+    },
+    {
+      icon: '🤝',
+      label: 'Deal Opened',
+      desc: `Both parties committed — agreed price ₹${deal.agreedPrice}`,
+      time: deal.createdAt,
+      color: '#7C3AED',
+      done: true,
+    },
+    {
+      icon: '📦',
+      label: 'Sale Confirmed',
+      desc: `Item handed over and deal sealed as sold`,
+      time: deal.dealStatus === 'sold' ? deal.updatedAt : null,
+      color: '#F59E0B',
+      done: deal.dealStatus === 'sold',
+    },
+    {
+      icon: '⭐',
+      label: 'Review Submitted',
+      desc: deal.review?.rating
+        ? `Rated ${deal.review.rating}/5${deal.review.comment ? ` — "${deal.review.comment.slice(0, 60)}${deal.review.comment.length > 60 ? '…' : ''}"` : ''}`
+        : isSeller ? 'Waiting for buyer to leave a review' : "You haven't reviewed this deal yet",
+      time: deal.review?.submittedAt || null,
+      color: '#EC4899',
+      done: !!deal.review?.submittedAt,
+    },
+  ];
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9000,
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+        animation: 'fadeIn 0.2s ease',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 480,
+          background: 'rgba(14,14,14,0.95)',
+          border: '1.5px solid rgba(255,255,255,0.1)',
+          borderRadius: 16,
+          overflow: 'hidden',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
+          animation: 'slideUp 0.25s ease',
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(0,217,255,0.08), rgba(124,58,237,0.08))',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          padding: '20px 20px 16px',
+          position: 'relative',
+        }}>
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute', top: 14, right: 14,
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 6, color: 'rgba(255,255,255,0.5)',
+              width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', fontSize: 14, lineHeight: 1,
+            }}
+          >✕</button>
+
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#00D9FF', marginBottom: 10 }}>
+            📋 Deal History
+          </div>
+
+          {/* Product row */}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <img
+              src={deal.product?.images?.[0] || '/placeholder.jpg'}
+              alt=""
+              style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {deal.product?.title}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
+                {isSeller ? `Buyer: ${otherName}` : `Seller: ${otherName}`}
+                {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{
+                  fontSize: 14, fontWeight: 800, color: '#00D9FF',
+                  fontFamily: 'JetBrains Mono, monospace',
+                }}>₹{deal.agreedPrice}</span>
+                {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</span>
+                )}
+                <span style={{
+                  fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                  textTransform: 'uppercase', letterSpacing: 1, padding: '2px 7px',
+                  borderRadius: 4, border: '1px solid rgba(16,185,129,0.3)',
+                  background: 'rgba(16,185,129,0.1)', color: '#10B981'
+                }}>SOLD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div style={{ padding: '20px 24px 24px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>
+            Order Timeline
+          </div>
+          <div style={{ position: 'relative' }}>
+            {steps.map((step, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: idx < steps.length - 1 ? 24 : 0 }}>
+                {/* Connector line */}
+                {idx < steps.length - 1 && (
+                  <div style={{
+                    position: 'absolute', left: 15, top: 32, bottom: 0,
+                    width: 1,
+                    background: step.done && steps[idx + 1]?.done
+                      ? `linear-gradient(to bottom, ${step.color}60, ${steps[idx + 1].color}30)`
+                      : 'rgba(255,255,255,0.07)',
+                  }} />
+                )}
+                {/* Icon dot */}
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  background: step.done ? `${step.color}18` : 'rgba(255,255,255,0.04)',
+                  border: `1.5px solid ${step.done ? step.color + '55' : 'rgba(255,255,255,0.1)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14,
+                  opacity: step.done ? 1 : 0.4,
+                  boxShadow: step.done ? `0 0 12px ${step.color}25` : 'none',
+                  position: 'relative', zIndex: 1,
+                }}>
+                  {step.icon}
+                </div>
+                {/* Content */}
+                <div style={{ flex: 1, minWidth: 0, paddingTop: 5 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div style={{
+                      fontSize: 13, fontWeight: 700,
+                      color: step.done ? '#fff' : 'rgba(255,255,255,0.3)',
+                    }}>{step.label}</div>
+                    {step.time && (
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'JetBrains Mono, monospace', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                        {fmt(step.time)}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 11, color: step.done ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)', marginTop: 3, lineHeight: 1.5 }}>
+                    {step.desc}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
+      `}</style>
+    </div>
+  );
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 // Main Component
 const UserDashboard = () => {
@@ -357,6 +567,7 @@ const UserDashboard = () => {
   const [dealsSubTab, setDealsSubTab] = useState('negotiations');
   const [reviewState, setReviewState] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
+  const [dealHistoryOpen, setDealHistoryOpen] = useState(null); // holds the deal object to show
 
   // Robust current-user ID — works whether auth returns id or _id
   const currentUserId = (user?._id || user?.id || '').toString();
@@ -2070,6 +2281,27 @@ const UserDashboard = () => {
                               )}
                             </div>
                           )}
+
+                          {/* DEAL HISTORY BUTTON */}
+                          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
+                            <button
+                              onClick={() => setDealHistoryOpen(deal)}
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                padding: '7px 14px', borderRadius: 8,
+                                border: '1.5px solid rgba(0,217,255,0.25)',
+                                background: 'rgba(0,217,255,0.06)',
+                                color: '#00D9FF', fontFamily: 'inherit',
+                                fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                                transition: 'all 0.15s',
+                                letterSpacing: 0.4,
+                              }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.45)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.25)'; }}
+                            >
+                              📋 Deal History
+                            </button>
+                          </div>
                         </div>
                       );
                     });
@@ -2449,6 +2681,15 @@ const UserDashboard = () => {
             </div>
           )
         }
+
+        {/* DEAL HISTORY MODAL */}
+        {dealHistoryOpen && (
+          <DealHistoryModal
+            deal={dealHistoryOpen}
+            onClose={() => setDealHistoryOpen(null)}
+            currentUserId={currentUserId}
+          />
+        )}
 
         {/* ADD PRODUCT MODAL */}
         <AddProductModal
