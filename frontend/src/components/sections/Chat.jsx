@@ -264,6 +264,7 @@ const OfferCard = ({ message, currentUserId, onRespond, responding }) => {
 //  Message Bubble
 // ─────────────────────────────────────────────────────────────
 const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
+    const navigate = useNavigate();
     const isMine = message.sender?._id === currentUserId || message.sender?._id?.toString() === currentUserId?.toString();
 
     return (
@@ -276,14 +277,17 @@ const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
         }}>
             {/* Avatar */}
             {!isMine && (
-                <div style={{
-                    width: 30, height: 30, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, color: '#0A0A0A',
-                    flexShrink: 0,
-                    overflow: 'hidden'
-                }}>
+                <div
+                    onClick={(e) => { e.stopPropagation(); message.sender?._id && navigate(`/seller/${message.sender._id}`); }}
+                    style={{
+                        width: 30, height: 30, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 700, color: '#0A0A0A',
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        cursor: 'pointer'
+                    }}>
                     {message.sender?.profilePicture
                         ? <img src={message.sender.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : getInitials(message.sender?.fullName)}
@@ -823,23 +827,44 @@ const Chat = () => {
                             <>
                                 {/* Thread header */}
                                 <div className="thread-header">
-                                    <div style={{
-                                        width: 38, height: 38, borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: 13, fontWeight: 700, color: '#0A0A0A', flexShrink: 0,
-                                        overflow: 'hidden'
-                                    }}>
+                                    <div
+                                        onClick={() => otherParticipant?._id && navigate(`/seller/${otherParticipant._id}`)}
+                                        style={{
+                                            width: 38, height: 38, borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: 13, fontWeight: 700, color: '#0A0A0A', flexShrink: 0,
+                                            overflow: 'hidden',
+                                            cursor: 'pointer'
+                                        }}
+                                        title="View Profile"
+                                    >
                                         {otherParticipant?.profilePicture
                                             ? <img src={otherParticipant.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             : getInitials(otherParticipant?.fullName)}
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{otherParticipant?.fullName || 'User'}</div>
+                                        <div
+                                            onClick={() => otherParticipant?._id && navigate(`/seller/${otherParticipant._id}`)}
+                                            style={{ fontWeight: 700, fontSize: 14, color: '#fff', cursor: 'pointer', display: 'inline-block' }}
+                                            title="View Profile"
+                                        >
+                                            {otherParticipant?.fullName || 'User'}
+                                        </div>
                                         {activeConv?.product && (
-                                            <div style={{ fontSize: 11, color: 'rgba(0,217,255,0.7)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <div
+                                                onClick={() => navigate(`/product/${activeConv.product._id}`)}
+                                                style={{ fontSize: 11, color: 'rgba(0,217,255,0.7)', display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+                                                title="View Product"
+                                            >
                                                 <TagIcon />
-                                                <span>{activeConv.product.title}</span>
+                                                <span
+                                                    style={{ textDecoration: 'none' }}
+                                                    onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+                                                    onMouseLeave={e => e.target.style.textDecoration = 'none'}
+                                                >
+                                                    {activeConv.product.title}
+                                                </span>
                                                 {activeConv.product.price && (
                                                     <span style={{ color: 'rgba(255,255,255,0.3)', marginLeft: 4 }}>· ₹{activeConv.product.price}</span>
                                                 )}
@@ -850,7 +875,9 @@ const Chat = () => {
                                         <img
                                             src={activeConv.product.images[0]}
                                             alt="product"
-                                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)' }}
+                                            onClick={() => navigate(`/product/${activeConv.product._id}`)}
+                                            title="View Product"
+                                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
                                         />
                                     )}
                                 </div>
