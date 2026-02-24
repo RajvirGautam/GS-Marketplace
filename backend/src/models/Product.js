@@ -15,7 +15,7 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: function() {
+      required: function () {
         return this.type === 'sale' || this.type === 'rent';
       }
     },
@@ -76,13 +76,18 @@ const productSchema = new mongoose.Schema(
     },
     branch: {
       type: String,
-      enum: ['cs', 'it', 'ece', 'ee', 'mech', 'civil'],
+      enum: ['cs', 'it', 'ece', 'ee', 'mech', 'civil', 'all'],
       required: true
     },
     year: {
-      type: Number,
-      enum: [1, 2, 3, 4],
-      required: true
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+      validate: {
+        validator: function (v) {
+          return [1, 2, 3, 4, '1', '2', '3', '4', 'all'].includes(v);
+        },
+        message: props => `${props.value} is not a valid year`
+      }
     },
     highlights: [String],
     specs: [{
@@ -104,11 +109,11 @@ productSchema.index({ category: 1, status: 1 });
 productSchema.index({ createdAt: -1 });
 
 // Virtual for calculating "time ago"
-productSchema.virtual('postedDate').get(function() {
+productSchema.virtual('postedDate').get(function () {
   const now = new Date();
   const diff = now - this.createdAt;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
+
   if (days === 0) return 'Today';
   if (days === 1) return '1 day ago';
   if (days < 7) return `${days} days ago`;
@@ -117,7 +122,7 @@ productSchema.virtual('postedDate').get(function() {
 });
 
 // Populate seller info when querying - FIXED
-productSchema.pre(/^find/, function() {
+productSchema.pre(/^find/, function () {
   this.populate({
     path: 'seller',
     select: 'fullName email enrollmentNumber isVerified branch year profilePicture'

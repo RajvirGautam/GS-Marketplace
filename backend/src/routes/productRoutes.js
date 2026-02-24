@@ -606,7 +606,7 @@ router.post('/', authenticate, upload.array('images', 5), async (req, res) => {
       images: imageUrls,
       seller: req.user._id,
       branch: branch,
-      year: parseInt(year),
+      year: year === 'all' ? 'all' : parseInt(year),
       highlights: parsedHighlights,
       specs: parsedSpecs
     });

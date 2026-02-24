@@ -124,6 +124,15 @@ export const productAPI = {
     return data;
   },
 
+  generateListing: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    const { data } = await api.post('/ai/generate-listing', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data;
+  },
+
   getPriceSuggestion: async (category, condition) => {
     const { data } = await api.get(`/products/price-suggestion?category=${category}&condition=${condition}`);
     return data;

@@ -27,6 +27,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [isAIAnalyzing, setIsAIAnalyzing] = useState(false);
+  const [aiProgress, setAiProgress] = useState(0);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [isPriceLoading, setIsPriceLoading] = useState(false);
 
@@ -41,6 +42,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
   ];
 
   const branches = [
+    { value: 'all', label: 'All Branches' },
     { value: 'cs', label: 'Computer Science' },
     { value: 'it', label: 'Information Technology' },
     { value: 'ece', label: 'Electronics & Comm.' },
@@ -107,6 +109,16 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setImagePreviews(newPreviews);
   };
 
+  const [aiFilledFields, setAiFilledFields] = useState(false);
+
+  const clearAIFill = () => {
+    setFormData({ title: '', description: '', price: '', category: '', branch: '', year: '', condition: '', type: 'sale' });
+    setHighlights(['']);
+    setSpecs([{ label: '', value: '' }]);
+    setAiFilledFields(false);
+    setAiSuggestion(null);
+  };
+
   const handleAIFill = async () => {
     if (images.length === 0) {
       toast.error('Upload an image first for AI analysis');
@@ -115,28 +127,66 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
     setIsAIAnalyzing(true);
     setAiSuggestion(null);
+    setAiProgress(0);
+
+    const progressInterval = setInterval(() => {
+      setAiProgress(prev => {
+        if (prev >= 95) return prev;
+        return prev + Math.floor(Math.random() * 5) + 2;
+      });
+    }, 400);
+
+    const toastId = toast.loading('✨ Analyzing image with AI...', {
+      style: {
+        background: '#0F0F0F', color: '#00D9FF',
+        border: '1px solid rgba(0,217,255,0.3)',
+        fontFamily: 'Space Mono, monospace', fontSize: '12px',
+      },
+    });
 
     try {
-      const res = await productAPI.analyzeImage(images[0]);
+      const res = await productAPI.generateListing(images[0]);
       if (res.success) {
-        setFormData(prev => ({ ...prev, category: res.suggestion.category }));
-        setAiSuggestion(res.suggestion);
-        toast.success(`AI suggests: ${res.suggestion.category.toUpperCase()}`);
+        const d = res.data;
 
-        // After category is set, get a price suggestion
-        setIsPriceLoading(true);
-        const priceRes = await productAPI.getPriceSuggestion(res.suggestion.category, formData.condition || 'Good');
-        if (priceRes.success) {
-          setAiSuggestion(prev => ({ ...prev, suggestedPrice: priceRes.suggestedPrice }));
-          toast.success(`Fair price suggested: ₹${priceRes.suggestedPrice}`);
-        }
+        // Populate all text fields
+        setFormData(prev => ({
+          ...prev,
+          title: d.title || prev.title,
+          description: d.description || prev.description,
+          category: d.category || prev.category,
+          condition: d.condition || prev.condition,
+        }));
+
+        // Populate lists
+        if (d.highlights && d.highlights.length > 0) setHighlights(d.highlights);
+        if (d.specs && d.specs.length > 0) setSpecs(d.specs);
+
+        setAiFilledFields(true);
+
+        toast.success('✨ All fields filled by AI — review & edit!', {
+          id: toastId,
+          style: {
+            background: '#0F0F0F', color: '#00D9FF',
+            border: '2px solid rgba(0,217,255,0.5)',
+            fontFamily: 'Space Mono, monospace', fontSize: '11px',
+            fontWeight: '700', letterSpacing: '0.5px',
+          },
+        });
+      } else {
+        toast.error('AI analysis failed. Try manual input.', { id: toastId });
       }
     } catch (err) {
       console.error('AI Fill error:', err);
-      toast.error('AI Analysis failed. Try manual input.');
+      const msg = err?.response?.data?.message || 'AI Analysis failed. Try manual input.';
+      toast.error(msg, { id: toastId });
     } finally {
-      setIsAIAnalyzing(false);
-      setIsPriceLoading(false);
+      clearInterval(progressInterval);
+      setAiProgress(100);
+      setTimeout(() => {
+        setIsAIAnalyzing(false);
+        setTimeout(() => setAiProgress(0), 300);
+      }, 400);
     }
   };
 
@@ -304,6 +354,8 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setErrors({});
     setIsSubmitting(false);
     setUploadProgress(0);
+    setAiFilledFields(false);
+    setAiSuggestion(null);
     onClose();
   };
 
@@ -762,6 +814,118 @@ const AddProductModal = ({ isOpen, onClose }) => {
               <div>
                 <div className="mono text-xs text-white opacity-60 mb-6 uppercase tracking-wider">STEP 01 / BASIC INFO</div>
 
+                {/* ── PHOTO UPLOAD (TOP) ── */}
+                <div style={{ marginBottom: 20 }}>
+                  <label className="block mono text-[10px] text-white/40 uppercase tracking-widest mb-2">Product Images (Min 1) *</label>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+
+                  {imagePreviews.length < 5 && (
+                    <div onClick={() => fileInputRef.current?.click()} className="upload-zone mb-3">
+                      <svg className="mx-auto mb-3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      <p className="mono text-xs text-white opacity-60 uppercase tracking-wider">CLICK TO UPLOAD</p>
+                    </div>
+                  )}
+
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-3">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="image-preview">
+                          <img src={preview} alt={`Preview ${index + 1}`} />
+                          <button onClick={() => removeImage(index)} className="image-preview-remove">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {errors.images && <p className="error-text">{errors.images}</p>}
+                </div>
+
+                {/* ── AI FILL BUTTON (prominent, below upload) ── */}
+                {imagePreviews.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAIFill}
+                    disabled={isAIAnalyzing}
+                    style={{
+                      width: '100%', marginBottom: 24,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      padding: '13px 20px',
+                      background: isAIAnalyzing
+                        ? 'rgba(0,217,255,0.06)'
+                        : 'linear-gradient(135deg, rgba(0,217,255,0.12), rgba(124,58,237,0.12))',
+                      border: `1.5px solid ${isAIAnalyzing ? 'rgba(0,217,255,0.2)' : 'rgba(0,217,255,0.4)'}`,
+                      borderRadius: 6,
+                      color: '#00D9FF',
+                      fontFamily: 'Space Mono, monospace',
+                      fontSize: 12, fontWeight: 700, letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      cursor: isAIAnalyzing ? 'default' : 'pointer',
+                      opacity: 1,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {!isAIAnalyzing && <span style={{ fontSize: 16 }}>✨</span>}
+                    {isAIAnalyzing ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
+                        <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${aiProgress}%`, background: '#00D9FF', transition: 'width 0.3s ease-out' }} />
+                        </div>
+                        <span style={{ minWidth: 40, textAlign: 'right', fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>{aiProgress}%</span>
+                      </div>
+                    ) : 'Fill All Fields with AI'}
+                  </button>
+                )}
+
+                {/* ── AI FILLED BANNER ── */}
+                {aiFilledFields && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: 'linear-gradient(135deg, rgba(0,217,255,0.07), rgba(124,58,237,0.07))',
+                    border: '1px solid rgba(0,217,255,0.25)',
+                    borderRadius: 6, padding: '10px 14px', marginBottom: 20,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 14 }}>✨</span>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#00D9FF', fontFamily: 'Space Mono, monospace', letterSpacing: 0.5 }}>
+                          Fields auto-filled by AI
+                        </div>
+                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                          Title · Description · Category · Condition · Highlights · Specs — review before submitting
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={clearAIFill}
+                      style={{
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                        color: 'rgba(255,255,255,0.5)', borderRadius: 4, padding: '4px 10px',
+                        fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                        fontFamily: 'Space Mono, monospace', letterSpacing: 0.5,
+                        transition: 'all 0.15s', whiteSpace: 'nowrap',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+                    >✕ CLEAR</button>
+                  </div>
+                )}
+
                 {/* Title */}
                 <div className="mb-5">
                   <label className="block mono text-xs text-white opacity-60 mb-2 uppercase tracking-wider">Title *</label>
@@ -785,60 +949,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     className="input-brutal"
                   />
                   {errors.description && <p className="error-text">{errors.description}</p>}
-                </div>
-
-                {/* Image Upload Area */}
-                <div style={{ marginBottom: 32 }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block mono text-[10px] text-white/40 uppercase tracking-widest">Product Images (Min 1) *</label>
-                    {imagePreviews.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={handleAIFill}
-                        disabled={isAIAnalyzing}
-                        className="flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded text-[10px] font-bold text-cyan-400 hover:bg-cyan-500/20 transition-all disabled:opacity-50"
-                      >
-                        {isAIAnalyzing ? '✨ ANALYZING...' : '✨ SNAP & FILL (AI)'}
-                      </button>
-                    )}
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-
-                  {imagePreviews.length < 5 && (
-                    <div onClick={() => fileInputRef.current?.click()} className="upload-zone mb-4">
-                      <svg className="mx-auto mb-3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                      </svg>
-                      <p className="mono text-xs text-white opacity-60 uppercase tracking-wider">CLICK TO UPLOAD</p>
-                    </div>
-                  )}
-
-                  {imagePreviews.length > 0 && (
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                      {imagePreviews.map((preview, index) => (
-                        <div key={index} className="image-preview">
-                          <img src={preview} alt={`Preview ${index + 1}`} />
-                          <button onClick={() => removeImage(index)} className="image-preview-remove">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {errors.images && <p className="error-text">{errors.images}</p>}
                 </div>
 
                 {/* Navigation */}
@@ -945,6 +1055,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                       className="input-brutal"
                     >
                       <option value="">Select Year</option>
+                      <option value="all">All Years</option>
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
                       <option value="3">3rd Year</option>
