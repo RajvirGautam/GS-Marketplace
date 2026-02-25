@@ -8,7 +8,18 @@ const SocketContext = createContext(null);
 export const useSocket = () => {
     const ctx = useContext(SocketContext);
     // Safe fallback — prevents crash when used outside SocketProvider
-    return ctx ?? { socket: null, unreadCount: 0, toasts: [], dismissToast: () => { }, markConversationRead: () => { } };
+    return ctx ?? {
+        socket: null,
+        unreadCount: 0,
+        toasts: [],
+        dismissToast: () => { },
+        markConversationRead: () => { },
+        notifications: [],
+        unreadNotifCount: 0,
+        markNotifRead: () => { },
+        markAllNotifsRead: () => { },
+        deleteNotif: () => { },
+    };
 };
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -19,6 +30,10 @@ export const SocketProvider = ({ children }) => {
     const socketRef = useRef(null);
     const [unreadCount, setUnreadCount] = useState(0);
     const [toasts, setToasts] = useState([]); // [{ id, conversationId, message, product? }]
+
+    // ── Notification state ────────────────────────────────────────────────────
+    const [notifications, setNotifications] = useState([]);
+    const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
     // ── Fetch initial unread count ────────────────────────────────────────────
     const fetchUnreadCount = useCallback(async () => {
@@ -33,6 +48,22 @@ export const SocketProvider = ({ children }) => {
         } catch (_) { }
     }, []);
 
+    // ── Fetch notifications from server ──────────────────────────────────────
+    const fetchNotifications = useCallback(async () => {
+        const token = Cookies.get('accessToken');
+        if (!token) return;
+        try {
+            const res = await fetch(`${API_URL}/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setNotifications(data.notifications);
+                setUnreadNotifCount(data.unreadCount);
+            }
+        } catch (_) { }
+    }, []);
+
     // ── Connect / disconnect socket tied to auth state ────────────────────────
     useEffect(() => {
         if (!isAuthenticated || !user) {
@@ -41,14 +72,17 @@ export const SocketProvider = ({ children }) => {
                 socketRef.current = null;
             }
             setUnreadCount(0);
+            setNotifications([]);
+            setUnreadNotifCount(0);
             return;
         }
 
         const token = Cookies.get('accessToken');
         if (!token) return;
 
-        // Fetch initial count on login
+        // Fetch initial data on login
         fetchUnreadCount();
+        fetchNotifications();
 
         const socket = io(SOCKET_URL, {
             auth: { token },
@@ -77,6 +111,12 @@ export const SocketProvider = ({ children }) => {
             });
         });
 
+        // ── New in-app notification from server ──────────────────────────────
+        socket.on('new_notification', (notif) => {
+            setNotifications(prev => [notif, ...prev].slice(0, 30)); // keep latest 30
+            setUnreadNotifCount(prev => prev + 1);
+        });
+
         socket.on('disconnect', () => {
             console.log('🔴 Socket disconnected');
         });
@@ -99,13 +139,59 @@ export const SocketProvider = ({ children }) => {
         fetchUnreadCount();
     }, [fetchUnreadCount]);
 
+    // ── Notification helpers ──────────────────────────────────────────────────
+    const markNotifRead = useCallback(async (id) => {
+        const token = Cookies.get('accessToken');
+        try {
+            await fetch(`${API_URL}/notifications/${id}/read`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+            setUnreadNotifCount(prev => Math.max(0, prev - 1));
+        } catch (_) { }
+    }, []);
+
+    const markAllNotifsRead = useCallback(async () => {
+        const token = Cookies.get('accessToken');
+        try {
+            await fetch(`${API_URL}/notifications/read-all`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setUnreadNotifCount(0);
+        } catch (_) { }
+    }, []);
+
+    const deleteNotif = useCallback(async (id) => {
+        const token = Cookies.get('accessToken');
+        try {
+            await fetch(`${API_URL}/notifications/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(prev => {
+                const toDelete = prev.find(n => n._id === id);
+                if (toDelete && !toDelete.isRead) setUnreadNotifCount(c => Math.max(0, c - 1));
+                return prev.filter(n => n._id !== id);
+            });
+        } catch (_) { }
+    }, []);
+
     return (
         <SocketContext.Provider value={{
             socket: socketRef.current,
             unreadCount,
             toasts,
             dismissToast,
-            markConversationRead
+            markConversationRead,
+            // Notification API
+            notifications,
+            unreadNotifCount,
+            markNotifRead,
+            markAllNotifsRead,
+            deleteNotif,
         }}>
             {children}
         </SocketContext.Provider>

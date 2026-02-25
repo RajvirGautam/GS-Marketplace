@@ -5,6 +5,7 @@ import { productAPI, offerAPI, dealAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
 import MyAccount from './dashboard/MyAccount';
+import NotificationBell from '../ui/NotificationBell';
 
 const HeartFilledIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
@@ -1737,7 +1738,7 @@ const UserDashboard = () => {
             </div>
             <div className="topbar-actions">
               <button className="topbar-icon-btn" title="Dark Mode"><MoonIcon /></button>
-              <button className="topbar-icon-btn" title="Notifications"><BellIcon /></button>
+              <NotificationBell dark={true} />
               <button className="topbar-icon-btn" title="Language"><GlobeIcon /></button>
               <button
                 style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}

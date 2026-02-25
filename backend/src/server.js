@@ -15,6 +15,7 @@ import offerRoutes from './routes/offerRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import dealRoutes from './routes/dealRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import './config/cloudinary.js';
 
 dotenv.config();
@@ -92,6 +93,7 @@ app.use('/api/offers', offerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -6,6 +6,7 @@ import { useSocket } from '../../context/SocketContext';
 import { productAPI } from '../../services/api';
 import ProductCard from '../ui/ProductCard';
 import AddProductModal from './AddProductModal';
+import NotificationBell from '../ui/NotificationBell';
 
 
 // --- Internal Icons ---
@@ -638,6 +639,9 @@ const Marketplace = () => {
                   )}
                 </Link>
               )}
+
+              {/* Notification Bell */}
+              {user && <NotificationBell dark={true} />}
 
               {user && (
                 <button

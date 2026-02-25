@@ -8,6 +8,7 @@ import Product from '../models/Product.js';
 import Deal from '../models/Deal.js';
 import { authenticate } from '../middleware/auth.js';
 import { io } from '../server.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -40,13 +41,23 @@ const uploadToCloudinary = (buffer, folder = 'chat', resourceType = 'auto') => {
 const emitToRecipients = (conversation, senderId, message) => {
     conversation.participants.forEach(participantId => {
         if (participantId.toString() !== senderId.toString()) {
-            io.to(`user:${participantId}`).emit('new_message', {
+            io.to(`user:${participantId.toString()}`).emit('new_message', {
                 conversationId: conversation._id.toString(),
                 message
             });
         }
     });
 };
+
+// Helper: create Notification doc + emit real-time socket event
+async function createAndEmitNotification(userId, type, title, body, meta = {}) {
+    try {
+        const notif = await Notification.create({ userId, type, title, body, meta });
+        io.to(`user:${userId.toString()}`).emit('new_notification', notif);
+    } catch (err) {
+        console.error('[chat-notif] error:', err.message);
+    }
+}
 
 // ─────────────────────────────────────────────
 // GET /api/chat/unread-count
@@ -207,6 +218,20 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
         // 🔴 Real-time: notify recipient(s)
         emitToRecipients(conversation, req.user._id, populated);
 
+        // 🔔 In-app notification for each recipient
+        const senderName = populated.sender?.fullName || 'Someone';
+        conversation.participants.forEach(participantId => {
+            if (participantId.toString() !== req.user._id.toString()) {
+                createAndEmitNotification(
+                    participantId,
+                    'new_message',
+                    `New Message from ${senderName}`,
+                    content.trim().slice(0, 80),
+                    { conversationId: conversation._id }
+                );
+            }
+        });
+
         res.status(201).json({ success: true, message: populated });
     } catch (err) {
         console.error('Error sending message:', err);
@@ -255,6 +280,20 @@ router.post('/conversations/:id/media', authenticate, upload.single('media'), as
         // 🔴 Real-time: notify recipient(s)
         emitToRecipients(conversation, req.user._id, populated);
 
+        // 🔔 In-app notification
+        const senderName = populated.sender?.fullName || 'Someone';
+        conversation.participants.forEach(participantId => {
+            if (participantId.toString() !== req.user._id.toString()) {
+                createAndEmitNotification(
+                    participantId,
+                    'new_message',
+                    `${senderName} sent ${mediaType === 'image' ? 'a photo 📷' : mediaType === 'video' ? 'a video 🎥' : 'a file 📎'}`,
+                    '',
+                    { conversationId: conversation._id }
+                );
+            }
+        });
+
         res.status(201).json({ success: true, message: populated });
     } catch (err) {
         console.error('Error uploading media:', err);
@@ -297,6 +336,20 @@ router.post('/conversations/:id/offer', authenticate, async (req, res) => {
 
         // 🔴 Real-time: notify recipient(s)
         emitToRecipients(conversation, req.user._id, populated);
+
+        // 🔔 In-app notification — offer received
+        const senderName = populated.sender?.fullName || 'Someone';
+        conversation.participants.forEach(participantId => {
+            if (participantId.toString() !== req.user._id.toString()) {
+                createAndEmitNotification(
+                    participantId,
+                    'new_offer',
+                    `Offer of ₹${Number(amount).toLocaleString('en-IN')} from ${senderName}`,
+                    note ? `"${note.slice(0, 60)}"` : 'Tap to view in chat',
+                    { conversationId: conversation._id }
+                );
+            }
+        });
 
         res.status(201).json({ success: true, message: populated });
     } catch (err) {

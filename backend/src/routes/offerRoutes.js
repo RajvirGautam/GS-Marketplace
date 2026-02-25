@@ -9,6 +9,7 @@ import { io } from '../server.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendMail } from '../utils/mailer.js';
 import { newOfferTemplate, offerAcceptedTemplate } from '../utils/emailTemplates.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -43,8 +44,15 @@ router.post('/', authenticate, async (req, res) => {
 
         await offer.save();
 
-        // Fire-and-forget: notify seller via email
+        // Fire-and-forget: notify seller via email + in-app notification
         notifySellerNewOffer(offer).catch(() => { });
+        createAndEmitNotification(
+            offer.seller,
+            'new_offer',
+            'New Offer Received 💰',
+            `Someone made an offer on your listing`,
+            { offerId: offer._id, productId: offer.product }
+        ).catch(() => { });
 
         res.status(201).json({ success: true, offer });
     } catch (error) {
@@ -123,8 +131,25 @@ router.patch('/:id/status', authenticate, async (req, res) => {
             }
             // Fire-and-forget: open/reuse a chat and send a preset acceptance message
             autoSendAcceptanceChat(offer);
-            // Fire-and-forget: notify buyer via email that deal is done
+            // Fire-and-forget: notify buyer via email + in-app notification that deal is done
             notifyBuyerOfferAccepted(offer).catch(() => { });
+            createAndEmitNotification(
+                offer.buyer,
+                'offer_accepted',
+                'Your Offer Was Accepted! 🎉',
+                `Deal confirmed — check My Deals to coordinate handover`,
+                { offerId: offer._id, productId: offer.product }
+            ).catch(() => { });
+        }
+
+        if (status === 'rejected') {
+            createAndEmitNotification(
+                offer.buyer,
+                'offer_rejected',
+                'Offer Declined',
+                `The seller passed on your offer`,
+                { offerId: offer._id, productId: offer.product }
+            ).catch(() => { });
         }
 
         res.json({ success: true, offer });
@@ -249,6 +274,15 @@ async function autoSendAcceptanceChat(offer) {
         });
     } catch (err) {
         console.error('Auto-chat error on offer acceptance:', err);
+    }
+}
+// ─── Helper: create Notification doc + emit real-time socket event ────────────
+async function createAndEmitNotification(userId, type, title, body, meta = {}) {
+    try {
+        const notif = await Notification.create({ userId, type, title, body, meta });
+        io.to(`user:${userId.toString()}`).emit('new_notification', notif);
+    } catch (err) {
+        console.error('[notification] createAndEmitNotification error:', err.message);
     }
 }
 

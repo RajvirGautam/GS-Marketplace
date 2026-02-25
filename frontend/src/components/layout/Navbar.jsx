@@ -3,6 +3,7 @@ import Icons from '../../assets/icons/Icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
+import NotificationBell from '../ui/NotificationBell'
 
 // --- LOCAL ICONS ---
 const ChevronDown = () => (
@@ -176,6 +177,9 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
             )}
           </Link>
         )}
+
+        {/* Notification Bell */}
+        {user && <NotificationBell dark={false} />}
 
         <button
           onClick={toggleTheme}
