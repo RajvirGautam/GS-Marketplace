@@ -4,8 +4,11 @@ import Product from '../models/Product.js';
 import Deal from '../models/Deal.js';
 import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
+import User from '../models/User.js';
 import { io } from '../server.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendMail } from '../utils/mailer.js';
+import { newOfferTemplate, offerAcceptedTemplate } from '../utils/emailTemplates.js';
 
 const router = express.Router();
 
@@ -39,6 +42,9 @@ router.post('/', authenticate, async (req, res) => {
         });
 
         await offer.save();
+
+        // Fire-and-forget: notify seller via email
+        notifySellerNewOffer(offer).catch(() => { });
 
         res.status(201).json({ success: true, offer });
     } catch (error) {
@@ -117,6 +123,8 @@ router.patch('/:id/status', authenticate, async (req, res) => {
             }
             // Fire-and-forget: open/reuse a chat and send a preset acceptance message
             autoSendAcceptanceChat(offer);
+            // Fire-and-forget: notify buyer via email that deal is done
+            notifyBuyerOfferAccepted(offer).catch(() => { });
         }
 
         res.json({ success: true, offer });
@@ -125,6 +133,65 @@ router.patch('/:id/status', authenticate, async (req, res) => {
         res.status(500).json({ success: false, message: 'Error updating status' });
     }
 });
+
+// ─── Helper: notify seller of new incoming offer ─────────────────────────────
+async function notifySellerNewOffer(offer) {
+    try {
+        const [seller, buyer, product] = await Promise.all([
+            User.findById(offer.seller).select('fullName email'),
+            User.findById(offer.buyer).select('fullName'),
+            Product.findById(offer.product).select('title price'),
+        ]);
+        if (!seller?.email) return;
+
+        const dashboardUrl = `${process.env.FRONTEND_URL}/dashboard?tab=negotiations`;
+
+        await sendMail({
+            to: seller.email,
+            subject: `New Offer on "${product?.title}" — GS Marketplace`,
+            html: newOfferTemplate({
+                sellerName: seller.fullName,
+                buyerName: buyer?.fullName || 'A buyer',
+                productTitle: product?.title || 'your listing',
+                offerPrice: offer.offerPrice,
+                originalPrice: product?.price || offer.offerPrice,
+                message: offer.message || '',
+                dashboardUrl,
+            }),
+        });
+    } catch (err) {
+        console.error('[mailer] notifySellerNewOffer error:', err.message);
+    }
+}
+
+// ─── Helper: notify buyer that their offer was accepted ───────────────────────
+async function notifyBuyerOfferAccepted(offer) {
+    try {
+        const [buyer, seller, product] = await Promise.all([
+            User.findById(offer.buyer).select('fullName email'),
+            User.findById(offer.seller).select('fullName'),
+            Product.findById(offer.product).select('title price'),
+        ]);
+        if (!buyer?.email) return;
+
+        const dashboardUrl = `${process.env.FRONTEND_URL}/dashboard?tab=deals`;
+
+        await sendMail({
+            to: buyer.email,
+            subject: `Your Offer Was Accepted! 🎉 — GS Marketplace`,
+            html: offerAcceptedTemplate({
+                buyerName: buyer.fullName,
+                sellerName: seller?.fullName || 'The seller',
+                productTitle: product?.title || 'your item',
+                agreedPrice: offer.offerPrice,
+                originalPrice: product?.price || offer.offerPrice,
+                dashboardUrl,
+            }),
+        });
+    } catch (err) {
+        console.error('[mailer] notifyBuyerOfferAccepted error:', err.message);
+    }
+}
 
 // ─── Helper: auto-send acceptance chat message ────────────────────────────────
 async function autoSendAcceptanceChat(offer) {
@@ -156,14 +223,9 @@ async function autoSendAcceptanceChat(offer) {
 
         const text = [
             `🎉 Offer accepted for "${product.title}"!`,
-            ``,
-            ``,
-            `✅ Agreed price: ₹${offer.offerPrice}${pct > 0 ? ` (${pct}% off ₹${product.price})` : ''}`,
-            ``,
-            ``,
-            `Please coordinate where and when to meet to complete the handover.`,
-            ``,
-            `Once done, mark it as ✓ Received in My Deals.`,
+            `Agreed price: ₹${offer.offerPrice}${pct > 0 ? ` (${pct}% off ₹${product.price})` : ''}`,
+            ` Please coordinate where and when to meet to complete the handover.`,
+            ` Once done, mark it as ✓ Received in My Deals.`,
         ].join('\n');
 
         const msg = await Message.create({
