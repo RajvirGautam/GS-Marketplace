@@ -382,12 +382,19 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
     {
       icon: '⭐',
       label: 'Review Submitted',
-      desc: deal.review?.rating
-        ? `Rated ${deal.review.rating}/5${deal.review.comment ? ` — "${deal.review.comment.slice(0, 60)}${deal.review.comment.length > 60 ? '…' : ''}"` : ''}`
-        : isSeller ? 'Waiting for buyer to leave a review' : "You haven't reviewed this deal yet",
-      time: deal.review?.submittedAt || null,
+      desc: (() => {
+        if (isBuyer) {
+          return deal.buyerReview?.rating
+            ? `You rated the seller ${deal.buyerReview.rating}/5${deal.buyerReview.comment ? ` — "${deal.buyerReview.comment.slice(0, 60)}${deal.buyerReview.comment.length > 60 ? '…' : ''}"` : ''}`
+            : "You haven't reviewed the seller yet";
+        }
+        return deal.buyerReview?.rating
+          ? `Buyer rated you ${deal.buyerReview.rating}/5${deal.buyerReview.comment ? ` — "${deal.buyerReview.comment.slice(0, 60)}${deal.buyerReview.comment.length > 60 ? '…' : ''}"` : ''}`
+          : 'Waiting for buyer to leave a review';
+      })(),
+      time: deal.buyerReview?.submittedAt || null,
       color: '#EC4899',
-      done: !!deal.review?.submittedAt,
+      done: !!deal.buyerReview?.submittedAt,
     },
   ];
 
@@ -2182,22 +2189,22 @@ const UserDashboard = () => {
                             </div>
                           )}
 
-                          {/* BUYER: Review form or submitted review (Confirmed Deals tab) */}
+                          {/* BUYER: Review form or submitted review */}
                           {isBuyer && deal.dealStatus === 'sold' && (
-                            deal.review?.submittedAt ? (
+                            deal.buyerReview?.submittedAt ? (
                               <div style={{
                                 background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
                                 borderRadius: 8, padding: '10px 14px'
                               }}>
-                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review</div>
+                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the seller</div>
                                 <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
                                   {[1, 2, 3, 4, 5].map(s => (
-                                    <span key={s} style={{ fontSize: 14, color: s <= deal.review.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                    <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
                                   ))}
                                 </div>
-                                {deal.review.comment && (
+                                {deal.buyerReview.comment && (
                                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                    "{deal.review.comment}"
+                                    "{deal.buyerReview.comment}"
                                   </div>
                                 )}
                               </div>
@@ -2207,7 +2214,7 @@ const UserDashboard = () => {
                                 borderRadius: 8, padding: '12px 14px'
                               }}>
                                 <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                  Rate your experience with the seller
+                                  ⭐ Rate the seller
                                 </div>
                                 <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
                                   {[1, 2, 3, 4, 5].map(star => (
@@ -2263,21 +2270,104 @@ const UserDashboard = () => {
                             )
                           )}
 
-                          {/* SELLER: sees buyer's submitted review */}
-                          {isSeller && deal.review?.submittedAt && (
-                            <div style={{
-                              background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
-                              borderRadius: 8, padding: '10px 14px'
-                            }}>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review</div>
-                              <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
-                                {[1, 2, 3, 4, 5].map(s => (
-                                  <span key={s} style={{ fontSize: 14, color: s <= deal.review.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
-                                ))}
-                              </div>
-                              {deal.review.comment && (
-                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                  "{deal.review.comment}"
+                          {/* SELLER: review form for buyer + view buyer's submitted review */}
+                          {isSeller && deal.dealStatus === 'sold' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              {/* Buyer's review of seller */}
+                              {deal.buyerReview?.submittedAt && (
+                                <div style={{
+                                  background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+                                  borderRadius: 8, padding: '10px 14px'
+                                }}>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review of you</div>
+                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                      <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                    ))}
+                                  </div>
+                                  {deal.buyerReview.comment && (
+                                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                      "{deal.buyerReview.comment}"
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {/* Seller's review of buyer */}
+                              {deal.sellerReview?.submittedAt ? (
+                                <div style={{
+                                  background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
+                                  borderRadius: 8, padding: '10px 14px'
+                                }}>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the buyer</div>
+                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                      <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                    ))}
+                                  </div>
+                                  {deal.sellerReview.comment && (
+                                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                      "{deal.sellerReview.comment}"
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div style={{
+                                  background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+                                  borderRadius: 8, padding: '12px 14px'
+                                }}>
+                                  <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+                                    ⭐ Rate the buyer
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                      <button
+                                        key={star}
+                                        onClick={() => setReviewState(prev => ({
+                                          ...prev,
+                                          [deal._id]: { ...prev[deal._id], rating: star }
+                                        }))}
+                                        style={{
+                                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                                          fontSize: 24, lineHeight: 1,
+                                          color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
+                                          transition: 'color 0.15s'
+                                        }}
+                                      >
+                                        ★
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <textarea
+                                    value={r.comment || ''}
+                                    onChange={(e) => setReviewState(prev => ({
+                                      ...prev,
+                                      [deal._id]: { ...prev[deal._id], comment: e.target.value }
+                                    }))}
+                                    placeholder="How was this buyer? (optional)"
+                                    rows={2}
+                                    style={{
+                                      width: '100%', background: 'rgba(255,255,255,0.04)',
+                                      border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
+                                      color: '#fff', fontSize: 12, padding: '8px 10px',
+                                      fontFamily: 'inherit', resize: 'none', outline: 'none',
+                                      marginBottom: 10
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => handleSubmitReview(deal._id)}
+                                    disabled={!r.rating || r.submitting}
+                                    style={{
+                                      padding: '7px 18px', borderRadius: 6, border: 'none',
+                                      background: r.rating
+                                        ? 'linear-gradient(135deg, #10B981, #00D9FF)'
+                                        : 'rgba(255,255,255,0.08)',
+                                      color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
+                                      fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
+                                      cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
+                                    }}
+                                  >
+                                    {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                  </button>
                                 </div>
                               )}
                             </div>

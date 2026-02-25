@@ -1,5 +1,7 @@
 import express from 'express';
 import Product from '../models/Product.js';
+import User from '../models/User.js';
+import Deal from '../models/Deal.js';
 import { authenticate } from '../middleware/auth.js';
 import multer from 'multer';
 import cloudinary from '../config/cloudinary.js';
@@ -166,6 +168,7 @@ router.get('/seller/:sellerId', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid seller ID' });
     }
 
+
     // Get all products for this seller
     const allProducts = await Product.find({ seller: sellerId })
       .populate({
@@ -176,7 +179,6 @@ router.get('/seller/:sellerId', async (req, res) => {
 
     if (allProducts.length === 0) {
       // Seller might exist but have no products — try fetching user directly
-      const User = (await import('../models/User.js')).default;
       const user = await User.findById(sellerId).select('fullName enrollmentNumber isVerified branch year profilePicture createdAt rating reviewCount totalSales');
       if (!user) {
         return res.status(404).json({ success: false, message: 'Seller not found' });
@@ -188,11 +190,18 @@ router.get('/seller/:sellerId', async (req, res) => {
           totalListings: 0, activeListings: 0, soldListings: 0,
           totalViews: 0, totalSaves: 0, categoryBreakdown: []
         },
-        recentListings: []
+        recentListings: [],
+        reviews: []
       });
     }
 
-    const seller = typeof allProducts[0].seller === 'object' ? allProducts[0].seller : null;
+    // Always fetch the seller fresh from DB to guarantee latest rating/reviewCount
+    const seller = await User.findById(sellerId).select(
+      'fullName enrollmentNumber isVerified branch year profilePicture createdAt authProvider rating reviewCount totalSales'
+    );
+    if (!seller) {
+      return res.status(404).json({ success: false, message: 'Seller not found' });
+    }
 
     // Compute stats
     const activeProducts = allProducts.filter(p => p.status === 'active');
@@ -216,6 +225,28 @@ router.get('/seller/:sellerId', async (req, res) => {
     // Recent 6 active listings for display
     const recentListings = activeProducts.slice(0, 6);
 
+    // Fetch latest 10 buyer reviews for this seller
+    const reviewDeals = await Deal.find({
+      seller: sellerId,
+      'buyerReview.submittedAt': { $exists: true }
+    })
+      .sort({ 'buyerReview.submittedAt': -1 })
+      .limit(10)
+      .populate('buyer', 'fullName profilePicture branch year');
+
+    const reviews = reviewDeals.map(d => ({
+      rating: d.buyerReview.rating,
+      comment: d.buyerReview.comment || '',
+      submittedAt: d.buyerReview.submittedAt,
+      reviewer: {
+        _id: d.buyer?._id,
+        fullName: d.buyer?.fullName || 'Anonymous',
+        profilePicture: d.buyer?.profilePicture || '',
+        branch: d.buyer?.branch || '',
+        year: d.buyer?.year || null,
+      }
+    }));
+
     res.json({
       success: true,
       seller,
@@ -227,13 +258,15 @@ router.get('/seller/:sellerId', async (req, res) => {
         totalSaves,
         categoryBreakdown
       },
-      recentListings
+      recentListings,
+      reviews
     });
   } catch (error) {
     console.error('Error fetching seller profile:', error);
     res.status(500).json({ success: false, message: 'Error fetching seller profile', error: error.message });
   }
 });
+
 
 // POST /api/products/analyze - Simple AI Categorization
 router.post('/analyze', authenticate, upload.single('image'), async (req, res) => {

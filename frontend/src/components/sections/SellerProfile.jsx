@@ -458,7 +458,7 @@ const SellerProfile = () => {
                     <div className="h-animate h-animate-d4 mb-12">
                         <div className="section-title"><PackageIcon /> Seller Reputation</div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                            <StatCard icon={<StarIcon />} label="Reputation" value={`${seller?.rating || 5.0} / 5`} accent="#F59E0B" delay={100} />
+                            <StatCard icon={<StarIcon />} label="Reputation" value={seller?.rating != null ? `${seller.rating.toFixed(1)} / 5` : 'N/A'} accent="#F59E0B" delay={100} />
                             <StatCard icon={<ShieldCheck />} label="Verified" value={seller?.isVerified ? 'YES' : 'NO'} accent="#00D9FF" delay={150} />
                             <StatCard icon={<AwardIcon />} label="Sales" value={seller?.totalSales || 0} accent="#10B981" delay={200} />
                             <StatCard icon={<HeartIcon />} label="Reviews" value={seller?.reviewCount || 0} accent="#EC4899" delay={250} />
@@ -527,18 +527,92 @@ const SellerProfile = () => {
                         )}
                     </div>
 
-                    {/* ── Reviews Placeholder ── */}
+                    {/* ── Verified Reviews ── */}
                     <div className="mt-16 h-animate h-animate-d4" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        <div className="section-title">Verified Reviews</div>
-                        <div className="bg-[rgba(255,255,255,0.02)] border border-dashed border-white/10 rounded-2xl p-12 text-center">
-                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                                <StarIcon />
-                            </div>
-                            <h3 className="text-lg font-bold text-white mb-2">No Reviews Yet</h3>
-                            <p className="text-sm text-white/40 max-w-sm mx-auto">
-                                Once this seller completes more transactions, their verified student reviews will appear here.
-                            </p>
+                        <div className="section-title">
+                            <StarIcon /> Verified Reviews
+                            {recentListings !== undefined && data.reviews?.length > 0 && (
+                                <span style={{ marginLeft: 4, color: '#F59E0B', fontSize: 11 }}>({data.reviews.length})</span>
+                            )}
                         </div>
+
+                        {(!data.reviews || data.reviews.length === 0) ? (
+                            <div className="bg-[rgba(255,255,255,0.02)] border border-dashed border-white/10 rounded-2xl p-12 text-center">
+                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                    <StarIcon />
+                                </div>
+                                <h3 className="text-lg font-bold text-white mb-2">No Reviews Yet</h3>
+                                <p className="text-sm text-white/40 max-w-sm mx-auto">
+                                    Once this seller completes transactions, their verified student reviews will appear here.
+                                </p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {data.reviews.map((review, idx) => {
+                                    const reviewerInitials = review.reviewer?.fullName
+                                        ? review.reviewer.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                        : '?';
+                                    return (
+                                        <div
+                                            key={idx}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.03)',
+                                                border: '1px solid rgba(255,255,255,0.07)',
+                                                borderRadius: 16,
+                                                padding: '16px 20px',
+                                                opacity: 0,
+                                                animation: `sp-fade-up 0.5s cubic-bezier(0.22,1,0.36,1) ${0.65 + idx * 0.07}s forwards`,
+                                            }}
+                                        >
+                                            {/* Reviewer info row */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                                                <div style={{
+                                                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                                                    background: 'linear-gradient(135deg, #00D9FF33, #7C3AED33)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    overflow: 'hidden',
+                                                }}>
+                                                    {review.reviewer?.profilePicture ? (
+                                                        <img src={review.reviewer.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <span style={{ fontSize: 13, fontWeight: 800, background: 'linear-gradient(135deg,#00D9FF,#7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                                                            {reviewerInitials}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ fontWeight: 700, fontSize: 13, color: '#fff', marginBottom: 1 }}>
+                                                        {review.reviewer?.fullName || 'Anonymous'}
+                                                    </div>
+                                                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'JetBrains Mono, monospace' }}>
+                                                        {review.reviewer?.branch ? review.reviewer.branch.toUpperCase() : ''}
+                                                        {review.reviewer?.year ? ` · Year ${review.reviewer.year}` : ''}
+                                                    </div>
+                                                </div>
+                                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                                    {/* Stars */}
+                                                    <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end', marginBottom: 2 }}>
+                                                        {[1, 2, 3, 4, 5].map(s => (
+                                                            <span key={s} style={{ fontSize: 13, color: s <= review.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                                        ))}
+                                                    </div>
+                                                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'JetBrains Mono, monospace' }}>
+                                                        {getTimeAgo(review.submittedAt)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* Comment */}
+                                            {review.comment && (
+                                                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', lineHeight: 1.6, paddingLeft: 48 }}>
+                                                    "{review.comment}"
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* ── Footer space ── */}

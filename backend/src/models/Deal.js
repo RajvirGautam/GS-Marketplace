@@ -41,21 +41,17 @@ const dealSchema = new mongoose.Schema({
         enum: ['active', 'sold'],
         default: 'active'
     },
-    // Buyer review (populated after seller confirms sold)
-    review: {
-        rating: {
-            type: Number,
-            min: 1,
-            max: 5
-        },
-        comment: {
-            type: String,
-            trim: true,
-            maxLength: 1000
-        },
-        submittedAt: {
-            type: Date
-        }
+    // Buyer → Seller review (buyer rates the seller after deal is sold)
+    buyerReview: {
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String, trim: true, maxLength: 1000 },
+        submittedAt: { type: Date }
+    },
+    // Seller → Buyer review (seller rates the buyer after deal is sold)
+    sellerReview: {
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String, trim: true, maxLength: 1000 },
+        submittedAt: { type: Date }
     }
 }, {
     timestamps: true
