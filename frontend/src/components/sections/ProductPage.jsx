@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, offerAPI, chatAPI } from '../../services/api';
 
@@ -84,6 +84,7 @@ const ChevronDown = () => (
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // AUTH INTEGRATION
   const { user, logout, savedProductIds, toggleSavedId } = useAuth();
@@ -241,20 +242,32 @@ const ProductPage = () => {
             sessionStorage.removeItem('productTransition');
 
             // Navigate back with scroll position
-            navigate('/marketplace', {
-              state: { scrollY: scrollY },
-              replace: false
-            });
+            if (location.state?.fromChat) {
+              navigate(`/chat/${location.state.conversationId}`);
+            } else {
+              navigate('/marketplace', {
+                state: { scrollY: scrollY },
+                replace: false
+              });
+            }
           }, 600);
         });
       } catch (error) {
         console.error('Back transition error:', error);
         sessionStorage.removeItem('productTransition');
-        navigate('/marketplace');
+        if (location.state?.fromChat) {
+          navigate(`/chat/${location.state.conversationId}`);
+        } else {
+          navigate('/marketplace');
+        }
       }
     } else {
       sessionStorage.removeItem('productTransition');
-      navigate('/marketplace');
+      if (location.state?.fromChat) {
+        navigate(`/chat/${location.state.conversationId}`);
+      } else {
+        navigate('/marketplace');
+      }
     }
   };
 

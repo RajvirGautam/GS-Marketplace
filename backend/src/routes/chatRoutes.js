@@ -93,7 +93,7 @@ router.post('/conversations', authenticate, async (req, res) => {
         })
             .populate('participants', 'fullName profilePicture')
             .populate('product', 'title images price')
-            .populate({ path: 'lastMessage', select: 'content type createdAt' });
+            .populate({ path: 'lastMessage', select: 'content type createdAt sender readBy' });
 
         if (!conversation) {
             conversation = await Conversation.create({ participants, product: productId });
@@ -118,10 +118,22 @@ router.get('/conversations', authenticate, async (req, res) => {
         const conversations = await Conversation.find({ participants: req.user._id })
             .populate('participants', 'fullName profilePicture')
             .populate('product', 'title images price')
-            .populate({ path: 'lastMessage', select: 'content type createdAt sender' })
+            .populate({ path: 'lastMessage', select: 'content type createdAt sender readBy' })
             .sort({ lastMessageAt: -1 });
 
-        res.json({ success: true, conversations });
+        // Compute unreadCount per conversation
+        const withUnread = await Promise.all(conversations.map(async (conv) => {
+            const unreadCount = await Message.countDocuments({
+                conversation: conv._id,
+                sender: { $ne: req.user._id },
+                readBy: { $ne: req.user._id }
+            });
+            const obj = conv.toObject();
+            obj.unreadCount = unreadCount;
+            return obj;
+        }));
+
+        res.json({ success: true, conversations: withUnread });
     } catch (err) {
         console.error('Error listing conversations:', err);
         res.status(500).json({ success: false, message: 'Server error' });

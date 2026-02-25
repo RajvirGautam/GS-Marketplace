@@ -361,6 +361,9 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
             : lastMsg.type === 'media' ? '📎 Media'
                 : lastMsg.content?.slice(0, 40) || '…';
 
+    // Check if unread using the backend-computed unreadCount
+    const isUnread = !isActive && conv.unreadCount > 0;
+
     return (
         <button
             onClick={onClick}
@@ -372,7 +375,8 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
                 backgroundColor: isActive ? 'rgba(0,217,255,0.08)' : 'transparent',
                 borderLeft: isActive ? '2px solid #00D9FF' : '2px solid transparent',
                 transition: 'all 0.15s',
-                display: 'flex', alignItems: 'center', gap: 12
+                display: 'flex', alignItems: 'center', gap: 12,
+                position: 'relative'
             }}
         >
             {/* Avatar */}
@@ -390,17 +394,47 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
 
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{ color: '#fff', fontSize: 13, fontWeight: 600, truncate: true }}>
+                    <span style={{
+                        color: isUnread ? '#fff' : 'rgba(255,255,255,0.9)',
+                        fontSize: 13,
+                        fontWeight: isUnread ? 800 : 600,
+                        truncate: true
+                    }}>
                         {other?.fullName || 'Unknown'}
                     </span>
-                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'JetBrains Mono, monospace' }}>
+                    <span style={{
+                        color: isUnread ? '#00D9FF' : 'rgba(255,255,255,0.3)',
+                        fontSize: 10,
+                        fontWeight: isUnread ? 700 : 400,
+                        fontFamily: 'JetBrains Mono, monospace'
+                    }}>
                         {timeAgo(conv.lastMessageAt)}
                     </span>
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {conv.product?.title && <span style={{ color: 'rgba(0,217,255,0.5)', marginRight: 4 }}>{conv.product.title}</span>}
+                <div style={{
+                    color: isUnread ? '#fff' : 'rgba(255,255,255,0.35)',
+                    fontWeight: isUnread ? 600 : 400,
+                    fontSize: 12,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                    {conv.product?.title && <span style={{ color: isUnread ? '#00D9FF' : 'rgba(0,217,255,0.5)', marginRight: 4 }}>{conv.product.title}</span>}
                     {preview}
                 </div>
+                {isUnread && (
+                    <div style={{
+                        position: 'absolute',
+                        right: 16,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: '#00D9FF',
+                        boxShadow: '0 0 8px #00D9FF'
+                    }} />
+                )}
             </div>
         </button>
     );
@@ -452,17 +486,19 @@ const Chat = () => {
     }, []);
 
     // ── Fetch messages for active conversation ──
-    const fetchMessages = useCallback(async (convId) => {
+    const fetchMessages = useCallback(async (convId, updateConvList = false) => {
         if (!convId) return;
         try {
             const res = await chatAPI.getMessages(convId);
             if (res.success) {
                 setMessages(res.messages || []);
+                // After fetching messages (which marks them as read), refresh conversation list
+                if (updateConvList) fetchConversations();
             }
         } catch (e) {
             console.error('Failed to fetch messages', e);
         }
-    }, []);
+    }, [fetchConversations]);
 
     // ── Initial load ──
     useEffect(() => {
@@ -474,7 +510,8 @@ const Chat = () => {
         if (!activeConvId) return;
         setMsgsLoading(true);
         shouldScrollRef.current = true; // jump to bottom on initial load
-        fetchMessages(activeConvId).finally(() => setMsgsLoading(false));
+        // Pass true so that after marking messages as read, conversations are refreshed (clears unread dot)
+        fetchMessages(activeConvId, true).finally(() => setMsgsLoading(false));
 
         // Start polling
         if (pollRef.current) clearInterval(pollRef.current);
@@ -846,14 +883,14 @@ const Chat = () => {
                                     <div style={{ flex: 1 }}>
                                         <div
                                             onClick={() => otherParticipant?._id && navigate(`/seller/${otherParticipant._id}`)}
-                                            style={{ fontWeight: 700, fontSize: 14, color: '#fff', cursor: 'pointer', display: 'inline-block' }}
+                                            style={{ fontWeight: 700, fontSize: 14, color: '#fff', cursor: 'pointer', display: 'block' }}
                                             title="View Profile"
                                         >
                                             {otherParticipant?.fullName || 'User'}
                                         </div>
                                         {activeConv?.product && (
                                             <div
-                                                onClick={() => navigate(`/product/${activeConv.product._id}`)}
+                                                onClick={() => navigate(`/product/${activeConv.product._id}`, { state: { fromChat: true, conversationId: activeConvId } })}
                                                 style={{ fontSize: 11, color: 'rgba(0,217,255,0.7)', display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
                                                 title="View Product"
                                             >
@@ -875,7 +912,7 @@ const Chat = () => {
                                         <img
                                             src={activeConv.product.images[0]}
                                             alt="product"
-                                            onClick={() => navigate(`/product/${activeConv.product._id}`)}
+                                            onClick={() => navigate(`/product/${activeConv.product._id}`, { state: { fromChat: true, conversationId: activeConvId } })}
                                             title="View Product"
                                             style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
                                         />
