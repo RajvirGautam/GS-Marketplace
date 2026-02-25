@@ -149,6 +149,8 @@ const ProductPage = () => {
       navigate('/');
       return;
     }
+    // Guard: cannot chat with yourself
+    if (isOwner) return;
     try {
       setChatLoading(true);
       const res = await chatAPI.startConversation(product._id);
@@ -165,6 +167,8 @@ const ProductPage = () => {
   const handleMakeOffer = async (e) => {
     e.preventDefault();
     if (!user) return navigate('/login');
+    // Guard: cannot offer on your own listing
+    if (isOwner) return;
 
     setOfferSubmitting(true);
     setOfferError('');
@@ -425,6 +429,11 @@ const ProductPage = () => {
       </div>
     );
   }
+
+  // Robust owner check — coerce both sides to string to handle ObjectId vs string mismatch
+  const sellerId = typeof product.seller === 'object' ? product.seller?._id : product.seller;
+  const currentUserId = user?._id || user?.id;
+  const isOwner = !!currentUserId && !!sellerId && String(currentUserId) === String(sellerId);
 
   const bgStyle = {
     background: `radial-gradient(600px circle at ${mousePos.x}% ${mousePos.y}%, ${product.accent || '#4f46e5'}20 0%, transparent 40%), #050505`
@@ -904,16 +913,22 @@ const ProductPage = () => {
           {product.specs && (
             <div className="card area-specs fade-in delay-3">
               <div className="flex gap-4 mb-6">
-                <button className="btn-primary flex-1" onClick={handleContactSeller} disabled={chatLoading}>
-                  <Message /> {chatLoading ? 'Opening Chat…' : 'Chat with Seller'}
-                </button>
-                {user?._id !== (typeof product.seller === 'object' ? product.seller._id : product.seller) && (
-                  <button
-                    className="btn-glass flex-1 border-[#00D9FF]/20 text-[#00D9FF] hover:bg-[#00D9FF]/10"
-                    onClick={() => setShowOfferModal(true)}
-                  >
-                    <SparklesIcon /> Make Offer
-                  </button>
+                {!isOwner ? (
+                  <>
+                    <button className="btn-primary flex-1" onClick={handleContactSeller} disabled={chatLoading}>
+                      <Message /> {chatLoading ? 'Opening Chat…' : 'Chat with Seller'}
+                    </button>
+                    <button
+                      className="btn-glass flex-1 border-[#00D9FF]/20 text-[#00D9FF] hover:bg-[#00D9FF]/10"
+                      onClick={() => setShowOfferModal(true)}
+                    >
+                      <SparklesIcon /> Make Offer
+                    </button>
+                  </>
+                ) : (
+                  <div className="w-full text-center p-3 bg-white/5 rounded-xl border border-white/10 text-white/50 text-sm font-medium flex items-center justify-center gap-2">
+                    <Shield size={16} /> You own this listing
+                  </div>
                 )}
               </div>
 
@@ -937,22 +952,24 @@ const ProductPage = () => {
           )}
 
           {/* 7. Actions */}
-          <div className="card area-actions fade-in delay-3 bg-white/5 border-white/10 flex flex-col gap-4 justify-center">
-            <button
-              className="btn-primary group relative overflow-hidden"
-              onClick={handleContactSeller}
-              disabled={chatLoading}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                {chatLoading ? 'Opening Chat…' : 'Contact Seller'} <Message />
-              </span>
-              <div className="absolute inset-0 bg-[var(--accent)] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-            </button>
+          {!isOwner && (
+            <div className="card area-actions fade-in delay-3 bg-white/5 border-white/10 flex flex-col gap-4 justify-center">
+              <button
+                className="btn-primary group relative overflow-hidden"
+                onClick={handleContactSeller}
+                disabled={chatLoading}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {chatLoading ? 'Opening Chat…' : 'Contact Seller'} <Message />
+                </span>
+                <div className="absolute inset-0 bg-[var(--accent)] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              </button>
 
-            <div className="text-center text-[10px] uppercase tracking-widest opacity-30">
-              Campus Handover • Verified Student • Safe
+              <div className="text-center text-[10px] uppercase tracking-widest opacity-30">
+                Campus Handover • Verified Student • Safe
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

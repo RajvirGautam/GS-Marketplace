@@ -186,6 +186,8 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       navigate('/');
       return;
     }
+    // Guard: cannot chat with yourself
+    if (isOwner) return;
     try {
       setChatLoading(true);
       const res = await chatAPI.startConversation(product._id);
@@ -198,6 +200,11 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
       setChatLoading(false);
     }
   };
+
+  // Robust owner check — coerce both sides to string to handle ObjectId vs string mismatch
+  const sellerOwnerId = typeof product.seller === 'object' ? product.seller?._id : product.seller;
+  const currentUserId = user?._id || user?.id;
+  const isOwner = !!currentUserId && !!sellerOwnerId && String(currentUserId) === String(sellerOwnerId);
   if (viewMode === 'list') {
     return (
       <div
@@ -302,13 +309,15 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
               </div>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={handleChatClick}
-                disabled={chatLoading}
-                className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                <ChatIcon /> {chatLoading ? '…' : 'Chat'}
-              </button>
+              {!isOwner && (
+                <button
+                  onClick={handleChatClick}
+                  disabled={chatLoading}
+                  className="bg-transparent border border-[rgba(255,255,255,0.2)] text-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  <ChatIcon /> {chatLoading ? '…' : 'Chat'}
+                </button>
+              )}
               <span className="bg-white text-black border border-white px-4 py-2 mono text-[10px] font-bold uppercase tracking-wider hover:bg-transparent hover:text-white transition-all">
                 View Details
               </span>

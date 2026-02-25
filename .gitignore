@@ -3,3 +3,5 @@ frontend/.env
 PRD.md
 backend/seed-products.js
 frontend/src/components/sections/UserDashboardv2.jsx
+backend/seed_custom_products.js
+backend/test_create.js
