@@ -77,18 +77,62 @@ function timeAgo(dateStr) {
     return `${Math.floor(diff / 86400)}d ago`;
 }
 
+// ── Group same-conversation message notifications into one card ────────────────
+// Returns a new array where all new_message notifs sharing a conversationId are
+// collapsed into a single entry. The entry keeps the newest notif's data but
+// adds a `count` field for how many were stacked and `stackedIds` so we can
+// mark/delete them all at once. Non-message notifs pass through unchanged.
+function groupNotifications(notifs) {
+    const grouped = [];
+    const seen = {}; // conversationId → index in `grouped`
+
+    for (const n of notifs) {
+        const convId = n.meta?.conversationId;
+        if (n.type === 'new_message' && convId) {
+            const key = convId.toString();
+            if (key in seen) {
+                const existing = grouped[seen[key]];
+                existing.count = (existing.count || 1) + 1;
+                existing.stackedIds = existing.stackedIds || [existing._id];
+                existing.stackedIds.push(n._id);
+                // Keep tracked as unread if any of the stacked are unread
+                if (!n.isRead) existing.isRead = false;
+                // Keep the latest timestamp
+                if (new Date(n.createdAt) > new Date(existing.createdAt)) {
+                    existing.createdAt = n.createdAt;
+                    existing.title = n.title; // use the latest sender name
+                }
+            } else {
+                seen[key] = grouped.length;
+                grouped.push({ ...n, count: 1 });
+            }
+        } else {
+            grouped.push(n);
+        }
+    }
+    return grouped;
+}
+
 // ── Single Notification Card ──────────────────────────────────────────────────
 const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
     const navigate = useNavigate();
     const cfg = TYPE_CONFIG[notif.type] || TYPE_CONFIG.new_message;
+    const isStacked = notif.count && notif.count > 1;
 
     const handleClick = () => {
-        if (!notif.isRead) onRead(notif._id);
+        // Mark all stacked notifications read, or just the single one
+        const ids = notif.stackedIds || [notif._id];
+        ids.forEach(id => { if (!notif.isRead) onRead(id); });
         onClose();
         const target = cfg.navTarget(notif.meta);
-        // Handle query-string navigation
         const [path, qs] = target.split('?');
         navigate(path + (qs ? `?${qs}` : ''));
+    };
+
+    const handleDelete = (e) => {
+        e.stopPropagation();
+        const ids = notif.stackedIds || [notif._id];
+        ids.forEach(id => onDelete(id));
     };
 
     return (
@@ -115,8 +159,24 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
                 border: `1px solid ${cfg.borderColor}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: cfg.accentColor,
+                position: 'relative',
             }}>
                 {cfg.icon}
+                {/* Stacked count badge on icon */}
+                {isStacked && (
+                    <span style={{
+                        position: 'absolute', top: -5, right: -5,
+                        minWidth: 16, height: 16, borderRadius: 8,
+                        background: cfg.accentColor,
+                        color: '#000',
+                        fontSize: 9, fontWeight: 900,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '0 3px',
+                        boxShadow: `0 0 6px ${cfg.accentColor}88`,
+                    }}>
+                        {notif.count > 9 ? '9+' : notif.count}
+                    </span>
+                )}
             </div>
 
             {/* Text */}
@@ -125,7 +185,9 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
                     <span style={{
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.5px',
                         textTransform: 'uppercase', color: cfg.accentColor,
-                    }}>{cfg.label}</span>
+                    }}>
+                        {isStacked ? `${notif.count} Messages` : cfg.label}
+                    </span>
                     <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0, marginLeft: 8 }}>
                         {timeAgo(notif.createdAt)}
                     </span>
@@ -152,7 +214,7 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
 
             {/* Delete button */}
             <button
-                onClick={e => { e.stopPropagation(); onDelete(notif._id); }}
+                onClick={handleDelete}
                 style={{
                     background: 'none', border: 'none', cursor: 'pointer',
                     color: 'rgba(255,255,255,0.2)', padding: '2px 4px',
@@ -289,9 +351,9 @@ const NotificationBell = ({ dark = true }) => {
                                 <div style={{ fontSize: 11 }}>New offers, deals, and messages will appear here.</div>
                             </div>
                         ) : (
-                            notifications.map(n => (
+                            groupNotifications(notifications).map(n => (
                                 <NotifCard
-                                    key={n._id}
+                                    key={n.stackedIds ? n.stackedIds[0] : n._id}
                                     notif={n}
                                     onRead={markNotifRead}
                                     onDelete={deleteNotif}
