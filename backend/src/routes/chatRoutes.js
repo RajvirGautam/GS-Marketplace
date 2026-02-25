@@ -365,4 +365,29 @@ router.patch('/messages/:msgId/offer', authenticate, async (req, res) => {
     }
 });
 
+// ─────────────────────────────────────────────
+// DELETE /api/chat/conversations/:id
+// Delete a conversation and all its messages
+// ─────────────────────────────────────────────
+router.delete('/conversations/:id', authenticate, async (req, res) => {
+    try {
+        const conversation = await Conversation.findById(req.params.id);
+        if (!conversation) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+        const isParticipant = conversation.participants.some(p => p.toString() === req.user._id.toString());
+        if (!isParticipant) return res.status(403).json({ success: false, message: 'Access denied' });
+
+        // Delete all messages in the conversation first
+        await Message.deleteMany({ conversation: req.params.id });
+
+        // Delete the conversation itself
+        await Conversation.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true, message: 'Conversation deleted' });
+    } catch (err) {
+        console.error('Error deleting conversation:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 export default router;

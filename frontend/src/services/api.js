@@ -243,6 +243,10 @@ export const chatAPI = {
     const { data } = await api.patch(`/chat/messages/${messageId}/offer`, { status });
     return data;
   },
+  deleteConversation: async (conversationId) => {
+    const { data } = await api.delete(`/chat/conversations/${conversationId}`);
+    return data;
+  },
 };
 
 // ==================== LEGACY EXPORTS (for backward compatibility) ====================

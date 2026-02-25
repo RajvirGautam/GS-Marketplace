@@ -55,6 +55,11 @@ const TagIcon = () => (
         <line x1="7" y1="7" x2="7.01" y2="7" />
     </svg>
 );
+const TrashIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
+);
 
 // ─────────────────────────────────────────────────────────────
 //  Helpers
@@ -163,6 +168,60 @@ const PriceNegotiatorModal = ({ onClose, onSubmit, productPrice, sending }) => {
                         {sending ? 'Sending…' : '💸 Send Offer'}
                     </button>
                 </form>
+            </div>
+        </div>
+    );
+};
+
+// ─────────────────────────────────────────────────────────────
+//  Delete Confirm Modal
+// ─────────────────────────────────────────────────────────────
+const DeleteConfirmModal = ({ onClose, onConfirm, deleting }) => {
+    return (
+        <div style={styles.modalOverlay} onClick={onClose}>
+            <div style={styles.negotiatorModal} onClick={e => e.stopPropagation()}>
+                <div style={styles.modalHeader}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ ...styles.modalIconWrap, background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.35)', color: '#EF4444' }}>
+                            <TrashIcon />
+                        </div>
+                        <div>
+                            <div style={styles.modalTitle}>Delete Conversation</div>
+                            <div style={styles.modalSub}>This action cannot be undone.</div>
+                        </div>
+                    </div>
+                    <button style={styles.closeBtn} onClick={onClose}><XIcon /></button>
+                </div>
+
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, lineHeight: 1.5 }}>
+                    Are you sure you want to permanently delete this conversation and all its messages?
+                </div>
+
+                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                    <button
+                        onClick={onClose}
+                        disabled={deleting}
+                        style={{
+                            flex: 1, padding: '12px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 13, fontWeight: 600,
+                            cursor: 'pointer', transition: 'background 0.2s'
+                        }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        disabled={deleting}
+                        style={{
+                            flex: 1, padding: '12px 0', borderRadius: 10, border: 'none',
+                            background: 'rgba(239, 68, 68, 0.8)', color: '#fff', fontSize: 13, fontWeight: 700,
+                            cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.5 : 1,
+                            transition: 'background 0.2s'
+                        }}
+                    >
+                        {deleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -458,6 +517,8 @@ const Chat = () => {
     const [msgsLoading, setMsgsLoading] = useState(false);
     const [showNegotiator, setShowNegotiator] = useState(false);
     const [offerSending, setOfferSending] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingChat, setDeletingChat] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null); // { file, url, type }
     const [uploading, setUploading] = useState(false);
 
@@ -593,6 +654,26 @@ const Chat = () => {
         const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'file';
         setMediaPreview({ file, url, type });
         e.target.value = '';
+    };
+
+    // ── Delete Conversation ──
+    const handleDeleteConversation = async () => {
+        if (!activeConvId) return;
+        setDeletingChat(true);
+        try {
+            const res = await chatAPI.deleteConversation(activeConvId);
+            if (res.success) {
+                setConversations(prev => prev.filter(c => c._id !== activeConvId));
+                setActiveConvId(null);
+                setMessages([]);
+                setShowDeleteModal(false);
+                navigate('/chat', { replace: true });
+            }
+        } catch (e) {
+            console.error('Failed to delete conversation', e);
+        } finally {
+            setDeletingChat(false);
+        }
     };
 
     // ── Send offer ──
@@ -908,15 +989,31 @@ const Chat = () => {
                                             </div>
                                         )}
                                     </div>
-                                    {activeConv?.product?.images?.[0] && (
-                                        <img
-                                            src={activeConv.product.images[0]}
-                                            alt="product"
-                                            onClick={() => navigate(`/product/${activeConv.product._id}`, { state: { fromChat: true, conversationId: activeConvId } })}
-                                            title="View Product"
-                                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
-                                        />
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                        {activeConv?.product?.images?.[0] && (
+                                            <img
+                                                src={activeConv.product.images[0]}
+                                                alt="product"
+                                                onClick={() => navigate(`/product/${activeConv.product._id}`, { state: { fromChat: true, conversationId: activeConvId } })}
+                                                title="View Product"
+                                                style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+                                            />
+                                        )}
+                                        <button
+                                            onClick={() => setShowDeleteModal(true)}
+                                            style={{
+                                                width: 36, height: 36, borderRadius: 8, border: 'none',
+                                                background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
+                                            }}
+                                            title="Delete Chat"
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                                        >
+                                            <TrashIcon />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Messages */}
@@ -1037,6 +1134,15 @@ const Chat = () => {
                     onSubmit={handleSendOffer}
                     productPrice={activeConv?.product?.price}
                     sending={offerSending}
+                />
+            )}
+
+            {/* Delete Negotiator Modal */}
+            {showDeleteModal && (
+                <DeleteConfirmModal
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={handleDeleteConversation}
+                    deleting={deletingChat}
                 />
             )}
         </>
