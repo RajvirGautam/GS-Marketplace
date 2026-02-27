@@ -1,6 +1,8 @@
 # SGSITS Marketplace (GS-MARK-II)
 
-A full-stack marketplace application built for the SGSITS college ecosystem, allowing students to securely buy, sell, and trade items within the community.
+A full-stack marketplace application rigorously tailored for the SGSITS college ecosystem, specifically engineered to cultivate a secure and vibrant platform where authenticated students can effortlessly buy, sell, and trade a diverse array of items within their campus community.
+
+The SGSITS Marketplace (GS-MARK-II) tackles the unique challenges of inter-campus commerce by mitigating trust issues inherently associated with generic marketplace platforms. By strictly leveraging a student-only verified environment, this application guarantees a safe space exclusively meant for the community. Whether textbooks, electronics, or dorm essentials, students can rely on a powerful suite of integrations, including automated product detail generation via AI and real-time negotiation through a live and interactive socket-based chat system. Building an environment that encourages trust and smooth transactions while maintaining utmost convenience and security is the core philosophy driving out operations and development for this service.
 
 ## Features
 - **Student Authentication:** Secure sign-up and login via Clerk and Google OAuth to ensure ONLY verified students can access the platform.
