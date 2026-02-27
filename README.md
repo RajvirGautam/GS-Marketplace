@@ -1,6 +1,6 @@
-# SGSITS Marketplace (GS-MARK-II)
+# Campus Marketplace (GS-MARKII)
 
-A full-stack marketplace application built for the SGSITS college ecosystem, allowing students to securely buy, sell, and trade items within the community.
+A full-stack marketplace application built for college ecosystems, allowing students to securely buy, sell, and trade items within the community.
 
 ## Features
 - **Student Authentication:** Secure sign-up and login via Clerk and Google OAuth to ensure ONLY verified students can access the platform.
@@ -14,7 +14,7 @@ A full-stack marketplace application built for the SGSITS college ecosystem, all
 
 1. **Sign Up / Login:** Ensure you are a verified student to enter the marketplace.
 2. **Browse or Search:** Explore the listed products on the homepage or search for specific items.
-3. **List an Item:** Hop to the 'Sell' section, upload a product photo, let the AI generate a description, review, add a price, and post.
+3. **List an Item:** Hop to the 'List an item' section, upload a product photo, let the AI generate a description, review, add a price, and post.
 4. **Make an Offer:** Found something interesting? Submit an offer directly on the product's page.
 5. **Negotiate in Real-Time:** Once an offer is placed, both parties can immediately start an interactive chat to finalize the deal.
 6. **Deal Closed:** After a successful negotiation, the item is marked as sold, and the deal is finalized!## Tech Stack
@@ -29,8 +29,8 @@ A full-stack marketplace application built for the SGSITS college ecosystem, all
 - **Server Environment**: Node.js & Express.js
 - **Database Architecture**: MongoDB & Mongoose
 - **Real-Time Events**: Socket.io
-- **Security & Auth**: Clerk, Passport.js (Google OAuth20), JWT, Helmet, bcrypt
-- **AI Integrations**: Google GenAI, OpenAI, Groq SDK
+- **Security & Auth**: Passport.js (Google OAuth20), JWT, Helmet, bcrypt
+- **AI Integrations**: Llama 3.2 11B Vision Instruct
 - **File Uploads**: Cloudinary, Multer
 - **Other utilities**: Nodemailer
 
