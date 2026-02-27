@@ -63,7 +63,8 @@ const Hero = () => {
 
   // Initialize particles
   useEffect(() => {
-    const newParticles = Array.from({ length: 50 }, (_, i) => ({
+    const count = window.innerWidth < 640 ? 25 : 50;
+    const newParticles = Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -516,11 +517,13 @@ const Hero = () => {
         /* Responsive */
         @media (max-width: 768px) {
           .card-3d { transform: none !important; }
+          .hero-enhanced { padding-top: 6rem; }
+          .product-showcase { border-radius: 16px; }
         }
       `}</style>
 
       {/* ===== ABSOLUTE TOP TICKER BAR ===== */}
-      <div className="top-ticker">
+      <div className="top-ticker hidden sm:block">
         <div className="flex items-center h-12 text-white/70 text-xs mono tracking-wider">
           <div className="marquee flex items-center gap-16 whitespace-nowrap">
             {[...Array(15)].map((_, i) => (
@@ -585,7 +588,7 @@ const Hero = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
             {/* ===== LEFT SIDEBAR - STATS ===== */}
-            <div className="lg:col-span-2 space-y-10 anim-fade-left delay-100">
+            <div className="hidden lg:block lg:col-span-2 space-y-10 anim-fade-left delay-100">
               
               {/* Date */}
               <div className="space-y-3">
@@ -833,7 +836,7 @@ const Hero = () => {
               </div>
 
               {/* CTA buttons */}
-              <div className="flex flex-wrap gap-4 items-center anim-fade-up delay-800">
+              <div className="flex flex-wrap gap-4 items-center anim-fade-up delay-800 flex-col sm:flex-row">
                 <button 
                   className="btn-magnetic mono text-sm rounded-xl relative overflow-hidden"
                   style={{ background: currentCard.accent }}
@@ -854,7 +857,7 @@ const Hero = () => {
             </div>
 
             {/* ===== RIGHT SIDEBAR - FEATURES ===== */}
-            <div className="lg:col-span-3 space-y-8 anim-fade-right delay-300">
+            <div className="hidden lg:block lg:col-span-3 space-y-8 anim-fade-right delay-300">
               
               <div className="space-y-8">
                 
@@ -945,12 +948,12 @@ const Hero = () => {
         </div>
 
         {/* Bottom timestamp */}
-        <div className="absolute bottom-8 left-8 mono text-xs text-white/30 anim-fade-up delay-800">
+        <div className="absolute bottom-8 left-8 mono text-xs text-white/30 anim-fade-up delay-800 hidden sm:block">
           LAST UPDATED: {month.toUpperCase()} {String(day).padStart(2, '0')} {year} — {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} IST
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 anim-fade-up delay-800">
+        <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 anim-fade-up delay-800 hidden sm:flex">
           <div className="mono text-xs text-white/40 uppercase tracking-widest">Scroll</div>
           <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
             <div className="w-1 h-2 bg-white/50 rounded-full animate-bounce" />

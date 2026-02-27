@@ -71,18 +71,18 @@ const Footer = () => {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
 
       {/* Main Content */}
-      <div className="max-w-[1600px] mx-auto px-6 pt-20 pb-12 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-12 relative z-10">
         
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-8 sm:gap-12 mb-14 sm:mb-20">
           
           {/* BRAND COLUMN */}
-          <div className="md:col-span-5 space-y-8">
+          <div className="col-span-2 md:col-span-5 space-y-6 sm:space-y-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#00D9FF] flex items-center justify-center text-black">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#00D9FF] flex items-center justify-center text-black shrink-0">
                 <ZapIcon />
               </div>
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none">
+                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter leading-none">
                   SGSITS<span className="text-[#00D9FF]">.MARKET</span>
                 </h2>
                 <div className="mono text-[10px] text-white/40 tracking-widest">
@@ -91,26 +91,26 @@ const Footer = () => {
               </div>
             </div>
             
-            <p className="text-white/60 mono text-sm leading-relaxed max-w-md border-l-2 border-white/10 pl-4">
-              // The decentralized marketplace for SGSITS Indore. 
+            <p className="text-white/60 mono text-xs sm:text-sm leading-relaxed max-w-md border-l-2 border-white/10 pl-4">
+              // The decentralized marketplace for college. 
               <br/>
-              // Built by students, for students. 
+              // Built by student, for students. 
               <br/>
               // Zero fees. Instant trade.
             </p>
 
             {/* Newsletter / Input Mock */}
-            <div className="max-w-xs">
+            <div className="max-w-sm">
               <label className="mono text-[10px] text-white/40 uppercase mb-2 block">
                 Stay Updated
               </label>
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                 <input 
                   type="email" 
                   placeholder="ENTER_EMAIL_ID" 
-                  className="bg-zinc-900 border border-white/20 px-4 py-2 text-xs mono text-white w-full focus:outline-none focus:border-[#00D9FF] placeholder:text-white/20"
+                  className="bg-zinc-900 border border-white/20 px-4 py-2.5 text-xs mono text-white w-full focus:outline-none focus:border-[#00D9FF] placeholder:text-white/20 min-w-0"
                 />
-                <button className="bg-white text-black px-4 py-2 text-xs font-bold uppercase hover:bg-[#00D9FF] transition-colors">
+                <button className="bg-white text-black px-4 py-2.5 text-xs font-bold uppercase hover:bg-[#00D9FF] transition-colors whitespace-nowrap">
                   Join
                 </button>
               </div>
@@ -118,11 +118,11 @@ const Footer = () => {
           </div>
 
           {/* LINKS COLUMN 1 */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <h4 className="mono text-xs text-[#00D9FF] uppercase tracking-widest mb-6 font-bold">
               / Platform
             </h4>
-            <ul className="space-y-4 mono text-sm text-white/60">
+            <ul className="space-y-3 sm:space-y-4 mono text-sm text-white/60">
               {['Browse All', 'Sell Item', 'Categories', 'Leaderboard'].map((item) => (
                 <li key={item}>
                   <a href="#" className="hover:text-white hover-underline-animation transition-colors">
@@ -134,18 +134,18 @@ const Footer = () => {
           </div>
 
           {/* LINKS COLUMN 2 */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <h4 className="mono text-xs text-[#00D9FF] uppercase tracking-widest mb-6 font-bold">
               / Connect
             </h4>
-            <ul className="space-y-4 mono text-sm text-white/60">
+            <ul className="space-y-3 sm:space-y-4 mono text-sm text-white/60">
               {[
                 { label: 'Instagram', icon: <InstagramIcon /> },
                 { label: 'Github', icon: <GithubIcon /> },
                 { label: 'Contact', icon: <MailIcon /> }
               ].map((item) => (
                 <li key={item.label}>
-                  <a href="#" className="flex items-center gap-2 hover:text-white transition-colors group">
+                  <a href="#" className="flex items-center gap-2 py-1 hover:text-white transition-colors group">
                     <span className="text-white/40 group-hover:text-[#00D9FF] transition-colors">{item.icon}</span>
                     <span className="hover-underline-animation">{item.label}</span>
                   </a>
@@ -155,21 +155,21 @@ const Footer = () => {
           </div>
 
           {/* STATUS COLUMN */}
-          <div className="md:col-span-3">
-             <div className="bg-zinc-900 border border-white/10 p-6">
+          <div className="col-span-2 md:col-span-3">
+             <div className="bg-zinc-900 border border-white/10 p-4 sm:p-6">
                <h4 className="mono text-xs text-white/40 uppercase mb-4 border-b border-white/10 pb-2">
                  System Status
                </h4>
                <div className="space-y-3">
-                 <div className="flex justify-between items-center mono text-xs">
+                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
                    <span className="text-white/60">SERVER UPTIME</span>
                    <span className="text-[#10B981]">99.9%</span>
                  </div>
-                 <div className="flex justify-between items-center mono text-xs">
+                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
                    <span className="text-white/60">ACTIVE TRADES</span>
                    <span className="text-white">1,248</span>
                  </div>
-                 <div className="flex justify-between items-center mono text-xs">
+                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
                    <span className="text-white/60">LAST UPDATE</span>
                    <span className="text-[#FF6B35]">JUST NOW</span>
                  </div>
@@ -185,12 +185,12 @@ const Footer = () => {
         </div>
 
         {/* BOTTOM BAR */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-white/40 mono text-xs">
+        <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+          <p className="text-white/40 mono text-xs text-center md:text-left">
             © 2026 SGSITS Market. Open Source Project.
           </p>
 
-          <div className="flex items-center gap-8">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 sm:gap-6">
             <a href="#" className="mono text-xs text-white/40 hover:text-white uppercase">Privacy Policy</a>
             <a href="#" className="mono text-xs text-white/40 hover:text-white uppercase">Terms of Service</a>
             
