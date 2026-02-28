@@ -1642,63 +1642,24 @@ const UserDashboard = () => {
           margin: 20px 0;
         }
 
-        /* ═══════════ RESPONSIVE ═══════════ */
-        @media (max-width: 1280px) {
-          .content-right { width: 260px; }
-          .stat-row { grid-template-columns: repeat(2, 1fr); }
+        /* ═══════════ VIEWPORT SPLIT ═══════════ */
+        .dash-mobile-only {
+          display: flex;
+          flex-direction: column;
         }
-        @media (max-width: 1024px) {
-          .dash-root {
-            flex-direction: column;
-          }
-          .sidebar {
-            display: flex;
-            flex-direction: row;
-            overflow-x: auto;
-            position: sticky;
-            top: 0;
-            width: 100%;
-            height: auto;
-            min-height: auto;
-            border-right: none;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 12px;
-            z-index: 50;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            gap: 12px;
-          }
-          .sidebar::-webkit-scrollbar {
-            display: none;
-          }
-          .sidebar-profile, .sidebar-brand, .sidebar-spacer, .sidebar-section-label {
-            display: none !important;
-          }
-          .sidebar-item {
-            width: auto;
-            padding: 8px 16px;
-            border-radius: 30px;
-            white-space: nowrap;
-            font-size: 13px;
-          }
-          
-          .main-area { margin-left: 0; }
-          .content-right { display: none; }
-          .mid-row, .bottom-row { grid-template-columns: 1fr; }
-          .bento-overview { grid-template-columns: 1fr !important; }
-          .bento-overview > * { grid-column: span 1 !important; }
-          .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-          }
+        .dash-desktop-only {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .dash-mobile-only { display: none !important; }
+          .dash-desktop-only { display: flex !important; width: 100%; }
         }
       `}</style>
 
       <ConfettiOverlay active={showConfetti} />
 
       {/* ===================== MOBILE VIEW ===================== */}
-      <div className="md:hidden" style={{ fontFamily: 'Manrope, sans-serif', background: '#080808', color: '#E4E4E7', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: 76 }}>
+      <div className="dash-mobile-only" style={{ fontFamily: 'Manrope, sans-serif', background: '#080808', color: '#E4E4E7', minHeight: '100vh', paddingBottom: 76 }}>
         <div className="noise-overlay" />
         {/* Mobile Top Bar */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1940,7 +1901,7 @@ const UserDashboard = () => {
       {/* =================== END MOBILE VIEW =================== */}
 
       {/* =================== DESKTOP VIEW =================== */}
-      <div className="hidden md:flex w-full">
+      <div className="dash-desktop-only">
         <div className="dash-root" style={{ background: '#080808', width: '100%' }}>
           <div
             ref={glowRef}
