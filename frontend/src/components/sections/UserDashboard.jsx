@@ -576,6 +576,7 @@ const UserDashboard = () => {
   const [reviewState, setReviewState] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
   const [dealHistoryOpen, setDealHistoryOpen] = useState(null); // holds the deal object to show
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar state
 
   // Robust current-user ID — works whether auth returns id or _id
   const currentUserId = (user?._id || user?.id || '').toString();
@@ -1124,6 +1125,8 @@ const UserDashboard = () => {
           min-height: 100vh;
           position: relative;
           z-index: 10;
+          width: 100%;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ═══════════ TOP BAR - SOFT BRUTALISM ═══════════ */
@@ -1648,10 +1651,63 @@ const UserDashboard = () => {
           .stat-row { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 1024px) {
-          .sidebar { display: none; }
+          .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            height: 100%;
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(10,10,10,0.95);
+            width: 260px;
+          }
+          .sidebar.open {
+            transform: translateX(0);
+          }
           .main-area { margin-left: 0; }
           .content-right { display: none; }
           .mid-row, .bottom-row { grid-template-columns: 1fr; }
+        }
+
+        .sidebar-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+          z-index: 90;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.open {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .hamburger-menu {
+          display: none;
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          padding: 8px;
+          margin-right: 8px;
+        }
+
+        @media (max-width: 1024px) {
+          .hamburger-menu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+
+        .table-responsive {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
         }
       `}</style>
 
@@ -1668,8 +1724,14 @@ const UserDashboard = () => {
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
 
+        {/* Mobile Sidebar Overlay */}
+        <div
+          className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+          onClick={() => setIsSidebarOpen(false)}
+        />
+
         {/* SIDEBAR */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-profile">
             <div className="sidebar-profile flex items-center gap-3">
 
@@ -1699,6 +1761,7 @@ const UserDashboard = () => {
               className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
               onClick={() => {
                 setSidebarActive(item.label);
+                setIsSidebarOpen(false);
                 if (item.action) item.action();
               }}
             >
@@ -1716,12 +1779,13 @@ const UserDashboard = () => {
               className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
               onClick={() => {
                 setSidebarActive(item.label);
+                setIsSidebarOpen(false);
                 if (item.action) item.action();
               }}
             >
               {item.icon}
               {item.label}
-              <ChevronRight />
+              {item.label !== 'Logout' && <ChevronRight />}
             </button>
           ))}
 
@@ -1739,7 +1803,16 @@ const UserDashboard = () => {
           {/* TOP BAR */}
           <header className="topbar">
             <div className="topbar-breadcrumb">
-
+              <button
+                className="hamburger-menu"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
               <span>Dashboard /</span>
               <span className="current">Overview</span>
             </div>
