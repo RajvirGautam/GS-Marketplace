@@ -393,20 +393,20 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
         </div>
 
         {/* Bottom Stats Box */}
-        <div className="bg-[#1C1D21] rounded-[16px] p-4 flex justify-between items-center">
-          <div>
-            <div className="text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-1">Condition</div>
-            <div className="text-[13px] font-bold text-white tracking-wide">
+        <div className="bg-[#1C1D21] rounded-[16px] p-3 sm:p-4 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-2">
+          <div className="flex items-center justify-between w-full xl:w-auto xl:block">
+            <div className="text-[10px] sm:text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-0 xl:mb-1">Condition</div>
+            <div className="text-[11px] sm:text-[13px] font-bold text-white tracking-wide">
               {product.condition ? product.condition.toUpperCase() : 'NEW'}
             </div>
           </div>
 
-          <div className="text-left">
-            <div className="text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-1">Views & Saves</div>
-            <div className="flex items-center gap-2 text-[13px] font-bold text-white tracking-wide">
-              <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span> {product.views || 0}
-              <span className="w-[1px] h-3 bg-[rgba(255,255,255,0.2)] mx-1"></span>
-              {saveCount} <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]"></span>
+          <div className="flex items-center justify-between w-full xl:w-auto xl:block xl:text-right border-t border-white/5 pt-2 xl:pt-0 xl:border-0">
+            <div className="text-[10px] sm:text-[11px] text-[rgba(255,255,255,0.6)] font-semibold mb-0 xl:mb-1">Views & Saves</div>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-bold text-white tracking-wide">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-green-500"></span> {product.views || 0}
+              <span className="w-[1px] h-3 bg-[rgba(255,255,255,0.2)] mx-0.5 sm:mx-1"></span>
+              {saveCount} <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#8B5CF6]"></span>
             </div>
           </div>
         </div>

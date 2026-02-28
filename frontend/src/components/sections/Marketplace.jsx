@@ -565,490 +565,705 @@ const Marketplace = () => {
       `}</style>
 
       <div className="theme-root relative">
-        {/* Mouse-tracking glow overlay */}
-        <div
-          ref={glowRef}
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{ background: 'radial-gradient(900px circle at 50% 50%, rgba(0,217,255,0.07) 0%, transparent 50%)' }}
-        />
+        {/* Mouse-tracking glow overlay (Desktop Only) */}
+        <div className="hidden md:block">
+          <div
+            ref={glowRef}
+            className="fixed inset-0 pointer-events-none z-0"
+            style={{ background: 'radial-gradient(900px circle at 50% 50%, rgba(0,217,255,0.07) 0%, transparent 50%)' }}
+          />
+        </div>
         {/* Noise & Grid */}
         <div className="noise-overlay"></div>
         <div className="grid-lines"></div>
 
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10">
-          <div className="max-w-[1800px] mx-auto px-6 py-4">
-            <div className="flex items-center gap-6">
-              <Link to="/">
-                <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">S</div>
-                  <span>SGSITS<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
-                </div>
-              </Link>
-
-              {/* Search */}
-              <div className="flex-1 max-w-2xl relative">
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
-                    <SearchIcon />
+        {/* ====== DESKTOP VIEW ====== */}
+        <div className="hidden md:block">
+          {/* Header */}
+          <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10">
+            <div className="max-w-[1800px] mx-auto px-6 py-4">
+              <div className="flex items-center gap-6">
+                <Link to="/">
+                  <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">S</div>
+                    <span>SGSITS<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
                   </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by title, tags, description, specs..."
-                    className="w-full h-12 pl-12 pr-10 bg-white/5 border border-white/10 text-white text-sm rounded-full focus:outline-none focus:border-[#00D9FF] transition-colors placeholder-white/40 input-modern"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => {
-                        setSearchQuery('');
-                        setDebouncedSearch('');
-                      }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
-                    >
-                      <XIcon />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsAddProductOpen(true)}
-                className="btn-primary hidden md:flex"
-              >
-                + List Item
-              </button>
-
-              {user && (
-                <Link
-                  to="/chat"
-                  className="btn-glass hidden md:flex relative"
-                  style={{ padding: '9px 16px' }}
-                  title="Messages"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-[3px] rounded-full flex items-center justify-center text-[9px] font-black text-white"
-                      style={{ background: 'linear-gradient(135deg, #c026d3, #ef4444)', boxShadow: '0 0 8px rgba(192,38,211,0.5)' }}
-                    >
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
                 </Link>
-              )}
 
-              {/* Notification Bell */}
-              {user && <NotificationBell dark={true} />}
+                {/* Search */}
+                <div className="flex-1 max-w-2xl relative">
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+                      <SearchIcon />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by title, tags, description, specs..."
+                      className="w-full h-12 pl-12 pr-10 bg-white/5 border border-white/10 text-white text-sm rounded-full focus:outline-none focus:border-[#00D9FF] transition-colors placeholder-white/40 input-modern"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setDebouncedSearch('');
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                      >
+                        <XIcon />
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-              {user && (
                 <button
-                  onClick={() => navigate('/dashboard')}
-                  className="btn-glass hidden md:flex"
-                  style={{ fontSize: 13, padding: '9px 18px' }}
+                  onClick={() => setIsAddProductOpen(true)}
+                  className="btn-primary hidden md:flex"
                 >
-                  Dashboard
+                  + List Item
                 </button>
-              )}
 
-              {user ? (
-                <div className="relative user-menu-container">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="btn-glass"
+                {user && (
+                  <Link
+                    to="/chat"
+                    className="btn-glass hidden md:flex relative"
+                    style={{ padding: '9px 16px' }}
+                    title="Messages"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden">
-                      {user?.profilePicture
-                        ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : user.fullName?.charAt(0).toUpperCase() || 'U'
-                      }
-                    </div>
-                    <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
-                    <ChevronDown />
-                  </button>
-
-                  {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
-                      <div className="p-4 border-b border-white/10">
-                        <div className="text-[10px] text-white/40 mono uppercase mb-1 font-bold">Logged in as</div>
-                        <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
-                        <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
-                        {user.enrollmentNumber && (
-                          <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => {
-                          navigate('/dashboard');
-                          setShowUserMenu(false);
-                        }}
-                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-[3px] rounded-full flex items-center justify-center text-[9px] font-black text-white"
+                        style={{ background: 'linear-gradient(135deg, #c026d3, #ef4444)', boxShadow: '0 0 8px rgba(192,38,211,0.5)' }}
                       >
-                        Dashboard
-                      </button>
-                      <button
-                        onClick={() => {
-                          logout();
-                          navigate('/');
-                        }}
-                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login" className="btn-glass hover:bg-white/10">
-                  Login
-                </Link>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <div className="max-w-[1800px] mx-auto relative z-10">
-          <div className="grid grid-cols-12">
-
-            {/* Sidebar Filters */}
-            <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/30 backdrop-blur-xl p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mono">Filters</h3>
-                {getActiveFilterCount() > 0 && (
-                  <button onClick={clearAllFilters} className="text-[10px] font-bold text-[#00D9FF] hover:underline mono">
-                    RESET
-                  </button>
-                )}
-              </div>
-
-              {/* Active Filters */}
-              {getActiveFilterCount() > 0 && (
-                <div className="mb-6 pb-6 border-b border-white/10">
-                  <div className="text-[10px] text-white/40 mb-3 uppercase font-bold mono">
-                    Active
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCategories.map(cat => (
-                      <span key={cat} className="filter-tag">
-                        {categories.find(c => c.slug === cat)?.name}
-                        <button onClick={() => toggleCategory(cat)} className="hover:text-white">
-                          <XIcon />
-                        </button>
-                      </span>
-                    ))}
-                    {selectedBranches.map(branch => (
-                      <span key={branch} className="filter-tag">
-                        {branches.find(b => b.slug === branch)?.name}
-                        <button onClick={() => toggleBranch(branch)} className="hover:text-white">
-                          <XIcon />
-                        </button>
-                      </span>
-                    ))}
-                    {selectedYears.map(year => (
-                      <span key={year} className="filter-tag">
-                        {years.find(y => y.value === year)?.label}
-                        <button onClick={() => toggleYear(year)} className="hover:text-white">
-                          <XIcon />
-                        </button>
-                      </span>
-                    ))}
-                    {selectedConditions.map(cond => (
-                      <span key={cond} className="filter-tag">
-                        {cond}
-                        <button onClick={() => toggleCondition(cond)} className="hover:text-white">
-                          <XIcon />
-                        </button>
-                      </span>
-                    ))}
-                    {selectedTypes.map(type => (
-                      <span key={type} className="filter-tag">
-                        {itemTypes.find(t => t.value === type)?.label}
-                        <button onClick={() => toggleType(type)} className="hover:text-white">
-                          <XIcon />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Categories */}
-              <div className="mb-8">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
-                <div className="space-y-3">
-                  {categories.map(cat => (
-                    <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedCategories.includes(cat.slug)}
-                        onChange={() => toggleCategory(cat.slug)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {cat.name}
-                      </span>
-                      <span className="text-xs text-white/20 font-mono">{cat.count}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <div className="flex justify-between mb-4">
-                  <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
-                  <span className="text-[11px] text-[#00D9FF] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10000"
-                  step="100"
-                  value={priceRange[1]}
-                  onChange={(e) => {
-                    setPriceRange([0, parseInt(e.target.value)]);
-                    setCurrentPage(1);
-                  }}
-                />
-              </div>
-
-              {/* Branches */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
-                <div className="space-y-3">
-                  {branches.map(branch => (
-                    <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedBranches.includes(branch.slug)}
-                        onChange={() => toggleBranch(branch.slug)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {branch.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Years */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
-                <div className="space-y-3">
-                  {years.map(year => (
-                    <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedYears.includes(year.value)}
-                        onChange={() => toggleYear(year.value)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {year.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Condition */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
-                <div className="space-y-3">
-                  {conditions.map(cond => (
-                    <label key={cond} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedConditions.includes(cond)}
-                        onChange={() => toggleCondition(cond)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {cond}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Item Types */}
-              <div className="mb-8 pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
-                <div className="space-y-3">
-                  {itemTypes.map(type => (
-                    <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedTypes.includes(type.value)}
-                        onChange={() => toggleType(type.value)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {type.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <main className="col-span-12 lg:col-span-9 xl:col-span-10 p-6 lg:p-8">
-
-              {/* Quick Filters */}
-              <div className="mb-6 overflow-x-auto">
-                <div className="flex gap-3 pb-2">
-                  {quickFilters.map((filter, index) => (
-                    <button
-                      key={index}
-                      onClick={filter.action}
-                      className="quick-filter-btn"
-                    >
-                      {filter.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-                <div className="text-sm text-white/60">
-                  Showing <span className="text-white font-bold">{products.length}</span> results
-                  {debouncedSearch && (
-                    <span className="ml-1 text-[#00D9FF]">
-                      for "{debouncedSearch}"
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4">
-
-                  <button
-                    onClick={() => setMobileFilterOpen(true)}
-                    className="lg:hidden btn-ghost text-xs"
-                  >
-                    <FilterIcon /> Filters
-                    {getActiveFilterCount() > 0 && (
-                      <span className="ml-2 w-5 h-5 bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-[10px] rounded-full flex items-center justify-center font-bold">
-                        {getActiveFilterCount()}
+                        {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
+                  </Link>
+                )}
+
+                {/* Notification Bell */}
+                {user && <NotificationBell dark={true} />}
+
+                {user && (
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="btn-glass hidden md:flex"
+                    style={{ fontSize: 13, padding: '9px 18px' }}
+                  >
+                    Dashboard
                   </button>
+                )}
 
-                  <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+                {user ? (
+                  <div className="relative user-menu-container">
                     <button
-                      onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="btn-glass"
                     >
-                      <GridIcon />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
-                    >
-                      <ListIcon />
-                    </button>
-                  </div>
-
-                  <div className="relative group">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none bg-white/5 border border-white/10 text-sm text-white px-4 py-2.5 pr-8 rounded-xl focus:outline-none cursor-pointer font-medium hover:bg-white/10"
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="pricelow">Price: Low to High</option>
-                      <option value="pricehigh">Price: High to Low</option>
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                        {user?.profilePicture
+                          ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : user.fullName?.charAt(0).toUpperCase() || 'U'
+                        }
+                      </div>
+                      <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
                       <ChevronDown />
+                    </button>
+
+                    {showUserMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
+                        <div className="p-4 border-b border-white/10">
+                          <div className="text-[10px] text-white/40 mono uppercase mb-1 font-bold">Logged in as</div>
+                          <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
+                          <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                          {user.enrollmentNumber && (
+                            <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigate('/dashboard');
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                        >
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={() => {
+                            logout();
+                            navigate('/');
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link to="/login" className="btn-glass hover:bg-white/10">
+                    Login
+                  </Link>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <div className="max-w-[1800px] mx-auto relative z-10">
+            <div className="grid grid-cols-12">
+
+              {/* Sidebar Filters */}
+              <aside className="col-span-12 lg:col-span-3 xl:col-span-2 border-r border-white/10 bg-black/30 backdrop-blur-xl p-6 hidden lg:block overflow-y-auto custom-scrollbar sticky top-[81px] h-[calc(100vh-81px)]">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mono">Filters</h3>
+                  {getActiveFilterCount() > 0 && (
+                    <button onClick={clearAllFilters} className="text-[10px] font-bold text-[#00D9FF] hover:underline mono">
+                      RESET
+                    </button>
+                  )}
+                </div>
+
+                {/* Active Filters */}
+                {getActiveFilterCount() > 0 && (
+                  <div className="mb-6 pb-6 border-b border-white/10">
+                    <div className="text-[10px] text-white/40 mb-3 uppercase font-bold mono">
+                      Active
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCategories.map(cat => (
+                        <span key={cat} className="filter-tag">
+                          {categories.find(c => c.slug === cat)?.name}
+                          <button onClick={() => toggleCategory(cat)} className="hover:text-white">
+                            <XIcon />
+                          </button>
+                        </span>
+                      ))}
+                      {selectedBranches.map(branch => (
+                        <span key={branch} className="filter-tag">
+                          {branches.find(b => b.slug === branch)?.name}
+                          <button onClick={() => toggleBranch(branch)} className="hover:text-white">
+                            <XIcon />
+                          </button>
+                        </span>
+                      ))}
+                      {selectedYears.map(year => (
+                        <span key={year} className="filter-tag">
+                          {years.find(y => y.value === year)?.label}
+                          <button onClick={() => toggleYear(year)} className="hover:text-white">
+                            <XIcon />
+                          </button>
+                        </span>
+                      ))}
+                      {selectedConditions.map(cond => (
+                        <span key={cond} className="filter-tag">
+                          {cond}
+                          <button onClick={() => toggleCondition(cond)} className="hover:text-white">
+                            <XIcon />
+                          </button>
+                        </span>
+                      ))}
+                      {selectedTypes.map(type => (
+                        <span key={type} className="filter-tag">
+                          {itemTypes.find(t => t.value === type)?.label}
+                          <button onClick={() => toggleType(type)} className="hover:text-white">
+                            <XIcon />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Categories */}
+                <div className="mb-8">
+                  <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
+                  <div className="space-y-3">
+                    {categories.map(cat => (
+                      <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="modern-checkbox"
+                          checked={selectedCategories.includes(cat.slug)}
+                          onChange={() => toggleCategory(cat.slug)}
+                        />
+                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                          {cat.name}
+                        </span>
+                        <span className="text-xs text-white/20 font-mono">{cat.count}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Range */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <div className="flex justify-between mb-4">
+                    <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
+                    <span className="text-[11px] text-[#00D9FF] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10000"
+                    step="100"
+                    value={priceRange[1]}
+                    onChange={(e) => {
+                      setPriceRange([0, parseInt(e.target.value)]);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+
+                {/* Branches */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
+                  <div className="space-y-3">
+                    {branches.map(branch => (
+                      <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="modern-checkbox"
+                          checked={selectedBranches.includes(branch.slug)}
+                          onChange={() => toggleBranch(branch.slug)}
+                        />
+                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                          {branch.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Years */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
+                  <div className="space-y-3">
+                    {years.map(year => (
+                      <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="modern-checkbox"
+                          checked={selectedYears.includes(year.value)}
+                          onChange={() => toggleYear(year.value)}
+                        />
+                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                          {year.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Condition */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
+                  <div className="space-y-3">
+                    {conditions.map(cond => (
+                      <label key={cond} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="modern-checkbox"
+                          checked={selectedConditions.includes(cond)}
+                          onChange={() => toggleCondition(cond)}
+                        />
+                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                          {cond}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Item Types */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
+                  <div className="space-y-3">
+                    {itemTypes.map(type => (
+                      <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="modern-checkbox"
+                          checked={selectedTypes.includes(type.value)}
+                          onChange={() => toggleType(type.value)}
+                        />
+                        <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                          {type.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </aside>
+
+              {/* Main Content Area */}
+              <main className="col-span-12 lg:col-span-9 xl:col-span-10 p-6 lg:p-8">
+
+                {/* Quick Filters */}
+                <div className="mb-6 overflow-x-auto">
+                  <div className="flex gap-3 pb-2">
+                    {quickFilters.map((filter, index) => (
+                      <button
+                        key={index}
+                        onClick={filter.action}
+                        className="quick-filter-btn"
+                      >
+                        {filter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                  <div className="text-sm text-white/60">
+                    Showing <span className="text-white font-bold">{products.length}</span> results
+                    {debouncedSearch && (
+                      <span className="ml-1 text-[#00D9FF]">
+                        for "{debouncedSearch}"
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4">
+
+                    <button
+                      onClick={() => setMobileFilterOpen(true)}
+                      className="lg:hidden btn-ghost text-xs"
+                    >
+                      <FilterIcon /> Filters
+                      {getActiveFilterCount() > 0 && (
+                        <span className="ml-2 w-5 h-5 bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                          {getActiveFilterCount()}
+                        </span>
+                      )}
+                    </button>
+
+                    <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+                      <button
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                      >
+                        <GridIcon />
+                      </button>
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                      >
+                        <ListIcon />
+                      </button>
+                    </div>
+
+                    <div className="relative group">
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="appearance-none bg-white/5 border border-white/10 text-sm text-white px-4 py-2.5 pr-8 rounded-xl focus:outline-none cursor-pointer font-medium hover:bg-white/10"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="pricelow">Price: Low to High</option>
+                        <option value="pricehigh">Price: High to Low</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+                        <ChevronDown />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Products Grid */}
-              {loading ? (
-                <div className="text-center py-20">
-                  <div className="text-sm text-white/40 animate-pulse mono">Loading products...</div>
-                </div>
-              ) : products.length === 0 ? (
-                <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="text-4xl mb-4 grayscale opacity-50">📦</div>
-                  <h3 className="text-lg font-bold text-white mb-2">No products found</h3>
-                  <p className="text-white/60 mb-6 text-sm">
-                    We couldn't find what you're looking for.
-                  </p>
-                  <button onClick={clearAllFilters} className="text-[#00D9FF] text-sm font-bold hover:underline">
-                    Clear all filters
-                  </button>
-                </div>
-              ) : (
-                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-                  {products.map((product, index) => (
-                    <div
-                      key={product._id}
-                      className="h-full group"
-                    >
-                      <ProductCard product={product} viewMode={viewMode} index={index} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-12 gap-2">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${currentPage === pageNum
-                          ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
-                          : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
-                          }`}
+                {/* Products Grid */}
+                {loading ? (
+                  <div className="text-center py-20">
+                    <div className="text-sm text-white/40 animate-pulse mono">Loading products...</div>
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="text-4xl mb-4 grayscale opacity-50">📦</div>
+                    <h3 className="text-lg font-bold text-white mb-2">No products found</h3>
+                    <p className="text-white/60 mb-6 text-sm">
+                      We couldn't find what you're looking for.
+                    </p>
+                    <button onClick={clearAllFilters} className="text-[#00D9FF] text-sm font-bold hover:underline">
+                      Clear all filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                    {products.map((product, index) => (
+                      <div
+                        key={product._id}
+                        className="h-full group"
                       >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+                        <ProductCard product={product} viewMode={viewMode} index={index} />
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-                  {totalPages > 5 && <span className="flex items-center text-white/40 px-2">...</span>}
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-12 gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+                    >
+                      <ChevronLeft />
+                    </button>
 
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
-                  >
-                    <ChevronRight />
-                  </button>
-                </div>
-              )}
-            </main>
+                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${currentPage === pageNum
+                            ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
+                            : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                            }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    {totalPages > 5 && <span className="flex items-center text-white/40 px-2">...</span>}
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+                    >
+                      <ChevronRight />
+                    </button>
+                  </div>
+                )}
+              </main>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Add Button */}
-        <button
-          onClick={() => setIsAddProductOpen(true)}
-          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-3xl flex items-center justify-center shadow-lg shadow-cyan-900/50 z-40"
-        >
-          +
-        </button>
+        {/* ====== MOBILE VIEW ====== */}
+        <div className="block md:hidden min-h-[100dvh] pb-24 relative z-10">
+
+          {/* Mobile Top Bar */}
+          <div className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between">
+            {user ? (
+              <div className="relative user-menu-container">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden" onClick={() => setShowUserMenu(!showUserMenu)}>
+                  {user?.profilePicture
+                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : user.fullName?.charAt(0).toUpperCase() || 'U'
+                  }
+                </div>
+                {showUserMenu && (
+                  <div className="absolute left-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
+                    <div className="p-4 border-b border-white/10">
+                      <div className="text-[10px] text-white/40 mono uppercase mb-1 font-bold">Logged in as</div>
+                      <div className="text-sm text-white font-bold truncate">{user.fullName}</div>
+                      <div className="text-xs text-white/60 truncate mt-0.5">{user.email}</div>
+                      {user.enrollmentNumber && (
+                        <div className="text-[10px] text-cyan-400 mono mt-2">{user.enrollmentNumber}</div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigate('/dashboard');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout();
+                        navigate('/');
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/10"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className="w-8 h-8 rounded-full bg-white/10 flex flex-col items-center justify-center text-white/50">
+                <span className="text-xs">👤</span>
+              </Link>
+            )}
+
+            <Link to="/">
+              <div className="text-lg font-bold text-white flex items-center gap-1.5 cursor-pointer">
+                <div className="w-6 h-6 rounded bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-black text-[10px]">S</div>
+                <span>SGSITS<span className="text-[#00D9FF]">.MKT</span></span>
+              </div>
+            </Link>
+
+            <div className="flex items-center gap-3">
+              {user && <NotificationBell dark={true} />}
+            </div>
+          </div>
+
+          {/* Mobile Search Area */}
+          <div className="px-4 py-3 bg-[#0A0A0A] border-b border-white/5 sticky top-[53px] z-40">
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                <SearchIcon />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full h-10 pl-10 pr-10 bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:outline-none focus:border-[#00D9FF] transition-colors placeholder-white/40"
+              />
+              {searchQuery && (
+                <button onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
+                  <XIcon />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Categories Scroller */}
+          <div className="px-4 py-4 overflow-x-auto custom-scrollbar flex gap-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <button
+              onClick={() => { setSelectedCategories([]); setCurrentPage(1); }}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.length === 0 ? 'bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white' : 'bg-white/5 text-white/60 border border-white/10'}`}
+            >
+              All
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => {
+                  setSelectedCategories([cat.slug]);
+                  setCurrentPage(1);
+                }}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.includes(cat.slug) ? 'bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white' : 'bg-white/5 text-white/60 border border-white/10'}`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile Filters & Stats */}
+          <div className="px-4 py-2 flex items-center justify-between mb-2">
+            <div className="text-xs text-white/50 mono">
+              <span className="text-white font-bold">{products.length}</span> items
+            </div>
+
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-[#00D9FF] font-bold bg-[#00D9FF]/10 px-3 py-1.5 rounded-lg border border-[#00D9FF]/20"
+            >
+              <FilterIcon /> Filters
+              {getActiveFilterCount() > 0 && <span className="ml-1 w-4 h-4 rounded-full bg-[#00D9FF] text-black flex items-center justify-center text-[9px]">{getActiveFilterCount()}</span>}
+            </button>
+          </div>
+
+          {/* Mobile Grid */}
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="text-xs text-white/40 animate-pulse mono">Loading products...</div>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12 px-4 mx-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="text-3xl mb-3 grayscale opacity-50">📦</div>
+              <h3 className="text-base font-bold text-white mb-1">No products found</h3>
+              <p className="text-white/50 mb-4 text-xs">
+                Try a different search or filter.
+              </p>
+              <button onClick={clearAllFilters} className="text-[#00D9FF] text-xs font-bold hover:underline">
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 px-4">
+              {products.map((product, index) => (
+                <div key={product._id} className="h-full">
+                  <ProductCard product={product} viewMode="grid" index={index} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Mobile Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8 gap-2 pb-8">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30"
+              >
+                <ChevronLeft />
+              </button>
+              <span className="text-xs text-white/60 flex items-center justify-center px-4 font-mono">
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30"
+              >
+                <ChevronRight />
+              </button>
+            </div>
+          )}
+
+        </div>
+
+        {/* Mobile Bottom Navigation (Sticky) */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/10 px-6 py-3 flex items-center justify-between z-50">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex flex-col items-center gap-1 text-[#00D9FF]">
+            <GridIcon />
+            <span className="text-[9px] font-bold mt-1">Home</span>
+          </button>
+          <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+            <span className="text-[9px] font-bold mt-1">Dashboard</span>
+          </button>
+
+          <button onClick={() => setIsAddProductOpen(true)} className="relative -top-5 flex flex-col items-center group">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-2xl shadow-lg shadow-cyan-900/40 group-active:scale-95 transition-transform">
+              +
+            </div>
+          </button>
+
+          <Link to="/chat" className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+            <span className="text-[9px] font-bold mt-1">Messages</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white bg-gradient-to-br from-pink-500 to-red-500 border border-black">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Link>
+          <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+            <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
+              {user?.profilePicture
+                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span className="text-[10px]">{user?.fullName?.charAt(0).toUpperCase() || 'U'}</span>
+              }
+            </div>
+            <span className="text-[9px] font-bold mt-1">Profile</span>
+          </button>
+        </div>
+
+        {/* Hiding old mobile Add Button since we added a sticky bottom nav */}
+        <div className="hidden">
+          <button
+            onClick={() => setIsAddProductOpen(true)}
+            className="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-3xl flex items-center justify-center shadow-lg shadow-cyan-900/50 z-40"
+          >
+            +
+          </button>
+        </div>
 
         {/* Mobile Filter Drawer */}
         <div
