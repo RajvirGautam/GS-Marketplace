@@ -684,6 +684,15 @@ const ProductPage = () => {
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
+        
+        @keyframes heartPop {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.4); }
+          100% { transform: scale(1); }
+        }
+        .animate-heart-pop {
+          animation: heartPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
         .noise {
           position: fixed;
@@ -708,8 +717,14 @@ const ProductPage = () => {
           <button className="btn-glass shadow-lg">
             <ShareIcon />
           </button>
-          <button className="btn-glass shadow-lg" onClick={handleSaveToggle} title={saved ? 'Unsave' : 'Save'}>
-            <Heart filled={saved} />
+          <button className="btn-glass shadow-lg group" onClick={(e) => {
+            const el = e.currentTarget.querySelector('svg');
+            el.classList.remove('animate-heart-pop');
+            void el.offsetWidth; // trigger reflow
+            el.classList.add('animate-heart-pop');
+            handleSaveToggle();
+          }} title={saved ? 'Unsave' : 'Save'}>
+            <Heart filled={saved} className="transition-colors duration-200" style={{ color: saved ? '#EF4444' : 'currentColor' }} />
             {saveCount > 0 && <span style={{ fontSize: 11, opacity: 0.7 }}>{saveCount}</span>}
           </button>
 
@@ -720,8 +735,11 @@ const ProductPage = () => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="btn-glass shadow-lg pl-2 pr-3"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold">
-                  {user.fullName?.charAt(0).toUpperCase() || 'U'}
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                  {user?.profilePicture
+                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : user.fullName?.charAt(0).toUpperCase() || 'U'
+                  }
                 </div>
                 <ChevronDown />
               </button>
@@ -759,7 +777,7 @@ const ProductPage = () => {
         </div>
       </nav>
 
-      <div className="wrapper relative z-10">
+      <div className="wrapper hidden md:block relative z-10">
         <div className="bento-grid">
           {/* 1. Main Image */}
           <div className="card area-main-img fade-in group cursor-zoom-in">
@@ -807,8 +825,10 @@ const ProductPage = () => {
           {/* 2. Header */}
           <div className="card area-header fade-in delay-1 flex flex-col justify-between min-h-[180px]">
             <div>
+              <div className="text-sm font-bold opacity-60 uppercase tracking-widest mb-3 flex items-center gap-2">
+                Marketplace <span className="opacity-40">/</span> <span className="text-white">{product.category}</span>
+              </div>
               <div className="flex gap-2 mb-4">
-                <span className="tag-pill">{product.category}</span>
                 <span className="tag-pill" style={{ color: product.accent, borderColor: product.accent }}>
                   {product.condition}
                 </span>
@@ -911,27 +931,7 @@ const ProductPage = () => {
 
           {/* 6. Specs */}
           {product.specs && (
-            <div className="card area-specs fade-in delay-3">
-              <div className="flex gap-4 mb-6">
-                {!isOwner ? (
-                  <>
-                    <button className="btn-primary flex-1" onClick={handleContactSeller} disabled={chatLoading}>
-                      <Message /> {chatLoading ? 'Opening Chat…' : 'Chat with Seller'}
-                    </button>
-                    <button
-                      className="btn-glass flex-1 border-[#00D9FF]/20 text-[#00D9FF] hover:bg-[#00D9FF]/10"
-                      onClick={() => setShowOfferModal(true)}
-                    >
-                      <SparklesIcon /> Make Offer
-                    </button>
-                  </>
-                ) : (
-                  <div className="w-full text-center p-3 bg-white/5 rounded-xl border border-white/10 text-white/50 text-sm font-medium flex items-center justify-center gap-2">
-                    <Shield size={16} /> You own this listing
-                  </div>
-                )}
-              </div>
-
+            <div className="card area-specs fade-in delay-3 mb-6">
               <div className="card-header">
                 <div className="card-title">
                   <GridIcon /> Specifications
@@ -951,102 +951,282 @@ const ProductPage = () => {
             </div>
           )}
 
-          {/* 7. Actions */}
-          {!isOwner && (
-            <div className="card area-actions fade-in delay-3 bg-white/5 border-white/10 flex flex-col gap-4 justify-center">
-              <button
-                className="btn-primary group relative overflow-hidden"
-                onClick={handleContactSeller}
-                disabled={chatLoading}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {chatLoading ? 'Opening Chat…' : 'Contact Seller'} <Message />
-                </span>
-                <div className="absolute inset-0 bg-[var(--accent)] translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-              </button>
-
-              <div className="text-center text-[10px] uppercase tracking-widest opacity-30">
+          {/* Actions - moved below specs */}
+          <div className="card area-actions fade-in delay-3">
+            <div className="flex gap-4 mb-4">
+              {!isOwner ? (
+                <>
+                  <button className="btn-primary flex-1" onClick={handleContactSeller} disabled={chatLoading}>
+                    <Message /> {chatLoading ? 'Opening Chat…' : 'Chat with Seller'}
+                  </button>
+                  <button
+                    className="btn-glass flex-1 border-[#00D9FF]/20 text-[#00D9FF] hover:bg-[#00D9FF]/10 py-4"
+                    onClick={() => setShowOfferModal(true)}
+                  >
+                    <SparklesIcon /> Make Offer
+                  </button>
+                </>
+              ) : (
+                <div className="w-full text-center p-3 bg-white/5 rounded-xl border border-white/10 text-white/50 text-sm font-medium flex items-center justify-center gap-2">
+                  <Shield size={16} /> You own this listing
+                </div>
+              )}
+            </div>
+            {!isOwner && (
+              <div className="text-center text-[10px] uppercase tracking-widest opacity-30 mt-2">
                 Campus Handover • Verified Student • Safe
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* ======================= MOBILE VIEW ======================= */}
+      {/* ========================================================= */}
+
+      <div className="block md:hidden pb-24 relative z-10 w-full overflow-x-hidden">
+        {/* Mobile Main Image with overlaid topnav */}
+        <div className="relative w-full aspect-[4/5] bg-zinc-900 rounded-b-3xl overflow-hidden shadow-2xl shadow-black">
+          <img
+            src={product.images && product.images.length > 0 ? product.images[activeImg] : (product.image || '/placeholder.jpg')}
+            alt={product.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Dark Gradient Overlay */}
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
+
+          {/* Top Badges */}
+          <div className="absolute top-24 left-4 flex gap-2 z-10">
+            {product.isVerified && (
+              <span className="bg-black/80 backdrop-blur text-white px-2 py-1 rounded-md text-[10px] font-bold border border-white/10 flex items-center gap-1">
+                <Shield /> Verified
+              </span>
+            )}
+            {product.isTrending && (
+              <span className="bg-[#FF5733] text-white px-2 py-1 rounded-md text-[10px] font-bold shadow-lg">
+                🔥 Trending
+              </span>
+            )}
+          </div>
+
+          {/* Mobile Breadcrumb overlaying bottom of image */}
+          <div className="absolute bottom-4 left-4 text-[10px] font-bold opacity-80 uppercase tracking-widest flex items-center gap-2 z-10">
+            Marketplace <span className="opacity-40">/</span> <span className="text-[#00D9FF] drop-shadow-md">{product.category}</span>
+          </div>
+        </div>
+
+        {/* Mobile Content Wrapper */}
+        <div className="px-5 pt-6 pb-8 space-y-6">
+
+          {/* Title & Price Row */}
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-extrabold leading-tight tracking-tight mb-2">
+                {product.title}
+              </h1>
+              <span className="inline-block px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border border-white/20" style={{ color: product.accent || '#00D9FF', borderColor: `${product.accent || '#00D9FF'}40` }}>
+                {product.condition}
+              </span>
+            </div>
+            <div className="text-right flex-shrink-0 bg-white/5 p-3 rounded-2xl border border-white/10">
+              <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold mb-1">Asking</div>
+              <div className="text-3xl font-black">
+                {product.type === 'free' ? (
+                  <span className="text-green-400">FREE</span>
+                ) : product.type === 'barter' ? (
+                  <span className="text-purple-400 text-xl">BARTER</span>
+                ) : (
+                  <>
+                    <span className="text-sm opacity-50 align-top mr-0.5">₹</span>
+                    {product.price}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Time / Views Row */}
+          <div className="flex gap-4 opacity-70 text-[11px] font-mono border-b border-white/10 pb-6">
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3 h-3" /> Posted {product.timeAgo}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Eye className="w-3 h-3" /> {product.views} views
+            </span>
+          </div>
+
+          {/* Seller Info Row (Compact Mobile) */}
+          <div
+            className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 active:scale-[0.98] transition-all"
+            onClick={() => {
+              const sellerId = typeof product.seller === 'object' ? product.seller?._id : null;
+              if (sellerId) navigate(`/seller/${sellerId}`);
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 flex-shrink-0">
+                {typeof product.seller === 'object' && product.seller.profilePicture ? (
+                  <img src={product.seller.profilePicture} alt="seller" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-tr from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-lg font-bold">
+                    {typeof product.seller === 'object' ? product.seller.fullName?.charAt(0).toUpperCase() : (product.user?.charAt(0) || 'U')}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="font-bold text-sm text-[#00D9FF]">{typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}</div>
+                <div className="text-[10px] opacity-50 mt-0.5 uppercase tracking-wide">
+                  {product.branch?.toUpperCase()} • {product.year}th Year
+                </div>
+              </div>
+            </div>
+            <div className="text-xs font-bold px-2 py-1 bg-white/10 rounded-lg">
+              {product.sellerRating || '⭐ New'}
+            </div>
+          </div>
+
+          {/* Analysis / Description */}
+          <div className="mt-8">
+            <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]"></span> Analysis
+            </h3>
+            <p className="text-[15px] font-light leading-relaxed opacity-90 text-white/90 px-1">
+              {product.description}
+            </p>
+          </div>
+
+          {/* Specs */}
+          {product.specs && (
+            <div className="mt-8 bg-white/5 rounded-2xl p-4 border border-white/10">
+              <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <GridIcon /> Specs
+              </h3>
+              <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                {product.specs.map((s, i) => (
+                  <div key={i} className="flex flex-col">
+                    <span className="text-[9px] uppercase tracking-widest text-[#00D9FF] mb-1">
+                      {s.label}
+                    </span>
+                    <span className="font-bold text-sm text-white/90">{s.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
+
+          {/* Mobile Actions Overlay (Sticky Bottom) */}
+          <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/10 p-4 z-50">
+            {!isOwner ? (
+              <div className="flex gap-2">
+                <button
+                  className="w-14 h-14 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
+                  onClick={(e) => {
+                    const el = e.currentTarget.querySelector('svg');
+                    el.classList.remove('animate-heart-pop');
+                    void el.offsetWidth;
+                    el.classList.add('animate-heart-pop');
+                    handleSaveToggle();
+                  }}
+                >
+                  <Heart filled={saved} style={{ color: saved ? '#EF4444' : 'white' }} />
+                </button>
+
+                <button className="h-14 flex-1 bg-white text-black font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm" onClick={handleContactSeller} disabled={chatLoading}>
+                  <Message /> {chatLoading ? 'Loading…' : 'Chat'}
+                </button>
+
+                <button className="h-14 flex-1 bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm shadow-lg shadow-[#00D9FF]/20" onClick={() => setShowOfferModal(true)}>
+                  <SparklesIcon /> Offer
+                </button>
+              </div>
+            ) : (
+              <div className="w-full text-center p-4 bg-white/5 rounded-2xl border border-white/10 text-white/50 text-sm font-bold flex items-center justify-center gap-2">
+                <Shield size={18} /> You own this listing
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
       {/* ── Make Offer Modal ── */}
-      {showOfferModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !offerSubmitting && setShowOfferModal(false)}></div>
-          <div className="relative w-full max-w-md bg-[#141414] border border-white/10 rounded-3xl p-8 shadow-2xl fade-in overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00D9FF] rounded-full blur-[80px] opacity-10"></div>
+      {
+        showOfferModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !offerSubmitting && setShowOfferModal(false)}></div>
+            <div className="relative w-full max-w-md bg-[#141414] border border-white/10 rounded-3xl p-8 shadow-2xl fade-in overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00D9FF] rounded-full blur-[80px] opacity-10"></div>
 
-            <h2 className="text-2xl font-black mb-1">Make an Offer</h2>
-            <p className="text-white/40 text-sm mb-6">Negotiate a fair price for this item.</p>
+              <h2 className="text-2xl font-black mb-1">Make an Offer</h2>
+              <p className="text-white/40 text-sm mb-6">Negotiate a fair price for this item.</p>
 
-            {offerSuccess ? (
-              <div className="py-8 text-center">
-                <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
-                  <Shield />
+              {offerSuccess ? (
+                <div className="py-8 text-center">
+                  <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
+                    <Shield />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Offer Sent Successfully!</h3>
+                  <p className="text-sm text-white/40">The seller will be notified of your offer.</p>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Offer Sent Successfully!</h3>
-                <p className="text-sm text-white/40">The seller will be notified of your offer.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleMakeOffer} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Proposed Price</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold">₹</span>
-                    <input
-                      type="number"
-                      required
-                      value={offerAmount}
-                      onChange={(e) => setOfferAmount(e.target.value)}
-                      placeholder={product.price}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-8 pr-4 text-white font-bold focus:border-[#00D9FF] outline-none transition-all"
+              ) : (
+                <form onSubmit={handleMakeOffer} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Proposed Price</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold">₹</span>
+                      <input
+                        type="number"
+                        required
+                        value={offerAmount}
+                        onChange={(e) => setOfferAmount(e.target.value)}
+                        placeholder={product.price}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-8 pr-4 text-white font-bold focus:border-[#00D9FF] outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Message (Optional)</label>
+                    <textarea
+                      value={offerMessage}
+                      onChange={(e) => setOfferMessage(e.target.value)}
+                      placeholder="Hi, I'm interested and can meet today..."
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white text-sm focus:border-[#00D9FF] outline-none transition-all min-h-[100px] resize-none"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 ml-1">Message (Optional)</label>
-                  <textarea
-                    value={offerMessage}
-                    onChange={(e) => setOfferMessage(e.target.value)}
-                    placeholder="Hi, I'm interested and can meet today..."
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-white text-sm focus:border-[#00D9FF] outline-none transition-all min-h-[100px] resize-none"
-                  />
-                </div>
+                  {offerError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-medium">
+                      {offerError}
+                    </div>
+                  )}
 
-                {offerError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-medium">
-                    {offerError}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      disabled={offerSubmitting}
+                      onClick={() => setShowOfferModal(false)}
+                      className="flex-1 px-6 py-4 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={offerSubmitting || !offerAmount}
+                      className="flex-[2] btn-primary"
+                      style={{ borderRadius: '1rem', padding: '1rem' }}
+                    >
+                      {offerSubmitting ? 'Sending...' : 'Send Offer'}
+                    </button>
                   </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    disabled={offerSubmitting}
-                    onClick={() => setShowOfferModal(false)}
-                    className="flex-1 px-6 py-4 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={offerSubmitting || !offerAmount}
-                    className="flex-[2] btn-primary"
-                    style={{ borderRadius: '1rem', padding: '1rem' }}
-                  >
-                    {offerSubmitting ? 'Sending...' : 'Send Offer'}
-                  </button>
-                </div>
-              </form>
-            )}
+                </form>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </>
   );
 };
