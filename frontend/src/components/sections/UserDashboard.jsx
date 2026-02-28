@@ -916,10 +916,10 @@ const UserDashboard = () => {
       : '0.0';
     const healthyListings = listings.filter(l => l.status === 'active').length;
     return [
-      { icon: '📈', label: 'Sell-through rate', value: `${sellThrough}%`, sub: `${stats.soldListings}/${stats.totalListings} sold`, color: '#00D9FF' },
-      { icon: '👁', label: 'Avg views / listing', value: avgViews, sub: `${stats.totalViews} total views`, color: '#7C3AED' },
-      { icon: '🤍', label: 'Save rate', value: `${saveRate}%`, sub: `of viewers save`, color: '#F59E0B' },
-      { icon: '✅', label: 'Active listings', value: healthyListings, sub: `of ${stats.totalListings} total`, color: '#10B981' },
+      { label: 'Sell-through rate', value: `${sellThrough}%`, sub: `${stats.soldListings}/${stats.totalListings} sold`, color: '#00D9FF' },
+      { label: 'Avg views / listing', value: avgViews, sub: `${stats.totalViews} total views`, color: '#7C3AED' },
+      { label: 'Save rate', value: `${saveRate}%`, sub: `of viewers save`, color: '#F59E0B' },
+      { label: 'Active listings', value: healthyListings, sub: `of ${stats.totalListings} total`, color: '#10B981' },
     ];
   })();
 
