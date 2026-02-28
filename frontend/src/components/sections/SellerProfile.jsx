@@ -152,16 +152,16 @@ const MiniProductCard = ({ product, index }) => {
             </div>
 
             {/* Info */}
-            <div className="p-3">
-                <h4 className="text-white text-sm font-bold truncate group-hover:text-[#00D9FF] transition-colors">{product.title}</h4>
-                <div className="flex items-center justify-between mt-1.5">
-                    <span className="text-[10px] text-white/40 mono uppercase">{product.category}</span>
-                    <span className="text-[10px] text-white/30 mono">{getTimeAgo(product.createdAt)}</span>
+            <div className="p-2 sm:p-3">
+                <h4 className="text-white text-xs sm:text-sm font-bold truncate group-hover:text-[#00D9FF] transition-colors">{product.title}</h4>
+                <div className="flex items-center justify-between mt-1 sm:mt-1.5">
+                    <span className="text-[9px] sm:text-[10px] text-white/40 mono uppercase truncate pr-2">{product.category}</span>
+                    <span className="text-[8px] sm:text-[10px] text-white/30 mono whitespace-nowrap">{getTimeAgo(product.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-3 mt-2 text-[10px] text-white/30 mono">
+                <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] text-white/30 mono">
                     <span className="flex items-center gap-1"><EyeIcon />{product.views || 0}</span>
                     <span className="flex items-center gap-1"><HeartIcon />{product.saves || 0}</span>
-                    <span className="ml-auto px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px]">
+                    <span className="ml-auto px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[8px] sm:text-[9px] truncate max-w-[50px] sm:max-w-none">
                         {product.condition}
                     </span>
                 </div>
@@ -383,8 +383,20 @@ const SellerProfile = () => {
                     }}
                 />
 
+                {/* ── Background Blurred Avatar (Responsive) ── */}
+                {seller?.profilePicture && (
+                    <div className="absolute top-0 inset-x-0 h-[60vh] z-0 overflow-hidden pointer-events-none opacity-40 md:opacity-30">
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#050505] z-10" />
+                        <img
+                            src={seller.profilePicture}
+                            alt=""
+                            className="w-full h-full object-cover blur-3xl scale-125 opacity-50 mix-blend-screen"
+                        />
+                    </div>
+                )}
+
                 {/* ── Sticky Nav ── */}
-                <nav className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+                <nav className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-6 py-4">
                     <div className="max-w-5xl mx-auto flex items-center justify-between">
                         <button onClick={() => navigate(-1)} className="sp-back-btn">
                             <ArrowLeft /> Back
@@ -402,13 +414,13 @@ const SellerProfile = () => {
                 </nav>
 
                 {/* ── Main Content ── */}
-                <div className="max-w-5xl mx-auto px-6 py-12 relative z-10">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
 
                     {/* ── Hero / Profile Header ── */}
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-14">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 mb-10 sm:mb-14 relative z-10 pt-4 sm:pt-0">
                         {/* Avatar */}
-                        <div className="avatar-ring w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 h-animate h-animate-d1">
-                            <div className="avatar-inner w-full h-full">
+                        <div className="avatar-ring w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 h-animate h-animate-d1 shadow-[0_0_40px_rgba(0,217,255,0.2)] md:shadow-none">
+                            <div className="avatar-inner w-full h-full overflow-hidden">
                                 {seller?.profilePicture ? (
                                     <img src={seller.profilePicture} alt={seller.fullName} className="w-full h-full object-cover rounded-full" />
                                 ) : (
@@ -422,47 +434,56 @@ const SellerProfile = () => {
                         {/* Name + badges */}
                         <div className="flex flex-col items-center sm:items-start gap-3 text-center sm:text-left">
                             <div className="h-animate h-animate-d1">
-                                <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-none">
+                                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-none">
                                     {seller?.fullName || 'Unknown Seller'}
                                 </h1>
                             </div>
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 h-animate h-animate-d2">
                                 {seller?.isVerified && (
-                                    <span className="verified-badge">
+                                    <span className="verified-badge !px-2 md:!px-3 !py-1 text-[10px] md:text-[11px]">
                                         <ShieldCheck /> Verified Student
                                     </span>
                                 )}
-                                {seller?.enrollmentNumber && (
-                                    <span className="sp-mono text-[11px] text-white/30 tracking-wider">
+                                {seller?.enrollmentNumber ? (
+                                    <span className="sp-mono text-[10px] md:text-[11px] text-white/50 tracking-wider bg-white/10 px-2 py-0.5 rounded border border-white/10 uppercase flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]"></span>
                                         {seller.enrollmentNumber}
+                                    </span>
+                                ) : (
+                                    <span className="sp-mono text-[10px] md:text-[11px] text-white/20 tracking-wider bg-white/5 px-2 py-0.5 rounded border border-white/5 italic">
+                                        ID Not Provided
                                     </span>
                                 )}
                             </div>
 
                             {/* Bio Pills */}
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 h-animate h-animate-d3">
-                                {seller?.branch && (
-                                    <span className="bio-pill">🎓 {branchLabel}</span>
-                                )}
-                                {seller?.year && (
-                                    <span className="bio-pill">📅 Year {seller.year}</span>
-                                )}
-                                <span className="bio-pill">
+                            <div className="flex flex-wrap flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-2 sm:gap-3 h-animate h-animate-d3 mt-2 sm:mt-0 w-full">
+                                <div className="flex gap-2">
+                                    {seller?.branch && (
+                                        <span className="bio-pill !px-3 !py-1.5 md:!px-4 md:!py-2 text-[10px] md:text-xs text-white/80 bg-white/10 md:bg-white/5 border-white/20">🎓 {branchLabel}</span>
+                                    )}
+                                    {seller?.year && (
+                                        <span className="bio-pill !px-3 !py-1.5 md:!px-4 md:!py-2 text-[10px] md:text-xs text-white/80 bg-white/10 md:bg-white/5 border-white/20">📅 Year {seller.year}</span>
+                                    )}
+                                </div>
+                                <span className="text-[10px] md:text-xs text-white/50 opacity-80 sp-mono mt-1 sm:mt-0 flex items-center justify-center gap-1.5 sm:ml-2">
                                     <CalendarIcon />
-                                    Member since {formatMemberSince(seller?.createdAt)}
+                                    Joined {formatMemberSince(seller?.createdAt)}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="h-animate h-animate-d4 mb-12">
+                    <div className="h-animate h-animate-d4 mb-10 sm:mb-12">
                         <div className="section-title"><PackageIcon /> Seller Reputation</div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                             <StatCard icon={<StarIcon />} label="Reputation" value={seller?.rating != null ? `${seller.rating.toFixed(1)} / 5` : 'N/A'} accent="#F59E0B" delay={100} />
                             <StatCard icon={<ShieldCheck />} label="Verified" value={seller?.isVerified ? 'YES' : 'NO'} accent="#00D9FF" delay={150} />
                             <StatCard icon={<AwardIcon />} label="Sales" value={seller?.totalSales || 0} accent="#10B981" delay={200} />
                             <StatCard icon={<HeartIcon />} label="Reviews" value={seller?.reviewCount || 0} accent="#EC4899" delay={250} />
-                            <StatCard icon={<EyeIcon />} label="Profile Views" value={stats.totalViews} accent="#8B5CF6" delay={300} />
+                            <div className="col-span-2 lg:col-span-1">
+                                <StatCard icon={<EyeIcon />} label="Profile Views" value={stats.totalViews} accent="#8B5CF6" delay={300} />
+                            </div>
                         </div>
                     </div>
 
@@ -508,7 +529,7 @@ const SellerProfile = () => {
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                     {recentListings.map((p, i) => (
                                         <MiniProductCard key={p._id} product={p} index={i} />
                                     ))}
