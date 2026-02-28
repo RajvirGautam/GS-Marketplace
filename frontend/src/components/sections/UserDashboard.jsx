@@ -946,6 +946,9 @@ const UserDashboard = () => {
     );
   }
 
+  const mobileTabs = ['Overview', 'My Listings', 'My Deals', 'Saved Products', 'My Account'];
+  const activeMobileTab = mobileTabs.includes(sidebarActive) ? sidebarActive : 'Overview';
+
   return (
     <>
       <style>{`
@@ -1679,10 +1682,10 @@ const UserDashboard = () => {
         </div>
 
         {/* Mobile Content Area */}
-        <div style={{ flex: 1, padding: '16px 14px', overflowY: 'auto' }}>
+        <div style={{ padding: '16px 14px', paddingBottom: '100px' }}>
 
           {/* ── OVERVIEW TAB ── */}
-          {sidebarActive === 'Overview' && (
+          {activeMobileTab === 'Overview' && (
             <>
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Hey, {userName?.split(' ')[0]} 👋</div>
@@ -1732,7 +1735,7 @@ const UserDashboard = () => {
           )}
 
           {/* ── MY LISTINGS TAB ── */}
-          {sidebarActive === 'My Listings' && (
+          {activeMobileTab === 'My Listings' && (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>My Listings</div>
@@ -1774,7 +1777,7 @@ const UserDashboard = () => {
           )}
 
           {/* ── MY DEALS TAB ── */}
-          {sidebarActive === 'My Deals' && (
+          {activeMobileTab === 'My Deals' && (
             <>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>My Deals</div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -1844,7 +1847,7 @@ const UserDashboard = () => {
           )}
 
           {/* ── SAVED PRODUCTS TAB ── */}
-          {sidebarActive === 'Saved Products' && (
+          {activeMobileTab === 'Saved Products' && (
             <>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>Saved Products</div>
               {savedLoading ? (
@@ -1871,7 +1874,7 @@ const UserDashboard = () => {
           )}
 
           {/* ── MY ACCOUNT TAB ── */}
-          {sidebarActive === 'My Account' && <MyAccount />}
+          {activeMobileTab === 'My Account' && <MyAccount />}
         </div>
 
         {/* Fixed Bottom Tab Bar */}
@@ -1890,7 +1893,7 @@ const UserDashboard = () => {
                 if (item.tab === 'Saved Products') fetchSavedProducts();
                 if (item.tab === 'My Deals' || item.tab === 'Overview') { fetchDeals(); fetchOffers(); }
               }}
-              style={{ flex: 1, padding: '10px 4px 12px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, color: sidebarActive === item.tab ? '#00D9FF' : 'rgba(255,255,255,0.35)', transition: 'color 0.15s' }}
+              style={{ flex: 1, padding: '10px 4px 12px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, color: activeMobileTab === item.tab ? '#00D9FF' : 'rgba(255,255,255,0.35)', transition: 'color 0.15s' }}
             >
               <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</div>
               <span style={{ fontSize: 10, fontWeight: 600 }}>{item.label}</span>
