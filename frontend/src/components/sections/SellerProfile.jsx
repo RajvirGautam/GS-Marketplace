@@ -395,13 +395,13 @@ const SellerProfile = () => {
                     </div>
                 )}
 
-                {/* ── Sticky Nav ── */}
-                <nav className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-6 py-4">
+                {/* ── Sticky Nav (Glassmorphic) ── */}
+                <nav className="sticky top-0 z-40 bg-black/10 backdrop-blur-3xl border-b border-white/5 px-4 md:px-6 py-4">
                     <div className="max-w-5xl mx-auto flex items-center justify-between">
                         <button onClick={() => navigate(-1)} className="sp-back-btn">
                             <ArrowLeft /> Back
                         </button>
-                        <div className="sp-mono text-[11px] text-white/20 uppercase tracking-widest hidden sm:block">
+                        <div className="sp-mono text-[11px] text-white/50 uppercase tracking-widest hidden sm:block">
                             Seller Profile
                         </div>
                         <Link
