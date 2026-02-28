@@ -717,7 +717,7 @@ const ProductPage = () => {
           <button className="btn-glass shadow-lg">
             <ShareIcon />
           </button>
-          <button className="btn-glass shadow-lg group" onClick={(e) => {
+          <button className="btn-glass shadow-lg group hidden md:flex items-center" onClick={(e) => {
             const el = e.currentTarget.querySelector('svg');
             el.classList.remove('animate-heart-pop');
             void el.offsetWidth; // trigger reflow
@@ -730,7 +730,7 @@ const ProductPage = () => {
 
           {/* USER MENU INTEGRATION */}
           {user ? (
-            <div className="relative user-menu-container">
+            <div className="relative user-menu-container hidden md:block">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="btn-glass shadow-lg pl-2 pr-3"
@@ -770,7 +770,7 @@ const ProductPage = () => {
               )}
             </div>
           ) : (
-            <Link to="/login" className="btn-glass shadow-lg">
+            <Link to="/login" className="btn-glass shadow-lg hidden md:flex items-center">
               Login
             </Link>
           )}
@@ -985,7 +985,7 @@ const ProductPage = () => {
       {/* ======================= MOBILE VIEW ======================= */}
       {/* ========================================================= */}
 
-      <div className="block md:hidden pb-24 relative z-10 w-full overflow-x-hidden">
+      <div className="block md:hidden relative z-10 w-full">
         {/* Mobile Main Image with overlaid topnav */}
         <div className="relative w-full aspect-[4/5] bg-zinc-900 rounded-b-3xl overflow-hidden shadow-2xl shadow-black">
           <img
@@ -1116,39 +1116,40 @@ const ProductPage = () => {
             </div>
           )}
 
-          {/* Mobile Actions Overlay (Sticky Bottom) */}
-          <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/10 p-4 z-50">
-            {!isOwner ? (
-              <div className="flex gap-2">
-                <button
-                  className="w-14 h-14 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
-                  onClick={(e) => {
-                    const el = e.currentTarget.querySelector('svg');
-                    el.classList.remove('animate-heart-pop');
-                    void el.offsetWidth;
-                    el.classList.add('animate-heart-pop');
-                    handleSaveToggle();
-                  }}
-                >
-                  <Heart filled={saved} style={{ color: saved ? '#EF4444' : 'white' }} />
-                </button>
-
-                <button className="h-14 flex-1 bg-white text-black font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm" onClick={handleContactSeller} disabled={chatLoading}>
-                  <Message /> {chatLoading ? 'Loading…' : 'Chat'}
-                </button>
-
-                <button className="h-14 flex-1 bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm shadow-lg shadow-[#00D9FF]/20" onClick={() => setShowOfferModal(true)}>
-                  <SparklesIcon /> Offer
-                </button>
-              </div>
-            ) : (
-              <div className="w-full text-center p-4 bg-white/5 rounded-2xl border border-white/10 text-white/50 text-sm font-bold flex items-center justify-center gap-2">
-                <Shield size={18} /> You own this listing
-              </div>
-            )}
-          </div>
-
         </div>
+
+        {/* Mobile Actions Overlay (Sticky Bottom) */}
+        <div className="sticky bottom-0 w-full bg-[#0A0A0A] border-t border-white/10 p-4 z-50">
+          {!isOwner ? (
+            <div className="flex gap-2 max-w-lg mx-auto">
+              <button
+                className="w-14 h-14 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center active:scale-95 transition-all flex-shrink-0"
+                onClick={(e) => {
+                  const el = e.currentTarget.querySelector('svg');
+                  el.classList.remove('animate-heart-pop');
+                  void el.offsetWidth;
+                  el.classList.add('animate-heart-pop');
+                  handleSaveToggle();
+                }}
+              >
+                <Heart filled={saved} style={{ color: saved ? '#EF4444' : 'white' }} />
+              </button>
+
+              <button className="h-14 flex-1 bg-white text-black font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm" onClick={handleContactSeller} disabled={chatLoading}>
+                <Message /> {chatLoading ? 'Loading…' : 'Chat'}
+              </button>
+
+              <button className="h-14 flex-1 bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm shadow-lg shadow-[#00D9FF]/20" onClick={() => setShowOfferModal(true)}>
+                <SparklesIcon /> Offer
+              </button>
+            </div>
+          ) : (
+            <div className="w-full max-w-lg mx-auto text-center p-4 bg-white/5 rounded-2xl border border-white/10 text-white/50 text-sm font-bold flex items-center justify-center gap-2">
+              <Shield size={18} /> You own this listing
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* ── Make Offer Modal ── */}
