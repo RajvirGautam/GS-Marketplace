@@ -1697,630 +1697,791 @@ const UserDashboard = () => {
 
       <ConfettiOverlay active={showConfetti} />
 
-      <div className="dash-root" style={{ background: '#080808' }}>
-        <div
-          ref={glowRef}
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{ background: 'radial-gradient(800px circle at 50% 50%, rgba(0,217,255,0.06) 0%, transparent 50%)' }}
-        />
+      {/* ===================== MOBILE VIEW ===================== */}
+      <div className="md:hidden" style={{ fontFamily: 'Manrope, sans-serif', background: '#080808', color: '#E4E4E7', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: 76 }}>
+        <div className="noise-overlay" />
+        {/* Mobile Top Bar */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: '#fff' }}>S</div>
+            <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <NotificationBell dark={true} />
+            <button onClick={() => setSidebarActive('My Account')} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#0A0A0A', border: 'none', cursor: 'pointer', padding: 0 }}>
+              {user?.profilePicture
+                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : (user?.fullName?.charAt(0).toUpperCase() || 'U')
+              }
+            </button>
+          </div>
+        </div>
 
-        {/* NOISE & GRID */}
-        <div className="noise-overlay"></div>
-        <div className="grid-lines"></div>
+        {/* Mobile Content Area */}
+        <div style={{ flex: 1, padding: '16px 14px', overflowY: 'auto' }}>
 
-        {/* SIDEBAR */}
-        <aside className="sidebar">
-          <div className="sidebar-profile">
-            <div className="sidebar-profile flex items-center gap-3">
-
-
-              {/* Logo / Branding */}
-              <Link to="/">
-                <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">
-                    S
+          {/* ── OVERVIEW TAB ── */}
+          {sidebarActive === 'Overview' && (
+            <>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Hey, {userName?.split(' ')[0]} 👋</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Here's how your listings are doing.</div>
+              </div>
+              {/* 2x2 Stat Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                {[
+                  { label: 'Listings', value: stats.totalListings, sub: `${stats.activeListings} active`, color: '#00D9FF' },
+                  { label: 'Views', value: stats.totalViews, sub: `${stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg`, color: '#7C3AED' },
+                  { label: 'Saves', value: stats.totalSaves, sub: 'interested users', color: '#F59E0B' },
+                  { label: 'Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, sub: `${stats.soldListings} sold`, color: '#10B981' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 14px 12px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}80, transparent)` }} />
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label}</div>
+                    <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: s.color, marginTop: 2 }}>{s.sub}</div>
                   </div>
-                  <span>
-                    SGSITS
-                    <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
-                      .MKT
+                ))}
+              </div>
+              {/* Quick Stats Card */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 14 }}>Quick Insights</div>
+                {quickStatsItems.map((qs, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: i < quickStatsItems.length - 1 ? 12 : 0, marginBottom: i < quickStatsItems.length - 1 ? 12 : 0, borderBottom: i < quickStatsItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <span style={{ fontSize: 20 }}>{qs.icon}</span>
+                    <div style={{ flex: 1 }}><div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{qs.label}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{qs.sub}</div></div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: qs.color }}>{qs.value}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Recent Activity Card */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 14 }}>Recent Activity</div>
+                {activityItems.map((a, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', paddingBottom: i < activityItems.length - 1 ? 12 : 0, marginBottom: i < activityItems.length - 1 ? 12 : 0, borderBottom: i < activityItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: a.color, marginTop: 5, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}><div style={{ fontSize: 13, color: '#fff', lineHeight: 1.4 }}>{a.text}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{a.time}</div></div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setIsAddProductOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <PlusIcon /> + List a New Product
+              </button>
+            </>
+          )}
+
+          {/* ── MY LISTINGS TAB ── */}
+          {sidebarActive === 'My Listings' && (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>My Listings</div>
+                <button onClick={() => setIsAddProductOpen(true)} style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', border: 'none', borderRadius: 8, padding: '8px 14px', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><PlusIcon /> Add</button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, scrollbarWidth: 'none', marginBottom: 16 }}>
+                {['all', 'active', 'sold', 'pending'].map(tab => (
+                  <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${activeTab === tab ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.12)'}`, background: activeTab === tab ? 'rgba(0,217,255,0.12)' : 'transparent', color: activeTab === tab ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                  </button>
+                ))}
+              </div>
+              {filteredListings.length > 0 ? filteredListings.map(listing => (
+                <div key={listing._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, marginBottom: 10, display: 'flex', gap: 12 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={getProductImage(listing)} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{listing.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>{getStatusBadge(listing.status)}<span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span></div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 15 }}>{getPriceDisplay(listing)}</div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => handleViewProduct(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
+                        <button onClick={() => handleEditProduct(listing)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>Edit</button>
+                        <button onClick={() => handleDelete(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Del</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )) : (
+                <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}>
+                  <div style={{ fontSize: 40, marginBottom: 10 }}>📦</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                  <button onClick={() => setIsAddProductOpen(true)} style={{ marginTop: 8, padding: '10px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Add Listing</button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ── MY DEALS TAB ── */}
+          {sidebarActive === 'My Deals' && (
+            <>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>My Deals</div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                {[['negotiations', '🤝 Active'], ['confirmed', '✅ Confirmed']].map(([val, label]) => (
+                  <button key={val} onClick={() => setDealsSubTab(val)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1px solid ${dealsSubTab === val ? 'rgba(0,217,255,0.4)' : 'rgba(255,255,255,0.1)'}`, background: dealsSubTab === val ? 'rgba(0,217,255,0.1)' : 'rgba(255,255,255,0.03)', color: dealsSubTab === val ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>{label}</button>
+                ))}
+              </div>
+              {dealsLoading || offersLoading ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>Loading...</div>
+              ) : dealsSubTab === 'negotiations' ? (() => {
+                const pRec = offersReceived.filter(o => o.status === 'pending');
+                const pSent = offersSent.filter(o => o.status === 'pending');
+                const aDeal = deals.filter(d => d.dealStatus === 'active');
+                const all = [
+                  ...pRec.map(o => ({ ...o, _t: 'received' })),
+                  ...pSent.map(o => ({ ...o, _t: 'sent' })),
+                  ...aDeal.map(d => ({ ...d, _t: 'deal' })),
+                ];
+                if (!all.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>🤝</div><div style={{ fontSize: 14, marginTop: 10 }}>No active negotiations</div></div>;
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {all.map((item, i) => {
+                      const color = item._t === 'received' ? '#F59E0B' : item._t === 'sent' ? '#00D9FF' : '#10B981';
+                      const label = item._t === 'received' ? 'INCOMING' : item._t === 'sent' ? 'SENT' : 'ACTIVE';
+                      return (
+                        <div key={item._id + i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
+                          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
+                            <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={item.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product?.title}</div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{item._t === 'received' ? `From: ${item.buyer?.fullName}` : item._t === 'sent' ? `To: ${item.seller?.fullName}` : `via ${item.source}`}</div>
+                            </div>
+                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: '#00D9FF' }}>₹{item.offerPrice || item.agreedPrice}</div>
+                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, background: `${color}18`, color, border: `1px solid ${color}40`, display: 'inline-block', marginTop: 3 }}>{label}</span>
+                            </div>
+                          </div>
+                          {item._t === 'received' && (
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <button onClick={() => handleOfferStatus(item._id, 'accepted')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Accept</button>
+                              <button onClick={() => handleOfferStatus(item._id, 'rejected')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#EF4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✕ Reject</button>
+                            </div>
+                          )}
+                          {item._t === 'sent' && <button onClick={() => handleOfferStatus(item._id, 'cancelled')} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel Offer</button>}
+                          {item._t === 'deal' && (() => { const isSel = (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId; return isSel ? <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>📦 Mark as Handed Over</button> : <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(0,217,255,0.35)', background: 'rgba(0,217,255,0.07)', color: '#00D9FF', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Confirm Received</button>; })()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })() : (() => {
+                const confirmed = deals.filter(d => d.dealStatus === 'sold');
+                if (!confirmed.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>✅</div><div style={{ fontSize: 14, marginTop: 10 }}>No confirmed deals yet</div></div>;
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {confirmed.map(deal => (
+                      <div key={deal._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                        <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#00D9FF', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
+                        <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }}>SOLD</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
+          {/* ── SAVED PRODUCTS TAB ── */}
+          {sidebarActive === 'Saved Products' && (
+            <>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>Saved Products</div>
+              {savedLoading ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>Loading...</div>
+              ) : savedProducts.length > 0 ? savedProducts.map(item => (
+                <div key={item._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, marginBottom: 10, display: 'flex', gap: 12 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={getProductImage(item)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{item.title}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{item.category} · {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 15 }}>{getPriceDisplay(item)}</div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => handleViewProduct(item._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
+                        <button onClick={async () => { try { const res = await productAPI.toggleSave(item._id); if (res.success && !res.saved) { setSavedProducts(prev => prev.filter(p => p._id !== item._id)); toggleSavedId(item._id); } } catch (e) { } }} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Unsave</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )) : (
+                <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40, marginBottom: 10 }}>🤍</div><div style={{ fontSize: 14, fontWeight: 600 }}>No saved products yet</div><button onClick={() => navigate('/marketplace')} style={{ marginTop: 14, padding: '10px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Browse Marketplace</button></div>
+              )}
+            </>
+          )}
+
+          {/* ── MY ACCOUNT TAB ── */}
+          {sidebarActive === 'My Account' && <MyAccount />}
+        </div>
+
+        {/* Fixed Bottom Tab Bar */}
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(8,8,8,0.96)', backdropFilter: 'blur(24px)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'stretch', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          {[
+            { label: 'Overview', icon: <HomeIcon />, tab: 'Overview' },
+            { label: 'Listings', icon: <PackageIcon />, tab: 'My Listings' },
+            { label: 'Deals', icon: <TrendingIcon />, tab: 'My Deals' },
+            { label: 'Saved', icon: <HeartFilledIcon />, tab: 'Saved Products' },
+            { label: 'Account', icon: <UsersIcon />, tab: 'My Account' },
+          ].map(item => (
+            <button
+              key={item.tab}
+              onClick={() => {
+                setSidebarActive(item.tab);
+                if (item.tab === 'Saved Products') fetchSavedProducts();
+                if (item.tab === 'My Deals' || item.tab === 'Overview') { fetchDeals(); fetchOffers(); }
+              }}
+              style={{ flex: 1, padding: '10px 4px 12px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, color: sidebarActive === item.tab ? '#00D9FF' : 'rgba(255,255,255,0.35)', transition: 'color 0.15s' }}
+            >
+              <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</div>
+              <span style={{ fontSize: 10, fontWeight: 600 }}>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* =================== END MOBILE VIEW =================== */}
+
+      {/* =================== DESKTOP VIEW =================== */}
+      <div className="hidden md:flex w-full">
+        <div className="dash-root" style={{ background: '#080808', width: '100%' }}>
+          <div
+            ref={glowRef}
+            className="fixed inset-0 pointer-events-none z-0"
+            style={{ background: 'radial-gradient(800px circle at 50% 50%, rgba(0,217,255,0.06) 0%, transparent 50%)' }}
+          />
+
+          {/* NOISE & GRID */}
+          <div className="noise-overlay"></div>
+          <div className="grid-lines"></div>
+
+          {/* SIDEBAR */}
+          <aside className="sidebar">
+            <div className="sidebar-profile">
+              <div className="sidebar-profile flex items-center gap-3">
+
+
+                {/* Logo / Branding */}
+                <Link to="/">
+                  <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">
+                      S
+                    </div>
+                    <span>
+                      SGSITS
+                      <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
+                        .MKT
+                      </span>
                     </span>
-                  </span>
-                </div>
+                  </div>
+                </Link>
+
+              </div>
+            </div>
+
+            <div className="sidebar-section-label">Dashboards</div>
+            {sidebarDashItems.map(item => (
+              <button
+                key={item.label}
+                className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
+                onClick={() => {
+                  setSidebarActive(item.label);
+                  if (item.action) item.action();
+                }}
+              >
+                {item.icon}
+                {item.label}
+                {item.label !== 'Overview' && <ChevronRight />}
+              </button>
+            ))}
+
+            <div style={{ height: 20 }} />
+            <div className="sidebar-section-label">Settings</div>
+            {sidebarSettItems.map(item => (
+              <button
+                key={item.label}
+                className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
+                onClick={() => {
+                  setSidebarActive(item.label);
+                  if (item.action) item.action();
+                }}
+              >
+                {item.icon}
+                {item.label}
+                <ChevronRight />
+              </button>
+            ))}
+
+            <div className="sidebar-spacer" />
+            <div className="sidebar-brand">
+              <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, color: '#fff' }}>S</div>
+                <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
               </Link>
-
             </div>
-          </div>
+          </aside>
 
-          <div className="sidebar-section-label">Dashboards</div>
-          {sidebarDashItems.map(item => (
-            <button
-              key={item.label}
-              className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
-              onClick={() => {
-                setSidebarActive(item.label);
-                if (item.action) item.action();
-              }}
-            >
-              {item.icon}
-              {item.label}
-              {item.label !== 'Overview' && <ChevronRight />}
-            </button>
-          ))}
+          {/* MAIN AREA */}
+          <div className="main-area">
+            {/* TOP BAR */}
+            <header className="topbar">
+              <div className="topbar-breadcrumb">
 
-          <div style={{ height: 20 }} />
-          <div className="sidebar-section-label">Settings</div>
-          {sidebarSettItems.map(item => (
-            <button
-              key={item.label}
-              className={`sidebar-item ${sidebarActive === item.label ? 'active' : ''}`}
-              onClick={() => {
-                setSidebarActive(item.label);
-                if (item.action) item.action();
-              }}
-            >
-              {item.icon}
-              {item.label}
-              <ChevronRight />
-            </button>
-          ))}
-
-          <div className="sidebar-spacer" />
-          <div className="sidebar-brand">
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, color: '#fff' }}>S</div>
-              <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
-            </Link>
-          </div>
-        </aside>
-
-        {/* MAIN AREA */}
-        <div className="main-area">
-          {/* TOP BAR */}
-          <header className="topbar">
-            <div className="topbar-breadcrumb">
-
-              <span>Dashboard /</span>
-              <span className="current">Overview</span>
-            </div>
-            <div className="topbar-actions">
-              <button className="topbar-icon-btn" title="Dark Mode"><MoonIcon /></button>
-              <NotificationBell dark={true} />
-              <button className="topbar-icon-btn" title="Language"><GlobeIcon /></button>
-              <button
-                style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
-                onClick={() => setIsAddProductOpen(true)}
-                title="List a Product"
-              >
-                <PlusIcon /> List Product
-              </button>
-              {/* User avatar + name in topbar */}
-              <button
-                onClick={() => setSidebarActive('My Account')}
-                style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '6px 12px 6px 6px', cursor: 'pointer' }}
-                title="My Account"
-              >
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#0A0A0A' }}>
-                  {user?.profilePicture
-                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : (user?.fullName?.charAt(0).toUpperCase() || 'U')
-                  }
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{userName?.split(' ')[0]}</span>
-              </button>
-            </div>
-          </header>
-
-          <div className="content-wrapper">
-            {/* CENTER CONTENT */}
-            <div className="content-main">
-              {sidebarActive === 'My Listings' ? (
-                /* ── MY LISTINGS FULL CRUD VIEW ── */
-                <>
-                  <div className="overview-header">
-                    <div>
-                      <h1>My Listings</h1>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                        {stats.totalListings} total · {stats.activeListings} active · {stats.soldListings} sold
-                      </div>
-                    </div>
-                    <button
-                      className="pricing-cta"
-                      style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
-                      onClick={() => setIsAddProductOpen(true)}
-                    >
-                      <PlusIcon /> Add New Listing
-                    </button>
+                <span>Dashboard /</span>
+                <span className="current">Overview</span>
+              </div>
+              <div className="topbar-actions">
+                <button className="topbar-icon-btn" title="Dark Mode"><MoonIcon /></button>
+                <NotificationBell dark={true} />
+                <button className="topbar-icon-btn" title="Language"><GlobeIcon /></button>
+                <button
+                  style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  onClick={() => setIsAddProductOpen(true)}
+                  title="List a Product"
+                >
+                  <PlusIcon /> List Product
+                </button>
+                {/* User avatar + name in topbar */}
+                <button
+                  onClick={() => setSidebarActive('My Account')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '6px 12px 6px 6px', cursor: 'pointer' }}
+                  title="My Account"
+                >
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#0A0A0A' }}>
+                    {user?.profilePicture
+                      ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : (user?.fullName?.charAt(0).toUpperCase() || 'U')
+                    }
                   </div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{userName?.split(' ')[0]}</span>
+                </button>
+              </div>
+            </header>
 
-                  {/* QUICK STATS ROW */}
-                  <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
-                    {[
-                      { label: 'Total', value: stats.totalListings, color: '#fff' },
-                      { label: 'Active', value: stats.activeListings, color: '#00D9FF' },
-                      { label: 'Sold', value: stats.soldListings, color: '#10B981' },
-                      { label: 'Pending', value: stats.pendingListings, color: '#F59E0B' },
-                    ].map(s => (
-                      <div className="stat-card" key={s.label}>
-                        <div className="stat-label">{s.label}</div>
-                        <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* FILTER TABS + LISTINGS GRID */}
-                  <div className="card" style={{ padding: 20 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                      <div className="listing-tabs" style={{ marginBottom: 0 }}>
-                        {['all', 'active', 'sold', 'pending'].map(tab => (
-                          <button
-                            key={tab}
-                            className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab)}
-                          >
-                            {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {filteredListings.length > 0 ? filteredListings.map((listing) => (
-                      <div className="listing-item" key={listing._id}>
-                        <div className="listing-img">
-                          <img src={getProductImage(listing)} alt={listing.title} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                              <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
-                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{listing.category || 'Uncategorised'}</div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {getStatusBadge(listing.status)}
-                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
-                              </div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                                👁 {listing.views || 0} views · 🤍 {listing.saves || 0} saves
-                              </div>
-                            </div>
-                          </div>
-                          <div className="listing-actions" style={{ marginTop: 10 }}>
-                            <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
-                            <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
-                            <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
-                            {listing.status === 'active' && (
-                              <button className="listing-action-btn" style={{ color: '#10B981', borderColor: 'rgba(16,185,129,0.3)' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
-                            )}
-                          </div>
+            <div className="content-wrapper">
+              {/* CENTER CONTENT */}
+              <div className="content-main">
+                {sidebarActive === 'My Listings' ? (
+                  /* ── MY LISTINGS FULL CRUD VIEW ── */
+                  <>
+                    <div className="overview-header">
+                      <div>
+                        <h1>My Listings</h1>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                          {stats.totalListings} total · {stats.activeListings} active · {stats.soldListings} sold
                         </div>
                       </div>
-                    )) : (
-                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                        <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>📦</div>
-                        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
-                        <div style={{ fontSize: 13, marginBottom: 20 }}>Start selling by adding your first product</div>
-                        <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>
-                          <PlusIcon /> Add Your First Listing
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : sidebarActive === 'My Deals' ? (
-                /* ── MY DEALS VIEW ── */
-                <>
-                  <div className="overview-header">
-                    <div>
-                      <h1>My Deals</h1>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                        Accepted negotiations and confirmed sales
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sub-tab pills */}
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                    {[['negotiations', '🤝 Negotiations'], ['confirmed', '✅ Confirmed Deals']].map(([key, label]) => (
                       <button
-                        key={key}
-                        onClick={() => setDealsSubTab(key)}
-                        style={{
-                          padding: '8px 20px',
-                          borderRadius: 30,
-                          border: `1.5px solid ${dealsSubTab === key ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                          background: dealsSubTab === key ? 'rgba(0,217,255,0.1)' : 'transparent',
-                          color: dealsSubTab === key ? '#00D9FF' : 'rgba(255,255,255,0.4)',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          fontFamily: 'inherit',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s',
-                        }}
+                        className="pricing-cta"
+                        style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+                        onClick={() => setIsAddProductOpen(true)}
                       >
-                        {label}
+                        <PlusIcon /> Add New Listing
                       </button>
-                    ))}
-                  </div>
-
-                  {(dealsLoading || offersLoading) ? (
-                    <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
-                      Loading...
                     </div>
-                  ) : (() => {
-                    // Negotiations sub-tab: pending offers + active deals
-                    if (dealsSubTab === 'negotiations') {
-                      // Pending offer cards the current user is involved in
-                      const pendingReceived = offersReceived.filter(o => o.status === 'pending');
-                      const pendingSent = offersSent.filter(o => o.status === 'pending');
-                      // Active deals (offer accepted, seller hasn't confirmed sold yet)
-                      const activeDeals = deals.filter(d => d.dealStatus === 'active');
 
-                      const hasAnything = pendingReceived.length > 0 || pendingSent.length > 0 || activeDeals.length > 0;
+                    {/* QUICK STATS ROW */}
+                    <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+                      {[
+                        { label: 'Total', value: stats.totalListings, color: '#fff' },
+                        { label: 'Active', value: stats.activeListings, color: '#00D9FF' },
+                        { label: 'Sold', value: stats.soldListings, color: '#10B981' },
+                        { label: 'Pending', value: stats.pendingListings, color: '#F59E0B' },
+                      ].map(s => (
+                        <div className="stat-card" key={s.label}>
+                          <div className="stat-label">{s.label}</div>
+                          <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
 
-                      if (!hasAnything) {
+                    {/* FILTER TABS + LISTINGS GRID */}
+                    <div className="card" style={{ padding: 20 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                        <div className="listing-tabs" style={{ marginBottom: 0 }}>
+                          {['all', 'active', 'sold', 'pending'].map(tab => (
+                            <button
+                              key={tab}
+                              className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
+                              onClick={() => setActiveTab(tab)}
+                            >
+                              {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {filteredListings.length > 0 ? filteredListings.map((listing) => (
+                        <div className="listing-item" key={listing._id}>
+                          <div className="listing-img">
+                            <img src={getProductImage(listing)} alt={listing.title} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{listing.category || 'Uncategorised'}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  {getStatusBadge(listing.status)}
+                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
+                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                                  👁 {listing.views || 0} views · 🤍 {listing.saves || 0} saves
+                                </div>
+                              </div>
+                            </div>
+                            <div className="listing-actions" style={{ marginTop: 10 }}>
+                              <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
+                              <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
+                              <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
+                              {listing.status === 'active' && (
+                                <button className="listing-action-btn" style={{ color: '#10B981', borderColor: 'rgba(16,185,129,0.3)' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>📦</div>
+                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                          <div style={{ fontSize: 13, marginBottom: 20 }}>Start selling by adding your first product</div>
+                          <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>
+                            <PlusIcon /> Add Your First Listing
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : sidebarActive === 'My Deals' ? (
+                  /* ── MY DEALS VIEW ── */
+                  <>
+                    <div className="overview-header">
+                      <div>
+                        <h1>My Deals</h1>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                          Accepted negotiations and confirmed sales
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sub-tab pills */}
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                      {[['negotiations', '🤝 Negotiations'], ['confirmed', '✅ Confirmed Deals']].map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => setDealsSubTab(key)}
+                          style={{
+                            padding: '8px 20px',
+                            borderRadius: 30,
+                            border: `1.5px solid ${dealsSubTab === key ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                            background: dealsSubTab === key ? 'rgba(0,217,255,0.1)' : 'transparent',
+                            color: dealsSubTab === key ? '#00D9FF' : 'rgba(255,255,255,0.4)',
+                            fontWeight: 700,
+                            fontSize: 12,
+                            fontFamily: 'inherit',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {(dealsLoading || offersLoading) ? (
+                      <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                        Loading...
+                      </div>
+                    ) : (() => {
+                      // Negotiations sub-tab: pending offers + active deals
+                      if (dealsSubTab === 'negotiations') {
+                        // Pending offer cards the current user is involved in
+                        const pendingReceived = offersReceived.filter(o => o.status === 'pending');
+                        const pendingSent = offersSent.filter(o => o.status === 'pending');
+                        // Active deals (offer accepted, seller hasn't confirmed sold yet)
+                        const activeDeals = deals.filter(d => d.dealStatus === 'active');
+
+                        const hasAnything = pendingReceived.length > 0 || pendingSent.length > 0 || activeDeals.length > 0;
+
+                        if (!hasAnything) {
+                          return (
+                            <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                              <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤝</div>
+                              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No negotiations yet</div>
+                              <div style={{ fontSize: 13 }}>Make or receive an offer to start negotiating</div>
+                            </div>
+                          );
+                        }
+
                         return (
-                          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤝</div>
-                            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No negotiations yet</div>
-                            <div style={{ fontSize: 13 }}>Make or receive an offer to start negotiating</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+                            {/* ── PENDING OFFERS RECEIVED (seller) ── */}
+                            {pendingReceived.length > 0 && (
+                              <div className="card" style={{ padding: 20 }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                  Incoming Offers
+                                </div>
+                                {pendingReceived.map(offer => (
+                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                        <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                      </div>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                          Buyer: {offer.buyer?.fullName}{offer.buyer?.branch ? ` · ${offer.buyer.branch.toUpperCase()}` : ''}
+                                        </div>
+                                        {offer.message && (
+                                          <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', padding: '4px 8px', borderRadius: 5 }}>
+                                            "{offer.message}"
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                        {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
+                                      </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                      <button
+                                        className="listing-action-btn"
+                                        style={{ padding: '6px 14px', fontSize: 11, borderColor: 'rgba(16,185,129,0.4)', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
+                                        onClick={() => handleOfferStatus(offer._id, 'accepted')}
+                                      >
+                                        ✓ Accept
+                                      </button>
+                                      <button
+                                        className="listing-action-btn del"
+                                        style={{ padding: '6px 14px', fontSize: 11 }}
+                                        onClick={() => handleOfferStatus(offer._id, 'rejected')}
+                                      >
+                                        ✕ Reject
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* ── PENDING OFFERS SENT (buyer) ── */}
+                            {pendingSent.length > 0 && (
+                              <div className="card" style={{ padding: 20 }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                  Offers You Sent
+                                </div>
+                                {pendingSent.map(offer => (
+                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                        <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                      </div>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                          Seller: {offer.seller?.fullName}
+                                        </div>
+                                      </div>
+                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                        {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
+                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
+                                      </div>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                      <button
+                                        className="listing-action-btn"
+                                        style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', borderColor: 'rgba(239,68,68,0.3)' }}
+                                        onClick={() => handleOfferStatus(offer._id, 'cancelled')}
+                                      >
+                                        Cancel Offer
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* ── ACCEPTED DEALS (awaiting seller confirm) ── */}
+                            {activeDeals.length > 0 && (
+                              <div className="card" style={{ padding: 20 }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                                  Accepted — Awaiting Handoff
+                                </div>
+                                {activeDeals.map((deal) => {
+                                  const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                                  const isSeller = sellerId?.toString() === currentUserId;
+                                  const otherParty = isSeller ? deal.buyer : deal.seller;
+                                  return (
+                                    <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                        <div className="listing-img" style={{ width: 52, height: 52 }}>
+                                          <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{deal.product?.title}</div>
+                                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                            {isSeller
+                                              ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
+                                              : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
+                                            {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+                                          </div>
+                                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>via {deal.source === 'chat' ? 'Chat' : 'Offer'}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                          <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                          {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</div>
+                                          )}
+                                          <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
+                                        </div>
+                                      </div>
+                                      {/* Seller: Mark as Handed Over */}
+                                      {isSeller && (
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '11px 14px' }}>
+                                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                            Ready to hand over the item?
+                                          </div>
+                                          <button
+                                            onClick={() => handleConfirmSold(deal._id)}
+                                            style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                          >
+                                            📦 Handed Over
+                                          </button>
+                                        </div>
+                                      )}
+                                      {/* Buyer: Mark as Received */}
+                                      {!isSeller && (
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)', borderRadius: 8, padding: '11px 14px' }}>
+                                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                            Got the item? Confirm receipt here.
+                                          </div>
+                                          <button
+                                            onClick={() => handleConfirmSold(deal._id)}
+                                            style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(0,217,255,0.4)', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                          >
+                                            ✓ Received Item
+                                          </button>
+                                        </div>
+                                      )}
+
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
                           </div>
                         );
                       }
 
-                      return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-                          {/* ── PENDING OFFERS RECEIVED (seller) ── */}
-                          {pendingReceived.length > 0 && (
-                            <div className="card" style={{ padding: 20 }}>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
-                                Incoming Offers
-                              </div>
-                              {pendingReceived.map(offer => (
-                                <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
-                                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                    <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                      <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                      <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
-                                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                        Buyer: {offer.buyer?.fullName}{offer.buyer?.branch ? ` · ${offer.buyer.branch.toUpperCase()}` : ''}
-                                      </div>
-                                      {offer.message && (
-                                        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', padding: '4px 8px', borderRadius: 5 }}>
-                                          "{offer.message}"
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                      <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
-                                      {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
-                                    </div>
-                                  </div>
-                                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                                    <button
-                                      className="listing-action-btn"
-                                      style={{ padding: '6px 14px', fontSize: 11, borderColor: 'rgba(16,185,129,0.4)', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
-                                      onClick={() => handleOfferStatus(offer._id, 'accepted')}
-                                    >
-                                      ✓ Accept
-                                    </button>
-                                    <button
-                                      className="listing-action-btn del"
-                                      style={{ padding: '6px 14px', fontSize: 11 }}
-                                      onClick={() => handleOfferStatus(offer._id, 'rejected')}
-                                    >
-                                      ✕ Reject
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* ── PENDING OFFERS SENT (buyer) ── */}
-                          {pendingSent.length > 0 && (
-                            <div className="card" style={{ padding: 20 }}>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
-                                Offers You Sent
-                              </div>
-                              {pendingSent.map(offer => (
-                                <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
-                                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                    <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                      <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                      <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
-                                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                        Seller: {offer.seller?.fullName}
-                                      </div>
-                                    </div>
-                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                      <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
-                                      {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
-                                      <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button
-                                      className="listing-action-btn"
-                                      style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', borderColor: 'rgba(239,68,68,0.3)' }}
-                                      onClick={() => handleOfferStatus(offer._id, 'cancelled')}
-                                    >
-                                      Cancel Offer
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* ── ACCEPTED DEALS (awaiting seller confirm) ── */}
-                          {activeDeals.length > 0 && (
-                            <div className="card" style={{ padding: 20 }}>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
-                                Accepted — Awaiting Handoff
-                              </div>
-                              {activeDeals.map((deal) => {
-                                const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
-                                const isSeller = sellerId?.toString() === currentUserId;
-                                const otherParty = isSeller ? deal.buyer : deal.seller;
-                                return (
-                                  <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
-                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                        <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                      </div>
-                                      <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{deal.product?.title}</div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                          {isSeller
-                                            ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
-                                            : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
-                                          {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
-                                        </div>
-                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>via {deal.source === 'chat' ? 'Chat' : 'Offer'}</div>
-                                      </div>
-                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
-                                        {deal.product?.price && deal.agreedPrice !== deal.product.price && (
-                                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</div>
-                                        )}
-                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
-                                      </div>
-                                    </div>
-                                    {/* Seller: Mark as Handed Over */}
-                                    {isSeller && (
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '11px 14px' }}>
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                          Ready to hand over the item?
-                                        </div>
-                                        <button
-                                          onClick={() => handleConfirmSold(deal._id)}
-                                          style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                                        >
-                                          📦 Handed Over
-                                        </button>
-                                      </div>
-                                    )}
-                                    {/* Buyer: Mark as Received */}
-                                    {!isSeller && (
-                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)', borderRadius: 8, padding: '11px 14px' }}>
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                          Got the item? Confirm receipt here.
-                                        </div>
-                                        <button
-                                          onClick={() => handleConfirmSold(deal._id)}
-                                          style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(0,217,255,0.4)', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                                        >
-                                          ✓ Received Item
-                                        </button>
-                                      </div>
-                                    )}
-
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        </div>
-                      );
-                    }
-
-                    // ── CONFIRMED DEALS sub-tab ──
-                    const confirmedDeals = deals.filter(d => d.dealStatus === 'sold');
-                    if (confirmedDeals.length === 0) {
-                      return (
-                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>✅</div>
-                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No confirmed deals yet</div>
-                          <div style={{ fontSize: 13 }}>Deals move here once the seller confirms them as sold</div>
-                        </div>
-                      );
-                    }
-
-                    return confirmedDeals.map((deal) => {
-                      const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
-                      const userId = user?._id;
-                      const isSeller = sellerId?.toString() === currentUserId;
-                      const isBuyer = !isSeller;
-                      const otherParty = isSeller ? deal.buyer : deal.seller;
-                      const r = reviewState[deal._id] || {};
-
-                      return (
-                        <div
-                          key={deal._id}
-                          className="listing-item"
-                          style={{ flexDirection: 'column', gap: 12, padding: 16, marginBottom: 12, borderRadius: 12 }}
-                        >
-                          {/* Deal header row */}
-                          <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                            <div className="listing-img" style={{ width: 60, height: 60 }}>
-                              <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                  <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3 }}>
-                                    {deal.product?.title}
-                                  </div>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 5 }}>
-                                    {isSeller
-                                      ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
-                                      : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
-                                    {typeof otherParty === 'object' && otherParty?.branch
-                                      ? ` · ${otherParty.branch.toUpperCase()}` : ''}
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span style={{
-                                      fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
-                                      textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px',
-                                      borderRadius: 4,
-                                      border: `1px solid ${deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.3)' : 'rgba(0,217,255,0.3)'}`,
-                                      background: deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.1)' : 'rgba(0,217,255,0.1)',
-                                      color: deal.dealStatus === 'sold' ? '#10B981' : '#00D9FF'
-                                    }}>
-                                      {deal.dealStatus === 'sold' ? 'SOLD' : 'ACTIVE'}
-                                    </span>
-                                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                                      via {deal.source === 'chat' ? 'Chat' : 'Offer'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                  <div style={{ fontSize: 18, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
-                                  {deal.product?.price && deal.agreedPrice !== deal.product.price && (
-                                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
-                                      ₹{deal.product.price}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                      // ── CONFIRMED DEALS sub-tab ──
+                      const confirmedDeals = deals.filter(d => d.dealStatus === 'sold');
+                      if (confirmedDeals.length === 0) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>✅</div>
+                            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No confirmed deals yet</div>
+                            <div style={{ fontSize: 13 }}>Deals move here once the seller confirms them as sold</div>
                           </div>
+                        );
+                      }
 
-                          {/* SELLER: Confirm as Sold button (Negotiations tab) */}
-                          {isSeller && deal.dealStatus === 'active' && (
-                            <div style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)',
-                              borderRadius: 8, padding: '10px 14px'
-                            }}>
-                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                Hand off the item? Confirm the sale to finalise.
+                      return confirmedDeals.map((deal) => {
+                        const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                        const userId = user?._id;
+                        const isSeller = sellerId?.toString() === currentUserId;
+                        const isBuyer = !isSeller;
+                        const otherParty = isSeller ? deal.buyer : deal.seller;
+                        const r = reviewState[deal._id] || {};
+
+                        return (
+                          <div
+                            key={deal._id}
+                            className="listing-item"
+                            style={{ flexDirection: 'column', gap: 12, padding: 16, marginBottom: 12, borderRadius: 12 }}
+                          >
+                            {/* Deal header row */}
+                            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                              <div className="listing-img" style={{ width: 60, height: 60 }}>
+                                <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
                               </div>
-                              <button
-                                onClick={() => handleConfirmSold(deal._id)}
-                                style={{
-                                  padding: '7px 16px', borderRadius: 6,
-                                  border: '1.5px solid rgba(16,185,129,0.5)',
-                                  background: 'rgba(16,185,129,0.15)', color: '#10B981',
-                                  fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                                  cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
-                                }}
-                              >
-                                ✓ Confirm as Sold
-                              </button>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                  <div>
+                                    <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3 }}>
+                                      {deal.product?.title}
+                                    </div>
+                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 5 }}>
+                                      {isSeller
+                                        ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
+                                        : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
+                                      {typeof otherParty === 'object' && otherParty?.branch
+                                        ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <span style={{
+                                        fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                                        textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px',
+                                        borderRadius: 4,
+                                        border: `1px solid ${deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.3)' : 'rgba(0,217,255,0.3)'}`,
+                                        background: deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.1)' : 'rgba(0,217,255,0.1)',
+                                        color: deal.dealStatus === 'sold' ? '#10B981' : '#00D9FF'
+                                      }}>
+                                        {deal.dealStatus === 'sold' ? 'SOLD' : 'ACTIVE'}
+                                      </span>
+                                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                                        via {deal.source === 'chat' ? 'Chat' : 'Offer'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                    <div style={{ fontSize: 18, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                    {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
+                                        ₹{deal.product.price}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          )}
 
-                          {/* BUYER: Review form or submitted review */}
-                          {isBuyer && deal.dealStatus === 'sold' && (
-                            deal.buyerReview?.submittedAt ? (
+                            {/* SELLER: Confirm as Sold button (Negotiations tab) */}
+                            {isSeller && deal.dealStatus === 'active' && (
                               <div style={{
-                                background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)',
                                 borderRadius: 8, padding: '10px 14px'
                               }}>
-                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the seller</div>
-                                <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
-                                  {[1, 2, 3, 4, 5].map(s => (
-                                    <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
-                                  ))}
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
+                                  Hand off the item? Confirm the sale to finalise.
                                 </div>
-                                {deal.buyerReview.comment && (
-                                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                    "{deal.buyerReview.comment}"
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div style={{
-                                background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
-                                borderRadius: 8, padding: '12px 14px'
-                              }}>
-                                <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                  ⭐ Rate the seller
-                                </div>
-                                <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
-                                  {[1, 2, 3, 4, 5].map(star => (
-                                    <button
-                                      key={star}
-                                      onClick={() => setReviewState(prev => ({
-                                        ...prev,
-                                        [deal._id]: { ...prev[deal._id], rating: star }
-                                      }))}
-                                      style={{
-                                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                                        fontSize: 24, lineHeight: 1,
-                                        color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
-                                        transition: 'color 0.15s'
-                                      }}
-                                    >
-                                      ★
-                                    </button>
-                                  ))}
-                                </div>
-                                <textarea
-                                  value={r.comment || ''}
-                                  onChange={(e) => setReviewState(prev => ({
-                                    ...prev,
-                                    [deal._id]: { ...prev[deal._id], comment: e.target.value }
-                                  }))}
-                                  placeholder="Share your experience (optional)..."
-                                  rows={2}
-                                  style={{
-                                    width: '100%', background: 'rgba(255,255,255,0.04)',
-                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                                    color: '#fff', fontSize: 12, padding: '8px 10px',
-                                    fontFamily: 'inherit', resize: 'none', outline: 'none',
-                                    marginBottom: 10
-                                  }}
-                                />
                                 <button
-                                  onClick={() => handleSubmitReview(deal._id)}
-                                  disabled={!r.rating || r.submitting}
+                                  onClick={() => handleConfirmSold(deal._id)}
                                   style={{
-                                    padding: '7px 18px', borderRadius: 6, border: 'none',
-                                    background: r.rating
-                                      ? 'linear-gradient(135deg, #7C3AED, #00D9FF)'
-                                      : 'rgba(255,255,255,0.08)',
-                                    color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
+                                    padding: '7px 16px', borderRadius: 6,
+                                    border: '1.5px solid rgba(16,185,129,0.5)',
+                                    background: 'rgba(16,185,129,0.15)', color: '#10B981',
                                     fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                                    cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
+                                    cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
                                   }}
                                 >
-                                  {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                  ✓ Confirm as Sold
                                 </button>
                               </div>
-                            )
-                          )}
+                            )}
 
-                          {/* SELLER: review form for buyer + view buyer's submitted review */}
-                          {isSeller && deal.dealStatus === 'sold' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                              {/* Buyer's review of seller */}
-                              {deal.buyerReview?.submittedAt && (
+                            {/* BUYER: Review form or submitted review */}
+                            {isBuyer && deal.dealStatus === 'sold' && (
+                              deal.buyerReview?.submittedAt ? (
                                 <div style={{
-                                  background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+                                  background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
                                   borderRadius: 8, padding: '10px 14px'
                                 }}>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review of you</div>
-                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the seller</div>
+                                  <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
                                     {[1, 2, 3, 4, 5].map(s => (
                                       <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
                                     ))}
@@ -2331,32 +2492,13 @@ const UserDashboard = () => {
                                     </div>
                                   )}
                                 </div>
-                              )}
-                              {/* Seller's review of buyer */}
-                              {deal.sellerReview?.submittedAt ? (
-                                <div style={{
-                                  background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
-                                  borderRadius: 8, padding: '10px 14px'
-                                }}>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the buyer</div>
-                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
-                                    {[1, 2, 3, 4, 5].map(s => (
-                                      <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
-                                    ))}
-                                  </div>
-                                  {deal.sellerReview.comment && (
-                                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                      "{deal.sellerReview.comment}"
-                                    </div>
-                                  )}
-                                </div>
                               ) : (
                                 <div style={{
-                                  background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+                                  background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
                                   borderRadius: 8, padding: '12px 14px'
                                 }}>
                                   <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                    ⭐ Rate the buyer
+                                    ⭐ Rate the seller
                                   </div>
                                   <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
                                     {[1, 2, 3, 4, 5].map(star => (
@@ -2383,7 +2525,7 @@ const UserDashboard = () => {
                                       ...prev,
                                       [deal._id]: { ...prev[deal._id], comment: e.target.value }
                                     }))}
-                                    placeholder="How was this buyer? (optional)"
+                                    placeholder="Share your experience (optional)..."
                                     rows={2}
                                     style={{
                                       width: '100%', background: 'rgba(255,255,255,0.04)',
@@ -2399,7 +2541,7 @@ const UserDashboard = () => {
                                     style={{
                                       padding: '7px 18px', borderRadius: 6, border: 'none',
                                       background: r.rating
-                                        ? 'linear-gradient(135deg, #10B981, #00D9FF)'
+                                        ? 'linear-gradient(135deg, #7C3AED, #00D9FF)'
                                         : 'rgba(255,255,255,0.08)',
                                       color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
                                       fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
@@ -2409,431 +2551,534 @@ const UserDashboard = () => {
                                     {r.submitting ? 'Submitting...' : 'Submit Review'}
                                   </button>
                                 </div>
-                              )}
-                            </div>
-                          )}
+                              )
+                            )}
 
-                          {/* DEAL HISTORY BUTTON */}
-                          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
-                            <button
-                              onClick={() => setDealHistoryOpen(deal)}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 6,
-                                padding: '7px 14px', borderRadius: 8,
-                                border: '1.5px solid rgba(0,217,255,0.25)',
-                                background: 'rgba(0,217,255,0.06)',
-                                color: '#00D9FF', fontFamily: 'inherit',
-                                fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                                transition: 'all 0.15s',
-                                letterSpacing: 0.4,
-                              }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.45)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.25)'; }}
-                            >
-                              📋 Deal History
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </>
-              ) : sidebarActive === 'Saved Products' ? (
-
-                /* ── SAVED PRODUCTS VIEW ── */
-                <>
-                  <div className="overview-header">
-                    <div>
-                      <h1>Saved Products</h1>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                        Products you've hearted across the marketplace
-                      </div>
-                    </div>
-                    <button
-                      className="pricing-cta"
-                      style={{ padding: '10px 20px', fontSize: 13 }}
-                      onClick={() => navigate('/marketplace')}
-                    >
-                      Browse Marketplace
-                    </button>
-                  </div>
-
-                  <div className="card" style={{ padding: 20 }}>
-                    {savedLoading ? (
-                      <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
-                        Loading saved products...
-                      </div>
-                    ) : savedProducts.length > 0 ? savedProducts.map((item) => (
-                      <div className="listing-item" key={item._id}>
-                        <div className="listing-img">
-                          <img src={getProductImage(item)} alt={item.title} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                              <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{item.title}</div>
-                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                {item.category} · by {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}
+                            {/* SELLER: review form for buyer + view buyer's submitted review */}
+                            {isSeller && deal.dealStatus === 'sold' && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {/* Buyer's review of seller */}
+                                {deal.buyerReview?.submittedAt && (
+                                  <div style={{
+                                    background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+                                    borderRadius: 8, padding: '10px 14px'
+                                  }}>
+                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review of you</div>
+                                    <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                      {[1, 2, 3, 4, 5].map(s => (
+                                        <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                      ))}
+                                    </div>
+                                    {deal.buyerReview.comment && (
+                                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                        "{deal.buyerReview.comment}"
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                {/* Seller's review of buyer */}
+                                {deal.sellerReview?.submittedAt ? (
+                                  <div style={{
+                                    background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
+                                    borderRadius: 8, padding: '10px 14px'
+                                  }}>
+                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the buyer</div>
+                                    <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                      {[1, 2, 3, 4, 5].map(s => (
+                                        <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                      ))}
+                                    </div>
+                                    {deal.sellerReview.comment && (
+                                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                        "{deal.sellerReview.comment}"
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div style={{
+                                    background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+                                    borderRadius: 8, padding: '12px 14px'
+                                  }}>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+                                      ⭐ Rate the buyer
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+                                      {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                          key={star}
+                                          onClick={() => setReviewState(prev => ({
+                                            ...prev,
+                                            [deal._id]: { ...prev[deal._id], rating: star }
+                                          }))}
+                                          style={{
+                                            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                                            fontSize: 24, lineHeight: 1,
+                                            color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
+                                            transition: 'color 0.15s'
+                                          }}
+                                        >
+                                          ★
+                                        </button>
+                                      ))}
+                                    </div>
+                                    <textarea
+                                      value={r.comment || ''}
+                                      onChange={(e) => setReviewState(prev => ({
+                                        ...prev,
+                                        [deal._id]: { ...prev[deal._id], comment: e.target.value }
+                                      }))}
+                                      placeholder="How was this buyer? (optional)"
+                                      rows={2}
+                                      style={{
+                                        width: '100%', background: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
+                                        color: '#fff', fontSize: 12, padding: '8px 10px',
+                                        fontFamily: 'inherit', resize: 'none', outline: 'none',
+                                        marginBottom: 10
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() => handleSubmitReview(deal._id)}
+                                      disabled={!r.rating || r.submitting}
+                                      style={{
+                                        padding: '7px 18px', borderRadius: 6, border: 'none',
+                                        background: r.rating
+                                          ? 'linear-gradient(135deg, #10B981, #00D9FF)'
+                                          : 'rgba(255,255,255,0.08)',
+                                        color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
+                                        fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
+                                        cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
+                                      }}
+                                    >
+                                      {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(item.createdAt)}</div>
-                            </div>
-                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                              <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(item)}</div>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                                {item.saves || 0} saves · {item.views || 0} views
-                              </div>
+                            )}
+
+                            {/* DEAL HISTORY BUTTON */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
+                              <button
+                                onClick={() => setDealHistoryOpen(deal)}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                                  padding: '7px 14px', borderRadius: 8,
+                                  border: '1.5px solid rgba(0,217,255,0.25)',
+                                  background: 'rgba(0,217,255,0.06)',
+                                  color: '#00D9FF', fontFamily: 'inherit',
+                                  fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                                  transition: 'all 0.15s',
+                                  letterSpacing: 0.4,
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.45)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.25)'; }}
+                              >
+                                📋 Deal History
+                              </button>
                             </div>
                           </div>
-                          <div className="listing-actions" style={{ marginTop: 10 }}>
-                            <button className="listing-action-btn" onClick={() => handleViewProduct(item._id)}>
-                              <EyeIcon /> VIEW
-                            </button>
-                            <button
-                              className="listing-action-btn del"
-                              style={{ color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
-                              onClick={async () => {
-                                try {
-                                  const res = await productAPI.toggleSave(item._id);
-                                  if (res.success && !res.saved) {
-                                    setSavedProducts(prev => prev.filter(p => p._id !== item._id));
-                                    toggleSavedId(item._id);
-                                  }
-                                } catch (e) { console.error(e); }
-                              }}
-                            >
-                              <HeartFilledIcon /> UNSAVE
-                            </button>
-                          </div>
+                        );
+                      });
+                    })()}
+                  </>
+                ) : sidebarActive === 'Saved Products' ? (
+
+                  /* ── SAVED PRODUCTS VIEW ── */
+                  <>
+                    <div className="overview-header">
+                      <div>
+                        <h1>Saved Products</h1>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                          Products you've hearted across the marketplace
                         </div>
                       </div>
-                    )) : (
-                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                        <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤍</div>
-                        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No saved products yet</div>
-                        <div style={{ fontSize: 13, marginBottom: 20 }}>Heart products in the marketplace to save them here</div>
-                        <button className="pricing-cta" onClick={() => navigate('/marketplace')}>
-                          Browse Marketplace
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : sidebarActive === 'My Account' ? (
-                /* ── MY ACCOUNT VIEW ── */
-                <MyAccount />
-              ) : (
-                /* ── OVERVIEW ── */
-                <>
-                  {/* OVERVIEW HEADER */}
-                  <div className="overview-header">
-                    <h1>Overview</h1>
+                      <button
+                        className="pricing-cta"
+                        style={{ padding: '10px 20px', fontSize: 13 }}
+                        onClick={() => navigate('/marketplace')}
+                      >
+                        Browse Marketplace
+                      </button>
+                    </div>
 
-                  </div>
-
-                  {/* STAT CARDS */}
-                  <div className="stat-row">
-                    <div className="stat-card">
-                      <div className="stat-label">Total Listings</div>
-                      <div className="stat-value">{stats.totalListings}</div>
-                      <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                        {stats.activeListings} active, {stats.soldListings} sold
-                      </div>
-                    </div>
-                    <div className="stat-card">
-                      <div className="stat-label">Total Views</div>
-                      <div className="stat-value">{stats.totalViews}</div>
-                      <div className="stat-change up">
-                        <ArrowUp color="#00D9FF" />
-                        {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per listing
-                      </div>
-                    </div>
-                    <div className="stat-card">
-                      <div className="stat-label">Total Saves</div>
-                      <div className="stat-value">{stats.totalSaves}</div>
-                      <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                        People interested
-                      </div>
-                    </div>
-                    <div className="stat-card">
-                      <div className="stat-label">Revenue</div>
-                      <div className="stat-value">₹{stats.totalRevenue.toLocaleString()}</div>
-                      <div className="stat-change up">
-                        <ArrowUp color="#00D9FF" /> {stats.soldListings} items sold
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SALES OVERVIEW + SIDE STATS */}
-                  <div className="mid-row">
-                    <div className="card">
-                      <div className="card-header">
-                        <span className="card-title">Category Distribution</span>
-                        <button style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}><MoreVert /></button>
-                      </div>
-                      <div className="sales-info">
-                        <div className="sales-icon-circle"><PackageIcon /></div>
-                        <div>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Total Listed Items</div>
-                          <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{stats.totalListings}</div>
+                    <div className="card" style={{ padding: 20 }}>
+                      {savedLoading ? (
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                          Loading saved products...
                         </div>
-                      </div>
-                      <div className="sales-content">
-                        <DonutChart data={donutData} size={170} />
-                        <div className="sales-legend" style={{ minWidth: 160 }}>
-                          {donutData.map((d, i) => (
-                            <div className="legend-item" key={i}>
-                              <span className="legend-dot" style={{ background: d.color }} />
-                              <span>{d.label}</span>
-                              <span className="amount">{d.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="side-stats">
-                      <div className="mini-stat-card">
-                        <div className="mini-stat-label">Active Listings</div>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                          <span className="mini-stat-value">{stats.activeListings}</span>
-                          <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
-                        </div>
-                        <div className="mini-stat-sub">Available now</div>
-                      </div>
-                      <div className="mini-stat-card">
-                        <div className="mini-stat-label">Pending Approval</div>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                          <span className="mini-stat-value">{stats.pendingListings}</span>
-                          <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
-                        </div>
-                        <div className="mini-stat-sub">Awaiting review</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PROFIT CHART + LISTINGS */}
-                  <div className="bottom-row" style={{ gridTemplateColumns: '2fr 3fr' }}>
-                    {/* TOTAL PROFIT */}
-                    <div className="profit-card">
-                      <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Engagement Growth</div>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Views + Saves per listing · chronological</div>
-                      </div>
-                      <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
-                        {stats.totalViews + stats.totalSaves} <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>interactions</span>
-                      </div>
-                      {engagementData.some(v => v > 0) ? (
-                        <MiniLineChart data={engagementData} width={260} height={90} color="#00D9FF" />
-                      ) : (
-                        <div style={{ height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
-                          Add listings to see your growth curve
-                        </div>
-                      )}
-                    </div>
-
-                    {/* MY LISTINGS */}
-                    <div className="card" style={{ maxHeight: 420, overflow: 'auto' }}>
-                      <div className="card-header">
-                        <span className="card-title">My Listings</span>
-                      </div>
-                      <div className="listing-tabs">
-                        {['all', 'active', 'sold', 'pending'].map(tab => (
-                          <button
-                            key={tab}
-                            className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab)}
-                          >
-                            {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
-                          </button>
-                        ))}
-                      </div>
-                      {filteredListings.length > 0 ? filteredListings.slice(0, 5).map((listing) => (
-                        <div className="listing-item" key={listing._id}>
+                      ) : savedProducts.length > 0 ? savedProducts.map((item) => (
+                        <div className="listing-item" key={item._id}>
                           <div className="listing-img">
-                            <img src={getProductImage(listing)} alt={listing.title} />
+                            <img src={getProductImage(item)} alt={item.title} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <div>
-                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  {getStatusBadge(listing.status)}
-                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{item.title}</div>
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                                  {item.category} · by {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}
+                                </div>
+                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(item.createdAt)}</div>
+                              </div>
+                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(item)}</div>
+                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                                  {item.saves || 0} saves · {item.views || 0} views
                                 </div>
                               </div>
-                              <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
-                              </div>
                             </div>
-                            <div className="listing-actions">
-                              <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
-                              <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
-                              <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DEL</button>
-                              {listing.status === 'active' && (
-                                <button className="listing-action-btn" onClick={() => handleMarkAsSold(listing._id)}>SOLD</button>
-                              )}
+                            <div className="listing-actions" style={{ marginTop: 10 }}>
+                              <button className="listing-action-btn" onClick={() => handleViewProduct(item._id)}>
+                                <EyeIcon /> VIEW
+                              </button>
+                              <button
+                                className="listing-action-btn del"
+                                style={{ color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                                onClick={async () => {
+                                  try {
+                                    const res = await productAPI.toggleSave(item._id);
+                                    if (res.success && !res.saved) {
+                                      setSavedProducts(prev => prev.filter(p => p._id !== item._id));
+                                      toggleSavedId(item._id);
+                                    }
+                                  } catch (e) { console.error(e); }
+                                }}
+                              >
+                                <HeartFilledIcon /> UNSAVE
+                              </button>
                             </div>
                           </div>
                         </div>
                       )) : (
-                        <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
-                          <div style={{ fontSize: 36, marginBottom: 8, opacity: 0.3 }}>📦</div>
-                          <div style={{ fontSize: 13 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤍</div>
+                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No saved products yet</div>
+                          <div style={{ fontSize: 13, marginBottom: 20 }}>Heart products in the marketplace to save them here</div>
+                          <button className="pricing-cta" onClick={() => navigate('/marketplace')}>
+                            Browse Marketplace
+                          </button>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </>
+                ) : sidebarActive === 'My Account' ? (
+                  /* ── MY ACCOUNT VIEW ── */
+                  <MyAccount />
+                ) : (
+                  /* ── OVERVIEW ── */
+                  <>
+                    {/* OVERVIEW HEADER */}
+                    <div className="overview-header">
+                      <h1>Overview</h1>
 
-                  {/* BOTTOM ROW: TOP PERFORMING + PREMIUM SELLER */}
-                  <div className="bottom-row">
-                    <div className="card">
-                      <div className="card-header">
-                        <span className="card-title">Top Performing</span>
-                        <button
-                          style={{ background: 'none', border: 'none', color: '#00D9FF', fontSize: 11, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
-                          onClick={() => setSidebarActive('My Listings')}
-                        >
-                          See All →
-                        </button>
+                    </div>
+
+                    {/* STAT CARDS */}
+                    <div className="stat-row">
+                      <div className="stat-card">
+                        <div className="stat-label">Total Listings</div>
+                        <div className="stat-value">{stats.totalListings}</div>
+                        <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          {stats.activeListings} active, {stats.soldListings} sold
+                        </div>
                       </div>
-                      {listings.length > 0 ? (() => {
-                        const maxViews = Math.max(...listings.map(l => l.views || 0), 1);
-                        return [...listings]
-                          .sort((a, b) => (b.views || 0) - (a.views || 0))
-                          .slice(0, 3)
-                          .map((l, i) => (
-                            <div key={l._id} style={{ marginBottom: 16 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                                  <span style={{ fontSize: 11, fontWeight: 800, color: ['#00D9FF', '#7C3AED', '#F59E0B'][i], flexShrink: 0 }}>#{i + 1}</span>
-                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
-                                </div>
-                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 8 }}>👁 {l.views || 0} · 🤍 {l.saves || 0}</span>
+                      <div className="stat-card">
+                        <div className="stat-label">Total Views</div>
+                        <div className="stat-value">{stats.totalViews}</div>
+                        <div className="stat-change up">
+                          <ArrowUp color="#00D9FF" />
+                          {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per listing
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-label">Total Saves</div>
+                        <div className="stat-value">{stats.totalSaves}</div>
+                        <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          People interested
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-label">Revenue</div>
+                        <div className="stat-value">₹{stats.totalRevenue.toLocaleString()}</div>
+                        <div className="stat-change up">
+                          <ArrowUp color="#00D9FF" /> {stats.soldListings} items sold
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SALES OVERVIEW + SIDE STATS */}
+                    <div className="mid-row">
+                      <div className="card">
+                        <div className="card-header">
+                          <span className="card-title">Category Distribution</span>
+                          <button style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}><MoreVert /></button>
+                        </div>
+                        <div className="sales-info">
+                          <div className="sales-icon-circle"><PackageIcon /></div>
+                          <div>
+                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Total Listed Items</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{stats.totalListings}</div>
+                          </div>
+                        </div>
+                        <div className="sales-content">
+                          <DonutChart data={donutData} size={170} />
+                          <div className="sales-legend" style={{ minWidth: 160 }}>
+                            {donutData.map((d, i) => (
+                              <div className="legend-item" key={i}>
+                                <span className="legend-dot" style={{ background: d.color }} />
+                                <span>{d.label}</span>
+                                <span className="amount">{d.value}</span>
                               </div>
-                              <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                                <div style={{
-                                  height: '100%',
-                                  width: `${Math.round(((l.views || 0) / maxViews) * 100)}%`,
-                                  background: `linear-gradient(90deg, ${['#00D9FF', '#7C3AED', '#F59E0B'][i]}, ${['#7C3AED', '#F59E0B', '#10B981'][i]})`,
-                                  borderRadius: 2,
-                                  transition: 'width 0.8s ease'
-                                }} />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="side-stats">
+                        <div className="mini-stat-card">
+                          <div className="mini-stat-label">Active Listings</div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <span className="mini-stat-value">{stats.activeListings}</span>
+                            <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
+                          </div>
+                          <div className="mini-stat-sub">Available now</div>
+                        </div>
+                        <div className="mini-stat-card">
+                          <div className="mini-stat-label">Pending Approval</div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <span className="mini-stat-value">{stats.pendingListings}</span>
+                            <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
+                          </div>
+                          <div className="mini-stat-sub">Awaiting review</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PROFIT CHART + LISTINGS */}
+                    <div className="bottom-row" style={{ gridTemplateColumns: '2fr 3fr' }}>
+                      {/* TOTAL PROFIT */}
+                      <div className="profit-card">
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Engagement Growth</div>
+                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>Views + Saves per listing · chronological</div>
+                        </div>
+                        <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 12 }}>
+                          {stats.totalViews + stats.totalSaves} <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>interactions</span>
+                        </div>
+                        {engagementData.some(v => v > 0) ? (
+                          <MiniLineChart data={engagementData} width={260} height={90} color="#00D9FF" />
+                        ) : (
+                          <div style={{ height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
+                            Add listings to see your growth curve
+                          </div>
+                        )}
+                      </div>
+
+                      {/* MY LISTINGS */}
+                      <div className="card" style={{ maxHeight: 420, overflow: 'auto' }}>
+                        <div className="card-header">
+                          <span className="card-title">My Listings</span>
+                        </div>
+                        <div className="listing-tabs">
+                          {['all', 'active', 'sold', 'pending'].map(tab => (
+                            <button
+                              key={tab}
+                              className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
+                              onClick={() => setActiveTab(tab)}
+                            >
+                              {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                            </button>
+                          ))}
+                        </div>
+                        {filteredListings.length > 0 ? filteredListings.slice(0, 5).map((listing) => (
+                          <div className="listing-item" key={listing._id}>
+                            <div className="listing-img">
+                              <img src={getProductImage(listing)} alt={listing.title} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                  <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    {getStatusBadge(listing.status)}
+                                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
+                                </div>
+                              </div>
+                              <div className="listing-actions">
+                                <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
+                                <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
+                                <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DEL</button>
+                                {listing.status === 'active' && (
+                                  <button className="listing-action-btn" onClick={() => handleMarkAsSold(listing._id)}>SOLD</button>
+                                )}
                               </div>
                             </div>
-                          ));
-                      })() : (
-                        <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
-                          No listings yet — add one to see top performers
+                          </div>
+                        )) : (
+                          <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
+                            <div style={{ fontSize: 36, marginBottom: 8, opacity: 0.3 }}>📦</div>
+                            <div style={{ fontSize: 13 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* BOTTOM ROW: TOP PERFORMING + PREMIUM SELLER */}
+                    <div className="bottom-row">
+                      <div className="card">
+                        <div className="card-header">
+                          <span className="card-title">Top Performing</span>
+                          <button
+                            style={{ background: 'none', border: 'none', color: '#00D9FF', fontSize: 11, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
+                            onClick={() => setSidebarActive('My Listings')}
+                          >
+                            See All →
+                          </button>
                         </div>
-                      )}
-                    </div>
-
-                    {/* PRICING */}
-                    <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <div className="pricing-badge">
-                        <ZapIcon /> Premium Seller
+                        {listings.length > 0 ? (() => {
+                          const maxViews = Math.max(...listings.map(l => l.views || 0), 1);
+                          return [...listings]
+                            .sort((a, b) => (b.views || 0) - (a.views || 0))
+                            .slice(0, 3)
+                            .map((l, i) => (
+                              <div key={l._id} style={{ marginBottom: 16 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 800, color: ['#00D9FF', '#7C3AED', '#F59E0B'][i], flexShrink: 0 }}>#{i + 1}</span>
+                                    <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
+                                  </div>
+                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 8 }}>👁 {l.views || 0} · 🤍 {l.saves || 0}</span>
+                                </div>
+                                <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                                  <div style={{
+                                    height: '100%',
+                                    width: `${Math.round(((l.views || 0) / maxViews) * 100)}%`,
+                                    background: `linear-gradient(90deg, ${['#00D9FF', '#7C3AED', '#F59E0B'][i]}, ${['#7C3AED', '#F59E0B', '#10B981'][i]})`,
+                                    borderRadius: 2,
+                                    transition: 'width 0.8s ease'
+                                  }} />
+                                </div>
+                              </div>
+                            ));
+                        })() : (
+                          <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+                            No listings yet — add one to see top performers
+                          </div>
+                        )}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                        <span className="pricing-amount">{stats.soldListings}</span>
-                        <span className="pricing-per">Items<br />Sold</span>
+
+                      {/* PRICING */}
+                      <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="pricing-badge">
+                          <ZapIcon /> Premium Seller
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                          <span className="pricing-amount">{stats.soldListings}</span>
+                          <span className="pricing-per">Items<br />Sold</span>
+                        </div>
+                        <div className="pricing-desc">
+                          Keep selling to unlock premium<br />features and seller badges 🚀
+                        </div>
+                        <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>Add New Product</button>
                       </div>
-                      <div className="pricing-desc">
-                        Keep selling to unlock premium<br />features and seller badges 🚀
+                    </div>
+                  </>
+                )}
+              </div >
+
+              {/* RIGHT PANEL */}
+              < div className="content-right" >
+                {/* ACTIVITY */}
+                < div className="right-section-title" > Activity</div >
+                {
+                  activityItems.map((n, i) => (
+                    <div className="notif-item" key={i}>
+                      <div className="notif-dot" style={{ background: n.color }} />
+                      <div>
+                        <div className="notif-text">{n.text}</div>
+                        <div className="notif-time">{n.time}</div>
                       </div>
-                      <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>Add New Product</button>
                     </div>
-                  </div>
-                </>
-              )}
-            </div >
+                  ))
+                }
 
-            {/* RIGHT PANEL */}
-            < div className="content-right" >
-              {/* ACTIVITY */}
-              < div className="right-section-title" > Activity</div >
-              {
-                activityItems.map((n, i) => (
-                  <div className="notif-item" key={i}>
-                    <div className="notif-dot" style={{ background: n.color }} />
-                    <div>
-                      <div className="notif-text">{n.text}</div>
-                      <div className="notif-time">{n.time}</div>
-                    </div>
-                  </div>
-                ))
-              }
+                < hr className="divider" />
 
-              < hr className="divider" />
-
-              {/* QUICK STATS */}
-              < div className="right-section-title" > Quick Stats</div >
-              {
-                quickStatsItems.map((a, i) => (
-                  <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
-                    <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
-                      {a.icon}
+                {/* QUICK STATS */}
+                < div className="right-section-title" > Quick Stats</div >
+                {
+                  quickStatsItems.map((a, i) => (
+                    <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
+                      <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
+                        {a.icon}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
+                        <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
+                        <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
-                      <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
-                      <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
-                    </div>
-                  </div>
-                ))
-              }
+                  ))
+                }
+              </div >
             </div >
           </div >
-        </div >
 
-        {/* DELETE MODAL */}
-        {
-          showDeleteModal && (
-            <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
-              <div className="modal-box" onClick={e => e.stopPropagation()}>
-                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Delete Listing?</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 }}>
-                  Are you sure you want to delete this listing? This action cannot be undone.
-                </p>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button
-                    onClick={() => setShowDeleteModal(false)}
-                    style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    style={{ flex: 1, padding: '10px', background: '#EF4444', border: 'none', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
-                  >
-                    Delete
-                  </button>
+          {/* DELETE MODAL */}
+          {
+            showDeleteModal && (
+              <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
+                <div className="modal-box" onClick={e => e.stopPropagation()}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Delete Listing?</h3>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20 }}>
+                    Are you sure you want to delete this listing? This action cannot be undone.
+                  </p>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmDelete}
+                      style={{ flex: 1, padding: '10px', background: '#EF4444', border: 'none', color: '#fff', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-        }
+            )
+          }
 
-        {/* DEAL HISTORY MODAL */}
-        {dealHistoryOpen && (
-          <DealHistoryModal
-            deal={dealHistoryOpen}
-            onClose={() => setDealHistoryOpen(null)}
-            currentUserId={currentUserId}
+          {/* DEAL HISTORY MODAL */}
+          {dealHistoryOpen && (
+            <DealHistoryModal
+              deal={dealHistoryOpen}
+              onClose={() => setDealHistoryOpen(null)}
+              currentUserId={currentUserId}
+            />
+          )}
+
+          {/* ADD PRODUCT MODAL */}
+          <AddProductModal
+            isOpen={isAddProductOpen}
+            onClose={() => { setIsAddProductOpen(false); fetchDashboardData(); }}
           />
-        )}
 
-        {/* ADD PRODUCT MODAL */}
-        <AddProductModal
-          isOpen={isAddProductOpen}
-          onClose={() => { setIsAddProductOpen(false); fetchDashboardData(); }}
-        />
-
-        {/* EDIT PRODUCT MODAL */}
-        <EditProductModal
-          isOpen={isEditProductOpen}
-          onClose={(success) => { setIsEditProductOpen(false); setEditingProduct(null); if (success) fetchDashboardData(); }}
-          product={editingProduct}
-        />
+          {/* EDIT PRODUCT MODAL */}
+          <EditProductModal
+            isOpen={isEditProductOpen}
+            onClose={(success) => { setIsEditProductOpen(false); setEditingProduct(null); if (success) fetchDashboardData(); }}
+            product={editingProduct}
+          />
+        </div >
       </div >
     </>
   );
