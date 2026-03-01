@@ -11,6 +11,11 @@ const ArrowLeftIcon = () => (
         <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
     </svg>
 );
+const InfoIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+);
 const SendIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -569,6 +574,7 @@ const Chat = () => {
     const [uploading, setUploading] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
@@ -963,19 +969,48 @@ const Chat = () => {
           border-radius: 24px;
           padding: 24px;
           overflow-y: auto;
+          transition: transform 0.3s ease;
         }
+        .mobile-sidebar-close { display: none; }
+        .desktop-only { display: block; }
+        .mobile-only { display: none; }
         
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
         @media (max-width: 1024px) {
           .product-sidebar { display: none; }
+          .product-sidebar.mobile-open {
+            display: flex;
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 340px;
+            z-index: 1000;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(20px);
+            border: none; border-left: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0;
+            padding-top: env(safe-area-inset-top, 24px);
+            padding-bottom: env(safe-area-inset-bottom, 24px);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+            animation: slideInRight 0.3s ease-out;
+          }
+          .mobile-sidebar-close {
+            display: flex; justify-content: flex-end; padding-bottom: 20px;
+            cursor: pointer; color: rgba(255,255,255,0.6);
+          }
+          .desktop-only { display: none; }
+          .mobile-only { display: flex; }
         }
         @media (max-width: 768px) {
-          .chat-body { padding: 0; gap: 0; flex-direction: column; }
+          .chat-root { height: 100vh; height: 100dvh; }
+          .chat-body { padding: 0; gap: 0; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
           .conv-list, .chat-thread, .product-sidebar { 
              width: 100%; border-radius: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.08);
           }
-          .chat-topbar { padding: 0 16px; }
+          .chat-topbar { padding: 0 16px; min-height: 60px; }
           .conv-list { display: ${activeConvId ? 'none' : 'flex'}; border-right: none; }
           .chat-thread { display: ${activeConvId ? 'flex' : 'none'}; border-radius: 0; border: none; }
+          .product-sidebar.mobile-open { width: 100%; border-left: none; }
         }
 
         /* ── Empty states ── */
@@ -1002,7 +1037,13 @@ const Chat = () => {
                 {/* Topbar */}
                 <div className="chat-topbar">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => {
+                            if (activeConvId && window.innerWidth <= 768) {
+                                navigate('/chat', { replace: true });
+                            } else {
+                                navigate(-1);
+                            }
+                        }}
                         style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 10px', borderRadius: 8, transition: 'all 0.15s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#fff'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
@@ -1145,6 +1186,18 @@ const Chat = () => {
                                         >
                                             <TrashIcon />
                                         </button>
+                                        <button
+                                            className="mobile-only"
+                                            onClick={() => setShowMobileSidebar(true)}
+                                            style={{
+                                                width: 36, height: 36, borderRadius: 8, border: 'none',
+                                                background: 'rgba(255, 255, 255, 0.05)', color: '#fff',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
+                                            }}
+                                        >
+                                            <InfoIcon />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1263,122 +1316,135 @@ const Chat = () => {
 
                     {/* ── Product Info Sidebar (3rd Column) ── */}
                     {activeConvId && activeConv?.product && (
-                        <div className="product-sidebar">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                                <span style={{ fontSize: 18, fontWeight: 700 }}>Listing Info</span>
-                            </div>
-
-                            <img
-                                src={activeConv.product.images?.[0] || activeConv.product.image || '/placeholder.jpg'}
-                                alt="product"
-                                style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 16, marginBottom: 16, border: '1px solid rgba(255,255,255,0.1)' }}
-                            />
-
-                            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
-                                {activeConv.product.title}
-                            </div>
-
-                            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                                <span style={{ padding: '4px 8px', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
-                                    {activeConv.product.condition || 'Used'}
-                                </span>
-                                <span style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
-                                    {activeConv.product.category || 'Product'}
-                                </span>
-                            </div>
-
-                            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 24, fontFamily: 'JetBrains Mono, monospace' }}>
-                                {activeConv.product.type === 'free' ? <span style={{ color: '#10B981' }}>FREE</span>
-                                    : activeConv.product.type === 'barter' ? <span style={{ color: '#a78bfa' }}>BARTER</span>
-                                        : `₹${activeConv.product.price}`}
-                            </div>
-
-                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                {/* Description */}
-                                {activeConv.product.description && (
-                                    <div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Description</div>
-                                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, wordBreak: 'break-word', fontWeight: 500 }}>
-                                            {activeConv.product.description}
-                                        </div>
+                        <>
+                            {showMobileSidebar && (
+                                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 999 }} onClick={() => setShowMobileSidebar(false)} />
+                            )}
+                            <div className={`product-sidebar ${showMobileSidebar ? 'mobile-open' : ''}`}>
+                                <div className="mobile-sidebar-close" onClick={() => setShowMobileSidebar(false)}>
+                                    <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <XIcon />
                                     </div>
-                                )}
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                                    <span style={{ fontSize: 18, fontWeight: 700 }}>Listing Info</span>
+                                </div>
 
-                                {/* Highlights — always show when present */}
-                                {activeConv.product.highlights?.length > 0 && (
-                                    <div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Highlights</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                            {activeConv.product.highlights.map((h, i) => (
-                                                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>
-                                                    <span style={{ color: '#00D9FF', flexShrink: 0, marginTop: 2, fontSize: 10 }}>◆</span>
-                                                    <span>{h}</span>
-                                                </div>
-                                            ))}
+                                <img
+                                    src={activeConv.product.images?.[0] || activeConv.product.image || '/placeholder.jpg'}
+                                    alt="product"
+                                    style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 16, marginBottom: 16, border: '1px solid rgba(255,255,255,0.1)' }}
+                                />
+
+                                <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
+                                    {activeConv.product.title}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                                    <span style={{ padding: '4px 8px', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                        {activeConv.product.condition || 'Used'}
+                                    </span>
+                                    <span style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                        {activeConv.product.category || 'Product'}
+                                    </span>
+                                </div>
+
+                                <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 24, fontFamily: 'JetBrains Mono, monospace' }}>
+                                    {activeConv.product.type === 'free' ? <span style={{ color: '#10B981' }}>FREE</span>
+                                        : activeConv.product.type === 'barter' ? <span style={{ color: '#a78bfa' }}>BARTER</span>
+                                            : `₹${activeConv.product.price}`}
+                                </div>
+
+                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    {/* Description */}
+                                    {activeConv.product.description && (
+                                        <div>
+                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Description</div>
+                                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, wordBreak: 'break-word', fontWeight: 500 }}>
+                                                {activeConv.product.description}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Specs */}
-                                {activeConv.product.specs && (typeof activeConv.product.specs === 'object') && (
-                                    <div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Specifications</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            {Array.isArray(activeConv.product.specs) ? (
-                                                activeConv.product.specs.map((spec, idx) => (
-                                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
-                                                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>{spec.label || spec.name || spec}</span>
-                                                        <span style={{ color: '#fff', fontWeight: 600 }}>{spec.value}</span>
+                                    {/* Highlights — always show when present */}
+                                    {activeConv.product.highlights?.length > 0 && (
+                                        <div>
+                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Highlights</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                {activeConv.product.highlights.map((h, i) => (
+                                                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>
+                                                        <span style={{ color: '#00D9FF', flexShrink: 0, marginTop: 2, fontSize: 10 }}>◆</span>
+                                                        <span>{h}</span>
                                                     </div>
-                                                ))
-                                            ) : (
-                                                Object.entries(activeConv.product.specs).map(([key, val]) => (
-                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
-                                                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>{key}</span>
-                                                        <span style={{ color: '#fff', fontWeight: 600 }}>{val}</span>
-                                                    </div>
-                                                ))
-                                            )}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Date Created */}
-                                {(activeConv.product.createdAt || activeConv.product.timeAgo) && (
-                                    <div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Details</div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                                            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Listed</span>
-                                            <span style={{ color: '#fff', fontWeight: 600 }}>
-                                                {activeConv.product.createdAt ? new Date(activeConv.product.createdAt).toLocaleDateString() : activeConv.product.timeAgo}
-                                            </span>
+                                    {/* Specs */}
+                                    {activeConv.product.specs && (typeof activeConv.product.specs === 'object') && (
+                                        <div>
+                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Specifications</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                {Array.isArray(activeConv.product.specs) ? (
+                                                    activeConv.product.specs.map((spec, idx) => (
+                                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
+                                                            <span style={{ color: 'rgba(255,255,255,0.5)' }}>{spec.label || spec.name || spec}</span>
+                                                            <span style={{ color: '#fff', fontWeight: 600 }}>{spec.value}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    Object.entries(activeConv.product.specs).map(([key, val]) => (
+                                                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
+                                                            <span style={{ color: 'rgba(255,255,255,0.5)' }}>{key}</span>
+                                                            <span style={{ color: '#fff', fontWeight: 600 }}>{val}</span>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+
+                                    {/* Date Created */}
+                                    {(activeConv.product.createdAt || activeConv.product.timeAgo) && (
+                                        <div>
+                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Details</div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Listed</span>
+                                                <span style={{ color: '#fff', fontWeight: 600 }}>
+                                                    {activeConv.product.createdAt ? new Date(activeConv.product.createdAt).toLocaleDateString() : activeConv.product.timeAgo}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
             </div>
-
             {/* Price Negotiator Modal */}
-            {showNegotiator && (
-                <PriceNegotiatorModal
-                    onClose={() => setShowNegotiator(false)}
-                    onSubmit={handleSendOffer}
-                    productPrice={activeConv?.product?.price}
-                    sending={offerSending}
-                />
-            )}
+            {
+                showNegotiator && (
+                    <PriceNegotiatorModal
+                        onClose={() => setShowNegotiator(false)}
+                        onSubmit={handleSendOffer}
+                        productPrice={activeConv?.product?.price}
+                        sending={offerSending}
+                    />
+                )
+            }
 
             {/* Delete Negotiator Modal */}
-            {showDeleteModal && (
-                <DeleteConfirmModal
-                    onClose={() => setShowDeleteModal(false)}
-                    onConfirm={handleDeleteConversation}
-                    deleting={deletingChat}
-                />
-            )}
+            {
+                showDeleteModal && (
+                    <DeleteConfirmModal
+                        onClose={() => setShowDeleteModal(false)}
+                        onConfirm={handleDeleteConversation}
+                        deleting={deletingChat}
+                    />
+                )
+            }
         </>
     );
 };

@@ -7,6 +7,7 @@ import { productAPI } from '../../services/api';
 import ProductCard from '../ui/ProductCard';
 import AddProductModal from './AddProductModal';
 import NotificationBell from '../ui/NotificationBell';
+import ConnectIdModal from '../auth/ConnectIdModal';
 
 
 // --- Internal Icons ---
@@ -77,6 +78,7 @@ const Marketplace = () => {
 
   // State Management
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
@@ -705,9 +707,9 @@ const Marketplace = () => {
                     )}
                   </div>
                 ) : (
-                  <Link to="/login" className="btn-glass hover:bg-white/10">
+                  <button onClick={() => setIsLoginOpen(true)} className="btn-glass hover:bg-white/10">
                     Login
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>
@@ -1341,6 +1343,9 @@ const Marketplace = () => {
 
         {/* Add Product Modal */}
         <AddProductModal isOpen={isAddProductOpen} onClose={() => setIsAddProductOpen(false)} />
+
+        {/* Login Modal */}
+        <ConnectIdModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       </div>
     </>
   );

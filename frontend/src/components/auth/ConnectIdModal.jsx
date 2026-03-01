@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import Tesseract from 'tesseract.js';
 import { useAuth } from '../../context/AuthContext';
 import Icons from '../../assets/icons/Icons';
@@ -9,9 +10,22 @@ import LoginGraphic from './LoginGraphic.png';
 const modalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
-  @keyframes modal-pop {
-    0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+  @keyframes modal-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes modal-fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes modal-pop-in {
+    0% { opacity: 0; transform: scale(0.95) translateY(32px); }
+    60% { opacity: 1; }
     100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes modal-pop-out {
+    0% { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.95) translateY(24px); }
   }
   @keyframes scan-line {
     0% { top: 0%; }
@@ -22,9 +36,21 @@ const modalStyles = `
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
   }
-  .animate-modal-pop { animation: modal-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .modal-backdrop-enter { animation: modal-fade-in 0.25s ease forwards; }
+  .modal-backdrop-exit  { animation: modal-fade-out 0.3s ease forwards; }
+  .modal-panel-enter    { animation: modal-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .modal-panel-exit     { animation: modal-pop-out 0.3s ease forwards; }
   .animate-scan-line { animation: scan-line 3s linear infinite; }
   .animate-float-slow { animation: float-slow 5s ease-in-out infinite; }
+
+  .modal-panel {
+    flex-direction: column;
+  }
+  @media (min-width: 768px) {
+    .modal-panel {
+      flex-direction: row;
+    }
+  }
 
   .mono { font-family: 'Space Mono', monospace; }
   
@@ -67,6 +93,9 @@ const modalStyles = `
 `;
 
 const ConnectIdModal = ({ isOpen, onClose }) => {
+  const [mounted, setMounted] = useState(false);
+  const [animating, setAnimating] = useState(null); // null=idle, true=entering, false=exiting
+  const closeTimerRef = useRef(null);
   const { register, login, loginWithGoogle } = useAuth();
 
   const [activeTab, setActiveTab] = useState('manual');
@@ -88,27 +117,38 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const [extractedText, setExtractedText] = useState('');
   const [debugInfo, setDebugInfo] = useState([]);
 
-  // Reset state when modal opens/closes
+  // Mount/unmount with animation
   useEffect(() => {
-    if (!isOpen) {
-      setActiveTab('manual');
-      setFile(null);
-      setImagePreview(null);
-      setFullName('');
-      setEnrollment('');
-      setEmail('');
-      setPassword('');
-      setIsLogin(false);
-      setDragActive(false);
-      setIsProcessing(false);
-      setVerificationStatus('idle');
-      setOcrProgress(0);
-      setExtractedText('');
-      setDebugInfo([]);
+    if (isOpen) {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      setMounted(true);
+      // Small tick to let DOM paint before triggering enter animation
+      requestAnimationFrame(() => setAnimating(true));
+    } else {
+      setAnimating(false);
+      closeTimerRef.current = setTimeout(() => {
+        setMounted(false);
+        // Reset form state after exit animation
+        setActiveTab('manual');
+        setFile(null);
+        setImagePreview(null);
+        setFullName('');
+        setEnrollment('');
+        setEmail('');
+        setPassword('');
+        setIsLogin(false);
+        setDragActive(false);
+        setIsProcessing(false);
+        setVerificationStatus('idle');
+        setOcrProgress(0);
+        setExtractedText('');
+        setDebugInfo([]);
+      }, 320);
     }
+    return () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!mounted) return null;
 
   // --- Image Preprocessing ---
   const preprocessImage = (file) => {
@@ -515,16 +555,48 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     return isLogin ? "LOGIN" : "SUBMIT FOR VERIFICATION";
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+  const modalContent = (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+    >
       <style>{modalStyles}</style>
 
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity"
+        className={animating === true ? 'modal-backdrop-enter' : animating === false ? 'modal-backdrop-exit' : ''}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+        }}
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-6xl bg-[#050505] border border-white/20 shadow-2xl flex flex-col md:flex-row animate-modal-pop overflow-hidden max-h-[90vh]">
+      {/* Panel */}
+      <div
+        className={`modal-panel ${animating === true ? 'modal-panel-enter' : animating === false ? 'modal-panel-exit' : ''}`}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '72rem',
+          maxHeight: 'calc(100vh - 2rem)',
+          background: '#050505',
+          border: '1px solid rgba(255,255,255,0.2)',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
+          display: 'flex',
+          overflow: 'hidden',
+        }}
+      >
 
         {/* Left Side */}
         <div className="w-full md:w-2/5 bg-zinc-900 border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden p-6 md:p-8 flex flex-col justify-center md:justify-between text-white shrink-0">
@@ -787,11 +859,11 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     <div
                       key={i}
                       className={`text-[9px] leading-relaxed ${info.includes('✅') || info.includes('✓') ? 'text-green-400' :
-                          info.includes('❌') || info.includes('✗') ? 'text-red-400' :
-                            info.includes('⚠️') ? 'text-yellow-400' :
-                              info.includes('═══') ? 'text-[#00D9FF] font-bold' :
-                                info.includes('🎉') ? 'text-green-300 font-bold' :
-                                  'text-white/70'
+                        info.includes('❌') || info.includes('✗') ? 'text-red-400' :
+                          info.includes('⚠️') ? 'text-yellow-400' :
+                            info.includes('═══') ? 'text-[#00D9FF] font-bold' :
+                              info.includes('🎉') ? 'text-green-300 font-bold' :
+                                'text-white/70'
                         }`}
                     >
                       {info}
@@ -816,6 +888,8 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ConnectIdModal;
