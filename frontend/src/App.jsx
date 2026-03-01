@@ -19,10 +19,10 @@ import SellerProfile from './components/sections/SellerProfile'
 import Chat from './components/sections/Chat'
 import ChatNotificationToast from './components/ui/ChatNotificationToast'
 
-// Only show footer on non-chat pages
+// Only show footer on non-chat and product pages
 function ConditionalFooter() {
   const location = useLocation()
-  if (location.pathname.startsWith('/chat')) return null
+  if (location.pathname.startsWith('/chat') || location.pathname.startsWith('/product')) return null
   return <Footer />
 }
 
@@ -72,7 +72,7 @@ function App() {
               <Route path="/chat/:conversationId" element={<Chat />} />
             </Routes>
 
-            {/* Footer hidden on /chat routes */}
+            {/* Footer hidden on /chat and /product routes */}
             <ConditionalFooter />
 
             {/* Manual login modal */}

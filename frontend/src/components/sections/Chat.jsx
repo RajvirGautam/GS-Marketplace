@@ -21,6 +21,20 @@ const PaperclipIcon = () => (
         <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
     </svg>
 );
+const SearchIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+const MicrophoneIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+);
 const DollarIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <line x1="12" y1="1" x2="12" y2="23" />
@@ -227,73 +241,77 @@ const DeleteConfirmModal = ({ onClose, onConfirm, deleting }) => {
     );
 };
 
-// ─────────────────────────────────────────────────────────────
-//  Offer Card (inside message thread)
-// ─────────────────────────────────────────────────────────────
 const OfferCard = ({ message, currentUserId, onRespond, responding }) => {
     const { offerData, sender } = message;
     const isSender = sender._id === currentUserId || sender._id?.toString() === currentUserId?.toString();
     const isPending = offerData?.status === 'pending';
 
     const statusColors = {
-        pending: { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.35)', text: '#F59E0B' },
-        accepted: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', text: '#10B981' },
-        rejected: { bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', text: '#EF4444' }
+        pending: { bg: 'rgba(234, 179, 8, 0.1)', border: 'rgba(234, 179, 8, 0.3)', text: '#FBBF24', label: 'PENDING' },
+        accepted: { bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.3)', text: '#34D399', label: 'ACCEPTED' },
+        rejected: { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', text: '#F87171', label: 'DECLINED' }
     };
     const sc = statusColors[offerData?.status] || statusColors.pending;
 
     return (
         <div style={{
-            background: 'rgba(0,217,255,0.05)',
-            border: '1.5px solid rgba(0,217,255,0.25)',
-            borderRadius: 12,
-            padding: '14px 16px',
-            maxWidth: 300,
-            marginTop: 2
+            background: isSender ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+            border: `1px solid ${isSender ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)'}`,
+            borderRadius: 16,
+            padding: '16px 20px',
+            width: '280px',
+            marginTop: 4,
+            position: 'relative',
+            overflow: 'hidden'
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <div style={{ background: 'rgba(0,217,255,0.15)', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.5)' }}>
                     <TagIcon />
-                    <span style={{ fontSize: 10, color: '#00D9FF', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', letterSpacing: 1 }}>PRICE OFFER</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                        Offer
+                    </span>
                 </div>
                 <div style={{
-                    marginLeft: 'auto',
-                    background: sc.bg,
-                    border: `1px solid ${sc.border}`,
-                    color: sc.text,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    fontFamily: 'JetBrains Mono, monospace',
-                    letterSpacing: 0.8,
-                    padding: '3px 8px',
-                    borderRadius: 4,
-                    textTransform: 'uppercase'
+                    background: sc.bg, border: `1px solid ${sc.border}`, color: sc.text,
+                    fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 6,
+                    letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 4
                 }}>
-                    {offerData?.status}
+                    {offerData?.status === 'accepted' && <CheckIcon />}
+                    {offerData?.status === 'rejected' && <XIcon />}
+                    {sc.label}
                 </div>
             </div>
 
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#00D9FF', marginBottom: 4, fontFamily: 'JetBrains Mono, monospace' }}>
-                ₹{offerData?.amount?.toLocaleString()}
-            </div>
-
-            {offerData?.note && (
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginBottom: 12, lineHeight: 1.5 }}>
-                    "{offerData.note}"
+            <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 6, fontFamily: 'JetBrains Mono, monospace', letterSpacing: -0.5 }}>
+                    ₹{offerData?.amount?.toLocaleString('en-IN')}
                 </div>
-            )}
+
+                {offerData?.note && (
+                    <div style={{
+                        fontSize: 13, color: 'rgba(255,255,255,0.7)',
+                        lineHeight: 1.5, marginBottom: 16,
+                        borderLeft: `2px solid rgba(255,255,255,0.2)`,
+                        paddingLeft: 10, fontStyle: 'italic'
+                    }}>
+                        "{offerData.note}"
+                    </div>
+                )}
+            </div>
 
             {!isSender && isPending && (
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, marginTop: (offerData?.note ? 0 : 16), position: 'relative', zIndex: 1 }}>
                     <button
                         onClick={() => onRespond(message._id, 'accepted')}
                         disabled={responding}
                         style={{
-                            flex: 1, padding: '8px 0', borderRadius: 8,
-                            background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)',
-                            color: '#10B981', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
+                            flex: 1, padding: '10px 0', borderRadius: 10,
+                            background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
                         }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#000'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; e.currentTarget.style.color = '#fff'; }}
                     >
                         <CheckIcon /> Accept
                     </button>
@@ -301,11 +319,13 @@ const OfferCard = ({ message, currentUserId, onRespond, responding }) => {
                         onClick={() => onRespond(message._id, 'rejected')}
                         disabled={responding}
                         style={{
-                            flex: 1, padding: '8px 0', borderRadius: 8,
-                            background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)',
-                            color: '#EF4444', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
+                            flex: 1, padding: '10px 0', borderRadius: 10,
+                            background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: 'rgba(255, 255, 255, 0.8)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
                         }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'; }}
                     >
                         <XIcon /> Decline
                     </button>
@@ -313,7 +333,13 @@ const OfferCard = ({ message, currentUserId, onRespond, responding }) => {
             )}
 
             {isSender && isPending && (
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Waiting for response…</div>
+                <div style={{
+                    fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: (offerData?.note ? 0 : 12),
+                    display: 'flex', alignItems: 'center', gap: 6, position: 'relative', zIndex: 1
+                }}>
+                    <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'rgba(255,255,255,0.8)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    Waiting for response...
+                </div>
             )}
         </div>
     );
@@ -336,20 +362,24 @@ const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
         }}>
             {/* Avatar */}
             {!isMine && (
-                <div
-                    onClick={(e) => { e.stopPropagation(); message.sender?._id && navigate(`/seller/${message.sender._id}`); }}
-                    style={{
-                        width: 30, height: 30, borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 700, color: '#0A0A0A',
-                        flexShrink: 0,
-                        overflow: 'hidden',
-                        cursor: 'pointer'
-                    }}>
-                    {message.sender?.profilePicture
-                        ? <img src={message.sender.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : getInitials(message.sender?.fullName)}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                    <div
+                        onClick={(e) => { e.stopPropagation(); message.sender?._id && navigate(`/seller/${message.sender._id}`); }}
+                        style={{
+                            width: 30, height: 30, borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 11, fontWeight: 700, color: '#0A0A0A',
+                            overflow: 'hidden',
+                            cursor: 'pointer'
+                        }}>
+                        {message.sender?.profilePicture
+                            ? <img src={message.sender.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : getInitials(message.sender?.fullName)}
+                    </div>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', maxWidth: 44, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {message.sender?.fullName?.split(' ')[0] || 'User'}
+                    </div>
                 </div>
             )}
 
@@ -420,7 +450,6 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
             : lastMsg.type === 'media' ? '📎 Media'
                 : lastMsg.content?.slice(0, 40) || '…';
 
-    // Check if unread using the backend-computed unreadCount
     const isUnread = !isActive && conv.unreadCount > 0;
 
     return (
@@ -429,10 +458,10 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
             style={{
                 width: '100%', textAlign: 'left', background: 'none', border: 'none',
                 padding: '12px 16px',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '16px',
+                marginBottom: '8px',
                 cursor: 'pointer',
-                backgroundColor: isActive ? 'rgba(0,217,255,0.08)' : 'transparent',
-                borderLeft: isActive ? '2px solid #00D9FF' : '2px solid transparent',
+                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
                 transition: 'all 0.15s',
                 display: 'flex', alignItems: 'center', gap: 12,
                 position: 'relative'
@@ -452,48 +481,65 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{
-                        color: isUnread ? '#fff' : 'rgba(255,255,255,0.9)',
-                        fontSize: 13,
-                        fontWeight: isUnread ? 800 : 600,
-                        truncate: true
-                    }}>
-                        {other?.fullName || 'Unknown'}
-                    </span>
+                {/* Row 1: Name • ProductName (scrollable) + Time */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 0, minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                        <span style={{
+                            color: isUnread ? '#fff' : 'rgba(255,255,255,0.9)',
+                            fontSize: 14,
+                            fontWeight: isUnread ? 800 : 600,
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0
+                        }}>
+                            {other?.fullName || 'Unknown'}
+                        </span>
+                        {conv.product?.title && (
+                            <>
+                                <span style={{ color: 'rgba(255,255,255,0.25)', margin: '0 6px', flexShrink: 0, fontSize: 13 }}>•</span>
+                                <span className="marquee-wrap" style={{ color: 'inherit' }} title={conv.product.title}>
+                                    <span
+                                        className="marquee-inner"
+                                        style={{
+                                            color: isUnread ? '#00D9FF' : 'rgba(0,217,255,0.6)',
+                                            fontSize: 12,
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        {/* Duplicate the span for a seamless cyclic CSS scroll */}
+                                        <span style={{ paddingRight: '20px' }}>{conv.product.title}</span>
+                                        <span aria-hidden="true" style={{ paddingRight: '20px' }}>{conv.product.title}</span>
+                                    </span>
+                                </span>
+                            </>
+                        )}
+                        {isUnread && (
+                            <div style={{
+                                width: 7, height: 7, borderRadius: '50%',
+                                background: '#00D9FF', boxShadow: '0 0 8px #00D9FF',
+                                marginLeft: 6, flexShrink: 0
+                            }} />
+                        )}
+                    </div>
                     <span style={{
                         color: isUnread ? '#00D9FF' : 'rgba(255,255,255,0.3)',
-                        fontSize: 10,
-                        fontWeight: isUnread ? 700 : 400,
-                        fontFamily: 'JetBrains Mono, monospace'
+                        fontSize: 10, fontWeight: isUnread ? 700 : 400,
+                        fontFamily: 'JetBrains Mono, monospace', flexShrink: 0
                     }}>
-                        {timeAgo(conv.lastMessageAt)}
+                        {timeAgo(conv.lastMessageAt || lastMsg?.createdAt)}
                     </span>
                 </div>
+
+                {/* Row 2: Message preview */}
                 <div style={{
-                    color: isUnread ? '#fff' : 'rgba(255,255,255,0.35)',
+                    color: isUnread ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
                     fontWeight: isUnread ? 600 : 400,
                     fontSize: 12,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                 }}>
-                    {conv.product?.title && <span style={{ color: isUnread ? '#00D9FF' : 'rgba(0,217,255,0.5)', marginRight: 4 }}>{conv.product.title}</span>}
                     {preview}
                 </div>
-                {isUnread && (
-                    <div style={{
-                        position: 'absolute',
-                        right: 16,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: '#00D9FF',
-                        boxShadow: '0 0 8px #00D9FF'
-                    }} />
-                )}
             </div>
         </button>
     );
@@ -521,6 +567,8 @@ const Chat = () => {
     const [deletingChat, setDeletingChat] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null); // { file, url, type }
     const [uploading, setUploading] = useState(false);
+
+    const [searchQuery, setSearchQuery] = useState('');
 
     const messagesEndRef = useRef(null);
     const messagesAreaRef = useRef(null);
@@ -745,8 +793,28 @@ const Chat = () => {
         .chat-grid-bg {
           position: absolute; inset: 0; pointer-events: none; z-index: 0;
           background-image:
-            repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.02) 59px, rgba(255,255,255,0.02) 60px),
-            repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.02) 59px, rgba(255,255,255,0.02) 60px);
+            repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px),
+            repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px);
+        }
+
+        @keyframes marquee-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-wrap {
+          display: inline-block;
+          max-width: 120px;
+          overflow: hidden;
+          vertical-align: bottom;
+          /* prevent the duplicate text from making the parent span taller */
+          white-space: nowrap;
+        }
+        .marquee-inner {
+          display: inline-block;
+          white-space: nowrap;
+          /* Linear, infinite loop, not alternating */
+          animation: marquee-scroll 8s linear infinite;
+          will-change: transform;
         }
 
         .chat-topbar {
@@ -761,23 +829,47 @@ const Chat = () => {
 
         .chat-body {
           display: flex; flex: 1; overflow: hidden; position: relative; z-index: 10;
+          padding: 20px;
+          gap: 20px;
         }
 
         /* ── Conv list ── */
         .conv-list {
-          width: 300px; flex-shrink: 0;
-          border-right: 1px solid rgba(255,255,255,0.08);
+          width: 320px; flex-shrink: 0;
           display: flex; flex-direction: column;
           background: rgba(12,12,12,0.8);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 24px;
           overflow: hidden;
         }
         .conv-list-header {
-          padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
-          font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-          color: rgba(255,255,255,0.3);
-          display: flex; align-items: center; justify-content: space-between;
+          padding: 20px 20px 10px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
         }
-        .conv-list-body { flex: 1; overflow-y: auto; }
+        .search-bar {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 100px;
+          padding: 10px 16px;
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .search-bar input {
+          background: transparent;
+          border: none;
+          outline: none;
+          color: #fff;
+          font-size: 14px;
+          width: 100%;
+        }
+        .search-bar input::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+        .conv-list-body { flex: 1; overflow-y: auto; padding: 0 12px 12px 12px; }
         .conv-list-body::-webkit-scrollbar { width: 4px; }
         .conv-list-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
@@ -785,6 +877,8 @@ const Chat = () => {
         .chat-thread {
           flex: 1; display: flex; flex-direction: column;
           background: rgba(10,10,10,0.6);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 24px;
           overflow: hidden;
         }
         .thread-header {
@@ -802,34 +896,39 @@ const Chat = () => {
         .messages-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 
         .input-bar {
-          padding: 12px 16px;
-          border-top: 1px solid rgba(255,255,255,0.08);
-          background: rgba(12,12,12,0.9);
-          backdrop-filter: blur(20px);
-          display: flex; align-items: flex-end; gap: 10; flex-shrink: 0;
+          padding: 16px 20px 20px 20px;
+          background: transparent;
+          display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .input-pill {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 100px;
+          padding: 8px 12px;
         }
         .input-field {
           flex: 1;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 12px;
-          padding: 10px 14px;
+          background: transparent;
+          border: none;
           color: #fff;
           font-family: 'Manrope', sans-serif;
           font-size: 14px;
           resize: none;
           outline: none;
-          min-height: 44px;
-          max-height: 120px;
-          transition: border-color 0.15s;
-          line-height: 1.5;
+          max-height: 80px;
+          line-height: 20px;
+          align-self: center;
+          padding: 10px 0;
         }
         .input-field:focus { border-color: rgba(0,217,255,0.4); }
         .input-field::placeholder { color: rgba(255,255,255,0.25); }
 
         .icon-btn {
-          width: 44px; height: 44px; border-radius: 10px; border: none;
-          background: rgba(255,255,255,0.06); cursor: pointer;
+          width: 40px; height: 40px; border-radius: 50%; border: none;
+          background: transparent; cursor: pointer;
           color: rgba(255,255,255,0.5);
           display: flex; align-items: center; justify-content: center;
           transition: all 0.15s; flex-shrink: 0;
@@ -847,14 +946,37 @@ const Chat = () => {
         .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         .offer-btn {
-          width: 44px; height: 44px; border-radius: 10px; border: none;
-          background: rgba(124,58,237,0.2);
-          border: 1px solid rgba(124,58,237,0.35);
-          cursor: pointer; color: #a78bfa;
+          width: 40px; height: 40px; border-radius: 50%; border: none;
+          background: transparent;
+          cursor: pointer; color: rgba(255,255,255,0.5);
           display: flex; align-items: center; justify-content: center;
           transition: all 0.15s; flex-shrink: 0;
         }
-        .offer-btn:hover { background: rgba(124,58,237,0.35); }
+        .offer-btn:hover { background: rgba(255,255,255,0.1); color: #a78bfa; }
+        
+        /* ── Product Info Sidebar ── */
+        .product-sidebar {
+          width: 320px; flex-shrink: 0;
+          display: flex; flex-direction: column;
+          background: rgba(12,12,12,0.8);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 24px;
+          padding: 24px;
+          overflow-y: auto;
+        }
+        
+        @media (max-width: 1024px) {
+          .product-sidebar { display: none; }
+        }
+        @media (max-width: 768px) {
+          .chat-body { padding: 0; gap: 0; flex-direction: column; }
+          .conv-list, .chat-thread, .product-sidebar { 
+             width: 100%; border-radius: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.08);
+          }
+          .chat-topbar { padding: 0 16px; }
+          .conv-list { display: ${activeConvId ? 'none' : 'flex'}; border-right: none; }
+          .chat-thread { display: ${activeConvId ? 'flex' : 'none'}; border-radius: 0; border: none; }
+        }
 
         /* ── Empty states ── */
         .empty-state {
@@ -880,12 +1002,12 @@ const Chat = () => {
                 {/* Topbar */}
                 <div className="chat-topbar">
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate(-1)}
                         style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 10px', borderRadius: 8, transition: 'all 0.15s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#fff'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
                     >
-                        <ArrowLeftIcon /> Dashboard
+                        <ArrowLeftIcon /> Back
                     </button>
                     <div style={{ height: 20, width: 1, background: 'rgba(255,255,255,0.1)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -902,8 +1024,15 @@ const Chat = () => {
                     {/* ── Conversation List ── */}
                     <div className="conv-list">
                         <div className="conv-list-header">
-                            <span>Conversations</span>
-                            <span style={{ color: '#00D9FF' }}>{conversations.length}</span>
+                            <div className="search-bar">
+                                <SearchIcon />
+                                <input
+                                    type="text"
+                                    placeholder="Search"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
                         </div>
 
                         <div className="conv-list-body">
@@ -912,11 +1041,14 @@ const Chat = () => {
                             ) : conversations.length === 0 ? (
                                 <div style={{ padding: 32, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'rgba(255,255,255,0.25)' }}>
                                     <MessageBubbleIcon />
-                                    <span style={{ fontSize: 13 }}>No conversations yet</span>
-                                    <span style={{ fontSize: 11, lineHeight: 1.6 }}>Message a seller from<br />any product page to start</span>
+                                    <span style={{ fontSize: 13 }}>No chats yet</span>
                                 </div>
                             ) : (
-                                conversations.map(conv => (
+                                conversations.filter(c => {
+                                    const other = c.participants?.find(p => p._id !== user?._id && p._id?.toString() !== user?._id?.toString()) || c.participants?.[0];
+                                    return other?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        c.product?.title?.toLowerCase().includes(searchQuery.toLowerCase());
+                                }).map(conv => (
                                     <ConvItem
                                         key={conv._id}
                                         conv={conv}
@@ -1081,7 +1213,6 @@ const Chat = () => {
                                     </div>
                                 )}
 
-                                {/* Input Bar */}
                                 <div className="input-bar">
                                     <input
                                         type="file"
@@ -1090,40 +1221,143 @@ const Chat = () => {
                                         style={{ display: 'none' }}
                                         accept="image/*,video/mp4,application/pdf"
                                     />
-                                    <button
-                                        className="icon-btn"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        title="Attach media"
-                                    >
-                                        <PaperclipIcon />
-                                    </button>
-                                    <button
-                                        className="offer-btn"
-                                        onClick={() => setShowNegotiator(true)}
-                                        title="Make a price offer"
-                                    >
-                                        <DollarIcon />
-                                    </button>
-                                    <textarea
-                                        className="input-field"
-                                        placeholder="Type a message…"
-                                        value={inputText}
-                                        onChange={e => setInputText(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        rows={1}
-                                    />
-                                    <button
-                                        className="send-btn"
-                                        onClick={handleSend}
-                                        disabled={!inputText.trim() || sending}
-                                        title="Send message"
-                                    >
-                                        <SendIcon />
-                                    </button>
+                                    <div className="input-pill">
+                                        <button
+                                            className="icon-btn"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            title="Attach media"
+                                        >
+                                            <PaperclipIcon />
+                                        </button>
+                                        <textarea
+                                            className="input-field"
+                                            placeholder="Your message"
+                                            value={inputText}
+                                            onChange={e => setInputText(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                            rows={1}
+                                        />
+                                        <button
+                                            className="offer-btn"
+                                            onClick={() => setShowNegotiator(true)}
+                                            title="Make a price offer"
+                                        >
+                                            <DollarIcon />
+                                        </button>
+                                        <button className="icon-btn" title="Voice Message (Mock)">
+                                            <MicrophoneIcon />
+                                        </button>
+                                        <button
+                                            className="send-btn" style={{ background: 'transparent', color: inputText.trim() ? '#00D9FF' : 'rgba(255,255,255,0.3)', boxShadow: 'none' }}
+                                            onClick={handleSend}
+                                            disabled={!inputText.trim() || sending}
+                                            title="Send message"
+                                        >
+                                            <SendIcon />
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}
                     </div>
+
+                    {/* ── Product Info Sidebar (3rd Column) ── */}
+                    {activeConvId && activeConv?.product && (
+                        <div className="product-sidebar">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                                <span style={{ fontSize: 18, fontWeight: 700 }}>Listing Info</span>
+                            </div>
+
+                            <img
+                                src={activeConv.product.images?.[0] || activeConv.product.image || '/placeholder.jpg'}
+                                alt="product"
+                                style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 16, marginBottom: 16, border: '1px solid rgba(255,255,255,0.1)' }}
+                            />
+
+                            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
+                                {activeConv.product.title}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                                <span style={{ padding: '4px 8px', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                    {activeConv.product.condition || 'Used'}
+                                </span>
+                                <span style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', borderRadius: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                    {activeConv.product.category || 'Product'}
+                                </span>
+                            </div>
+
+                            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 24, fontFamily: 'JetBrains Mono, monospace' }}>
+                                {activeConv.product.type === 'free' ? <span style={{ color: '#10B981' }}>FREE</span>
+                                    : activeConv.product.type === 'barter' ? <span style={{ color: '#a78bfa' }}>BARTER</span>
+                                        : `₹${activeConv.product.price}`}
+                            </div>
+
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                {/* Description */}
+                                {activeConv.product.description && (
+                                    <div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Description</div>
+                                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, wordBreak: 'break-word', fontWeight: 500 }}>
+                                            {activeConv.product.description}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Highlights — always show when present */}
+                                {activeConv.product.highlights?.length > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Highlights</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                            {activeConv.product.highlights.map((h, i) => (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>
+                                                    <span style={{ color: '#00D9FF', flexShrink: 0, marginTop: 2, fontSize: 10 }}>◆</span>
+                                                    <span>{h}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Specs */}
+                                {activeConv.product.specs && (typeof activeConv.product.specs === 'object') && (
+                                    <div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Specifications</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            {Array.isArray(activeConv.product.specs) ? (
+                                                activeConv.product.specs.map((spec, idx) => (
+                                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
+                                                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>{spec.label || spec.name || spec}</span>
+                                                        <span style={{ color: '#fff', fontWeight: 600 }}>{spec.value}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                Object.entries(activeConv.product.specs).map(([key, val]) => (
+                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '8px' }}>
+                                                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>{key}</span>
+                                                        <span style={{ color: '#fff', fontWeight: 600 }}>{val}</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Date Created */}
+                                {(activeConv.product.createdAt || activeConv.product.timeAgo) && (
+                                    <div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Details</div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                            <span style={{ color: 'rgba(255,255,255,0.5)' }}>Listed</span>
+                                            <span style={{ color: '#fff', fontWeight: 600 }}>
+                                                {activeConv.product.createdAt ? new Date(activeConv.product.createdAt).toLocaleDateString() : activeConv.product.timeAgo}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -1155,76 +1389,81 @@ const Chat = () => {
 const styles = {
     modalOverlay: {
         position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(8px)',
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(12px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 999, padding: 20
+        zIndex: 999, padding: 20,
+        animation: 'fadeIn 0.2s ease-out'
     },
     negotiatorModal: {
-        background: 'linear-gradient(145deg, #111111, #0d0d0d)',
-        border: '1px solid rgba(124,58,237,0.35)',
-        borderRadius: 16,
-        padding: 24,
+        background: '#0a0a0a',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: 24,
+        padding: 32,
         width: '100%',
-        maxWidth: 400,
-        boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,58,237,0.1)',
-        display: 'flex', flexDirection: 'column', gap: 20
+        maxWidth: 420,
+        boxShadow: '0 32px 64px rgba(0,0,0,0.8)',
+        display: 'flex', flexDirection: 'column', gap: 24,
+        position: 'relative',
+        overflow: 'hidden'
     },
     modalHeader: {
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between'
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+        position: 'relative', zIndex: 1
     },
     modalIconWrap: {
-        width: 40, height: 40, borderRadius: 10,
-        background: 'rgba(124,58,237,0.2)',
-        border: '1px solid rgba(124,58,237,0.35)',
+        width: 48, height: 48, borderRadius: 14,
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#a78bfa'
+        color: '#fff'
     },
-    modalTitle: { fontSize: 16, fontWeight: 700, color: '#fff' },
-    modalSub: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+    modalTitle: { fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: -0.5 },
+    modalSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
     closeBtn: {
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: 'rgba(255,255,255,0.4)', padding: 4, borderRadius: 6,
+        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
+        color: 'rgba(255,255,255,0.6)', width: 32, height: 32, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'color 0.15s'
+        transition: 'all 0.2s', marginTop: 4
     },
-    fieldGroup: { display: 'flex', flexDirection: 'column', gap: 8 },
-    fieldLabel: { fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.3 },
+    fieldGroup: { display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 },
+    fieldLabel: { fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.3 },
     priceInput: {
         display: 'flex', alignItems: 'center',
-        background: 'rgba(255,255,255,0.05)',
-        border: '1.5px solid rgba(124,58,237,0.3)',
-        borderRadius: 10, overflow: 'hidden',
-        transition: 'border-color 0.15s'
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: 14, overflow: 'hidden',
+        transition: 'all 0.2s'
     },
     currencyBadge: {
-        padding: '0 14px', fontSize: 18, fontWeight: 700, color: '#a78bfa',
-        background: 'rgba(124,58,237,0.15)', borderRight: '1px solid rgba(124,58,237,0.2)',
-        height: 48, display: 'flex', alignItems: 'center', flexShrink: 0,
+        padding: '0 20px', fontSize: 20, fontWeight: 700, color: '#fff',
+        background: 'rgba(255,255,255,0.05)', borderRight: '1px solid rgba(255,255,255,0.1)',
+        height: 56, display: 'flex', alignItems: 'center', flexShrink: 0,
         fontFamily: 'JetBrains Mono, monospace'
     },
     priceInputField: {
         flex: 1, border: 'none', background: 'transparent',
-        padding: '0 14px', height: 48,
-        color: '#fff', fontSize: 20, fontWeight: 700,
+        padding: '0 16px', height: 56,
+        color: '#fff', fontSize: 24, fontWeight: 800,
         outline: 'none', fontFamily: 'JetBrains Mono, monospace',
-        minWidth: 0
+        minWidth: 0, letterSpacing: -0.5
     },
     noteTextarea: {
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 10, padding: '12px 14px',
-        color: 'rgba(255,255,255,0.8)', fontSize: 13,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: 14, padding: '16px',
+        color: '#fff', fontSize: 14,
         fontFamily: 'Manrope, sans-serif',
         outline: 'none', resize: 'none',
-        lineHeight: 1.6, transition: 'border-color 0.15s'
+        lineHeight: 1.6, transition: 'all 0.2s'
     },
     submitBtn: {
-        padding: '13px 0', borderRadius: 10, border: 'none',
-        background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-        color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-        transition: 'all 0.15s', letterSpacing: 0.3,
-        boxShadow: '0 4px 16px rgba(124,58,237,0.35)'
+        padding: '16px 0', borderRadius: 14, border: 'none',
+        background: '#fff',
+        color: '#000', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+        transition: 'all 0.2s', letterSpacing: 0.5, textTransform: 'uppercase',
+        boxShadow: '0 4px 12px rgba(255,255,255,0.2)',
+        marginTop: 8, position: 'relative', zIndex: 1
     }
 };
 

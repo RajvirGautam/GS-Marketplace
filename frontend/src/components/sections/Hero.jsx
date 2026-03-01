@@ -9,7 +9,7 @@ const Hero = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef(null);
   const cardRef = useRef(null);
-  
+
   const today = new Date();
   const day = today.getDate();
 
@@ -116,7 +116,7 @@ const Hero = () => {
     const centerY = rect.height / 2;
     const rotateX = (y - centerY) / 25;
     const rotateY = (centerX - x) / 25;
-    
+
     cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
   };
 
@@ -517,12 +517,274 @@ const Hero = () => {
         /* Responsive */
         @media (max-width: 768px) {
           .card-3d { transform: none !important; }
-          .hero-enhanced { padding-top: 6rem; }
+          .hero-enhanced { padding-top: 4rem; }
           .product-showcase { border-radius: 16px; }
         }
+
+        /* ===== MOBILE ADAPTIVE STYLES ===== */
+
+        /* Mobile ticker */
+        .mobile-ticker {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 9999;
+          overflow: hidden;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: rgba(0,0,0,0.7);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+
+        .mobile-ticker .marquee {
+          animation: marquee 25s linear infinite;
+        }
+
+        /* Mobile hero card - full bleed style */
+        .mobile-product-card {
+          position: relative;
+          border-radius: 20px;
+          overflow: hidden;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .mobile-product-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 20px;
+          padding: 1px;
+          background: linear-gradient(135deg, var(--accent-color) 0%, transparent 50%, var(--accent-color) 100%);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          opacity: 0.3;
+          pointer-events: none;
+        }
+
+        .mobile-product-image {
+          position: relative;
+          aspect-ratio: 16/10;
+          overflow: hidden;
+        }
+
+        .mobile-product-image::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85) 100%);
+          pointer-events: none;
+        }
+
+        /* Mobile stats strip */
+        .mobile-stats-strip {
+          display: flex;
+          gap: 0;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-stats-strip::-webkit-scrollbar {
+          display: none;
+        }
+
+        .mobile-stat-item {
+          flex: 1;
+          min-width: 0;
+          text-align: center;
+          padding: 16px 12px;
+          position: relative;
+        }
+
+        .mobile-stat-item:not(:last-child)::after {
+          content: '';
+          position: absolute;
+          right: 0;
+          top: 20%;
+          height: 60%;
+          width: 1px;
+          background: rgba(255,255,255,0.08);
+        }
+
+        /* Mobile feature pills - horizontal scroll */
+        .mobile-features-scroll {
+          display: flex;
+          gap: 10px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: 4px;
+        }
+
+        .mobile-features-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .mobile-feature-pill {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 18px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          backdrop-filter: blur(10px);
+        }
+
+        /* Mobile card dots */
+        .mobile-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.2);
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .mobile-dot.active {
+          width: 28px;
+          border-radius: 14px;
+        }
+
+        /* Mobile CTA buttons */
+        .mobile-cta-primary {
+          width: 100%;
+          padding: 16px 24px;
+          border-radius: 16px;
+          border: none;
+          font-weight: 800;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          cursor: pointer;
+          color: white;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+
+        .mobile-cta-primary:active {
+          transform: scale(0.98);
+        }
+
+        .mobile-cta-secondary {
+          width: 100%;
+          padding: 16px 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          font-weight: 700;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          cursor: pointer;
+          color: rgba(255,255,255,0.9);
+          transition: all 0.3s ease;
+        }
+
+        .mobile-cta-secondary:active {
+          transform: scale(0.98);
+          background: rgba(255,255,255,0.1);
+        }
+
+        /* Mobile categories */
+        .mobile-categories {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-categories::-webkit-scrollbar {
+          display: none;
+        }
+
+        .mobile-cat-chip {
+          flex-shrink: 0;
+          padding: 8px 16px;
+          border-radius: 100px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.7);
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .mobile-cat-chip:active {
+          background: rgba(255,255,255,0.12);
+          color: white;
+        }
+
+        /* Swipe indicator animation */
+        @keyframes swipeHint {
+          0%, 100% { transform: translateX(0); opacity: 0.4; }
+          50% { transform: translateX(8px); opacity: 0.8; }
+        }
+
+        .swipe-hint {
+          animation: swipeHint 2s ease-in-out infinite;
+        }
+
+        /* Mobile trust banner */
+        .mobile-trust-banner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          padding: 14px;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mobile-trust-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.5);
+          font-weight: 600;
+        }
+
       `}</style>
 
-      {/* ===== ABSOLUTE TOP TICKER BAR ===== */}
+      {/* ===== MOBILE TICKER BAR ===== */}
+      <div className="mobile-ticker sm:hidden">
+        <div className="flex items-center h-9 text-white/60 text-[10px] mono tracking-wider">
+          <div className="marquee flex items-center gap-8 whitespace-nowrap">
+            {[...Array(10)].map((_, i) => (
+              <React.Fragment key={`m-${i}`}>
+                <span className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full" style={{ background: currentCard.accent }} />
+                  VERIFIED ONLY
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full" style={{ background: currentCard.accent }} />
+                  CAMPUS TRADE
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full" style={{ background: currentCard.accent }} />
+                  ZERO FEES
+                </span>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== DESKTOP TICKER BAR ===== */}
       <div className="top-ticker hidden sm:block">
         <div className="flex items-center h-12 text-white/70 text-xs mono tracking-wider">
           <div className="marquee flex items-center gap-16 whitespace-nowrap">
@@ -553,7 +815,7 @@ const Hero = () => {
       <section ref={containerRef} className="hero-enhanced relative pt-24 pb-20 px-4 sm:px-6 lg:px-8">
 
         {/* Animated gradient mesh */}
-        <div 
+        <div
           className="gradient-mesh"
           style={{
             background: `radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, ${currentCard.accent}40 0%, transparent 50%)`
@@ -583,13 +845,252 @@ const Hero = () => {
           />
         ))}
 
-        <div className="max-w-[1800px] mx-auto relative z-10 pt-20">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            
+        <div className="max-w-[1800px] mx-auto relative z-10 pt-8 sm:pt-20">
+
+          {/* ============================= */}
+          {/* ===== MOBILE LAYOUT ONLY ===== */}
+          {/* ============================= */}
+          <div className="lg:hidden space-y-6 pb-8">
+
+            {/* Mobile badge */}
+            <div className="flex items-center justify-center anim-fade-up delay-100">
+              <div className="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-full">
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: currentCard.accent }} />
+                <span className="mono text-[10px] text-white/80 tracking-widest uppercase font-bold">SGSITS Exclusive</span>
+              </div>
+            </div>
+
+            {/* Mobile headline - compact */}
+            <div className="text-center anim-fade-up delay-200">
+              <h1 className="text-[clamp(2.8rem,14vw,4.5rem)] leading-[0.92] font-black text-white tracking-tight">
+                <span className="block">TRADE</span>
+                <span className="block" style={{ color: currentCard.accent }}>DIRECTLY</span>
+                <span className="block">ON CAMPUS</span>
+              </h1>
+              <p className="text-sm text-white/60 mt-4 px-4 leading-relaxed max-w-sm mx-auto">
+                Engineering essentials from <span className="font-semibold text-white/80">verified students</span>.
+                <span className="font-bold" style={{ color: currentCard.accent }}> No shipping. No fees.</span>
+              </p>
+            </div>
+
+            {/* Mobile stats strip */}
+            <div className="glass-card rounded-2xl overflow-hidden anim-fade-up delay-300">
+              <div className="mobile-stats-strip">
+                <div className="mobile-stat-item">
+                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>100%</div>
+                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Verified</div>
+                </div>
+                <div className="mobile-stat-item">
+                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>24/7</div>
+                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Support</div>
+                </div>
+                <div className="mobile-stat-item">
+                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>0₹</div>
+                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Fees</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile product card */}
+            <div
+              className="anim-scale delay-400"
+              style={{ '--accent-color': currentCard.accent }}
+            >
+              <div className="mobile-product-card">
+                <div className={`${isTransitioning ? 'card-transition-exit' : 'card-transition-enter'}`}>
+
+                  {/* Product image - full bleed */}
+                  <div className="mobile-product-image">
+                    <img
+                      src={currentCard.image}
+                      alt={currentCard.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Overlay content on image */}
+                    <div className="absolute bottom-0 left-0 right-0 z-10 p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className="mono text-[9px] px-2 py-1 rounded-full font-bold text-white/90"
+                          style={{ background: `${currentCard.accent}40`, border: `1px solid ${currentCard.accent}60` }}
+                        >
+                          {currentCard.tag}
+                        </span>
+                        <span className="mono text-[9px] text-white/50">#{String(currentIndex + 1).padStart(2, '0')}/{String(cards.length).padStart(2, '0')}</span>
+                      </div>
+                      <h3 className="text-xl font-black text-white leading-tight">{currentCard.title}</h3>
+                      <div
+                        className="mono text-2xl font-black text-white mt-1"
+                        style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+                      >
+                        {currentCard.price}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-5">
+                    {/* Seller info */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs"
+                        style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}99)` }}
+                      >
+                        {currentCard.user.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-white font-bold text-sm">{currentCard.user}</div>
+                        <div className="mono text-[9px] text-white/40 uppercase tracking-wide">Active now · Verified ✓</div>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-xs text-white/50 leading-relaxed mb-4">
+                      {currentCard.description}
+                    </p>
+
+                    {/* Quick chips */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                        📍 Campus Pickup
+                      </span>
+                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                        ⚡ Instant
+                      </span>
+                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                        🛡️ Verified
+                      </span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        className="action-pill mono text-white flex-1 justify-center text-xs"
+                        style={{ background: currentCard.accent }}
+                      >
+                        View Details →
+                      </button>
+                      <button
+                        className="action-pill mono text-white/80 flex-1 justify-center text-xs"
+                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                      >
+                        💬 Message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile card nav dots */}
+                <div className="flex items-center justify-center gap-2 pb-4">
+                  {cards.map((card, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => switchCard(idx)}
+                      className={`mobile-dot ${idx === currentIndex ? 'active' : ''}`}
+                      style={{
+                        background: idx === currentIndex ? currentCard.accent : 'rgba(255,255,255,0.2)'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile feature pills - horizontal scroll */}
+            <div className="anim-fade-up delay-500">
+              <div className="mobile-features-scroll px-1">
+                <div className="mobile-feature-pill">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${currentCard.accent}25` }}
+                  >
+                    <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xs">Verified Only</div>
+                    <div className="text-[10px] text-white/40">College credentials</div>
+                  </div>
+                </div>
+                <div className="mobile-feature-pill">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${currentCard.accent}25` }}
+                  >
+                    <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xs">Instant Meet</div>
+                    <div className="text-[10px] text-white/40">On-campus handover</div>
+                  </div>
+                </div>
+                <div className="mobile-feature-pill">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${currentCard.accent}25` }}
+                  >
+                    <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xs">Zero Fees</div>
+                    <div className="text-[10px] text-white/40">100% yours to keep</div>
+                  </div>
+                </div>
+                <span className="flex-shrink-0 flex items-center text-white/30 swipe-hint">›</span>
+              </div>
+            </div>
+
+            {/* Mobile categories */}
+            <div className="anim-fade-up delay-600">
+              <div className="mono text-[10px] text-white/40 tracking-widest mb-3 uppercase font-bold px-1">Popular Categories</div>
+              <div className="mobile-categories">
+                {['🔌 Electronics', '📚 Books', '🔧 Tools', '🥼 Lab Gear', '⚙️ Components', '✏️ Stationery'].map((cat) => (
+                  <button key={cat} className="mobile-cat-chip mono">
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile CTA buttons */}
+            <div className="space-y-3 anim-fade-up delay-700">
+              <button
+                className="mobile-cta-primary mono"
+                style={{ background: currentCard.accent }}
+              >
+                🛍️ Browse Market
+              </button>
+              <button className="mobile-cta-secondary mono">
+                📦 List Your Item
+              </button>
+            </div>
+
+            {/* Mobile trust banner */}
+            <div className="mobile-trust-banner anim-fade-up delay-800">
+              <div className="mobile-trust-item">
+                <span>🛡️</span>
+                <span className="mono">Secure</span>
+              </div>
+              <div className="w-px h-4 bg-white/10" />
+              <div className="mobile-trust-item">
+                <span>✓</span>
+                <span className="mono">Verified</span>
+              </div>
+              <div className="w-px h-4 bg-white/10" />
+              <div className="mobile-trust-item">
+                <span>⚡</span>
+                <span className="mono">Fast</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ============================== */}
+          {/* ===== DESKTOP LAYOUT ONLY ===== */}
+          {/* ============================== */}
+          <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+
             {/* ===== LEFT SIDEBAR - STATS ===== */}
-            <div className="hidden lg:block lg:col-span-2 space-y-10 anim-fade-left delay-100">
-              
+            <div className="lg:col-span-2 space-y-10 anim-fade-left delay-100">
+
               {/* Date */}
               <div className="space-y-3">
                 <div className="mono text-2xl text-white/90 font-black tracking-wider">
@@ -608,14 +1109,14 @@ const Hero = () => {
                   </div>
                   <div className="mono text-xs text-white/60 mt-2 uppercase tracking-widest">Verified Users</div>
                 </div>
-                
+
                 <div className="group cursor-pointer">
                   <div className="text-5xl font-black counter transition-all group-hover:scale-110" style={{ color: currentCard.accent }}>
                     24<span className="text-2xl">/7</span>
                   </div>
                   <div className="mono text-xs text-white/60 mt-2 uppercase tracking-widest">Active Support</div>
                 </div>
-                
+
                 <div className="group cursor-pointer">
                   <div className="text-5xl font-black counter transition-all group-hover:scale-110" style={{ color: currentCard.accent }}>
                     0<span className="text-2xl">₹</span>
@@ -649,15 +1150,15 @@ const Hero = () => {
 
             {/* ===== MAIN CONTENT ===== */}
             <div className="lg:col-span-7 space-y-12">
-              
+
               {/* Hero headline */}
               <div className="space-y-8 anim-fade-up delay-200">
-                
+
                 <div className="inline-flex items-center gap-3 glass-card px-5 py-3 rounded-full">
                   <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: currentCard.accent }} />
                   <span className="mono text-xs text-white/80 tracking-widest uppercase font-bold">SGSITS Exclusive Platform</span>
                 </div>
-                
+
                 <h1 className="text-[clamp(2.5rem,10vw,8rem)] leading-[0.95] font-black text-white tracking-tight">
                   <span className="block anim-fade-up delay-300">TRADE</span>
                   <span className="block accent-underline anim-fade-up delay-400" style={{ color: currentCard.accent }}>
@@ -667,13 +1168,13 @@ const Hero = () => {
                 </h1>
 
                 <p className="text-xl sm:text-2xl text-white/70 max-w-3xl leading-relaxed font-light anim-fade-up delay-600">
-                  Engineering essentials marketplace. From <span className="font-semibold text-white">Raspberry Pis</span> to <span className="font-semibold text-white">Drafters</span>, <span className="font-semibold text-white">Calculators</span> to <span className="font-semibold text-white">Lab Coats</span>. 
+                  Engineering essentials marketplace. From <span className="font-semibold text-white">Raspberry Pis</span> to <span className="font-semibold text-white">Drafters</span>, <span className="font-semibold text-white">Calculators</span> to <span className="font-semibold text-white">Lab Coats</span>.
                   Exchange with verified students. <span className="font-bold" style={{ color: currentCard.accent }}>No shipping. No middlemen.</span> Pure campus commerce.
                 </p>
               </div>
 
               {/* ===== REDESIGNED PRODUCT SHOWCASE ===== */}
-              <div 
+              <div
                 ref={cardRef}
                 className="card-3d anim-scale delay-700"
                 onMouseMove={handleCardMouseMove}
@@ -681,13 +1182,13 @@ const Hero = () => {
                 style={{ '--accent-color': currentCard.accent, '--accent-glow': `${currentCard.accent}40` }}
               >
                 <div className="product-showcase">
-                  
+
                   <div className={`${isTransitioning ? 'card-transition-exit' : 'card-transition-enter'}`}>
-                    
+
                     {/* Top strip - seller info */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                       <div className="flex items-center gap-3">
-                        <div 
+                        <div
                           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm"
                           style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}99)` }}
                         >
@@ -699,7 +1200,7 @@ const Hero = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span 
+                        <span
                           className="mono text-[10px] px-3 py-1.5 rounded-full font-bold text-white/90"
                           style={{ background: `${currentCard.accent}30`, border: `1px solid ${currentCard.accent}50` }}
                         >
@@ -713,10 +1214,10 @@ const Hero = () => {
 
                     {/* Main content area */}
                     <div className="grid md:grid-cols-2 gap-0">
-                      
+
                       {/* Image */}
                       <div className="product-image-wrapper aspect-[4/3] md:aspect-auto md:min-h-[380px]">
-                        <img 
+                        <img
                           src={currentCard.image}
                           alt={currentCard.title}
                           className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
@@ -727,7 +1228,7 @@ const Hero = () => {
                         />
                         {/* Price badge overlaid on image */}
                         <div className="absolute bottom-6 left-6 z-10">
-                          <div 
+                          <div
                             className="mono text-3xl lg:text-4xl font-black text-white"
                             style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
                           >
@@ -738,9 +1239,9 @@ const Hero = () => {
 
                       {/* Details side */}
                       <div className="p-8 lg:p-10 flex flex-col justify-between relative">
-                        
+
                         {/* Background accent glow */}
-                        <div 
+                        <div
                           className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
                           style={{ background: currentCard.accent }}
                         />
@@ -772,13 +1273,13 @@ const Hero = () => {
 
                         {/* Action area */}
                         <div className="flex flex-wrap items-center gap-3">
-                          <button 
+                          <button
                             className="action-pill mono text-white flex-1 sm:flex-none"
                             style={{ background: currentCard.accent }}
                           >
                             View Details →
                           </button>
-                          <button 
+                          <button
                             className="action-pill mono text-white/80 flex-1 sm:flex-none"
                             style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
                           >
@@ -793,7 +1294,7 @@ const Hero = () => {
 
                   {/* Bottom navigation strip */}
                   <div className="flex items-center gap-4 px-6 py-4 border-t border-white/5 bg-black/20">
-                    
+
                     {/* Thumbnail strip */}
                     <div className="flex items-center gap-3 flex-1 overflow-x-auto">
                       {cards.map((card, idx) => (
@@ -803,8 +1304,8 @@ const Hero = () => {
                           className={`thumb-item flex items-center gap-3 px-3 py-2 ${idx === currentIndex ? 'active' : ''}`}
                           style={{ '--accent-color': card.accent, '--accent-glow': `${card.accent}40` }}
                         >
-                          <img 
-                            src={card.image} 
+                          <img
+                            src={card.image}
                             alt={card.title}
                             className="w-10 h-10 rounded-lg object-cover"
                           />
@@ -823,7 +1324,7 @@ const Hero = () => {
                           key={idx}
                           onClick={() => switchCard(idx)}
                           className={`nav-dot ${idx === currentIndex ? 'active' : ''}`}
-                          style={{ 
+                          style={{
                             '--accent-color': currentCard.accent,
                             background: idx === currentIndex ? currentCard.accent : 'rgba(255,255,255,0.2)'
                           }}
@@ -837,13 +1338,13 @@ const Hero = () => {
 
               {/* CTA buttons */}
               <div className="flex flex-wrap gap-4 items-center anim-fade-up delay-800 flex-col sm:flex-row">
-                <button 
+                <button
                   className="btn-magnetic mono text-sm rounded-xl relative overflow-hidden"
                   style={{ background: currentCard.accent }}
                 >
                   🛍️ BROWSE MARKET
                 </button>
-                <button 
+                <button
                   className="glass-card mono text-sm px-8 py-4 rounded-xl text-white font-bold hover:bg-white/10 transition-all relative overflow-hidden"
                 >
                   📦 LIST YOUR ITEM
@@ -857,14 +1358,14 @@ const Hero = () => {
             </div>
 
             {/* ===== RIGHT SIDEBAR - FEATURES ===== */}
-            <div className="hidden lg:block lg:col-span-3 space-y-8 anim-fade-right delay-300">
-              
+            <div className="lg:col-span-3 space-y-8 anim-fade-right delay-300">
+
               <div className="space-y-8">
-                
+
                 {/* Feature 1 */}
                 <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
                   <div className="flex items-start gap-4 mb-4">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >
@@ -882,7 +1383,7 @@ const Hero = () => {
                 {/* Feature 2 */}
                 <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
                   <div className="flex items-start gap-4 mb-4">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >
@@ -900,7 +1401,7 @@ const Hero = () => {
                 {/* Feature 3 */}
                 <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
                   <div className="flex items-start gap-4 mb-4">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Tesseract from 'tesseract.js'; 
+import Tesseract from 'tesseract.js';
 import { useAuth } from '../../context/AuthContext';
 import Icons from '../../assets/icons/Icons';
 import NeonButton from '../ui/NeonButton';
@@ -68,10 +68,10 @@ const modalStyles = `
 
 const ConnectIdModal = ({ isOpen, onClose }) => {
   const { register, login, loginWithGoogle } = useAuth();
-  
+
   const [activeTab, setActiveTab] = useState('manual');
   const [dragActive, setDragActive] = useState(false);
-  
+
   // Form Data States
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -107,7 +107,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       setDebugInfo([]);
     }
   }, [isOpen]);
-  
+
   if (!isOpen) return null;
 
   // --- Image Preprocessing ---
@@ -119,35 +119,35 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          
+
           const maxWidth = 1600;
           const scale = Math.min(1, maxWidth / img.width);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
-          
+
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
+
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
-          
+
           for (let i = 0; i < data.length; i += 4) {
             const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            
+
             const contrast = 1.8;
             const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
             let newValue = factor * (avg - 128) + 128;
-            
+
             if (newValue < 128) {
               newValue = Math.max(0, newValue * 0.7);
             } else {
               newValue = Math.min(255, newValue * 1.2);
             }
-            
+
             data[i] = data[i + 1] = data[i + 2] = newValue;
           }
-          
+
           ctx.putImageData(imageData, 0, 0);
-          
+
           canvas.toBlob((blob) => {
             resolve(blob);
           }, 'image/png');
@@ -162,7 +162,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
   const createNormalizedVersion = (text) => {
     if (!text) return '';
-    
+
     return text
       .toLowerCase()
       .replace(/\s+/g, '')
@@ -180,10 +180,10 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     const len1 = str1.length;
     const len2 = str2.length;
     const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
-    
+
     for (let i = 0; i <= len1; i++) matrix[i][0] = i;
     for (let j = 0; j <= len2; j++) matrix[0][j] = j;
-    
+
     for (let i = 1; i <= len1; i++) {
       for (let j = 1; j <= len2; j++) {
         const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
@@ -194,7 +194,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         );
       }
     }
-    
+
     const distance = matrix[len1][len2];
     const maxLen = Math.max(len1, len2);
     return 1 - (distance / maxLen);
@@ -203,33 +203,33 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const fuzzyMatchEnrollment = (scannedText, targetEnrollment, debugLog) => {
     const target = targetEnrollment.toLowerCase().replace(/\s+/g, '');
     const scanned = scannedText.toLowerCase();
-    
+
     debugLog(`🎯 Target Enrollment: "${targetEnrollment}"`);
-    
+
     if (scanned.includes(target)) {
       debugLog(`✅ Strategy 1: Direct match found`);
       return true;
     }
-    
+
     const normalizedTarget = createNormalizedVersion(target);
     const normalizedScanned = createNormalizedVersion(scanned);
-    
+
     if (normalizedScanned.includes(normalizedTarget)) {
       debugLog(`✅ Strategy 2: Normalized match found`);
       return true;
     }
-    
+
     const scannedNumbers = scanned.match(/[a-z0-9]{6,}/gi) || [];
-    
+
     for (const seq of scannedNumbers) {
       const similarity = calculateSimilarity(seq.toLowerCase(), target);
-      
+
       if (similarity >= 0.75) {
         debugLog(`✅ Strategy 3: High similarity match (${(similarity * 100).toFixed(1)}%)`);
         return true;
       }
     }
-    
+
     debugLog(`❌ No match found`);
     return false;
   };
@@ -237,19 +237,19 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   const fuzzyMatchName = (scannedText, targetName, debugLog) => {
     const scannedLower = scannedText.toLowerCase();
     const nameParts = targetName.trim().toLowerCase().split(/\s+/).filter(part => part.length >= 2);
-    
+
     debugLog(`🔎 Checking ${nameParts.length} name parts: ${nameParts.join(', ')}`);
-    
+
     let matchCount = 0;
     const requiredMatches = Math.ceil(nameParts.length / 2);
-    
+
     for (const part of nameParts) {
       if (scannedLower.includes(part)) {
         matchCount++;
         debugLog(`   ✓ "${part}" found (direct)`);
         continue;
       }
-      
+
       const words = scannedLower.split(/\s+/);
       for (const word of words) {
         if (word.length >= part.length - 1 && word.length <= part.length + 1) {
@@ -262,7 +262,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         }
       }
     }
-    
+
     const matched = matchCount >= requiredMatches;
     debugLog(`📊 Name Match: ${matchCount}/${nameParts.length} parts: ${matched ? '✓ PASS' : '✗ FAIL'}`);
     return matched;
@@ -293,22 +293,22 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
   const handleFileSelect = (selectedFile) => {
     if (!selectedFile) return;
-    
+
     if (!selectedFile.type.startsWith('image/')) {
       alert('Please upload an image file (JPG, PNG, etc.)');
       return;
     }
-    
+
     if (selectedFile.size > 10 * 1024 * 1024) {
       alert('File size must be less than 10MB');
       return;
     }
-    
+
     setFile(selectedFile);
     setVerificationStatus('idle');
     setExtractedText('');
     setDebugInfo([]);
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       setImagePreview(e.target.result);
@@ -330,15 +330,15 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       alert("Please enter email and password.");
       return;
     }
-    
+
     setIsProcessing(true);
     setDebugInfo([]);
-    
+
     try {
       addDebugInfo('🔑 Attempting login...');
-      
+
       const result = await login(email, password);
-      
+
       if (result.success) {
         addDebugInfo('✅ Login successful!');
         setTimeout(() => {
@@ -364,13 +364,13 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       alert("Please fill in all fields and upload an ID card.");
       return;
     }
-    
+
     setIsProcessing(true);
     setVerificationStatus('idle');
     setOcrProgress(0);
     setExtractedText('');
     setDebugInfo([]);
-    
+
     try {
       addDebugInfo('═══════════════════════════════');
       addDebugInfo('🚀 VERIFICATION PROCESS STARTED');
@@ -379,14 +379,14 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       addDebugInfo(`🔢 Enrollment Input: "${enrollment}"`);
       addDebugInfo(`📧 Email: "${email}"`);
       addDebugInfo(`📁 File: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
-      
+
       // Preprocess image
       addDebugInfo('🖼️  Preprocessing image...');
       const processedImage = await preprocessImage(file);
       addDebugInfo('✓ Image preprocessed successfully');
-      
+
       addDebugInfo('🔍 Starting OCR scan...');
-      
+
       // Perform OCR
       const { data: { text, confidence } } = await Tesseract.recognize(
         processedImage,
@@ -405,26 +405,26 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           tessedit_pageseg_mode: Tesseract.PSM.AUTO,
         }
       );
-      
+
       setExtractedText(text);
       addDebugInfo('═══════════════════════════════');
       addDebugInfo(`✅ OCR COMPLETE`);
       addDebugInfo(`📊 Confidence: ${Math.round(confidence)}%`);
       addDebugInfo(`📄 Extracted ${text.length} characters`);
       addDebugInfo('═══════════════════════════════');
-      
+
       // Name Verification
       addDebugInfo('');
       addDebugInfo('👤 NAME VERIFICATION:');
       addDebugInfo('─────────────────────────────');
       const nameMatch = fuzzyMatchName(text, fullName, addDebugInfo);
-      
+
       // Enrollment Verification
       addDebugInfo('');
       addDebugInfo('🎫 ENROLLMENT VERIFICATION:');
       addDebugInfo('─────────────────────────────');
       const enrollmentMatch = fuzzyMatchEnrollment(text, enrollment, addDebugInfo);
-      
+
       // Final Decision
       addDebugInfo('');
       addDebugInfo('═══════════════════════════════');
@@ -433,12 +433,12 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
       addDebugInfo(`👤 Name: ${nameMatch ? '✅ VERIFIED' : '❌ FAILED'}`);
       addDebugInfo(`🎫 Enrollment: ${enrollmentMatch ? '✅ VERIFIED' : '❌ FAILED'}`);
       addDebugInfo('═══════════════════════════════');
-      
+
       if (nameMatch && enrollmentMatch) {
         addDebugInfo('');
         addDebugInfo('🎉 ✅ OCR VERIFICATION SUCCESSFUL! 🎉');
         addDebugInfo('Creating account...');
-        
+
         const result = await register({
           email,
           password,
@@ -446,11 +446,11 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           enrollmentNumber: enrollment,
           isVerified: true
         });
-        
+
         if (result.success) {
           addDebugInfo('✅ Account created successfully!');
           addDebugInfo('🚀 Redirecting to marketplace...');
-          
+
           setVerificationStatus('success');
           setTimeout(() => {
             onClose();
@@ -473,7 +473,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         addDebugInfo('   • Try uploading a higher quality image');
         setVerificationStatus('failed');
       }
-      
+
     } catch (error) {
       console.error("Verification Error:", error);
       addDebugInfo('');
@@ -501,7 +501,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     if (verificationStatus === 'success') {
       return (
         <span className="flex items-center gap-2 text-black font-bold mono text-xs uppercase">
-          <Icons.CheckCircle size={16}/> VERIFIED! REDIRECTING...
+          <Icons.CheckCircle size={16} /> VERIFIED! REDIRECTING...
         </span>
       );
     }
@@ -518,41 +518,43 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <style>{modalStyles}</style>
-      
-      <div 
-        className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" 
+
+      <div
+        className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       <div className="relative w-full max-w-6xl bg-[#050505] border border-white/20 shadow-2xl flex flex-col md:flex-row animate-modal-pop overflow-hidden max-h-[90vh]">
-        
+
         {/* Left Side */}
-        <div className="w-full md:w-2/5 bg-zinc-900 border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden p-8 flex flex-col justify-between text-white">
-          
+        <div className="w-full md:w-2/5 bg-zinc-900 border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden p-6 md:p-8 flex flex-col justify-center md:justify-between text-white shrink-0">
+
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-          
-          <div className="relative z-10">
-            <div className="w-12 h-12 bg-[#00D9FF] flex items-center justify-center mb-6 border border-white/10 text-black shadow-[4px_4px_0px_white]">
-              <Icons.ShieldCheck className="w-6 h-6" />
+
+          <div className="relative z-10 flex items-center md:items-start md:flex-col gap-4 md:gap-0">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#00D9FF] flex-shrink-0 flex items-center justify-center md:mb-6 border border-white/10 text-black shadow-[4px_4px_0px_white]">
+              <Icons.ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
             </div>
-            <h2 className="text-2xl font-black uppercase leading-tight mb-2 tracking-tighter">
-              Secure Campus<br/>Network
-            </h2>
-            <p className="text-white/60 text-xs font-medium mono border-l-2 border-[#00D9FF] pl-3">
-              // Join the exclusive marketplace for SGSITS. <br/>
-              // Verified students only. No middlemen.
-            </p>
+            <div>
+              <h2 className="text-xl md:text-2xl font-black uppercase leading-tight md:mb-2 tracking-tighter">
+                Secure Campus<br className="hidden md:block" /> Network
+              </h2>
+              <p className="hidden md:block text-white/60 text-xs font-medium mono border-l-2 border-[#00D9FF] pl-3 mt-1">
+                // Join the exclusive marketplace for SGSITS. <br />
+                // Verified students only. No middlemen.
+              </p>
+            </div>
           </div>
 
-          <div className="relative z-10 flex-1 flex items-center justify-center py-6">
-            <img 
-              src={LoginGraphic} 
-              alt="Security Graphic" 
-              className="w-full max-w-[240px] h-auto object-contain drop-shadow-xl animate-float-slow opacity-90 transition-all duration-500"
+          <div className="relative z-10 hidden md:flex flex-1 items-center justify-center py-6">
+            <img
+              src={LoginGraphic}
+              alt="Security Graphic"
+              className="w-full max-w-[240px] h-auto object-contain drop-shadow-xl animate-float-slow opacity-90"
             />
           </div>
 
-          <div className="relative z-10">
+          <div className="relative z-10 hidden md:block">
             <div className="bg-black border border-white/20 p-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"></div>
@@ -561,7 +563,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                 </span>
               </div>
               <p className="text-[10px] text-white/50 mono leading-relaxed">
-                SYSTEM ACCESS GRANTED <br/>
+                SYSTEM ACCESS GRANTED <br />
                 {isProcessing ? 'ANALYZING ID CARD WITH AI...' : 'READY FOR VERIFICATION...'}
               </p>
             </div>
@@ -570,7 +572,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
         {/* Right Side */}
         <div className="w-full md:w-3/5 p-8 relative bg-[#0A0A0A] overflow-y-auto custom-scrollbar">
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center border border-white/20 text-white/40 hover:text-white hover:border-white hover:bg-white/10 transition-all z-20"
           >
@@ -601,16 +603,16 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
           {/* Google Button */}
           <div className="mb-6">
-            <button 
+            <button
               onClick={handleGoogleLogin}
               disabled={isProcessing}
               className="w-full bg-white hover:bg-gray-100 text-black px-4 py-3 text-xs font-bold uppercase transition-colors mono disabled:opacity-50 flex items-center justify-center gap-3"
             >
               <svg viewBox="0 0 24 24" className="w-5 h-5">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.11c-.22-.66-.35-1.36-.35-2.11s.13-1.45.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.11c-.22-.66-.35-1.36-.35-2.11s.13-1.45.35-2.11V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.66-2.84z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
               {isLogin ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE'}
             </button>
@@ -631,87 +633,87 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               <>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full input-brutal px-4 py-3 text-sm" 
-                    placeholder="your@email.com" 
+                    className="w-full input-brutal px-4 py-3 text-sm"
+                    placeholder="your@email.com"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full input-brutal px-4 py-3 text-sm" 
-                    placeholder="••••••••" 
+                    className="w-full input-brutal px-4 py-3 text-sm"
+                    placeholder="••••••••"
                   />
                 </div>
               </>
             ) : (
               /* SIGNUP MODE - Full Form with ID Upload */
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Email</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full input-brutal px-4 py-3 text-sm" 
-                      placeholder="your@email.com" 
+                      className="w-full input-brutal px-4 py-3 text-sm"
+                      placeholder="your@email.com"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Password</label>
-                    <input 
-                      type="password" 
+                    <input
+                      type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full input-brutal px-4 py-3 text-sm" 
-                      placeholder="••••••••" 
+                      className="w-full input-brutal px-4 py-3 text-sm"
+                      placeholder="••••••••"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Full Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full input-brutal px-4 py-3 text-sm" 
-                      placeholder="Rajvir Gautam" 
+                      className="w-full input-brutal px-4 py-3 text-sm"
+                      placeholder="Rajvir Gautam"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-white ml-1 uppercase mono">Enrollment No.</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={enrollment}
                       onChange={(e) => setEnrollment(e.target.value)}
-                      className="w-full input-brutal px-4 py-3 text-sm" 
-                      placeholder="0801CS211234" 
+                      className="w-full input-brutal px-4 py-3 text-sm"
+                      placeholder="0801CS211234"
                     />
                     <p className="text-[9px] text-white/40 mono mt-1">Case insensitive • AI will handle OCR errors</p>
                   </div>
                 </div>
 
-                <div 
+                <div
                   className={`relative border-2 border-dashed p-6 flex flex-col items-center justify-center text-center transition-colors
                   ${dragActive ? 'border-[#00D9FF] bg-[#00D9FF]/10' : 'border-white/20 hover:border-white/40 bg-zinc-900/50'} cursor-pointer`}
-                  onDragEnter={handleDrag} 
-                  onDragLeave={handleDrag} 
-                  onDragOver={handleDrag} 
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
                   onDrop={handleDrop}
                 >
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={(e) => handleFileSelect(e.target.files[0])}
                   />
-                  
+
                   {file ? (
                     <div className="space-y-3 w-full">
                       <div className="flex items-center gap-3 text-green-500 font-bold justify-center">
@@ -719,13 +721,13 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                         <span className="mono text-xs uppercase">{file.name}</span>
                       </div>
                       {imagePreview && (
-                        <img 
-                          src={imagePreview} 
-                          alt="ID Preview" 
+                        <img
+                          src={imagePreview}
+                          alt="ID Preview"
                           className="max-h-40 mx-auto border border-white/20 shadow-lg"
                         />
                       )}
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setFile(null);
@@ -749,14 +751,14 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                       <p className="text-[10px] text-white/40 mt-1 mono">JPG, PNG • MAX 10MB • CLEAR & WELL-LIT</p>
                     </>
                   )}
-                  
+
                   {dragActive && <div className="absolute left-0 right-0 h-0.5 bg-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.8)] animate-scan-line pointer-events-none"></div>}
                 </div>
               </>
             )}
 
-            <NeonButton 
-              primary={verificationStatus !== 'failed'} 
+            <NeonButton
+              primary={verificationStatus !== 'failed'}
               className={`w-full justify-center py-4 mt-4 rounded-none font-mono uppercase text-xs font-bold ${verificationStatus === 'failed' ? 'bg-red-900/20 border-red-500 text-red-500 hover:border-red-400' : ''}`}
               disabled={isProcessing || verificationStatus === 'success'}
               onClick={isLogin ? handleManualLogin : handleManualSignup}
@@ -769,7 +771,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               <div className="debug-panel p-4 space-y-2 mt-6">
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#00D9FF]/20">
                   <span className="font-bold uppercase text-[#00D9FF]">// AI VERIFICATION LOG</span>
-                  <button 
+                  <button
                     onClick={() => {
                       setExtractedText('');
                       setDebugInfo([]);
@@ -779,25 +781,24 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                     CLEAR
                   </button>
                 </div>
-                
+
                 <div className="space-y-0.5 max-h-48 overflow-y-auto pr-2">
                   {debugInfo.map((info, i) => (
-                    <div 
-                      key={i} 
-                      className={`text-[9px] leading-relaxed ${
-                        info.includes('✅') || info.includes('✓') ? 'text-green-400' :
-                        info.includes('❌') || info.includes('✗') ? 'text-red-400' :
-                        info.includes('⚠️') ? 'text-yellow-400' :
-                        info.includes('═══') ? 'text-[#00D9FF] font-bold' :
-                        info.includes('🎉') ? 'text-green-300 font-bold' :
-                        'text-white/70'
-                      }`}
+                    <div
+                      key={i}
+                      className={`text-[9px] leading-relaxed ${info.includes('✅') || info.includes('✓') ? 'text-green-400' :
+                          info.includes('❌') || info.includes('✗') ? 'text-red-400' :
+                            info.includes('⚠️') ? 'text-yellow-400' :
+                              info.includes('═══') ? 'text-[#00D9FF] font-bold' :
+                                info.includes('🎉') ? 'text-green-300 font-bold' :
+                                  'text-white/70'
+                        }`}
                     >
                       {info}
                     </div>
                   ))}
                 </div>
-                
+
                 {extractedText && (
                   <details className="mt-4 pt-3 border-t border-[#00D9FF]/20">
                     <summary className="cursor-pointer text-[10px] text-[#00D9FF] hover:text-white uppercase tracking-wider">

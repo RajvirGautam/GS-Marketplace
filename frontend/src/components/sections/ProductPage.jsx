@@ -104,6 +104,8 @@ const ProductPage = () => {
   const [offerError, setOfferError] = useState('');
   const [offerSuccess, setOfferSuccess] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
@@ -162,6 +164,31 @@ const ProductPage = () => {
     } finally {
       setChatLoading(false);
     }
+  };
+
+  // Share functionality
+  const handleShare = async () => {
+    const productUrl = window.location.href;
+    const sellerName = typeof product.seller === 'object' ? product.seller.fullName : (product.user || 'a student');
+    const priceText = product.type === 'free' ? 'FREE' : product.type === 'barter' ? 'barter' : `₹${product.price}`;
+    const whatsappText = `🛒 *${product.title}* — ${priceText}\n📦 Condition: ${product.condition}\n👤 Seller: ${sellerName} (${product.branch?.toUpperCase() || ''} • ${product.year}th Yr)\n\nCheck it out on GS Marketplace 👇\n${productUrl}`;
+
+    // Try native Web Share API (works great on mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.title,
+          text: whatsappText,
+          url: productUrl,
+        });
+        return;
+      } catch (err) {
+        // User cancelled or API failed – fall through to modal
+        if (err.name === 'AbortError') return;
+      }
+    }
+    // Fallback: open custom share modal
+    setShowShareModal(true);
   };
 
   const handleMakeOffer = async (e) => {
@@ -702,6 +729,38 @@ const ProductPage = () => {
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
           z-index: 50;
         }
+
+        .share-option-btn {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          width: 100%;
+          padding: 14px 16px;
+          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.04);
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: left;
+          font-family: var(--font-main);
+        }
+        .share-option-btn:hover {
+          background: rgba(255,255,255,0.1);
+          border-color: rgba(255,255,255,0.2);
+        }
+        .share-option-btn .share-icon-wrap {
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 20px;
+        }
       `}</style>
 
       <div className="noise"></div>
@@ -714,7 +773,7 @@ const ProductPage = () => {
         </button>
 
         <div className="flex gap-3 pointer-events-auto items-center">
-          <button className="btn-glass shadow-lg">
+          <button className="btn-glass shadow-lg" onClick={handleShare} title="Share this listing">
             <ShareIcon />
           </button>
           <button className="btn-glass shadow-lg group hidden md:flex items-center" onClick={(e) => {
@@ -1228,6 +1287,103 @@ const ProductPage = () => {
           </div>
         )
       }
+      {/* ── Share Modal ── */}
+      {showShareModal && (() => {
+        const productUrl = window.location.href;
+        const sellerName = typeof product.seller === 'object' ? product.seller.fullName : (product.user || 'a student');
+        const priceText = product.type === 'free' ? 'FREE' : product.type === 'barter' ? 'barter' : `₹${product.price}`;
+        const waText = encodeURIComponent(`🛒 *${product.title}* — ${priceText}\n📦 Condition: ${product.condition}\n👤 Seller: ${sellerName}${product.branch ? ` (${product.branch.toUpperCase()}` : ''}${product.year ? ` • ${product.year}th Yr)` : ')'}\n\nCheck it out on GS Marketplace 👇\n${productUrl}`);
+
+        const handleCopyLink = async () => {
+          try {
+            await navigator.clipboard.writeText(productUrl);
+            setShareCopied(true);
+            setTimeout(() => setShareCopied(false), 2500);
+          } catch { }
+        };
+
+        return (
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowShareModal(false)} />
+            <div className="relative w-full max-w-sm bg-[#141414] border border-white/10 rounded-3xl p-6 shadow-2xl fade-in overflow-hidden">
+              {/* Glow */}
+              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full blur-[80px] opacity-20" style={{ background: product.accent || '#00D9FF' }} />
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-xl font-black">Share Listing</h2>
+                  <p className="text-white/40 text-xs mt-0.5 font-mono">Send this to a friend</p>
+                </div>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all text-lg font-bold"
+                >×</button>
+              </div>
+
+              {/* Product preview strip */}
+              <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10 mb-5">
+                <img
+                  src={product.images?.[0] || product.image || '/placeholder.jpg'}
+                  alt={product.title}
+                  className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-white/10"
+                />
+                <div className="min-w-0">
+                  <div className="font-bold text-sm truncate">{product.title}</div>
+                  <div className="text-white/50 text-xs mt-0.5">{priceText} · {product.condition}</div>
+                </div>
+              </div>
+
+              {/* Share options */}
+              <div className="space-y-2.5">
+                {/* WhatsApp */}
+                <a
+                  href={`https://wa.me/?text=${waText}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="share-option-btn"
+                  onClick={() => setShowShareModal(false)}
+                >
+                  <span className="share-icon-wrap" style={{ background: '#25D36620' }}>
+                    <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
+                      <path d="M16 3C8.82 3 3 8.82 3 16c0 2.36.63 4.6 1.72 6.55L3 29l6.67-1.7A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3Z" fill="#25D366" />
+                      <path d="M22.3 19.1c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51H11.8c-.2 0-.5.07-.77.37-.27.3-1.02 1-1.02 2.44 0 1.44 1.05 2.84 1.19 3.03.15.2 2.06 3.15 5 4.42.7.3 1.24.48 1.66.61.7.22 1.33.19 1.83.11.56-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" fill="#fff" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="text-sm">Share on WhatsApp</div>
+                    <div className="text-white/40 text-xs">Send product details + link</div>
+                  </div>
+                </a>
+
+                {/* Copy Link */}
+                <button className="share-option-btn" onClick={handleCopyLink}>
+                  <span className="share-icon-wrap" style={{ background: shareCopied ? '#22c55e20' : '#ffffff10' }}>
+                    {shareCopied ? (
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    )}
+                  </span>
+                  <div>
+                    <div className="text-sm" style={{ color: shareCopied ? '#22c55e' : '#fff' }}>{shareCopied ? 'Link Copied!' : 'Copy Link'}</div>
+                    <div className="text-white/40 text-xs">Copy product URL to clipboard</div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="mt-5 text-center text-[10px] uppercase tracking-widest text-white/20">
+                GS Marketplace · Campus Deals
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 };

@@ -103,14 +103,14 @@ router.post('/conversations', authenticate, async (req, res) => {
             participants: { $all: participants, $size: 2 }
         })
             .populate('participants', 'fullName profilePicture')
-            .populate('product', 'title images price')
+            .populate('product', 'title images price type condition category branch year description highlights specs barterFor createdAt')
             .populate({ path: 'lastMessage', select: 'content type createdAt sender readBy' });
 
         if (!conversation) {
             conversation = await Conversation.create({ participants, product: productId });
             conversation = await Conversation.findById(conversation._id)
                 .populate('participants', 'fullName profilePicture')
-                .populate('product', 'title images price');
+                .populate('product', 'title images price type condition category branch year description highlights specs barterFor createdAt');
         }
 
         res.json({ success: true, conversation });
@@ -128,7 +128,7 @@ router.get('/conversations', authenticate, async (req, res) => {
     try {
         const conversations = await Conversation.find({ participants: req.user._id })
             .populate('participants', 'fullName profilePicture')
-            .populate('product', 'title images price')
+            .populate('product', 'title images price type condition category branch year description highlights specs barterFor createdAt')
             .populate({ path: 'lastMessage', select: 'content type createdAt sender readBy' })
             .sort({ lastMessageAt: -1 });
 
