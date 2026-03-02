@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { chatAPI } from '../../services/api';
 
 // ─────────────────────────────────────────────────────────────
@@ -364,6 +365,7 @@ const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
             alignItems: 'flex-end',
             gap: 8,
             marginBottom: 8,
+            width: '100%',
         }}>
             {/* Avatar */}
             {!isMine && (
@@ -557,6 +559,7 @@ const Chat = () => {
     const navigate = useNavigate();
     const { conversationId } = useParams();
     const { user } = useAuth();
+    const { socket, markConversationRead } = useSocket();
 
     const [conversations, setConversations] = useState([]);
     const [activeConvId, setActiveConvId] = useState(conversationId || null);
@@ -607,18 +610,42 @@ const Chat = () => {
             const res = await chatAPI.getMessages(convId);
             if (res.success) {
                 setMessages(res.messages || []);
-                // After fetching messages (which marks them as read), refresh conversation list
-                if (updateConvList) fetchConversations();
+                // After fetching messages (which marks them as read server-side):
+                if (updateConvList) {
+                    fetchConversations();      // refresh conv list unread dots
+                    markConversationRead();    // sync the global chat badge in navbar
+                }
             }
         } catch (e) {
             console.error('Failed to fetch messages', e);
         }
-    }, [fetchConversations]);
+    }, [fetchConversations, markConversationRead]);
 
     // ── Initial load ──
     useEffect(() => {
         fetchConversations();
     }, [fetchConversations]);
+
+    // ── Real-time: receive new messages via socket ──
+    useEffect(() => {
+        if (!socket || !activeConvId) return;
+        const handleNewMessage = ({ conversationId: convId, message }) => {
+            if (convId === activeConvId) {
+                // Append the message directly — no need to poll
+                setMessages(prev => {
+                    if (prev.some(m => m._id === message._id)) return prev; // dedupe
+                    return [...prev, message];
+                });
+                shouldScrollRef.current = true;
+                // Mark it read immediately since we're looking at this convo
+                markConversationRead();
+            }
+            // Always refresh conversation list so preview/time update
+            fetchConversations();
+        };
+        socket.on('new_message', handleNewMessage);
+        return () => socket.off('new_message', handleNewMessage);
+    }, [socket, activeConvId, fetchConversations, markConversationRead]);
 
     // ── Load messages on conversation change ──
     useEffect(() => {

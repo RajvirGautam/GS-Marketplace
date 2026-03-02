@@ -14,6 +14,7 @@ export const useSocket = () => {
         toasts: [],
         dismissToast: () => { },
         markConversationRead: () => { },
+        fetchUnreadCount: () => { },
         notifications: [],
         unreadNotifCount: 0,
         markNotifRead: () => { },
@@ -28,6 +29,7 @@ const SOCKET_URL = API_URL.replace('/api', '');
 export const SocketProvider = ({ children }) => {
     const { user, isAuthenticated } = useAuth();
     const socketRef = useRef(null);
+    const [socketInstance, setSocketInstance] = useState(null); // reactive socket for consumers
     const [unreadCount, setUnreadCount] = useState(0);
     const [toasts, setToasts] = useState([]); // [{ id, conversationId, message, product? }]
 
@@ -93,22 +95,29 @@ export const SocketProvider = ({ children }) => {
 
         socket.on('connect', () => {
             console.log('🟢 Socket connected');
+            // Re-sync counts after connect/reconnect to recover any missed events
+            fetchUnreadCount();
+            fetchNotifications();
         });
 
         socket.on('new_message', ({ conversationId, message }) => {
-            // Increment badge
-            setUnreadCount(prev => prev + 1);
-
-            // Show toast (skip if window is currently on that conversation)
             const currentPath = window.location.pathname;
-            if (currentPath === `/chat/${conversationId}`) return;
+            const isViewingConversation = currentPath === `/chat/${conversationId}`;
 
-            const toastId = `${conversationId}-${message._id || Date.now()}`;
-            setToasts(prev => {
-                // Replace existing toast for same conversation (don't stack duplicates)
-                const filtered = prev.filter(t => t.conversationId !== conversationId);
-                return [...filtered, { id: toastId, conversationId, message }];
-            });
+            // Only bump badge if the user isn't actively reading this conversation.
+            // When they ARE reading it, Chat.jsx calls markConversationRead() which
+            // re-fetches the accurate count from the server instead.
+            if (!isViewingConversation) {
+                setUnreadCount(prev => prev + 1);
+
+                // Show toast only when not on that conversation
+                const toastId = `${conversationId}-${message._id || Date.now()}`;
+                setToasts(prev => {
+                    // Replace existing toast for same conversation (don't stack duplicates)
+                    const filtered = prev.filter(t => t.conversationId !== conversationId);
+                    return [...filtered, { id: toastId, conversationId, message }];
+                });
+            }
         });
 
         // ── New in-app notification from server ──────────────────────────────
@@ -122,10 +131,12 @@ export const SocketProvider = ({ children }) => {
         });
 
         socketRef.current = socket;
+        setSocketInstance(socket);
 
         return () => {
             socket.disconnect();
             socketRef.current = null;
+            setSocketInstance(null);
         };
     }, [isAuthenticated, user]);
 
@@ -181,11 +192,12 @@ export const SocketProvider = ({ children }) => {
 
     return (
         <SocketContext.Provider value={{
-            socket: socketRef.current,
+            socket: socketInstance,
             unreadCount,
             toasts,
             dismissToast,
             markConversationRead,
+            fetchUnreadCount,
             // Notification API
             notifications,
             unreadNotifCount,
