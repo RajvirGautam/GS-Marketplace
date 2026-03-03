@@ -588,7 +588,7 @@ const Chat = () => {
     // Derived: active conversation object
     const activeConv = conversations.find(c => c._id === activeConvId);
     const otherParticipant = activeConv?.participants?.find(
-        p => p._id !== user?._id && p._id?.toString() !== user?._id?.toString()
+        p => p._id !== (user?.id || user?._id) && p._id?.toString() !== (user?.id || user?._id)?.toString()
     ) || activeConv?.participants?.[0];
 
     // ── Fetch conversations ──
@@ -1113,14 +1113,14 @@ const Chat = () => {
                                 </div>
                             ) : (
                                 conversations.filter(c => {
-                                    const other = c.participants?.find(p => p._id !== user?._id && p._id?.toString() !== user?._id?.toString()) || c.participants?.[0];
+                                    const other = c.participants?.find(p => p._id !== (user?.id || user?._id) && p._id?.toString() !== (user?.id || user?._id)?.toString()) || c.participants?.[0];
                                     return other?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                         c.product?.title?.toLowerCase().includes(searchQuery.toLowerCase());
                                 }).map(conv => (
                                     <ConvItem
                                         key={conv._id}
                                         conv={conv}
-                                        currentUserId={user?._id}
+                                        currentUserId={user?.id || user?._id}
                                         isActive={conv._id === activeConvId}
                                         onClick={() => selectConversation(conv._id)}
                                     />
@@ -1243,7 +1243,7 @@ const Chat = () => {
                                             <MessageBubble
                                                 key={msg._id}
                                                 message={msg}
-                                                currentUserId={user?._id}
+                                                currentUserId={user?.id || user?._id}
                                                 onRespond={handleRespondToOffer}
                                                 responding={responding}
                                             />
