@@ -336,6 +336,23 @@ const Marketplace = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
+        /* Skeleton Shimmer */
+        @keyframes shimmer {
+          0% { background-position: -800px 0; }
+          100% { background-position: 800px 0; }
+        }
+        .skeleton-shimmer {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.04) 0%,
+            rgba(255,255,255,0.10) 40%,
+            rgba(255,255,255,0.04) 80%
+          );
+          background-size: 800px 100%;
+          animation: shimmer 1.6s infinite linear;
+          border-radius: 8px;
+        }
+
         .theme-root {
           font-family: 'Manrope', sans-serif;
           background: #0A0A0A;
@@ -979,8 +996,28 @@ const Marketplace = () => {
 
                 {/* Products Grid */}
                 {loading ? (
-                  <div className="text-center py-20">
-                    <div className="text-sm text-white/40 animate-pulse mono">Loading products...</div>
+                  <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                    {Array.from({ length: viewMode === 'grid' ? 8 : 5 }).map((_, i) => (
+                      <div key={i} className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden">
+                        {/* Image placeholder */}
+                        <div className="skeleton-shimmer w-full" style={{ height: viewMode === 'grid' ? 180 : 120 }} />
+                        <div className="p-4 space-y-3">
+                          {/* Badge row */}
+                          <div className="flex gap-2">
+                            <div className="skeleton-shimmer h-5 w-16 rounded-full" />
+                            <div className="skeleton-shimmer h-5 w-20 rounded-full" />
+                          </div>
+                          {/* Title */}
+                          <div className="skeleton-shimmer h-4 w-3/4 rounded" />
+                          <div className="skeleton-shimmer h-3 w-1/2 rounded" />
+                          {/* Price */}
+                          <div className="flex items-center justify-between pt-1">
+                            <div className="skeleton-shimmer h-5 w-16 rounded" />
+                            <div className="skeleton-shimmer h-8 w-8 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : products.length === 0 ? (
                   <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
@@ -1171,8 +1208,22 @@ const Marketplace = () => {
 
           {/* Mobile Grid */}
           {loading ? (
-            <div className="text-center py-12">
-              <div className="text-xs text-white/40 animate-pulse mono">Loading products...</div>
+            <div className="grid grid-cols-2 gap-3 px-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
+                  {/* Image placeholder */}
+                  <div className="skeleton-shimmer w-full" style={{ height: 130 }} />
+                  <div className="p-3 space-y-2">
+                    {/* Badge */}
+                    <div className="skeleton-shimmer h-4 w-14 rounded-full" />
+                    {/* Title */}
+                    <div className="skeleton-shimmer h-3 w-full rounded" />
+                    <div className="skeleton-shimmer h-3 w-2/3 rounded" />
+                    {/* Price */}
+                    <div className="skeleton-shimmer h-4 w-12 rounded mt-1" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12 px-4 mx-4 bg-white/5 rounded-2xl border border-white/10">
