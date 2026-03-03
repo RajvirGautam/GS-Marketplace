@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { productAPI, offerAPI, dealAPI } from '../../services/api';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
@@ -545,7 +546,9 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
 // Main Component
 const UserDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, toggleSavedId } = useAuth();
+  const { notifications } = useSocket();
 
   const [listings, setListings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -602,6 +605,21 @@ const UserDashboard = () => {
 
   useEffect(() => { fetchDashboardData(); }, []);
 
+  // ── Deep-link: read ?tab= URL param and switch to the right sidebar/subtab ──
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'negotiations') {
+      setSidebarActive('My Deals');
+      setDealsSubTab('negotiations');
+    } else if (tab === 'deals') {
+      setSidebarActive('My Deals');
+      setDealsSubTab('deals');
+    }
+    // Clear the param from the URL so navigating back works cleanly
+    if (tab) navigate(location.pathname, { replace: true });
+  }, [location.search]);
+
   const fetchSavedProducts = async () => {
     try {
       setSavedLoading(true);
@@ -614,6 +632,17 @@ const UserDashboard = () => {
       setSavedLoading(false);
     }
   };
+
+  // ── Real-time: re-fetch offers/deals when a relevant notification arrives ──
+  useEffect(() => {
+    if (!notifications.length) return;
+    const latest = notifications[0]; // SocketContext prepends newest first
+    const offerTypes = ['new_offer', 'offer_accepted', 'offer_rejected', 'deal_done'];
+    if (offerTypes.includes(latest?.type)) {
+      fetchOffers();
+      fetchDeals();
+    }
+  }, [notifications]);
 
   // Fetch when tab becomes active
   useEffect(() => {
