@@ -173,10 +173,22 @@ router.get('/conversations/:id/messages', authenticate, async (req, res) => {
             .limit(limit);
 
         // Mark messages as read
-        await Message.updateMany(
+        const updateResult = await Message.updateMany(
             { conversation: req.params.id, readBy: { $ne: req.user._id } },
             { $addToSet: { readBy: req.user._id } }
         );
+
+        if (updateResult.modifiedCount > 0) {
+            // Tell the sender that their messages were just read
+            conversation.participants.forEach(participantId => {
+                if (participantId.toString() !== req.user._id.toString()) {
+                    io.to(`user:${participantId.toString()}`).emit('messages_read', {
+                        conversationId: req.params.id,
+                        readByUserId: req.user._id
+                    });
+                }
+            });
+        }
 
         res.json({ success: true, messages, page });
     } catch (err) {

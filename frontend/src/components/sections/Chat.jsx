@@ -57,6 +57,14 @@ const CheckIcon = () => (
         <polyline points="20 6 9 17 4 12" />
     </svg>
 );
+const DoubleCheckIcon = () => (
+    <svg width="18" height="12" viewBox="0 0 28 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Left tick */}
+        <polyline points="1 7 5 11 11 3" />
+        {/* Right tick (offset 8px to the right) */}
+        <polyline points="9 7 13 11 19 3" />
+    </svg>
+);
 const ImageIcon = () => (
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -436,9 +444,22 @@ const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
                     </div>
                 )}
 
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                    {formatTime(message.createdAt)}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                        {formatTime(message.createdAt)}
+                    </span>
+                    {isMine && message.type !== 'offer' && (
+                        message.readBy?.some(id => id.toString() !== currentUserId?.toString()) ? (
+                            <span style={{ color: '#00D9FF' }} title="Read">
+                                <DoubleCheckIcon />
+                            </span>
+                        ) : (
+                            <span style={{ color: 'rgba(255,255,255,0.4)' }} title="Sent">
+                                <CheckIcon />
+                            </span>
+                        )
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -575,6 +596,7 @@ const Chat = () => {
     const [deletingChat, setDeletingChat] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null); // { file, url, type }
     const [uploading, setUploading] = useState(false);
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -643,17 +665,41 @@ const Chat = () => {
             // Always refresh conversation list so preview/time update
             fetchConversations();
         };
+
+        const handleMessagesRead = ({ conversationId: convId, readByUserId }) => {
+            if (convId === activeConvId) {
+                setMessages(prev => prev.map(msg => {
+                    if (!msg.readBy.includes(readByUserId)) {
+                        return { ...msg, readBy: [...msg.readBy, readByUserId] };
+                    }
+                    return msg;
+                }));
+            }
+        };
+
         socket.on('new_message', handleNewMessage);
-        return () => socket.off('new_message', handleNewMessage);
+        socket.on('messages_read', handleMessagesRead);
+
+        return () => {
+            socket.off('new_message', handleNewMessage);
+            socket.off('messages_read', handleMessagesRead);
+        };
     }, [socket, activeConvId, fetchConversations, markConversationRead]);
 
     // ── Load messages on conversation change ──
     useEffect(() => {
         if (!activeConvId) return;
         setMsgsLoading(true);
-        shouldScrollRef.current = true; // jump to bottom on initial load
+        setIsScrolledToBottom(false);
         // Pass true so that after marking messages as read, conversations are refreshed (clears unread dot)
-        fetchMessages(activeConvId, true).finally(() => setMsgsLoading(false));
+        fetchMessages(activeConvId, true).then(() => {
+            // Force scroll to bottom immediately after the initial load of messages
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+                // Reveal the chat area after it has scrolled
+                setIsScrolledToBottom(true);
+            }, 50);
+        }).finally(() => setMsgsLoading(false));
 
         // Start polling
         if (pollRef.current) clearInterval(pollRef.current);
@@ -1229,7 +1275,7 @@ const Chat = () => {
                                 </div>
 
                                 {/* Messages */}
-                                <div className="messages-area" ref={messagesAreaRef}>
+                                <div className="messages-area" ref={messagesAreaRef} style={{ opacity: isScrolledToBottom ? 1 : 0, transition: 'opacity 0.2s ease-in' }}>
                                     {msgsLoading && messages.length === 0 ? (
                                         <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, paddingTop: 40 }}>
                                             Loading messages…
