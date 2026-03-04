@@ -339,6 +339,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
   };
 
   const isSeller = (typeof deal.seller === 'object' ? deal.seller?._id : deal.seller)?.toString() === currentUserId;
+  const isBuyer = (typeof deal.buyer === 'object' ? deal.buyer?._id : deal.buyer)?.toString() === currentUserId;
   const otherParty = isSeller ? deal.buyer : deal.seller;
   const otherName = typeof otherParty === 'object' ? otherParty?.fullName : '—';
 
