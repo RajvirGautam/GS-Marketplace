@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
@@ -692,14 +692,7 @@ const Chat = () => {
         setMsgsLoading(true);
         setIsScrolledToBottom(false);
         // Pass true so that after marking messages as read, conversations are refreshed (clears unread dot)
-        fetchMessages(activeConvId, true).then(() => {
-            // Force scroll to bottom immediately after the initial load of messages
-            setTimeout(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-                // Reveal the chat area after it has scrolled
-                setIsScrolledToBottom(true);
-            }, 50);
-        }).finally(() => setMsgsLoading(false));
+        fetchMessages(activeConvId, true).finally(() => setMsgsLoading(false));
 
         // Start polling
         if (pollRef.current) clearInterval(pollRef.current);
@@ -717,9 +710,18 @@ const Chat = () => {
     }, [conversationId]);
 
     // ── Scroll to bottom (only when near bottom or explicitly triggered) ──
-    useEffect(() => {
+    useLayoutEffect(() => {
         const area = messagesAreaRef.current;
         if (!area) return;
+
+        if (!isScrolledToBottom) {
+            if (!msgsLoading || messages.length > 0) {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+                setIsScrolledToBottom(true);
+            }
+            return;
+        }
+
         if (shouldScrollRef.current) {
             // Explicit jump (conversation switch or message sent by us)
             messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
@@ -731,7 +733,7 @@ const Chat = () => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }
         }
-    }, [messages]);
+    }, [messages, isScrolledToBottom, msgsLoading]);
 
     // ── Send text message ──
     const handleSend = async () => {
@@ -849,6 +851,7 @@ const Chat = () => {
         setActiveConvId(convId);
         navigate(`/chat/${convId}`, { replace: true });
         setMessages([]);
+        setIsScrolledToBottom(false);
     };
 
     return (
@@ -874,6 +877,11 @@ const Chat = () => {
           background-image:
             repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px),
             repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px);
+        }
+
+        @keyframes skeletonPulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.8; }
         }
 
         @keyframes marquee-scroll {
@@ -1274,13 +1282,9 @@ const Chat = () => {
                                     </div>
                                 </div>
 
-                                {/* Messages */}
-                                <div className="messages-area" ref={messagesAreaRef} style={{ opacity: isScrolledToBottom ? 1 : 0, transition: 'opacity 0.2s ease-in' }}>
-                                    {msgsLoading && messages.length === 0 ? (
-                                        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, paddingTop: 40 }}>
-                                            Loading messages…
-                                        </div>
-                                    ) : messages.length === 0 ? (
+                                {/* Messages — fade in once loaded & scrolled to bottom */}
+                                <div className="messages-area" ref={messagesAreaRef} style={{ opacity: isScrolledToBottom ? 1 : 0, transition: 'opacity 0.25s ease-in' }}>
+                                    {messages.length === 0 && !msgsLoading && isScrolledToBottom ? (
                                         <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13, paddingTop: 40 }}>
                                             No messages yet. Say hi! 👋
                                         </div>
