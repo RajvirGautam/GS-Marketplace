@@ -7,6 +7,7 @@ import AddProductModal from './AddProductModal';
 import EditProductModal from './dashboard/EditProductModal';
 import MyAccount from './dashboard/MyAccount';
 import NotificationBell from '../ui/NotificationBell';
+import Avatar from '../ui/Avatar';
 
 const HeartFilledIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
@@ -1698,7 +1699,7 @@ const UserDashboard = () => {
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: '#fff' }}>S</div>
-            <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+            <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>Campus<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <NotificationBell dark={true} />
@@ -1961,7 +1962,7 @@ const UserDashboard = () => {
                       S
                     </div>
                     <span>
-                      SGSITS
+                      Campus
                       <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
                         .MKT
                       </span>
@@ -2009,7 +2010,7 @@ const UserDashboard = () => {
             <div className="sidebar-brand">
               <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, color: '#fff' }}>S</div>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>SGSITS<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>Campus<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
               </Link>
             </div>
           </aside>

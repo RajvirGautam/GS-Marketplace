@@ -63,7 +63,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               {step === 3 && 'Upload College ID'}
             </h2>
             <p className="text-secondary text-lg">
-              {step === 1 && 'Only SGSITS students allowed – we verify everything.'}
+              {step === 1 && 'Only Campus students allowed – we verify everything.'}
               {step === 2 && 'As mentioned on your college ID card.'}
               {step === 3 && 'We use OCR to auto-verify your details securely.'}
             </p>

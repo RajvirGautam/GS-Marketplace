@@ -612,7 +612,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                 Secure Campus<br className="hidden md:block" /> Network
               </h2>
               <p className="hidden md:block text-white/60 text-xs font-medium mono border-l-2 border-[#00D9FF] pl-3 mt-1">
-                // Join the exclusive marketplace for SGSITS. <br />
+                // Join the exclusive marketplace for Campus. <br />
                 // Verified students only. No middlemen.
               </p>
             </div>

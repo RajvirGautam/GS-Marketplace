@@ -98,7 +98,7 @@ const Hero = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-slate-300 mb-8 w-fit mx-auto lg:mx-0 backdrop-blur-md">
               <span className="text-blue-400 font-semibold">Campus Market</span>
               <span className="text-slate-600">|</span>
-              <span className="flex items-center gap-1">Exclusive for SGSITS <Icons.ChevronRight className="w-3 h-3" /></span>
+              <span className="flex items-center gap-1">Exclusive for Campus <Icons.ChevronRight className="w-3 h-3" /></span>
             </div>
 
             {/* Responsive Text Size: text-4xl on mobile, text-7xl on desktop */}
@@ -160,7 +160,7 @@ const Hero = () => {
              <ul className="text-left space-y-3 mb-10 mx-auto lg:mx-0 inline-block">
                 <li className="flex items-center gap-3 text-slate-300 text-sm">
                     <span className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 shrink-0"><Icons.CheckCircle className="w-3 h-3" /></span>
-                    Verified SGSITS Students Only
+                    Verified Campus Students Only
                 </li>
                 <li className="flex items-center gap-3 text-slate-300 text-sm">
                     <span className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0"><Icons.Zap className="w-3 h-3" /></span>

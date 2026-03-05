@@ -123,7 +123,7 @@ const Categories = () => {
           </div>
           <div className="anim-slide-up text-right md:text-left" style={{opacity: 0, animationDelay: '0.1s'}}>
              <p className="text-white/60 mono text-xs max-w-sm ml-auto">
-               // Essential supplies for the SGSITS ecosystem. <br/>
+               // Essential supplies for the Campus ecosystem. <br/>
                // Select a module to initialize search query.
              </p>
           </div>

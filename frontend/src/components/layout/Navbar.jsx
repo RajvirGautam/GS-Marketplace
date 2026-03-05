@@ -142,7 +142,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           <Icons.Zap />
         </div>
         <span className="text-xl font-black text-indigo-950 dark:text-white tracking-tighter whitespace-nowrap hidden sm:inline">
-          SGSITS<span className="text-cyan-700 dark:text-cyan-400">.MKT</span>
+          Campus<span className="text-cyan-700 dark:text-cyan-400">.MKT</span>
         </span>
       </Link>
 

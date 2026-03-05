@@ -302,7 +302,7 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
                 <h2 className="text-2xl font-black uppercase text-white tracking-tight">One Last Step!</h2>
               </div>
               <p className="text-white/60 text-xs mono border-l-2 border-[#00D9FF] pl-3">
-                // Verify your SGSITS ID card to access the marketplace
+                // Verify your Campus ID card to access the marketplace
               </p>
               {userEmail && <p className="text-white/40 text-[10px] mono mt-2 pl-3">Logged in as: {userEmail}</p>}
             </div>

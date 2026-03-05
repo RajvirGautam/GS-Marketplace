@@ -162,7 +162,7 @@ const Features = () => {
           </div>
           <div className="col-span-12 lg:col-span-4 reveal-on-scroll" style={{ transitionDelay: '0.1s' }}>
             <p className="text-white/60 mono text-sm leading-relaxed border-l-2 border-white/20 pl-6">
-              // A marketplace engineered specifically for the SGSITS ecosystem. 
+              // A marketplace engineered specifically for the Campus ecosystem. 
               <br/>
               // Secure protocol. Low latency. Zero friction.
             </p>

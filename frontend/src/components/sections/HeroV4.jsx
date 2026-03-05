@@ -50,7 +50,7 @@ const Hero = () => {
         {/* Badge */}
         <div className="mb-6 animate-fade-in-up">
            <span className="px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-xs font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.2)] backdrop-blur-md">
-             Exclusive for SGSITS
+             Exclusive for Campus
            </span>
         </div>
 

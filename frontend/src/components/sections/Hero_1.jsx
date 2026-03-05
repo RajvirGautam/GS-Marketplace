@@ -240,13 +240,13 @@ const Hero = () => {
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Text Content */}
           <div className="animate-catchy-content">
-            <Badge>Exclusive for SGSITS Students</Badge>
+            <Badge>Exclusive for Campus Students</Badge>
             <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mt-6 leading-[1.1] tracking-tight">
               The Future of <br />
               <span className="neon-text">Campus Market</span>
             </h1>
             <p className="text-slate-600 dark:text-slate-300 text-lg mt-6 max-w-lg leading-relaxed font-semibold">
-              Buy, sell, and trade drafters, quantums, electronics, and notes within the SGSITS secure network. No middlemen. Pure velocity.
+              Buy, sell, and trade drafters, quantums, electronics, and notes within the Campus secure network. No middlemen. Pure velocity.
             </p>
             
             <div className="flex flex-wrap gap-4 mt-8">

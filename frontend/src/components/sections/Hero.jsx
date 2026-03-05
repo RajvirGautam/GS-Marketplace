@@ -804,7 +804,7 @@ const Hero = () => {
                 </span>
                 <span className="flex items-center gap-3">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: currentCard.accent }} />
-                  SGSITS EXCLUSIVE
+                  CAMPUS EXCLUSIVE
                 </span>
               </React.Fragment>
             ))}

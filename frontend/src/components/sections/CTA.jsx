@@ -99,7 +99,7 @@ const CTA = () => {
           {/* Dynamic Background: Scrolling Text */}
           <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
             <div className="scrolling-text whitespace-nowrap text-[12rem] font-black uppercase leading-none text-white">
-              SGSITS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// SGSITS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
+              CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
             </div>
           </div>
 
@@ -128,7 +128,7 @@ const CTA = () => {
 
             {/* Description */}
             <p className="text-white/60 mono text-sm md:text-base max-w-xl mb-12 leading-relaxed">
-              // Join 2,000+ SGSITS students trading daily. <br/>
+              // Join 2,000+ Campus students trading daily. <br/>
               // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidty.
             </p>
 

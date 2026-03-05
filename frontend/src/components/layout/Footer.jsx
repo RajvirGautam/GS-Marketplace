@@ -2,19 +2,19 @@ import React from 'react'
 
 // --- Internal Icons ---
 const ZapIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
 )
 const ArrowUpIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>
 )
 const GithubIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
 )
 const InstagramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
 )
 const MailIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
 )
 
 const Footer = () => {
@@ -24,7 +24,7 @@ const Footer = () => {
 
   return (
     <footer className="relative bg-[#050505] border-t border-white/10 text-white overflow-hidden">
-      
+
       {/* --- STYLES --- */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
@@ -72,9 +72,9 @@ const Footer = () => {
 
       {/* Main Content */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 sm:pb-12 relative z-10">
-        
+
         <div className="grid grid-cols-2 md:grid-cols-12 gap-8 sm:gap-12 mb-14 sm:mb-20">
-          
+
           {/* BRAND COLUMN */}
           <div className="col-span-2 md:col-span-5 space-y-6 sm:space-y-8">
             <div className="flex items-center gap-3">
@@ -83,19 +83,19 @@ const Footer = () => {
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter leading-none">
-                  SGSITS<span className="text-[#00D9FF]">.MARKET</span>
+                  Campus<span className="text-[#00D9FF]">.MARKET</span>
                 </h2>
                 <div className="mono text-[10px] text-white/40 tracking-widest">
                   SYS_VER_2.4.0 // STABLE
                 </div>
               </div>
             </div>
-            
+
             <p className="text-white/60 mono text-xs sm:text-sm leading-relaxed max-w-md border-l-2 border-white/10 pl-4">
-              // The decentralized marketplace for college. 
-              <br/>
-              // Built by student, for students. 
-              <br/>
+              // The decentralized marketplace for college.
+              <br />
+              // Built by student, for students.
+              <br />
               // Zero fees. Instant trade.
             </p>
 
@@ -105,9 +105,9 @@ const Footer = () => {
                 Stay Updated
               </label>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-                <input 
-                  type="email" 
-                  placeholder="ENTER_EMAIL_ID" 
+                <input
+                  type="email"
+                  placeholder="ENTER_EMAIL_ID"
                   className="bg-zinc-900 border border-white/20 px-4 py-2.5 text-xs mono text-white w-full focus:outline-none focus:border-[#00D9FF] placeholder:text-white/20 min-w-0"
                 />
                 <button className="bg-white text-black px-4 py-2.5 text-xs font-bold uppercase hover:bg-[#00D9FF] transition-colors whitespace-nowrap">
@@ -156,30 +156,30 @@ const Footer = () => {
 
           {/* STATUS COLUMN */}
           <div className="col-span-2 md:col-span-3">
-             <div className="bg-zinc-900 border border-white/10 p-4 sm:p-6">
-               <h4 className="mono text-xs text-white/40 uppercase mb-4 border-b border-white/10 pb-2">
-                 System Status
-               </h4>
-               <div className="space-y-3">
-                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
-                   <span className="text-white/60">SERVER UPTIME</span>
-                   <span className="text-[#10B981]">99.9%</span>
-                 </div>
-                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
-                   <span className="text-white/60">ACTIVE TRADES</span>
-                   <span className="text-white">1,248</span>
-                 </div>
-                 <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
-                   <span className="text-white/60">LAST UPDATE</span>
-                   <span className="text-[#FF6B35]">JUST NOW</span>
-                 </div>
-               </div>
-               
-               <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
-                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                 <span className="mono text-[10px] text-green-500 uppercase">All Systems Operational</span>
-               </div>
-             </div>
+            <div className="bg-zinc-900 border border-white/10 p-4 sm:p-6">
+              <h4 className="mono text-xs text-white/40 uppercase mb-4 border-b border-white/10 pb-2">
+                System Status
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
+                  <span className="text-white/60">SERVER UPTIME</span>
+                  <span className="text-[#10B981]">99.9%</span>
+                </div>
+                <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
+                  <span className="text-white/60">ACTIVE TRADES</span>
+                  <span className="text-white">1,248</span>
+                </div>
+                <div className="flex justify-between items-center mono text-[11px] sm:text-xs gap-3">
+                  <span className="text-white/60">LAST UPDATE</span>
+                  <span className="text-[#FF6B35]">JUST NOW</span>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="mono text-[10px] text-green-500 uppercase">All Systems Operational</span>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -187,14 +187,14 @@ const Footer = () => {
         {/* BOTTOM BAR */}
         <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
           <p className="text-white/40 mono text-xs text-center md:text-left">
-            © 2026 SGSITS Market. Open Source Project.
+            © 2026 Campus Market. Open Source Project.
           </p>
 
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 sm:gap-6">
             <a href="#" className="mono text-xs text-white/40 hover:text-white uppercase">Privacy Policy</a>
             <a href="#" className="mono text-xs text-white/40 hover:text-white uppercase">Terms of Service</a>
-            
-            <button 
+
+            <button
               onClick={scrollToTop}
               className="group flex items-center gap-2 bg-white text-black px-4 py-2 text-xs font-bold uppercase hover:bg-[#00D9FF] transition-colors"
             >
@@ -209,9 +209,9 @@ const Footer = () => {
       <div className="border-t border-white/10 bg-black py-2 overflow-hidden select-none">
         <div className="whitespace-nowrap animate-marquee flex gap-8">
           {[...Array(10)].map((_, i) => (
-             <span key={i} className="mono text-xs font-bold text-white/20 uppercase tracking-[0.2em]">
-               /// SGSITS EXCLUSIVE /// VERIFIED STUDENTS /// SECURE TRADE /// NO MIDDLEMEN
-             </span>
+            <span key={i} className="mono text-xs font-bold text-white/20 uppercase tracking-[0.2em]">
+               /// CAMPUS EXCLUSIVE /// VERIFIED STUDENTS /// SECURE TRADE /// NO MIDDLEMEN
+            </span>
           ))}
         </div>
       </div>
