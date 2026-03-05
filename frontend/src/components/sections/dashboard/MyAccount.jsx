@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { userAPI } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
+import Avatar from '../../ui/Avatar';
 
 const BRANCHES = [
     { label: 'Computer Science', value: 'CS' },
@@ -69,11 +70,6 @@ const MyAccount = () => {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
-
-    /* initials from fullName */
-    const initials = user?.fullName
-        ? user.fullName.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2)
-        : 'U';
 
     const showToast = (type, msg) => {
         setToast({ type, msg });
@@ -224,16 +220,16 @@ const MyAccount = () => {
                             {/* Circle */}
                             <div style={{
                                 width: 102, height: 102, borderRadius: '50%',
-                                background: avatarSrc ? '#000' : 'linear-gradient(135deg,#00D9FF,#7C3AED)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 32, fontWeight: 800, color: '#0A0A0A',
                                 border: '3px solid rgba(255,255,255,0.14)',
                                 overflow: 'hidden', userSelect: 'none',
                             }}>
-                                {avatarSrc
-                                    ? <img src={avatarSrc} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    : initials
-                                }
+                                <Avatar
+                                    src={avatarSrc}
+                                    name={user?.fullName || user?.name || user?.email}
+                                    size={102}
+                                    style={{ fontSize: '32px', fontWeight: '800' }}
+                                />
                             </div>
 
                             {/* Hover overlay */}

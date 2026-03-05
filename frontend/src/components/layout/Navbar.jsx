@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
 import NotificationBell from '../ui/NotificationBell'
+import Avatar from '../ui/Avatar'
 
 // --- LOCAL ICONS ---
 const ChevronDown = () => (
@@ -204,12 +205,12 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="group flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/15 hover:border-black/20 dark:hover:border-white text-indigo-900 dark:text-white transition-all backdrop-blur-md cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shadow-sm overflow-hidden">
-                  {user?.profilePicture
-                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : getInitials()
-                  }
-                </div>
+                <Avatar
+                  src={user?.profilePicture}
+                  name={user?.fullName || user?.name || user?.email}
+                  size={28}
+                  style={{ fontSize: '12px', fontWeight: 'bold' }}
+                />
                 <span className="text-xs font-bold tracking-wide">
                   {getDisplayName()}
                 </span>
@@ -333,12 +334,11 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
           ) : (
             <div className="mt-2 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-violet-700 flex items-center justify-center text-white font-bold overflow-hidden">
-                  {user?.profilePicture
-                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : getInitials()
-                  }
-                </div>
+                <Avatar
+                  src={user?.profilePicture}
+                  name={user?.fullName || user?.name || user?.email}
+                  size={40}
+                />
                 <div className="overflow-hidden">
                   <div className="text-indigo-900 dark:text-white font-bold truncate">
                     {user.fullName || user.name || "Student"}

@@ -1702,11 +1702,13 @@ const UserDashboard = () => {
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <NotificationBell dark={true} />
-            <button onClick={() => setSidebarActive('My Account')} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#0A0A0A', border: 'none', cursor: 'pointer', padding: 0 }}>
-              {user?.profilePicture
-                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : (user?.fullName?.charAt(0).toUpperCase() || 'U')
-              }
+            <button onClick={() => setSidebarActive('My Account')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <Avatar
+                src={user?.profilePicture}
+                name={user?.fullName || user?.name || user?.email}
+                size={32}
+                style={{ fontSize: '12px', fontWeight: '800' }}
+              />
             </button>
           </div>
         </div>
@@ -2038,12 +2040,12 @@ const UserDashboard = () => {
                   style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '6px 12px 6px 6px', cursor: 'pointer' }}
                   title="My Account"
                 >
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#0A0A0A' }}>
-                    {user?.profilePicture
-                      ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : (user?.fullName?.charAt(0).toUpperCase() || 'U')
-                    }
-                  </div>
+                  <Avatar
+                    src={user?.profilePicture}
+                    name={user?.fullName || user?.name || user?.email}
+                    size={28}
+                    style={{ fontSize: '11px', fontWeight: '800' }}
+                  />
                   <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{userName?.split(' ')[0]}</span>
                 </button>
               </div>

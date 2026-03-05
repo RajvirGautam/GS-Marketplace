@@ -8,6 +8,7 @@ import ProductCard from '../ui/ProductCard';
 import AddProductModal from './AddProductModal';
 import NotificationBell from '../ui/NotificationBell';
 import ConnectIdModal from '../auth/ConnectIdModal';
+import Avatar from '../ui/Avatar';
 
 
 // --- Internal Icons ---
@@ -682,12 +683,12 @@ const Marketplace = () => {
                       onClick={() => setShowUserMenu(!showUserMenu)}
                       className="btn-glass"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden">
-                        {user?.profilePicture
-                          ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : user.fullName?.charAt(0).toUpperCase() || 'U'
-                        }
-                      </div>
+                      <Avatar
+                        src={user?.profilePicture}
+                        name={user?.fullName || user?.name || user?.email}
+                        size={32}
+                        style={{ fontSize: '12px', fontWeight: '800' }}
+                      />
                       <span className="hidden sm:inline">{user.fullName?.split(' ')[0]}</span>
                       <ChevronDown />
                     </button>
@@ -1093,11 +1094,13 @@ const Marketplace = () => {
           <div className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between">
             {user ? (
               <div className="relative user-menu-container">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-xs font-bold text-white overflow-hidden" onClick={() => setShowUserMenu(!showUserMenu)}>
-                  {user?.profilePicture
-                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : user.fullName?.charAt(0).toUpperCase() || 'U'
-                  }
+                <div onClick={() => setShowUserMenu(!showUserMenu)} style={{ cursor: 'pointer' }}>
+                  <Avatar
+                    src={user?.profilePicture}
+                    name={user?.fullName || user?.name || user?.email}
+                    size={32}
+                    style={{ fontSize: '12px', fontWeight: '800' }}
+                  />
                 </div>
                 {showUserMenu && (
                   <div className="absolute left-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/20 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden z-50">
@@ -1298,11 +1301,13 @@ const Marketplace = () => {
             )}
           </Link>
           <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
-            <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-              {user?.profilePicture
-                ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span className="text-[10px]">{user?.fullName?.charAt(0).toUpperCase() || 'U'}</span>
-              }
+            <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
+              <Avatar
+                src={user?.profilePicture}
+                name={user?.fullName || user?.name || user?.email}
+                size={20}
+                style={{ fontSize: '10px', fontWeight: '800' }}
+              />
             </div>
             <span className="text-[9px] font-bold mt-1">Profile</span>
           </button>

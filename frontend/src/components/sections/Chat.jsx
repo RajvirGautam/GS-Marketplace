@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { chatAPI } from '../../services/api';
+import Avatar from '../ui/Avatar';
 
 // ─────────────────────────────────────────────────────────────
 //  SVG Icons
@@ -380,20 +381,16 @@ const MessageBubble = ({ message, currentUserId, onRespond, responding }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                     <div
                         onClick={(e) => { e.stopPropagation(); message.sender?._id && navigate(`/seller/${message.sender._id}`); }}
-                        style={{
-                            width: 30, height: 30, borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 11, fontWeight: 700, color: '#0A0A0A',
-                            overflow: 'hidden',
-                            cursor: 'pointer'
-                        }}>
-                        {message.sender?.profilePicture
-                            ? <img src={message.sender.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : getInitials(message.sender?.fullName)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <Avatar
+                            src={message.sender?.profilePicture}
+                            name={message.sender?.fullName || message.sender?.name || 'User'}
+                            size={30}
+                        />
                     </div>
                     <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', maxWidth: 44, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {message.sender?.fullName?.split(' ')[0] || 'User'}
+                        {((message.sender?.fullName) || '').split(' ')[0] || 'User'}
                     </div>
                 </div>
             )}
@@ -496,17 +493,11 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
             }}
         >
             {/* Avatar */}
-            <div style={{
-                width: 42, height: 42, borderRadius: '50%',
-                background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, fontWeight: 700, color: '#0A0A0A', flexShrink: 0,
-                overflow: 'hidden'
-            }}>
-                {other?.profilePicture
-                    ? <img src={other.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : getInitials(other?.fullName)}
-            </div>
+            <Avatar
+                src={other?.profilePicture}
+                name={other?.fullName || other?.name || 'Unknown'}
+                size={42}
+            />
 
             <div style={{ flex: 1, minWidth: 0 }}>
                 {/* Row 1: Name • ProductName (scrollable) + Time */}
@@ -1201,19 +1192,14 @@ const Chat = () => {
                                 <div className="thread-header">
                                     <div
                                         onClick={() => otherParticipant?._id && navigate(`/seller/${otherParticipant._id}`)}
-                                        style={{
-                                            width: 38, height: 38, borderRadius: '50%',
-                                            background: 'linear-gradient(135deg, #00D9FF, #7C3AED)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: 13, fontWeight: 700, color: '#0A0A0A', flexShrink: 0,
-                                            overflow: 'hidden',
-                                            cursor: 'pointer'
-                                        }}
+                                        style={{ cursor: 'pointer' }}
                                         title="View Profile"
                                     >
-                                        {otherParticipant?.profilePicture
-                                            ? <img src={otherParticipant.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            : getInitials(otherParticipant?.fullName)}
+                                        <Avatar
+                                            src={otherParticipant?.profilePicture}
+                                            name={otherParticipant?.fullName || otherParticipant?.name || 'User'}
+                                            size={38}
+                                        />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { sellerAPI } from '../../services/api';
+import Avatar from '../ui/Avatar';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -421,13 +421,12 @@ const SellerProfile = () => {
                         {/* Avatar */}
                         <div className="avatar-ring w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 h-animate h-animate-d1 shadow-[0_0_40px_rgba(0,217,255,0.2)] md:shadow-none">
                             <div className="avatar-inner w-full h-full overflow-hidden">
-                                {seller?.profilePicture ? (
-                                    <img src={seller.profilePicture} alt={seller.fullName} className="w-full h-full object-cover rounded-full" />
-                                ) : (
-                                    <span style={{ fontSize: 40, fontWeight: 900, background: 'linear-gradient(135deg,#00D9FF,#7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                        {initials}
-                                    </span>
-                                )}
+                                <Avatar
+                                    src={seller?.profilePicture}
+                                    name={seller?.fullName}
+                                    size={128}
+                                    style={{ fontSize: '40px', fontWeight: '900' }}
+                                />
                             </div>
                         </div>
 
@@ -589,18 +588,15 @@ const SellerProfile = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
                                                 <div style={{
                                                     width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                                                    background: 'linear-gradient(135deg, #00D9FF33, #7C3AED33)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     overflow: 'hidden',
                                                 }}>
-                                                    {review.reviewer?.profilePicture ? (
-                                                        <img src={review.reviewer.profilePicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    ) : (
-                                                        <span style={{ fontSize: 13, fontWeight: 800, background: 'linear-gradient(135deg,#00D9FF,#7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                                            {reviewerInitials}
-                                                        </span>
-                                                    )}
+                                                    <Avatar
+                                                        src={review.reviewer?.profilePicture}
+                                                        name={review.reviewer?.fullName || 'Anonymous'}
+                                                        size={36}
+                                                        style={{ fontSize: '13px', fontWeight: '800' }}
+                                                    />
                                                 </div>
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div style={{ fontWeight: 700, fontSize: 13, color: '#fff', marginBottom: 1 }}>

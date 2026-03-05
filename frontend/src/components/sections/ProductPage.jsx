@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, offerAPI, chatAPI } from '../../services/api';
+import Avatar from '../ui/Avatar';
 
 // --- ICONS ---
 const ArrowLeft = () => (
@@ -794,11 +795,13 @@ const ProductPage = () => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="btn-glass shadow-lg pl-2 pr-3"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                  {user?.profilePicture
-                    ? <img src={user.profilePicture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : user.fullName?.charAt(0).toUpperCase() || 'U'
-                  }
+                <div className="w-6 h-6 flex items-center justify-center overflow-hidden">
+                  <Avatar
+                    src={user?.profilePicture}
+                    name={user?.fullName || user?.name || user?.email}
+                    size={24}
+                    style={{ fontSize: '10px', fontWeight: '800' }}
+                  />
                 </div>
                 <ChevronDown />
               </button>
@@ -916,12 +919,14 @@ const ProductPage = () => {
             }}
             title="View Seller Profile"
           >
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#00D9FF] to-[#7C3AED] p-[2px] mb-3 group-hover/sellercard:scale-105 transition-transform">
-              <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-xl font-serif italic">
-                {typeof product.seller === 'object'
-                  ? product.seller.fullName?.charAt(0).toUpperCase()
-                  : (product.user?.charAt(0) || 'U')
-                }
+            <div className="w-16 h-16 rounded-full p-[2px] mb-3 group-hover/sellercard:scale-105 transition-transform" style={{ background: 'linear-gradient(to top right, #00D9FF, #7C3AED)' }}>
+              <div className="w-full h-full rounded-full bg-black flex items-center justify-center font-serif italic" style={{ overflow: 'hidden' }}>
+                <Avatar
+                  src={typeof product.seller === 'object' ? product.seller.profilePicture : undefined}
+                  name={typeof product.seller === 'object' ? product.seller.fullName : product.user}
+                  size={64}
+                  style={{ fontSize: '24px', fontWeight: '800' }}
+                />
               </div>
             </div>
             <div className="font-bold text-lg group-hover/sellercard:text-[#00D9FF] transition-colors">
@@ -1126,13 +1131,12 @@ const ProductPage = () => {
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 flex-shrink-0">
-                {typeof product.seller === 'object' && product.seller.profilePicture ? (
-                  <img src={product.seller.profilePicture} alt="seller" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-tr from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-lg font-bold">
-                    {typeof product.seller === 'object' ? product.seller.fullName?.charAt(0).toUpperCase() : (product.user?.charAt(0) || 'U')}
-                  </div>
-                )}
+                <Avatar
+                  src={typeof product.seller === 'object' ? product.seller.profilePicture : undefined}
+                  name={typeof product.seller === 'object' ? product.seller.fullName : product.user}
+                  size={48}
+                  style={{ fontSize: '18px', fontWeight: '800' }}
+                />
               </div>
               <div>
                 <div className="font-bold text-sm text-[#00D9FF]">{typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}</div>
