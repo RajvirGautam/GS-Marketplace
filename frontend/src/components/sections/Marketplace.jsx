@@ -87,6 +87,7 @@ const Marketplace = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [activeQuickFilter, setActiveQuickFilter] = useState(null);
 
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -95,6 +96,7 @@ const Marketplace = () => {
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [draftPriceRange, setDraftPriceRange] = useState([0, 10000]);
 
   // Products state
   const [products, setProducts] = useState([]);
@@ -261,9 +263,11 @@ const Marketplace = () => {
     setSelectedConditions([]);
     setSelectedTypes([]);
     setPriceRange([0, 10000]);
+    setDraftPriceRange([0, 10000]);
     setSearchQuery('');
     setDebouncedSearch('');
     setCurrentPage(1);
+    setActiveQuickFilter(null);
   };
 
   const getActiveFilterCount = () => {
@@ -277,35 +281,52 @@ const Marketplace = () => {
     return count;
   };
 
-  // Quick filter presets
+  // Quick filter presets — mono-select (one at a time)
+  const applyQuickFilter = (key, apply, clear) => {
+    if (activeQuickFilter === key) {
+      // toggle off
+      clear();
+      setActiveQuickFilter(null);
+    } else {
+      // switch to this one: first clear all filter state
+      setSelectedCategories([]);
+      setSelectedBranches([]);
+      setSelectedYears([]);
+      setSelectedConditions([]);
+      setSelectedTypes([]);
+      setPriceRange([0, 10000]);
+      setDraftPriceRange([0, 10000]);
+      // then apply the specific filter
+      apply();
+      setActiveQuickFilter(key);
+    }
+    setCurrentPage(1);
+  };
+
   const quickFilters = [
     {
+      key: 'free',
       label: 'Free Items',
-      action: () => {
-        setSelectedTypes(['free']);
-        setCurrentPage(1);
-      }
+      apply: () => setSelectedTypes(['free']),
+      clear: () => setSelectedTypes([]),
     },
     {
+      key: 'under500',
       label: 'Under ₹500',
-      action: () => {
-        setPriceRange([0, 500]);
-        setCurrentPage(1);
-      }
+      apply: () => { setPriceRange([0, 500]); setDraftPriceRange([0, 500]); },
+      clear: () => { setPriceRange([0, 10000]); setDraftPriceRange([0, 10000]); },
     },
     {
+      key: 'barter',
       label: 'Barter Only',
-      action: () => {
-        setSelectedTypes(['barter']);
-        setCurrentPage(1);
-      }
+      apply: () => setSelectedTypes(['barter']),
+      clear: () => setSelectedTypes([]),
     },
     {
+      key: 'new',
       label: 'New Condition',
-      action: () => {
-        setSelectedConditions(['New', 'Like New']);
-        setCurrentPage(1);
-      }
+      apply: () => setSelectedConditions(['New', 'Like New']),
+      clear: () => setSelectedConditions([]),
     },
   ];
 
@@ -549,6 +570,39 @@ const Marketplace = () => {
           border-color: rgba(255,255,255,0.3);
         }
 
+        /* Dual range slider */
+        input[type="range"] {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 4px;
+          background: transparent;
+          outline: none;
+          border-radius: 10px;
+          position: relative;
+          pointer-events: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          cursor: pointer;
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(0,217,255,0.5);
+          border: 2.5px solid #0A0A0A;
+          pointer-events: auto;
+        }
+        input[type="range"]::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          cursor: pointer;
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(0,217,255,0.5);
+          border: 2.5px solid #0A0A0A;
+          pointer-events: auto;
+        }
+
         /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
@@ -606,7 +660,7 @@ const Marketplace = () => {
                 <Link to="/">
                   <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">S</div>
-                    <span>SGSITS<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
+                    <span>Campus<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
                   </div>
                 </Link>
 
@@ -820,23 +874,95 @@ const Marketplace = () => {
                   </div>
                 </div>
 
-                {/* Price Range */}
+                {/* Price Range - Dual Handle */}
                 <div className="mb-8 pt-6 border-t border-white/10">
-                  <div className="flex justify-between mb-4">
-                    <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
-                    <span className="text-[11px] text-[#00D9FF] font-mono">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex flex-col items-start gap-1">
+                      <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
+                      {(draftPriceRange[0] !== 0 || draftPriceRange[1] !== 10000) && (
+                        <button
+                          onClick={() => {
+                            setPriceRange([0, 10000]);
+                            setDraftPriceRange([0, 10000]);
+                            setCurrentPage(1);
+                          }}
+                          className="text-[9px] font-bold text-[#00D9FF] hover:underline mono bg-[#00D9FF]/10 px-2 py-0.5 rounded-sm"
+                        >
+                          RESET
+                        </button>
+                      )}
+                    </div>
+
+                    <span className="text-[11px] text-[#00D9FF] font-mono mt-0.5">
+                      ₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}
+                    </span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={priceRange[1]}
-                    onChange={(e) => {
-                      setPriceRange([0, parseInt(e.target.value)]);
-                      setCurrentPage(1);
-                    }}
-                  />
+
+                  <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
+                    {/* Track background */}
+                    <div style={{
+                      position: 'absolute', width: '100%', height: 4,
+                      background: 'rgba(255,255,255,0.1)', borderRadius: 10,
+                    }} />
+                    {/* Filled range between handles — follows draft for smooth visual */}
+                    <div style={{
+                      position: 'absolute',
+                      left: `${(draftPriceRange[0] / 10000) * 100}%`,
+                      right: `${100 - (draftPriceRange[1] / 10000) * 100}%`,
+                      height: 4,
+                      background: 'linear-gradient(90deg, #00D9FF, #7C3AED)',
+                      borderRadius: 10,
+                    }} />
+                    {/* Min handle — updates draft on drag, commits on release */}
+                    <input
+                      type="range" min="0" max="10000" step="100"
+                      value={draftPriceRange[0]}
+                      onChange={(e) => {
+                        const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100);
+                        setDraftPriceRange([val, draftPriceRange[1]]);
+                      }}
+                      onMouseUp={(e) => {
+                        const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100);
+                        setPriceRange([val, draftPriceRange[1]]);
+                        setCurrentPage(1);
+                      }}
+                      onTouchEnd={(e) => {
+                        const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100);
+                        setPriceRange([val, draftPriceRange[1]]);
+                        setCurrentPage(1);
+                      }}
+                      style={{ position: 'absolute', width: '100%', zIndex: 4 }}
+                    />
+                    {/* Max handle */}
+                    <input
+                      type="range" min="0" max="10000" step="100"
+                      value={draftPriceRange[1]}
+                      onChange={(e) => {
+                        const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100);
+                        setDraftPriceRange([draftPriceRange[0], val]);
+                      }}
+                      onMouseUp={(e) => {
+                        const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100);
+                        setPriceRange([draftPriceRange[0], val]);
+                        setCurrentPage(1);
+                      }}
+                      onTouchEnd={(e) => {
+                        const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100);
+                        setPriceRange([draftPriceRange[0], val]);
+                        setCurrentPage(1);
+                      }}
+                      style={{ position: 'absolute', width: '100%', zIndex: 3 }}
+                    />
+                  </div>
+
+                  {/* Scale labels */}
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[9px] text-white/25 mono">₹0</span>
+                    <span className="text-[9px] text-white/25 mono">₹2.5k</span>
+                    <span className="text-[9px] text-white/25 mono">₹5k</span>
+                    <span className="text-[9px] text-white/25 mono">₹7.5k</span>
+                    <span className="text-[9px] text-white/25 mono">₹10k</span>
+                  </div>
                 </div>
 
                 {/* Branches */}
@@ -926,11 +1052,16 @@ const Marketplace = () => {
                 {/* Quick Filters */}
                 <div className="mb-6 overflow-x-auto">
                   <div className="flex gap-3 pb-2">
-                    {quickFilters.map((filter, index) => (
+                    {quickFilters.map((filter) => (
                       <button
-                        key={index}
-                        onClick={filter.action}
+                        key={filter.key}
+                        onClick={() => applyQuickFilter(filter.key, filter.apply, filter.clear)}
                         className="quick-filter-btn"
+                        style={activeQuickFilter === filter.key ? {
+                          background: 'linear-gradient(135deg, rgba(0,217,255,0.15), rgba(124,58,237,0.15))',
+                          border: '1px solid rgba(0,217,255,0.4)',
+                          color: '#00D9FF',
+                        } : {}}
                       >
                         {filter.label}
                       </button>
@@ -1142,7 +1273,7 @@ const Marketplace = () => {
             <Link to="/">
               <div className="text-lg font-bold text-white flex items-center gap-1.5 cursor-pointer">
                 <div className="w-6 h-6 rounded bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-black text-[10px]">S</div>
-                <span>SGSITS<span className="text-[#00D9FF]">.MKT</span></span>
+                <span>Campus<span className="text-[#00D9FF]">.MKT</span></span>
               </div>
             </Link>
 
