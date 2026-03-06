@@ -1,5 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+const UploadIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
+const ArrowRight = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
 // Added `zDepth` to establish a kinematic parallax field.
 // Values closer to 1.0 are "closer" to the camera and fly by faster.
 // Values closer to 4.0 are "further" away and move slower.
@@ -37,18 +52,70 @@ const CTA = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Phase 1: Each card zooms toward camera at its own zDepth-driven rate
+  // Phase 1: Per-card kinematic parallax + global gate
   const globalCardOpacity = Math.max(0, 1 - (scrollYProgress - 0.2) * 5);
 
-  // Phase 2 (stub): Circle grows from scroll 0.35 to 0.65
+  // Phase 2: Headline bifurcates (Scroll 0.2 -> 0.4)
+  const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.2) / 0.2, 1));
+  const textTranslate = textSplitProgress * 180;
+  const textOpacity = Math.max(0, 1 - textSplitProgress * 1.5);
+
+  // Phase 3: Circle expands from the empty focal centre (Scroll 0.35 -> 0.65)
   const circleProgress = Math.max(0, Math.min((scrollYProgress - 0.35) / 0.3, 1));
   const circleScale = circleProgress * 1.55;
+
+  // Phase 4: CTA panel fades in once circle is fully expanded
+  const ctaOpacity = circleProgress >= 1 ? 1 : 0;
+  const isCtaInteractive = ctaOpacity > 0.5;
 
   return (
     <section ref={containerRef} className="relative w-full h-[350vh] bg-[#F5F5F7]">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
         .mono { font-family: 'Space Mono', monospace; }
+
+        .cta-container {
+          opacity: 0;
+          transform: scale(0.95);
+          filter: blur(12px);
+          transition: all 0.3s ease-out;
+        }
+        .cta-container.is-visible {
+          opacity: 1;
+          transform: scale(1);
+          filter: blur(0);
+        }
+
+        @keyframes scrollText {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .scrolling-text { animation: scrollText 30s linear infinite; }
+
+        .btn-brutal {
+          position: relative;
+          background: #fff;
+          color: #000;
+          border: 1px solid #fff;
+          padding: 16px 32px;
+          font-family: 'Space Mono', monospace;
+          font-weight: 700;
+          text-transform: uppercase;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+        .btn-brutal:hover {
+          background: #00D9FF;
+          border-color: #00D9FF;
+          box-shadow: 4px 4px 0 rgba(255,255,255,0.2);
+          transform: translate(-2px, -2px);
+        }
+        .btn-outline {
+          background: transparent;
+          color: #fff;
+          border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover { background: #fff; color: #000; border-color: #fff; }
 
         .tech-grid-bg {
           background-color: #0A0A0A;
@@ -64,32 +131,17 @@ const CTA = () => {
 
         {/* Stratum 1: Parallax Social Proof Field */}
         <div className="absolute inset-0 z-10 pointer-events-none origin-center">
-
-          {/* Centred headline fades with cards */}
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ opacity: globalCardOpacity }}
-          >
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter text-center leading-none">
-              Trusted by<br />
-              <span className="text-black">2,000+ students</span>
-            </h1>
-          </div>
-
           {REVIEWS.map((r) => {
             const scaleFactor = 1 + (scrollYProgress * 20) / r.zDepth;
             let localOpacity = 1;
-            if (scaleFactor > 3) {
-              localOpacity = Math.max(0, 1 - (scaleFactor - 3) * 0.8);
-            }
+            if (scaleFactor > 3) localOpacity = Math.max(0, 1 - (scaleFactor - 3) * 0.8);
             const finalOpacity = Math.min(localOpacity, globalCardOpacity);
             return (
               <div
                 key={r.id}
                 className="absolute bg-white shadow-[0_4px_28px_rgba(0,0,0,0.08)] p-4 md:p-5 rounded-2xl border border-zinc-100 hidden lg:flex flex-col gap-3"
                 style={{
-                  ...r.pos,
-                  width: r.width,
+                  ...r.pos, width: r.width,
                   transform: `scale(${scaleFactor}) rotate(${r.rotate})`,
                   opacity: finalOpacity,
                   willChange: 'transform, opacity',
@@ -110,17 +162,28 @@ const CTA = () => {
           })}
         </div>
 
-        {/* Stratum 2: Radial Expansion Plane — dark grid circle grows on scroll */}
+        {/* Stratum 1.5: Bifurcating Typography */}
+        <div className="absolute inset-0 z-15 pointer-events-none flex flex-col items-center justify-center gap-2">
+          <h1
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter text-center leading-none"
+            style={{ transform: `translateY(-${textTranslate}px)`, opacity: textOpacity, willChange: 'transform, opacity' }}
+          >
+            Trusted by
+          </h1>
+          <h1
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-black tracking-tighter text-center leading-none"
+            style={{ transform: `translateY(${textTranslate}px)`, opacity: textOpacity, willChange: 'transform, opacity' }}
+          >
+            2,000+ students
+          </h1>
+        </div>
+
+        {/* Stratum 2: Radial Expansion Plane */}
         <div
           className="absolute tech-grid-bg z-20"
           style={{
-            width: '200vmax',
-            height: '200vmax',
-            borderRadius: '50%',
-            top: '50%',
-            left: '50%',
-            marginTop: '-100vmax',
-            marginLeft: '-100vmax',
+            width: '200vmax', height: '200vmax', borderRadius: '50%',
+            top: '50%', left: '50%', marginTop: '-100vmax', marginLeft: '-100vmax',
             transform: `scale(${circleScale})`,
             border: '2px solid rgba(0,217,255,0.4)',
             boxShadow: '0 0 100px rgba(0,217,255,0.15) inset',
@@ -128,6 +191,50 @@ const CTA = () => {
             willChange: 'transform',
           }}
         />
+
+        {/* Stratum 3: Terminal Interface */}
+        <div
+          className={`absolute inset-0 z-30 flex items-center justify-center px-6 transition-opacity duration-300 ${isCtaInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          style={{ opacity: ctaOpacity }}
+        >
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute left-6 top-0 bottom-0 w-px bg-white/5" />
+            <div className="absolute right-6 top-0 bottom-0 w-px bg-white/5" />
+          </div>
+          <div className="max-w-7xl mx-auto relative w-full">
+            <div className={`cta-container w-full relative bg-zinc-900 border border-white/10 overflow-hidden ${isCtaInteractive ? 'is-visible' : ''}`}>
+              <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
+                <div className="scrolling-text whitespace-nowrap text-[8rem] md:text-[12rem] font-black uppercase leading-none text-white">
+                  CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
+                </div>
+              </div>
+              <div className="absolute top-0 left-0 border-l-2 border-t-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
+              <div className="absolute bottom-0 right-0 border-r-2 border-b-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
+              <div className="relative z-10 px-6 py-12 md:px-8 md:py-24 flex flex-col items-center text-center">
+                <div className="flex items-center gap-2 mb-8 bg-black/40 border border-white/10 px-3 py-1 backdrop-blur-md">
+                  <div className="w-2 h-2 bg-[#00D9FF] animate-pulse" />
+                  <span className="mono text-[10px] md:text-xs text-[#00D9FF] tracking-widest uppercase">Network Status: Active</span>
+                </div>
+                <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8 max-w-4xl">
+                  Ready to clear<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">Your Inventory?</span>
+                </h2>
+                <p className="text-white/60 mono text-xs md:text-base max-w-xl mb-12 leading-relaxed">
+                  // Join 2,000+ Campus students trading daily. <br />
+                  // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidity.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                  <button className="btn-brutal flex items-center justify-center gap-3 text-sm md:text-base">
+                    <UploadIcon /><span>Initialize Upload</span>
+                  </button>
+                  <button className="btn-brutal btn-outline flex items-center justify-center gap-3 text-sm md:text-base">
+                    <span>View Guidelines</span><ArrowRight />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </section>
