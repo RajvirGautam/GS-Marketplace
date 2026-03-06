@@ -19,18 +19,66 @@ const ArrowRight = () => (
 // Values closer to 1.0 are "closer" to the camera and fly by faster.
 // Values closer to 4.0 are "further" away and move slower.
 const REVIEWS = [
-  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '8%', left: '4%' }, rotate: '-3deg', width: '230px', zDepth: 1.2 },
-  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '35%', left: '6%' }, rotate: '2.5deg', width: '240px', zDepth: 2.8 },
-  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '12%', left: '32%' }, rotate: '1deg', width: '220px', zDepth: 3.5 },
-  { id: 15, name: "Arjun N.", role: "Electronics", text: "Verified profiles mean I actually trust the person I'm meeting.", pos: { bottom: '25%', left: '8%' }, rotate: '-1.8deg', width: '248px', zDepth: 1.5 },
-  { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { top: '55%', left: '2%' }, rotate: '4deg', width: '215px', zDepth: 3.2 },
-  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '28%' }, rotate: '-2.2deg', width: '260px', zDepth: 2.1 },
-  { id: 2, name: "Priya M.", role: "B.Tech", text: "Met near the library for the handoff. Super convenient.", pos: { top: '10%', right: '12%' }, rotate: '-1deg', width: '250px', zDepth: 1.1 },
-  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '28%', right: '4%' }, rotate: '3.5deg', width: '235px', zDepth: 2.5 },
-  { id: 14, name: "Dev V.", role: "Comp. Sci", text: "Zero latency on image uploads. Works flawlessly.", pos: { top: '50%', right: '6%' }, rotate: '-2.8deg', width: '240px', zDepth: 1.8 },
-  { id: 4, name: "Neha J.", role: "Arts", text: "Smooth experience, zero platform fees. Love it.", pos: { bottom: '22%', right: '8%' }, rotate: '1.2deg', width: '245px', zDepth: 3.8 },
-  { id: 9, name: "Rohan J.", role: "Business", text: "Way better than WhatsApp groups. Listings stay fresh.", pos: { top: '18%', right: '35%' }, rotate: '-4deg', width: '220px', zDepth: 2.4 },
-  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '8%', right: '30%' }, rotate: '2.1deg', width: '210px', zDepth: 1.6 },
+  {
+    id: 1, name: "Rahul S.", role: "Engineering",
+    text: "Got my textbooks in literally 10 minutes. Safe and easy.",
+    pos: { top: '8%', left: '4%' }, rotate: '-3deg', width: '230px', zDepth: 1.2
+  },
+  {
+    id: 8, name: "Anita D.", role: "Design",
+    text: "Sold my old T-square to a junior the same day I listed it.",
+    pos: { top: '35%', left: '6%' }, rotate: '2.5deg', width: '240px', zDepth: 2.8
+  },
+  {
+    id: 7, name: "Vikram P.", role: "M.Tech",
+    text: "Found cheap Arduino kits. Saved a ton of money.",
+    pos: { top: '12%', left: '32%' }, rotate: '1deg', width: '220px', zDepth: 3.5
+  },
+  {
+    id: 15, name: "Arjun N.", role: "Electronics",
+    text: "Verified profiles mean I actually trust the person I'm meeting.",
+    pos: { bottom: '25%', left: '8%' }, rotate: '-1.8deg', width: '248px', zDepth: 1.5
+  },
+  {
+    id: 13, name: "Rishabh K.", role: "Pharmacy",
+    text: "Got lab coats for half the price. Great for juniors.",
+    pos: { top: '55%', left: '2%' }, rotate: '4deg', width: '215px', zDepth: 3.2
+  },
+  {
+    id: 3, name: "Aman K.", role: "Mechanical",
+    text: "Listed 6 things, sold 5 in two days. Highly recommend.",
+    pos: { bottom: '8%', left: '28%' }, rotate: '-2.2deg', width: '260px', zDepth: 2.1
+  },
+  {
+    id: 2, name: "Priya M.", role: "B.Tech",
+    text: "Met near the library for the handoff. Super convenient.",
+    pos: { top: '10%', right: '12%' }, rotate: '-1deg', width: '250px', zDepth: 1.1
+  },
+  {
+    id: 10, name: "Kritika S.", role: "Architecture",
+    text: "The UI is so clean. Listed my tools and got inquiries fast.",
+    pos: { top: '28%', right: '4%' }, rotate: '3.5deg', width: '235px', zDepth: 2.5
+  },
+  {
+    id: 14, name: "Dev V.", role: "Comp. Sci",
+    text: "Zero latency on image uploads. Works flawlessly.",
+    pos: { top: '50%', right: '6%' }, rotate: '-2.8deg', width: '240px', zDepth: 1.8
+  },
+  {
+    id: 4, name: "Neha J.", role: "Arts",
+    text: "Smooth experience, zero platform fees. Love it.",
+    pos: { bottom: '22%', right: '8%' }, rotate: '1.2deg', width: '245px', zDepth: 3.8
+  },
+  {
+    id: 9, name: "Rohan J.", role: "Business",
+    text: "Way better than WhatsApp groups. Listings stay fresh.",
+    pos: { top: '18%', right: '35%' }, rotate: '-4deg', width: '220px', zDepth: 2.4
+  },
+  {
+    id: 5, name: "Karan T.", role: "Comp. Sci",
+    text: "Fast uploads, works perfectly on mobile.",
+    pos: { bottom: '8%', right: '30%' }, rotate: '2.1deg', width: '210px', zDepth: 1.6
+  },
 ];
 
 const CTA = () => {
@@ -47,31 +95,38 @@ const CTA = () => {
       const progress = Math.min(Math.max(currentScroll / maxScroll, 0), 1);
       setScrollYProgress(progress);
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Phase 1: Per-card kinematic parallax + global gate
+  // --- Strict Sequenced Kinematics --- 
+
+  // Phase 1 (Cards): Handled directly in the render loop to utilize individual zDepth indices.
+  // Global fade forces all remaining straggler cards to disappear before the circle expands.
   const globalCardOpacity = Math.max(0, 1 - (scrollYProgress - 0.2) * 5);
 
-  // Phase 2: Headline bifurcates (Scroll 0.2 -> 0.4)
+  // Phase 2: Headline splits in half and fades out (Scroll 0.2 -> 0.4)
   const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.2) / 0.2, 1));
   const textTranslate = textSplitProgress * 180;
   const textOpacity = Math.max(0, 1 - textSplitProgress * 1.5);
 
-  // Phase 3: Circle expands from the empty focal centre (Scroll 0.35 -> 0.65)
+  // Phase 3: Circle expands from the empty focal center (Scroll 0.35 -> 0.65)
   const circleProgress = Math.max(0, Math.min((scrollYProgress - 0.35) / 0.3, 1));
   const circleScale = circleProgress * 1.55;
 
-  // Phase 4: CTA panel fades in once circle is fully expanded
+  // Phase 4: Terminal CTA snaps in instantly once the circle is fully expanded.
+  // Binary: fully visible when circleProgress === 1, fully hidden otherwise.
   const ctaOpacity = circleProgress >= 1 ? 1 : 0;
   const isCtaInteractive = ctaOpacity > 0.5;
 
   return (
     <section ref={containerRef} className="relative w-full h-[350vh] bg-[#F5F5F7]">
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
         .mono { font-family: 'Space Mono', monospace; }
 
         .cta-container {
@@ -90,7 +145,9 @@ const CTA = () => {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .scrolling-text { animation: scrollText 30s linear infinite; }
+        .scrolling-text {
+          animation: scrollText 30s linear infinite;
+        }
 
         .btn-brutal {
           position: relative;
@@ -115,7 +172,11 @@ const CTA = () => {
           color: #fff;
           border: 1px solid rgba(255,255,255,0.3);
         }
-        .btn-outline:hover { background: #fff; color: #000; border-color: #fff; }
+        .btn-outline:hover {
+          background: #fff;
+          color: #000;
+          border-color: #fff;
+        }
 
         .tech-grid-bg {
           background-color: #0A0A0A;
@@ -132,19 +193,28 @@ const CTA = () => {
         {/* Stratum 1: Parallax Social Proof Field */}
         <div className="absolute inset-0 z-10 pointer-events-none origin-center">
           {REVIEWS.map((r) => {
+            // Apply kinematic scaling inversely proportional to zDepth
             const scaleFactor = 1 + (scrollYProgress * 20) / r.zDepth;
+
+            // Localized fade: The card fades as it physically "passes" the camera (scale > 3)
             let localOpacity = 1;
-            if (scaleFactor > 3) localOpacity = Math.max(0, 1 - (scaleFactor - 3) * 0.8);
+            if (scaleFactor > 3) {
+              localOpacity = Math.max(0, 1 - (scaleFactor - 3) * 0.8);
+            }
+
+            // Final opacity is the stricter of its local fade and the global sequence fade
             const finalOpacity = Math.min(localOpacity, globalCardOpacity);
+
             return (
               <div
                 key={r.id}
                 className="absolute bg-white shadow-[0_4px_28px_rgba(0,0,0,0.08)] p-4 md:p-5 rounded-2xl border border-zinc-100 hidden lg:flex flex-col gap-3"
                 style={{
-                  ...r.pos, width: r.width,
+                  ...r.pos,
+                  width: r.width,
                   transform: `scale(${scaleFactor}) rotate(${r.rotate})`,
                   opacity: finalOpacity,
-                  willChange: 'transform, opacity',
+                  willChange: 'transform, opacity'
                 }}
               >
                 <div className="flex items-center gap-3 mb-1">
@@ -156,7 +226,9 @@ const CTA = () => {
                     <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{r.role}</p>
                   </div>
                 </div>
-                <p className="text-[13px] text-zinc-700 leading-relaxed">"{r.text}"</p>
+                <p className="text-[13px] text-zinc-700 leading-relaxed">
+                  "{r.text}"
+                </p>
               </div>
             );
           })}
@@ -164,15 +236,25 @@ const CTA = () => {
 
         {/* Stratum 1.5: Bifurcating Typography */}
         <div className="absolute inset-0 z-15 pointer-events-none flex flex-col items-center justify-center gap-2">
+          {/* Top Half Ascends */}
           <h1
             className="text-5xl md:text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter text-center leading-none"
-            style={{ transform: `translateY(-${textTranslate}px)`, opacity: textOpacity, willChange: 'transform, opacity' }}
+            style={{
+              transform: `translateY(-${textTranslate}px)`,
+              opacity: textOpacity,
+              willChange: 'transform, opacity'
+            }}
           >
             Trusted by
           </h1>
+          {/* Bottom Half Descends */}
           <h1
             className="text-5xl md:text-6xl lg:text-7xl font-black text-black tracking-tighter text-center leading-none"
-            style={{ transform: `translateY(${textTranslate}px)`, opacity: textOpacity, willChange: 'transform, opacity' }}
+            style={{
+              transform: `translateY(${textTranslate}px)`,
+              opacity: textOpacity,
+              willChange: 'transform, opacity'
+            }}
           >
             2,000+ students
           </h1>
@@ -182,8 +264,13 @@ const CTA = () => {
         <div
           className="absolute tech-grid-bg z-20"
           style={{
-            width: '200vmax', height: '200vmax', borderRadius: '50%',
-            top: '50%', left: '50%', marginTop: '-100vmax', marginLeft: '-100vmax',
+            width: '200vmax',
+            height: '200vmax',
+            borderRadius: '50%',
+            top: '50%',
+            left: '50%',
+            marginTop: '-100vmax',
+            marginLeft: '-100vmax',
             transform: `scale(${circleScale})`,
             border: '2px solid rgba(0,217,255,0.4)',
             boxShadow: '0 0 100px rgba(0,217,255,0.15) inset',
@@ -192,7 +279,7 @@ const CTA = () => {
           }}
         />
 
-        {/* Stratum 3: Terminal Interface */}
+        {/* Stratum 3: Terminal Interface Construction */}
         <div
           className={`absolute inset-0 z-30 flex items-center justify-center px-6 transition-opacity duration-300 ${isCtaInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}
           style={{ opacity: ctaOpacity }}
@@ -201,36 +288,53 @@ const CTA = () => {
             <div className="absolute left-6 top-0 bottom-0 w-px bg-white/5" />
             <div className="absolute right-6 top-0 bottom-0 w-px bg-white/5" />
           </div>
+
           <div className="max-w-7xl mx-auto relative w-full">
             <div className={`cta-container w-full relative bg-zinc-900 border border-white/10 overflow-hidden ${isCtaInteractive ? 'is-visible' : ''}`}>
+
+              {/* Scrolling Ambient Telemetry */}
               <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
                 <div className="scrolling-text whitespace-nowrap text-[8rem] md:text-[12rem] font-black uppercase leading-none text-white">
                   CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
                 </div>
               </div>
+
+              {/* Geometric Interface Boundaries */}
               <div className="absolute top-0 left-0 border-l-2 border-t-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
               <div className="absolute bottom-0 right-0 border-r-2 border-b-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
+
               <div className="relative z-10 px-6 py-12 md:px-8 md:py-24 flex flex-col items-center text-center">
+
                 <div className="flex items-center gap-2 mb-8 bg-black/40 border border-white/10 px-3 py-1 backdrop-blur-md">
                   <div className="w-2 h-2 bg-[#00D9FF] animate-pulse" />
-                  <span className="mono text-[10px] md:text-xs text-[#00D9FF] tracking-widest uppercase">Network Status: Active</span>
+                  <span className="mono text-[10px] md:text-xs text-[#00D9FF] tracking-widest uppercase">
+                    Network Status: Active
+                  </span>
                 </div>
+
                 <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8 max-w-4xl">
                   Ready to clear<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">Your Inventory?</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
+                    Your Inventory?
+                  </span>
                 </h2>
+
                 <p className="text-white/60 mono text-xs md:text-base max-w-xl mb-12 leading-relaxed">
                   // Join 2,000+ Campus students trading daily. <br />
                   // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidity.
                 </p>
+
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                   <button className="btn-brutal flex items-center justify-center gap-3 text-sm md:text-base">
-                    <UploadIcon /><span>Initialize Upload</span>
+                    <UploadIcon />
+                    <span>Initialize Upload</span>
                   </button>
                   <button className="btn-brutal btn-outline flex items-center justify-center gap-3 text-sm md:text-base">
-                    <span>View Guidelines</span><ArrowRight />
+                    <span>View Guidelines</span>
+                    <ArrowRight />
                   </button>
                 </div>
+
               </div>
             </div>
           </div>
