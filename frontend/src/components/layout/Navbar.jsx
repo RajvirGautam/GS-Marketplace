@@ -65,56 +65,60 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
   // Scroll animation (SHAPE AND POSITION ONLY)
   useEffect(() => {
-    const handleUpdate = () => {
-      if (!navRef.current) return
+    let ticking = false;
 
-      const scrollY = window.scrollY
-      const maxScroll = 200
-      let ratio = scrollY / maxScroll
-      if (ratio > 1) ratio = 1
-      if (ratio < 0) ratio = 0
+    const updateNav = () => {
+      if (!navRef.current) return;
 
-      const isMobile = window.innerWidth < 768
+      const scrollY = window.scrollY;
+      const maxScroll = 200;
+      let ratio = scrollY / maxScroll;
+      if (ratio > 1) ratio = 1;
+      if (ratio < 0) ratio = 0;
 
-      const startWidth = isMobile ? 90 : 55
-      const endWidth = 100
-      const currentWidth = startWidth + ((endWidth - startWidth) * ratio)
+      const isMobile = window.innerWidth < 768;
 
-      const startOffset = 72
-      const currentOffset = startOffset * (1 - ratio)
-      const currentLeft = `calc(50% - ${currentOffset}px)`
+      const startWidth = isMobile ? 90 : 55;
+      const endWidth = 100;
+      const currentWidth = startWidth + ((endWidth - startWidth) * ratio);
 
-      const currentTop = 65 - (65 * ratio)
-      const currentRadius = 65 - (65 * ratio)
+      const startOffset = 72;
+      const currentOffset = startOffset * (1 - ratio);
+      const currentLeft = `calc(50% - ${currentOffset}px)`;
 
-      // --- REMOVED JS COLOR/OPACITY CALCULATION HERE ---
-      // The JS was overriding the Tailwind glass classes.
-      // We now rely solely on CSS for the glass effect.
+      const currentTop = 65 - (65 * ratio);
+      const currentRadius = 65 - (65 * ratio);
 
-      const el = navRef.current
-      el.style.left = currentLeft
-      el.style.width = `${currentWidth}%`
-      el.style.top = `${currentTop}px`
-      el.style.borderTopLeftRadius = `${currentRadius}px`
-      el.style.borderTopRightRadius = `${currentRadius}px`
-      el.style.borderBottomLeftRadius = `${currentRadius}px`
-      el.style.borderBottomRightRadius = `${currentRadius}px`
+      const el = navRef.current;
+      el.style.left = currentLeft;
+      el.style.width = `${currentWidth}%`;
+      el.style.top = `${currentTop}px`;
+      el.style.borderTopLeftRadius = `${currentRadius}px`;
+      el.style.borderTopRightRadius = `${currentRadius}px`;
+      el.style.borderBottomLeftRadius = `${currentRadius}px`;
+      el.style.borderBottomRightRadius = `${currentRadius}px`;
+    };
 
-      // --- REMOVED JS STYLE OVERRIDES HERE ---
-      // el.style.backgroundColor = ...
-      // el.style.borderColor = ...
-    }
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateNav();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
 
-    window.addEventListener('scroll', handleUpdate, { passive: true })
-    window.addEventListener('resize', handleUpdate)
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
     // Trigger once on mount to set initial shape
-    handleUpdate()
+    updateNav();
 
     return () => {
-      window.removeEventListener('scroll', handleUpdate)
-      window.removeEventListener('resize', handleUpdate)
-    }
-  }, [isDark]) // isDark dependency remains if you ever want to re-add JS theming
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   return (
     <nav
@@ -131,7 +135,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         /* --------------------------- */
         
         shadow-[0_20px_50px_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.6)]
-        transition-all duration-200 ease-out
+        transition-[background-color,box-shadow,border-color] duration-200 ease-out
         hover:bg-white/20 dark:hover:bg-white/5
         hover:shadow-[0_20px_50px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.9)]
       `}
