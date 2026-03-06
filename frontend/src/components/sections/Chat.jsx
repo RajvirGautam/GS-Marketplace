@@ -1099,6 +1099,32 @@ const Chat = () => {
           display: flex; align-items: center; gap: 12; flex-shrink: 0;
         }
 
+        /* Navigation Buttons */
+        .nav-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.7);
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .nav-btn:hover {
+          background: rgba(255,255,255,0.1);
+          color: #fff;
+          border-color: rgba(255,255,255,0.2);
+        }
+        @media (max-width: 768px) {
+          .nav-btn-text { display: none; }
+          .nav-btn { padding: 8px; border-radius: 8px; }
+          .conversation-count { display: none !important; }
+        }
+
         /* Scrollbar for conv list */
         * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
       `}</style>
@@ -1127,8 +1153,29 @@ const Chat = () => {
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00D9FF', boxShadow: '0 0 6px #00D9FF' }} />
                         <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>Messages</span>
                     </div>
-                    <div style={{ marginLeft: 'auto', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'JetBrains Mono, monospace' }}>
-                        {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button
+                                onClick={() => navigate('/marketplace')}
+                                className="nav-btn"
+                                title="Marketplace"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                <span className="nav-btn-text">Marketplace</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="nav-btn"
+                                title="Dashboard"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                                <span className="nav-btn-text">Dashboard</span>
+                            </button>
+                        </div>
+                        <div className="conversation-count" style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'JetBrains Mono, monospace' }}>
+                            {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+                        </div>
                     </div>
                 </div>
 
