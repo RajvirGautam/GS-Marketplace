@@ -1,162 +1,86 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 
-// --- Internal Icons ---
-const UploadIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-)
-const ArrowRight = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-)
+// Scattered review cards pushed to viewport edges, hollow centre to frame typography.
+const REVIEWS = [
+  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '8%', left: '4%' }, rotate: '-3deg', width: '230px' },
+  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '35%', left: '6%' }, rotate: '2.5deg', width: '240px' },
+  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '12%', left: '32%' }, rotate: '1deg', width: '220px' },
+  { id: 15, name: "Arjun N.", role: "Electronics", text: "Verified profiles mean I actually trust the person I'm meeting.", pos: { bottom: '25%', left: '8%' }, rotate: '-1.8deg', width: '248px' },
+  { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { top: '55%', left: '2%' }, rotate: '4deg', width: '215px' },
+  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '28%' }, rotate: '-2.2deg', width: '260px' },
+  { id: 2, name: "Priya M.", role: "B.Tech", text: "Met near the library for the handoff. Super convenient.", pos: { top: '10%', right: '12%' }, rotate: '-1deg', width: '250px' },
+  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '28%', right: '4%' }, rotate: '3.5deg', width: '235px' },
+  { id: 14, name: "Dev V.", role: "Comp. Sci", text: "Zero latency on image uploads. Works flawlessly.", pos: { top: '50%', right: '6%' }, rotate: '-2.8deg', width: '240px' },
+  { id: 4, name: "Neha J.", role: "Arts", text: "Smooth experience, zero platform fees. Love it.", pos: { bottom: '22%', right: '8%' }, rotate: '1.2deg', width: '245px' },
+  { id: 9, name: "Rohan J.", role: "Business", text: "Way better than WhatsApp groups. Listings stay fresh.", pos: { top: '18%', right: '35%' }, rotate: '-4deg', width: '220px' },
+  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '8%', right: '30%' }, rotate: '2.1deg', width: '210px' },
+];
 
 const CTA = () => {
-  // Intersection Observer for scroll animation
+  const containerRef = useRef(null);
+  const [scrollYProgress, setScrollYProgress] = useState(0);
+
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-        }
-      });
-    }, { threshold: 0.3 });
-
-    const el = document.querySelector(".cta-container");
-    if (el) observer.observe(el);
-
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const { top, height } = containerRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const maxScroll = height - windowHeight;
+      const currentScroll = -top;
+      const progress = Math.min(Math.max(currentScroll / maxScroll, 0), 1);
+      setScrollYProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const reviewsOpacity = Math.max(0, 1 - scrollYProgress * 5);
+
   return (
-    <section className="py-8 px-6 bg-[#0A0A0A] relative overflow-hidden border-b border-white/10">
-      
+    <section ref={containerRef} className="relative w-full h-[350vh] bg-[#F5F5F7]">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
         .mono { font-family: 'Space Mono', monospace; }
-
-        .cta-container {
-          opacity: 0;
-          transform: scale(0.95);
-          filter: blur(10px);
-          transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .cta-container.is-visible {
-          opacity: 1;
-          transform: scale(1);
-          filter: blur(0);
-        }
-
-        /* Scrolling Background Text */
-        @keyframes scrollText {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .scrolling-text {
-          animation: scrollText 30s linear infinite;
-        }
-
-        /* Brutalist Button */
-        .btn-brutal {
-          position: relative;
-          background: #fff;
-          color: #000;
-          border: 1px solid #fff;
-          padding: 16px 32px;
-          font-family: 'Space Mono', monospace;
-          font-weight: 700;
-          text-transform: uppercase;
-          transition: all 0.2s;
-          cursor: pointer;
-        }
-        .btn-brutal:hover {
-          background: #00D9FF;
-          border-color: #00D9FF;
-          box-shadow: 4px 4px 0 rgba(255,255,255,0.2);
-          transform: translate(-2px, -2px);
-        }
-        .btn-outline {
-          background: transparent;
-          color: #fff;
-          border: 1px solid rgba(255,255,255,0.3);
-        }
-        .btn-outline:hover {
-          background: #fff;
-          color: #000;
-          border-color: #fff;
-        }
       `}</style>
 
-      {/* Decorative Grid Lines */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-6 top-0 bottom-0 w-px bg-white/5"></div>
-        <div className="absolute right-6 top-0 bottom-0 w-px bg-white/5"></div>
-      </div>
+      <div className="sticky top-0 w-full h-screen overflow-hidden flex items-center justify-center">
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        
-        {/* Main CTA Box */}
-        <div className="cta-container relative bg-zinc-900 border border-white/10 overflow-hidden group">
-          
-          {/* Dynamic Background: Scrolling Text */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
-            <div className="scrolling-text whitespace-nowrap text-[12rem] font-black uppercase leading-none text-white">
-              CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
-            </div>
+        {/* Social proof layer */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{ opacity: reviewsOpacity }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter text-center leading-none">
+              Trusted by<br />
+              <span className="text-black">2,000+ students</span>
+            </h1>
           </div>
 
-          {/* Corner Accents */}
-          <div className="absolute top-0 left-0 p-4 border-l-2 border-t-2 border-[#00D9FF] w-16 h-16 pointer-events-none"></div>
-          <div className="absolute bottom-0 right-0 p-4 border-r-2 border-b-2 border-[#00D9FF] w-16 h-16 pointer-events-none"></div>
-          
-          {/* Content Wrapper */}
-          <div className="relative z-10 px-8 md:py-16 flex flex-col items-center text-center">
-            
-            {/* Status Badge */}
-            <div className="flex items-center gap-2 mb-8 bg-black/40 border border-white/10 px-3 py-1 backdrop-blur-md">
-              <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"></div>
-              <span className="mono text-xs text-[#00D9FF] tracking-widest uppercase">
-                Network Status: Active
-              </span>
+          {REVIEWS.map((r) => (
+            <div
+              key={r.id}
+              className="absolute bg-white shadow-[0_4px_28px_rgba(0,0,0,0.08)] p-4 md:p-5 rounded-2xl border border-zinc-100 hidden lg:flex flex-col gap-3"
+              style={{ ...r.pos, width: r.width, transform: `rotate(${r.rotate})` }}
+            >
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-8 h-8 shrink-0 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
+                  {r.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-black leading-tight">{r.name}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{r.role}</p>
+                </div>
+              </div>
+              <p className="text-[13px] text-zinc-700 leading-relaxed">"{r.text}"</p>
             </div>
-
-            {/* Headline */}
-            <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8 max-w-4xl">
-              Ready to clear<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
-                Your Inventory?
-              </span>
-            </h2>
-
-            {/* Description */}
-            <p className="text-white/60 mono text-sm md:text-base max-w-xl mb-12 leading-relaxed">
-              // Join 2,000+ Campus students trading daily. <br/>
-              // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidty.
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <button className="btn-brutal flex items-center justify-center gap-3 group">
-                <UploadIcon />
-                <span>Initialize Upload</span>
-              </button>
-              
-              <button className="btn-brutal btn-outline flex items-center justify-center gap-3">
-                <span>View Guidelines</span>
-                <ArrowRight />
-              </button>
-            </div>
-
-            {/* Decorative Footer Code */}
-            <div className="absolute bottom-6 left-0 right-0 text-center hidden md:block">
-               <span className="mono text-[10px] text-white/20">
-                 System_ID: CTA_MOD_V2.4 // READY_TO_EXECUTE
-               </span>
-            </div>
-
-          </div>
+          ))}
         </div>
+
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default CTA
+export default CTA;
