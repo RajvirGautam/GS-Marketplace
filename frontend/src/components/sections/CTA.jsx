@@ -122,7 +122,7 @@ const CTA = () => {
   const isCtaInteractive = ctaOpacity > 0.5;
 
   return (
-    <section ref={containerRef} className="relative w-full h-[350vh] bg-[#F5F5F7]">
+    <section ref={containerRef} className="relative w-full h-[350vh] bg-[#0a0a0f]">
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
@@ -208,7 +208,7 @@ const CTA = () => {
             return (
               <div
                 key={r.id}
-                className="absolute bg-white shadow-[0_4px_28px_rgba(0,0,0,0.08)] p-4 md:p-5 rounded-2xl border border-zinc-100 hidden lg:flex flex-col gap-3"
+                className="absolute bg-[#1a1a24] shadow-[0_4px_28px_rgba(0,0,0,0.5)] p-4 md:p-5 rounded-2xl border border-white/10 hidden lg:flex flex-col gap-3"
                 style={{
                   ...r.pos,
                   width: r.width,
@@ -218,15 +218,15 @@ const CTA = () => {
                 }}
               >
                 <div className="flex items-center gap-3 mb-1">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
+                  <div className="w-8 h-8 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
                     {r.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-black leading-tight">{r.name}</p>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{r.role}</p>
+                    <p className="text-sm font-bold text-white/90 leading-tight">{r.name}</p>
+                    <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{r.role}</p>
                   </div>
                 </div>
-                <p className="text-[13px] text-zinc-700 leading-relaxed">
+                <p className="text-[13px] text-white/60 leading-relaxed">
                   "{r.text}"
                 </p>
               </div>
@@ -238,7 +238,7 @@ const CTA = () => {
         <div className="absolute inset-0 z-15 pointer-events-none flex flex-col items-center justify-center gap-2">
           {/* Top Half Ascends */}
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-black text-zinc-900 tracking-tighter text-center leading-none"
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
             style={{
               transform: `translateY(-${textTranslate}px)`,
               opacity: textOpacity,
@@ -249,7 +249,7 @@ const CTA = () => {
           </h1>
           {/* Bottom Half Descends */}
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-black text-black tracking-tighter text-center leading-none"
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
             style={{
               transform: `translateY(${textTranslate}px)`,
               opacity: textOpacity,
