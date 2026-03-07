@@ -7,8 +7,10 @@ const Hero = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [particles, setParticles] = useState([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const containerRef = useRef(null);
   const cardRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
 
   const today = new Date();
   const day = today.getDate();
@@ -74,6 +76,30 @@ const Hero = () => {
       opacity: Math.random() * 0.5 + 0.2
     }));
     setParticles(newParticles);
+  }, []);
+
+  // Handle Scroll to hide dots/stars
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 200); // Wait 200ms after scroll stops to show dots again
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, []);
 
 
@@ -151,7 +177,7 @@ const Hero = () => {
           font-family: 'Manrope', sans-serif;
           background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 50%, #000000 100%);
           position: relative;
-          overflow: hidden;
+          overflow: visible; /* Prevent any chance of the 4th card clipping */
           min-height: 100vh;
         }
 
@@ -251,7 +277,7 @@ const Hero = () => {
         .anim-fade-right { animation: fadeInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
         .anim-scale { animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-        /* Glassmorphism card */
+        /* Glassmorphism card - Restored */
         .glass-card {
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
@@ -272,14 +298,24 @@ const Hero = () => {
           will-change: transform;
         }
 
-        /* Product card redesign */
+        /* Scroll Stack Animation Core Styles */
+        .sticky-card-wrapper {
+          position: sticky;
+        }
+        
+        .card-3d-inner {
+          transform-style: preserve-3d;
+          transition: transform 0.2s ease-out;
+          will-change: transform;
+        }
+
+        /* Product card redesign - Kept Opaque Dark */
         .product-showcase {
           position: relative;
           border-radius: 24px;
           overflow: hidden;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(40px);
+          background: #0d0d12;
+          border: 1px solid rgba(255,255,255,0.05);
         }
 
         .product-showcase::before {
@@ -470,28 +506,6 @@ const Hero = () => {
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
         .delay-800 { animation-delay: 0.8s; opacity: 0; }
 
-        /* Thumbnail strip */
-        .thumb-item {
-          cursor: pointer;
-          border: 2px solid rgba(255,255,255,0.1);
-          border-radius: 12px;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-          opacity: 0.5;
-          flex-shrink: 0;
-        }
-
-        .thumb-item:hover {
-          opacity: 0.8;
-          border-color: rgba(255,255,255,0.3);
-        }
-
-        .thumb-item.active {
-          opacity: 1;
-          border-color: var(--accent-color);
-          box-shadow: 0 0 20px var(--accent-glow);
-        }
-
         /* Quick action pill */
         .action-pill {
           display: inline-flex;
@@ -546,8 +560,8 @@ const Hero = () => {
           position: relative;
           border-radius: 20px;
           overflow: hidden;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: #0d0d12;
+          border: 1px solid rgba(255,255,255,0.05);
         }
 
         .mobile-product-card::before {
@@ -637,96 +651,6 @@ const Hero = () => {
           backdrop-filter: blur(10px);
         }
 
-        /* Mobile card dots */
-        .mobile-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.2);
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-dot.active {
-          width: 28px;
-          border-radius: 14px;
-        }
-
-        /* Mobile CTA buttons */
-        .mobile-cta-primary {
-          width: 100%;
-          padding: 16px 24px;
-          border-radius: 16px;
-          border: none;
-          font-weight: 800;
-          font-size: 14px;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          color: white;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-cta-primary:active {
-          transform: scale(0.98);
-        }
-
-        .mobile-cta-secondary {
-          width: 100%;
-          padding: 16px 24px;
-          border-radius: 16px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          font-weight: 700;
-          font-size: 14px;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          color: rgba(255,255,255,0.9);
-          transition: all 0.3s ease;
-        }
-
-        .mobile-cta-secondary:active {
-          transform: scale(0.98);
-          background: rgba(255,255,255,0.1);
-        }
-
-        /* Mobile categories */
-        .mobile-categories {
-          display: flex;
-          gap: 8px;
-          overflow-x: auto;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .mobile-categories::-webkit-scrollbar {
-          display: none;
-        }
-
-        .mobile-cat-chip {
-          flex-shrink: 0;
-          padding: 8px 16px;
-          border-radius: 100px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.7);
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          white-space: nowrap;
-        }
-
-        .mobile-cat-chip:active {
-          background: rgba(255,255,255,0.12);
-          color: white;
-        }
-
         /* Swipe indicator animation */
         @keyframes swipeHint {
           0%, 100% { transform: translateX(0); opacity: 0.4; }
@@ -735,27 +659,6 @@ const Hero = () => {
 
         .swipe-hint {
           animation: swipeHint 2s ease-in-out infinite;
-        }
-
-        /* Mobile trust banner */
-        .mobile-trust-banner {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          padding: 14px;
-          border-radius: 14px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .mobile-trust-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          color: rgba(255,255,255,0.5);
-          font-weight: 600;
         }
 
       `}</style>
@@ -822,13 +725,13 @@ const Hero = () => {
           }}
         />
 
-        {/* Grid overlay */}
+        {/* Grid overlay - Remains constant during scroll */}
         <div className="grid-overlay" />
 
         {/* Noise texture */}
         <div className="noise" />
 
-        {/* Particle system */}
+        {/* Particle system - Fades out on scroll */}
         {particles.map((particle) => (
           <div
             key={particle.id}
@@ -838,7 +741,8 @@ const Hero = () => {
               top: `${particle.y}%`,
               width: `${particle.size}px`,
               height: `${particle.size}px`,
-              opacity: particle.opacity,
+              opacity: isScrolling ? 0 : particle.opacity,
+              transition: 'opacity 0.4s ease',
               '--tx': `${particle.speedX * 100}px`,
               '--ty': `${particle.speedY * 100}px`
             }}
@@ -891,108 +795,105 @@ const Hero = () => {
               </div>
             </div>
 
-            {/* Mobile product card */}
-            <div
-              className="anim-scale delay-400"
-              style={{ '--accent-color': currentCard.accent }}
-            >
-              <div className="mobile-product-card">
-                <div className={`${isTransitioning ? 'card-transition-exit' : 'card-transition-enter'}`}>
-
-                  {/* Product image - full bleed */}
-                  <div className="mobile-product-image">
-                    <img
-                      src={currentCard.image}
-                      alt={currentCard.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Overlay content on image */}
-                    <div className="absolute bottom-0 left-0 right-0 z-10 p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="mono text-[9px] px-2 py-1 rounded-full font-bold text-white/90"
-                          style={{ background: `${currentCard.accent}40`, border: `1px solid ${currentCard.accent}60` }}
-                        >
-                          {currentCard.tag}
-                        </span>
-                        <span className="mono text-[9px] text-white/50">#{String(currentIndex + 1).padStart(2, '0')}/{String(cards.length).padStart(2, '0')}</span>
-                      </div>
-                      <h3 className="text-xl font-black text-white leading-tight">{currentCard.title}</h3>
-                      <div
-                        className="mono text-2xl font-black text-white mt-1"
-                        style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
-                      >
-                        {currentCard.price}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card body */}
-                  <div className="p-5">
-                    {/* Seller info */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs"
-                        style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}99)` }}
-                      >
-                        {currentCard.user.charAt(0)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-white font-bold text-sm">{currentCard.user}</div>
-                        <div className="mono text-[9px] text-white/40 uppercase tracking-wide">Active now · Verified ✓</div>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-xs text-white/50 leading-relaxed mb-4">
-                      {currentCard.description}
-                    </p>
-
-                    {/* Quick chips */}
-                    <div className="flex flex-wrap gap-1.5 mb-5">
-                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
-                        📍 Campus Pickup
-                      </span>
-                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
-                        ⚡ Instant
-                      </span>
-                      <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
-                        🛡️ Verified
-                      </span>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        className="action-pill mono text-white flex-1 justify-center text-xs"
-                        style={{ background: currentCard.accent }}
-                      >
-                        View Details →
-                      </button>
-                      <button
-                        className="action-pill mono text-white/80 flex-1 justify-center text-xs"
-                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
-                      >
-                        💬 Message
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile card nav dots */}
-                <div className="flex items-center justify-center gap-2 pb-4">
-                  {cards.map((card, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => switchCard(idx)}
-                      className={`mobile-dot ${idx === currentIndex ? 'active' : ''}`}
+            {/* ===== REDESIGNED MOBILE PRODUCT SHOWCASE (STACKING SCROLL) ===== */}
+            <div className="relative w-full pb-[5vh] anim-scale delay-400">
+              {cards.map((card, idx) => (
+                <React.Fragment key={card.id}>
+                  <div
+                    className="sticky-card-wrapper"
+                    style={{
+                      top: `calc(90px + ${idx * 24}px)`,
+                      zIndex: idx + 10,
+                    }}
+                  >
+                    <div
                       style={{
-                        background: idx === currentIndex ? currentCard.accent : 'rgba(255,255,255,0.2)'
+                        '--accent-color': card.accent,
+                        animationDelay: `${400 + (idx * 100)}ms`
                       }}
-                    />
-                  ))}
-                </div>
-              </div>
+                    >
+                      <div className="mobile-product-card shadow-[0_15px_35px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/5">
+                        <div className="mobile-product-image">
+                          <img
+                            src={card.image}
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 z-10 p-5">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span
+                                className="mono text-[9px] px-2 py-1 rounded-full font-bold text-white/90"
+                                style={{ background: `${card.accent}40`, border: `1px solid ${card.accent}60` }}
+                              >
+                                {card.tag}
+                              </span>
+                              <span className="mono text-[9px] text-white/50">#{String(idx + 1).padStart(2, '0')}/{String(cards.length).padStart(2, '0')}</span>
+                            </div>
+                            <h3 className="text-xl font-black text-white leading-tight">{card.title}</h3>
+                            <div
+                              className="mono text-2xl font-black text-white mt-1"
+                              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}
+                            >
+                              {card.price}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-5">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div
+                              className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs"
+                              style={{ background: `linear-gradient(135deg, ${card.accent}, ${card.accent}99)` }}
+                            >
+                              {card.user.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-white font-bold text-sm">{card.user}</div>
+                              <div className="mono text-[9px] text-white/40 uppercase tracking-wide">Active now · Verified ✓</div>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-white/50 leading-relaxed mb-4">
+                            {card.description}
+                          </p>
+
+                          <div className="flex flex-wrap gap-1.5 mb-5">
+                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                              📍 Campus Pickup
+                            </span>
+                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                              ⚡ Instant
+                            </span>
+                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                              🛡️ Verified
+                            </span>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              className="action-pill mono text-white flex-1 justify-center text-xs"
+                              style={{ background: card.accent }}
+                            >
+                              View Details →
+                            </button>
+                            <button
+                              className="action-pill mono text-white/80 flex-1 justify-center text-xs"
+                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                            >
+                              💬 Message
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {idx !== cards.length - 1 && (
+                    <div style={{ height: '20vh' }} />
+                  )}
+                </React.Fragment>
+              ))}
+              {/* Spacer so last card reaches its sticky top before page scrolls away */}
+              <div style={{ height: '60vh' }} />
             </div>
 
             {/* Mobile feature pills - horizontal scroll */}
@@ -1038,49 +939,6 @@ const Hero = () => {
               </div>
             </div>
 
-            {/* Mobile categories */}
-            <div className="anim-fade-up delay-600">
-              <div className="mono text-[10px] text-white/40 tracking-widest mb-3 uppercase font-bold px-1">Popular Categories</div>
-              <div className="mobile-categories">
-                {['🔌 Electronics', '📚 Books', '🔧 Tools', '🥼 Lab Gear', '⚙️ Components', '✏️ Stationery'].map((cat) => (
-                  <button key={cat} className="mobile-cat-chip mono">
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile CTA buttons */}
-            <div className="space-y-3 anim-fade-up delay-700">
-              <button
-                className="mobile-cta-primary mono"
-                style={{ background: currentCard.accent }}
-              >
-                🛍️ Browse Market
-              </button>
-              <button className="mobile-cta-secondary mono">
-                📦 List Your Item
-              </button>
-            </div>
-
-            {/* Mobile trust banner */}
-            <div className="mobile-trust-banner anim-fade-up delay-800">
-              <div className="mobile-trust-item">
-                <span>🛡️</span>
-                <span className="mono">Secure</span>
-              </div>
-              <div className="w-px h-4 bg-white/10" />
-              <div className="mobile-trust-item">
-                <span>✓</span>
-                <span className="mono">Verified</span>
-              </div>
-              <div className="w-px h-4 bg-white/10" />
-              <div className="mobile-trust-item">
-                <span>⚡</span>
-                <span className="mono">Fast</span>
-              </div>
-            </div>
-
           </div>
 
           {/* ============================== */}
@@ -1089,7 +947,7 @@ const Hero = () => {
           <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
             {/* ===== LEFT SIDEBAR - STATS ===== */}
-            <div className="lg:col-span-2 space-y-10 anim-fade-left delay-100">
+            <div className="lg:col-span-2 space-y-10 anim-fade-left delay-100 sticky top-32 h-fit">
 
               {/* Date */}
               <div className="space-y-3">
@@ -1125,8 +983,8 @@ const Hero = () => {
                 </div>
               </div>
 
-              {/* Rotating badge */}
-              <div className="hidden lg:block pt-8">
+              {/* Rotating badge - MOVED BACK DOWN HERE */}
+              <div className="hidden lg:block pt-2">
                 <div className="w-28 h-28 relative">
                   <svg className="circular-text absolute inset-0 w-full h-full" viewBox="0 0 120 120">
                     <defs>
@@ -1173,192 +1031,147 @@ const Hero = () => {
                 </p>
               </div>
 
-              {/* ===== REDESIGNED PRODUCT SHOWCASE ===== */}
-              <div
-                ref={cardRef}
-                className="card-3d anim-scale delay-700"
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-                style={{ '--accent-color': currentCard.accent, '--accent-glow': `${currentCard.accent}40` }}
-              >
-                <div className="product-showcase">
+              {/* ===== REDESIGNED PRODUCT SHOWCASE (STACKING SCROLL) ===== */}
+              <div className="relative w-full pt-4">
+                {cards.map((card, idx) => (
+                  <React.Fragment key={card.id}>
+                    <div
+                      className="sticky-card-wrapper"
+                      style={{
+                        top: `calc(120px + ${idx * 48}px)`,
+                        zIndex: idx + 10,
+                      }}
+                    >
+                      <div
+                        className="card-3d-inner anim-scale"
+                        style={{
+                          '--accent-color': card.accent,
+                          '--accent-glow': `${card.accent}40`,
+                          animationDelay: `${700 + (idx * 100)}ms`,
+                        }}
+                        onMouseMove={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const x = e.clientX - rect.left;
+                          const y = e.clientY - rect.top;
+                          const centerX = rect.width / 2;
+                          const centerY = rect.height / 2;
+                          const rotateX = (y - centerY) / 25;
+                          const rotateY = (centerX - x) / 25;
+                          e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                        }}
+                      >
+                        <div className="product-showcase shadow-[0_25px_60px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/5">
+                          {/* Top strip - seller info */}
+                          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm"
+                                style={{ background: `linear-gradient(135deg, ${card.accent}, ${card.accent}99)` }}
+                              >
+                                {card.user.charAt(0)}
+                              </div>
+                              <div>
+                                <div className="text-white font-bold text-sm">{card.user}</div>
+                                <div className="mono text-[10px] text-white/40 uppercase tracking-wide">Active now · Verified ✓</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span
+                                className="mono text-[10px] px-3 py-1.5 rounded-full font-bold text-white/90"
+                                style={{ background: `${card.accent}30`, border: `1px solid ${card.accent}50` }}
+                              >
+                                {card.tag}
+                              </span>
+                              <span className="mono text-[10px] text-white/30">
+                                #{String(idx + 1).padStart(2, '0')}/{String(cards.length).padStart(2, '0')}
+                              </span>
+                            </div>
+                          </div>
 
-                  <div className={`${isTransitioning ? 'card-transition-exit' : 'card-transition-enter'}`}>
+                          {/* Main content area */}
+                          <div className="grid md:grid-cols-2 gap-0">
+                            {/* Image */}
+                            <div className="product-image-wrapper aspect-[4/3] md:aspect-auto md:min-h-[380px]">
+                              <img
+                                src={card.image}
+                                alt={card.title}
+                                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                                style={{
+                                  transform: `scale(1.02) translate(${mousePos.x * 8}px, ${mousePos.y * 8}px)`,
+                                  transition: 'transform 0.4s ease-out'
+                                }}
+                              />
+                              <div className="absolute bottom-6 left-6 z-10">
+                                <div
+                                  className="mono text-3xl lg:text-4xl font-black text-white"
+                                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
+                                >
+                                  {card.price}
+                                </div>
+                              </div>
+                            </div>
 
-                    {/* Top strip - seller info */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm"
-                          style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}99)` }}
-                        >
-                          {currentCard.user.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="text-white font-bold text-sm">{currentCard.user}</div>
-                          <div className="mono text-[10px] text-white/40 uppercase tracking-wide">Active now · Verified ✓</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="mono text-[10px] px-3 py-1.5 rounded-full font-bold text-white/90"
-                          style={{ background: `${currentCard.accent}30`, border: `1px solid ${currentCard.accent}50` }}
-                        >
-                          {currentCard.tag}
-                        </span>
-                        <span className="mono text-[10px] text-white/30">
-                          #{String(currentIndex + 1).padStart(2, '0')}/{String(cards.length).padStart(2, '0')}
-                        </span>
-                      </div>
-                    </div>
+                            {/* Details side */}
+                            <div className="p-8 lg:p-10 flex flex-col justify-between relative">
+                              <div
+                                className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
+                                style={{ background: card.accent }}
+                              />
+                              <div className="relative">
+                                <h3 className="text-2xl lg:text-4xl font-black text-white leading-tight mb-4">
+                                  {card.title}
+                                </h3>
+                                <p className="text-sm text-white/50 leading-relaxed mb-6 max-w-md">
+                                  {card.description}
+                                </p>
+                                <div className="flex flex-wrap gap-2 mb-8">
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                    📍 On Campus Pickup
+                                  </span>
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                    ⚡ Instant Meet
+                                  </span>
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                    🛡️ Verified Seller
+                                  </span>
+                                </div>
+                              </div>
 
-                    {/* Main content area */}
-                    <div className="grid md:grid-cols-2 gap-0">
-
-                      {/* Image */}
-                      <div className="product-image-wrapper aspect-[4/3] md:aspect-auto md:min-h-[380px]">
-                        <img
-                          src={currentCard.image}
-                          alt={currentCard.title}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                          style={{
-                            transform: `scale(1.02) translate(${mousePos.x * 8}px, ${mousePos.y * 8}px)`,
-                            transition: 'transform 0.4s ease-out'
-                          }}
-                        />
-                        {/* Price badge overlaid on image */}
-                        <div className="absolute bottom-6 left-6 z-10">
-                          <div
-                            className="mono text-3xl lg:text-4xl font-black text-white"
-                            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
-                          >
-                            {currentCard.price}
+                              <div className="flex flex-wrap items-center gap-3">
+                                <button
+                                  className="action-pill mono text-white flex-1 sm:flex-none"
+                                  style={{ background: card.accent }}
+                                >
+                                  View Details →
+                                </button>
+                                <button
+                                  className="action-pill mono text-white/80 flex-1 sm:flex-none"
+                                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                                >
+                                  💬 Message
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      {/* Details side */}
-                      <div className="p-8 lg:p-10 flex flex-col justify-between relative">
-
-                        {/* Background accent glow */}
-                        <div
-                          className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
-                          style={{ background: currentCard.accent }}
-                        />
-
-                        <div className="relative">
-                          {/* Title */}
-                          <h3 className="text-2xl lg:text-4xl font-black text-white leading-tight mb-4">
-                            {currentCard.title}
-                          </h3>
-
-                          {/* Description */}
-                          <p className="text-sm text-white/50 leading-relaxed mb-6 max-w-md">
-                            {currentCard.description}
-                          </p>
-
-                          {/* Quick info chips */}
-                          <div className="flex flex-wrap gap-2 mb-8">
-                            <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
-                              📍 On Campus Pickup
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
-                              ⚡ Instant Meet
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
-                              🛡️ Verified Seller
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Action area */}
-                        <div className="flex flex-wrap items-center gap-3">
-                          <button
-                            className="action-pill mono text-white flex-1 sm:flex-none"
-                            style={{ background: currentCard.accent }}
-                          >
-                            View Details →
-                          </button>
-                          <button
-                            className="action-pill mono text-white/80 flex-1 sm:flex-none"
-                            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
-                          >
-                            💬 Message
-                          </button>
-                        </div>
-
-                      </div>
                     </div>
-
-                  </div>
-
-                  {/* Bottom navigation strip */}
-                  <div className="flex items-center gap-4 px-6 py-4 border-t border-white/5 bg-black/20">
-
-                    {/* Thumbnail strip */}
-                    <div className="flex items-center gap-3 flex-1 overflow-x-auto">
-                      {cards.map((card, idx) => (
-                        <button
-                          key={card.id}
-                          onClick={() => switchCard(idx)}
-                          className={`thumb-item flex items-center gap-3 px-3 py-2 ${idx === currentIndex ? 'active' : ''}`}
-                          style={{ '--accent-color': card.accent, '--accent-glow': `${card.accent}40` }}
-                        >
-                          <img
-                            src={card.image}
-                            alt={card.title}
-                            className="w-10 h-10 rounded-lg object-cover"
-                          />
-                          <div className="hidden sm:block text-left min-w-[100px]">
-                            <div className="text-white text-xs font-bold truncate" style={{ maxWidth: '120px' }}>{card.title}</div>
-                            <div className="mono text-[10px] font-bold" style={{ color: card.accent }}>{card.price}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Navigation dots */}
-                    <div className="flex items-center gap-2">
-                      {cards.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => switchCard(idx)}
-                          className={`nav-dot ${idx === currentIndex ? 'active' : ''}`}
-                          style={{
-                            '--accent-color': currentCard.accent,
-                            background: idx === currentIndex ? currentCard.accent : 'rgba(255,255,255,0.2)'
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* CTA buttons */}
-              <div className="flex flex-wrap gap-4 items-center anim-fade-up delay-800 flex-col sm:flex-row">
-                <button
-                  className="btn-magnetic mono text-sm rounded-xl relative overflow-hidden"
-                  style={{ background: currentCard.accent }}
-                >
-                  🛍️ BROWSE MARKET
-                </button>
-                <button
-                  className="glass-card mono text-sm px-8 py-4 rounded-xl text-white font-bold hover:bg-white/10 transition-all relative overflow-hidden"
-                >
-                  📦 LIST YOUR ITEM
-                </button>
-                <div className="ml-auto hidden sm:flex items-center gap-2 text-white/50 mono text-xs">
-                  <span>SCROLL TO EXPLORE</span>
-                  <span className="animate-bounce">↓</span>
-                </div>
+                    {idx !== cards.length - 1 && (
+                      <div style={{ height: '35vh' }} />
+                    )}
+                  </React.Fragment>
+                ))}
+                {/* Spacer so last card reaches its sticky top before page scrolls away */}
+                <div style={{ height: '80vh' }} />
               </div>
 
             </div>
 
             {/* ===== RIGHT SIDEBAR - FEATURES ===== */}
-            <div className="lg:col-span-3 space-y-8 anim-fade-right delay-300">
+            <div className="lg:col-span-3 space-y-8 anim-fade-right delay-300 sticky top-32 h-fit">
 
               <div className="space-y-8">
 
@@ -1418,30 +1231,6 @@ const Hero = () => {
 
               </div>
 
-              {/* Categories */}
-              <div className="glass-card p-6 rounded-2xl">
-                <div className="mono text-xs text-white/60 tracking-widest mb-4 uppercase font-bold">Popular Categories</div>
-                <div className="flex flex-wrap gap-2">
-                  {['Electronics', 'Books', 'Tools', 'Lab Gear', 'Components', 'Stationery'].map((cat, idx) => (
-                    <button
-                      key={cat}
-                      className="text-xs px-4 py-2 rounded-lg glass-card text-white/80 hover:text-white hover:bg-white/10 transition-all mono font-semibold"
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Trust badge */}
-              <div className="glass-card p-6 rounded-2xl border-2" style={{ borderColor: currentCard.accent }}>
-                <div className="text-center">
-                  <div className="text-4xl mb-3">🛡️</div>
-                  <div className="font-black text-white text-xl mb-2">100% Secure</div>
-                  <div className="text-sm text-white/70">All transactions verified through college authentication</div>
-                </div>
-              </div>
-
             </div>
 
           </div>
@@ -1451,14 +1240,6 @@ const Hero = () => {
         {/* Bottom timestamp */}
         <div className="absolute bottom-8 left-8 mono text-xs text-white/30 anim-fade-up delay-800 hidden sm:block">
           LAST UPDATED: {month.toUpperCase()} {String(day).padStart(2, '0')} {year} — {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} IST
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 anim-fade-up delay-800 hidden sm:flex">
-          <div className="mono text-xs text-white/40 uppercase tracking-widest">Scroll</div>
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-            <div className="w-1 h-2 bg-white/50 rounded-full animate-bounce" />
-          </div>
         </div>
 
       </section>
