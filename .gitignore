@@ -8,6 +8,7 @@ backend/test_create.js
 
 # Unused frontend files
 frontend/src/components/modals/AuthModal.jsx
+/Users/vkgautam/Desktop/GS-MARK-II/frontend/src/components/modals/AuthModal.jsx
 frontend/src/components/sections/Hero_1.jsx
 frontend/src/components/sections/Hero_lastSplit.jsx
 frontend/src/components/sections/Hero01.jsx
