@@ -5,3 +5,21 @@ backend/seed-products.js
 frontend/src/components/sections/UserDashboardv2.jsx
 backend/seed_custom_products.js
 backend/test_create.js
+
+# Unused frontend files
+frontend/src/components/modals/AuthModal.jsx
+frontend/src/components/sections/Hero_1.jsx
+frontend/src/components/sections/Hero_lastSplit.jsx
+frontend/src/components/sections/Hero01.jsx
+frontend/src/components/sections/HeroCards.jsx
+frontend/src/components/sections/HeroV4.jsx
+frontend/src/components/sections/Products.js
+frontend/src/components/sections/UserListings.jsx
+frontend/src/components/ui/Badge.jsx
+frontend/src/components/ui/GlassCard.jsx
+frontend/src/theme.js
+
+# Unused backend files
+backend/src/config/database.js
+backend/src/controllers/authController.js
+backend/src/middleware/ClerkAuth.js

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
-
+import { useAuth } from '../../context/AuthContext'
+import toast, { Toaster } from 'react-hot-toast'
+import AddProductModal from './AddProductModal'
+import ConnectIdModal from '../auth/ConnectIdModal'
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -8,9 +11,13 @@ const Hero = () => {
   const [particles, setParticles] = useState([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const containerRef = useRef(null);
   const cardRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
+  const { user } = useAuth();
 
   const today = new Date();
   const day = today.getDate();
@@ -33,11 +40,11 @@ const Hero = () => {
 
   const cards = [
     {
-      id: 1, user: "Ved1nsh EI", price: "₹8,000", title: "Raspberry Pi 4 Model B", tag: "Electronics",
+      id: 1, user: "Ved1nsh EI", price: "₹350", title: "Arduino Uno R3", tag: "Electronics",
       image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
       accent: "#FF6B35",
       gradient: "from-orange-500 to-red-500",
-      description: "Brand new, sealed box. Includes heatsinks & case. Perfect for IoT projects."
+      description: "Used in 3rd sem minor project only, no issues at all. Ideal for beginners."
     },
     {
       id: 2, user: "Amit (Mech)", price: "₹450", title: "Roller Drafter (Omega)", tag: "Engineering",
@@ -54,11 +61,11 @@ const Hero = () => {
       description: "552 functions, solar powered. Used for one semester only."
     },
     {
-      id: 4, user: "Priya (EI)", price: "₹150", title: "Shivani Guide (Data Structures)", tag: "Books",
-      image: "https://cdn-ilblhlh.nitrocdn.com/GPZeMEUHDphHkVuSHXUfUfAmIVwnktTp/assets/images/optimized/rev-ecdaa54/notes.newtondesk.com/wp-content/uploads/2024/02/Data-structures-DSA-study-notes-pdf-samp3.jpg",
+      id: 4, user: "Suryansh (EI)", price: "₹18,000", title: "Bambu Lab A1 3D Printer", tag: "3D Printer",
+      image: "https://res.cloudinary.com/rajvirgautam/image/upload/v1773122110/61-Ee5SFeNL._AC_UF1000_1000_QL80__dhqsce.jpg",
       accent: "#7B2CBF",
       gradient: "from-purple-500 to-pink-500",
-      description: "Clean copy with highlights. Covers all semester topics + solved papers."
+      description: "Brand new, sealed box. Perfect for hobbyists and professionals."
     },
   ];
 
@@ -528,6 +535,57 @@ const Hero = () => {
           transform: translateY(-1px);
         }
 
+        .hero-cta-button {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+          box-shadow: 0 10px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+        }
+
+        .hero-cta-button::before {
+          content: '';
+          position: absolute;
+          inset: 1px;
+          border-radius: inherit;
+          background: linear-gradient(135deg, var(--accent-color), rgba(255,255,255,0.14));
+          opacity: 0.16;
+          transition: opacity 0.25s ease;
+          z-index: -2;
+        }
+
+        .hero-cta-button::after {
+          content: '';
+          position: absolute;
+          inset: -40%;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+          transform: translateX(-120%) rotate(10deg);
+          transition: transform 0.7s ease;
+          z-index: -1;
+        }
+
+        .hero-cta-button:hover {
+          transform: translateY(-1px);
+          border-color: color-mix(in srgb, var(--accent-color) 60%, white 20%);
+          background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+          box-shadow: 0 14px 30px rgba(0,0,0,0.36), 0 0 0 1px color-mix(in srgb, var(--accent-color) 20%, transparent);
+          color: #ffffff;
+        }
+
+        .hero-cta-button:hover::before {
+          opacity: 0.24;
+        }
+
+        .hero-cta-button:hover::after {
+          transform: translateX(120%) rotate(10deg);
+        }
+
+        .hero-cta-button:active {
+          transform: translateY(0);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
           .card-3d { transform: none !important; }
@@ -756,13 +814,41 @@ const Hero = () => {
           {/* ============================= */}
           <div className="lg:hidden space-y-6 pb-8">
 
-            {/* Mobile badge */}
-            <div className="flex items-center justify-center anim-fade-up delay-100">
-              <div className="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-full">
-                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: currentCard.accent }} />
-                <span className="mono text-[10px] text-white/80 tracking-widest uppercase font-bold">SGSITS Exclusive</span>
+            {/* Mobile AI Banner */}
+            {showBanner && (
+              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[10px] p-1.5 pr-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-[280px] mx-auto">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 ml-1">
+                    {/* Rocket Icon matching screenshot */}
+                    <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5M15.4 12L20.2 7.2A3.38 3.38 0 0 0 15.4 2.4L10.6 7.2c-3.1 1.05-6.6 2.43-6.6 2.43l5.17 5.17c0 0 1.38-3.5 2.43-6.6M12 15.4L7.2 20.2c-1.2 1.2-3.1.2-3.4-1.3l5.5-5.5M10 10l4 4" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-[11px] leading-none">AI Listing Autofill is here!</p>
+                    <p className="text-white/60 text-[8px] tracking-wide mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>Snap a photo — AI fills the details</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      if (user) { setShowAddModal(true); }
+                      else {
+                        toast.error('Sign in to continue', { style: { background: '#0F0F0F', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontFamily: 'Space Mono, monospace', fontSize: '12px' } });
+                        setShowConnectModal(true);
+                      }
+                    }}
+                    className="hero-cta-button flex-shrink-0 font-semibold text-[11px] px-3 py-1.5 rounded-[10px] text-white/90 whitespace-nowrap"
+                    style={{ '--accent-color': currentCard.accent }}
+                  >
+                    Try now →
+                  </button>
+                  <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/50 hover:text-white transition-colors p-1">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Mobile headline - compact */}
             <div className="text-center anim-fade-up delay-200">
@@ -1012,10 +1098,40 @@ const Hero = () => {
               {/* Hero headline */}
               <div className="space-y-8 anim-fade-up delay-200">
 
-                <div className="inline-flex items-center gap-3 glass-card px-5 py-3 rounded-full">
-                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: currentCard.accent }} />
-                  <span className="mono text-xs text-white/80 tracking-widest uppercase font-bold">SGSITS Exclusive Platform</span>
-                </div>
+                {/* AI Listing Banner */}
+                {showBanner && (
+                  <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pr-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] scale-90 origin-left">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 ml-1" style={{ background: 'rgba(0,217,255,0.1)' }}>
+                        <svg className="w-3.5 h-3.5 text-[#00D9FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                        </svg>
+                      </div>
+                      <div className="pt-0.5">
+                        <p className="text-white font-bold text-[12px] leading-tight">AI Listing Autofill is here!</p>
+                        <p className="text-white/50 text-[10px] mono mt-0.5">Snap a photo — AI fills the details instantly</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-1">
+                      <button
+                        onClick={() => {
+                          if (user) { setShowAddModal(true); }
+                          else {
+                            toast.error('Sign in to continue', { style: { background: '#0F0F0F', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontFamily: 'Space Mono, monospace', fontSize: '12px' } });
+                            setShowConnectModal(true);
+                          }
+                        }}
+                        className="hero-cta-button flex-shrink-0 font-semibold text-[11px] px-3 py-1.5 rounded-full text-white whitespace-nowrap"
+                        style={{ '--accent-color': currentCard.accent }}
+                      >
+                        Try now →
+                      </button>
+                      <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/50 hover:text-white transition-colors">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <h1 className="text-[clamp(2.5rem,10vw,8rem)] leading-[0.95] font-black text-white tracking-tight">
                   <span className="block anim-fade-up delay-300">TRADE</span>
@@ -1243,6 +1359,15 @@ const Hero = () => {
         </div>
 
       </section>
+
+      {/* Modals */}
+      <Toaster
+        position="bottom-center"
+        toastOptions={{ duration: 3000 }}
+        containerStyle={{ zIndex: 99999 }}
+      />
+      <AddProductModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+      <ConnectIdModal isOpen={showConnectModal} onClose={() => setShowConnectModal(false)} />
     </>
   )
 }
