@@ -186,12 +186,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         {/* Notification Bell */}
         {user && <NotificationBell dark={false} />}
 
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-yellow-300 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors"
-        >
-          {isDark ? <Icons.Sun /> : <Icons.Moon />}
-        </button>
+
 
         {/* Auth Buttons */}
         {!user ? (
@@ -278,12 +273,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
             CONNECT
           </button>
         )}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg bg-gray-100/50 dark:bg-white/5 text-indigo-900 dark:text-yellow-300 backdrop-blur-md"
-        >
-          {isDark ? <Icons.Sun /> : <Icons.Moon />}
-        </button>
+
         <button
           className="text-indigo-950 dark:text-white"
           onClick={() => setIsOpen(!isOpen)}
