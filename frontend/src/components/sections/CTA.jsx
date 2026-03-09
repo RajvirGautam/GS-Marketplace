@@ -55,8 +55,13 @@ const REVIEWS = [
 const CTA = () => {
   const containerRef = useRef(null);
   const [scrollYProgress, setScrollYProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize, { passive: true });
+
     const handleScroll = () => {
       if (!containerRef.current) return;
       const { top, height } = containerRef.current.getBoundingClientRect();
@@ -69,31 +74,39 @@ const CTA = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // --- Strict Sequenced Kinematics --- 
 
-  // Phase 1 (Cards): Handled directly in the render loop to utilize individual zDepth indices.
-  // Global fade forces all remaining straggler cards to disappear before the circle expands.
-  const globalCardOpacity = Math.max(0, 1 - (scrollYProgress - 0.2) * 5);
+  // Phase 1 (Cards Zoom): Introduce a delay. 
+  // Scroll 0.0 -> 0.1 is a "dead zone" so users can read the initial state.
+  // Cards fly and fade completely between 0.1 and 0.4.
+  const cardProgress = Math.max(0, Math.min((scrollYProgress - 0.1) / 0.3, 1));
+  const globalCardOpacity = 1 - Math.max(0, (cardProgress - 0.8) / 0.2);
 
-  // Phase 2: Headline splits in half and fades out (Scroll 0.2 -> 0.4)
-  const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.2) / 0.2, 1));
-  const textTranslate = textSplitProgress * 180;
-  const textOpacity = Math.max(0, 1 - textSplitProgress * 1.5);
+  // Phase 2 (Text Split): Keep the copy visible while the circle opens through the middle.
+  const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.22, 1));
+  const textTranslate = textSplitProgress * (isMobile ? 70 : 110);
+  const textOpacity = 1 - Math.max(0, (textSplitProgress - 0.86) / 0.14);
 
-  // Phase 3: Circle expands from the empty focal center (Scroll 0.35 -> 0.65)
-  const circleProgress = Math.max(0, Math.min((scrollYProgress - 0.35) / 0.3, 1));
-  const circleScale = circleProgress * 1.55;
+  // Phase 3 (Morph Shell): Replace the circle with a panel that grows into the CTA frame.
+  const morphProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.28, 1));
+  const morphWidth = `min(${12 + (morphProgress * 76)}vw, 1120px)`;
+  const morphHeight = `min(${18 + (morphProgress * 50)}vh, 720px)`;
+  const morphRadius = `${Math.max(isMobile ? 18 : 28, 999 - (morphProgress * 960))}px`;
+  const morphScale = 0.88 + (morphProgress * 0.14);
 
-  // Phase 4: Terminal CTA snaps in instantly once the circle is fully expanded.
-  // Binary: fully visible when circleProgress === 1, fully hidden otherwise.
-  const ctaOpacity = circleProgress >= 1 ? 1 : 0;
-  const isCtaInteractive = ctaOpacity > 0.5;
+  // Phase 4 (CTA Reveal): Fade in as the shell nears its final frame.
+  const ctaOpacity = Math.max(0, Math.min((morphProgress - 0.72) / 0.28, 1));
+  const isCtaInteractive = ctaOpacity > 0.85;
 
   return (
-    <section ref={containerRef} className="relative w-full h-[350vh] bg-[#0a0a0f]">
+    <section ref={containerRef} className="relative w-full h-[400vh] bg-[#0a0a0f]">
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
@@ -102,9 +115,9 @@ const CTA = () => {
 
         .cta-container {
           opacity: 0;
-          transform: scale(0.95);
-          filter: blur(12px);
-          transition: all 0.3s ease-out;
+          transform: scale(0.97);
+          filter: blur(10px);
+          transition: all 0.35s ease-out;
         }
         .cta-container.is-visible {
           opacity: 1;
@@ -133,8 +146,8 @@ const CTA = () => {
           cursor: pointer;
         }
         .btn-brutal:hover {
-          background: #00D9FF;
-          border-color: #00D9FF;
+          background: #ffffff;
+          border-color: #ffffff;
           box-shadow: 4px 4px 0 rgba(255,255,255,0.2);
           transform: translate(-2px, -2px);
         }
@@ -149,41 +162,153 @@ const CTA = () => {
           border-color: #fff;
         }
 
-        .tech-grid-bg {
-          background-color: #0A0A0A;
+        .morph-shell {
+          position: absolute;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 34%),
+            linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0) 40%),
+            linear-gradient(325deg, rgba(255,255,255,0.025), rgba(255,255,255,0) 42%),
+            linear-gradient(180deg, #101018, #09090d 72%);
+          border: 1px solid rgba(255,255,255,0.05);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 40px 120px rgba(0,0,0,0.45);
+          overflow: hidden;
+        }
+
+        .morph-grid {
+          position: absolute;
+          inset: 0;
           background-image:
-            radial-gradient(circle at center, transparent 0%, #0A0A0A 80%),
-            linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
-          background-size: 100% 100%, 40px 40px, 40px 40px;
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+          background-size: 42px 42px;
+          mask-image: radial-gradient(circle at center, rgba(0,0,0,0.95), rgba(0,0,0,0.65));
+          opacity: 0.28;
+          pointer-events: none;
+        }
+
+        .split-copy {
+          text-shadow: 0 8px 30px rgba(0,0,0,0.45);
+          transition: text-shadow 0.3s ease;
+        }
+
+        .morph-shell::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, transparent, rgba(255,255,255,0.045), transparent),
+            linear-gradient(180deg, rgba(255,255,255,0.03), transparent 30%, rgba(255,255,255,0.015));
+          opacity: 0.7;
+          pointer-events: none;
+        }
+
+        .morph-shell::after {
+          content: '';
+          position: absolute;
+          inset: 14px;
+          border-radius: inherit;
+          border: 1px solid rgba(255,255,255,0.04);
+          pointer-events: none;
+        }
+
+        .morph-inner-glow {
+          position: absolute;
+          inset: 12%;
+          border-radius: inherit;
+          background:
+            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.035) 26%, rgba(10,10,15,0) 72%);
+          filter: blur(28px);
+          opacity: 0.9;
+          pointer-events: none;
+        }
+
+        .morph-center-spine {
+          position: absolute;
+          left: 50%;
+          top: 12%;
+          width: 1px;
+          height: 76%;
+          transform: translateX(-50%);
+          background: linear-gradient(180deg, transparent, rgba(255,255,255,0.18), transparent);
+          box-shadow: 0 0 18px rgba(255,255,255,0.08);
+        }
+
+        .morph-center-spine::before,
+        .morph-center-spine::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          width: 40px;
+          height: 1px;
+          transform: translateX(-50%);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+        }
+
+        .morph-center-spine::before {
+          top: 18%;
+        }
+
+        .morph-center-spine::after {
+          bottom: 18%;
+        }
+
+        .morph-scan-line {
+          position: absolute;
+          left: 10%;
+          right: 10%;
+          top: 50%;
+          height: 1px;
+          transform: translateY(-50%);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+          opacity: 0.6;
+          pointer-events: none;
+        }
+
+        .morph-shell-content {
+          position: absolute;
+          inset: 0;
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
 
       <div className="sticky top-0 w-full h-screen overflow-hidden flex items-center justify-center">
 
         {/* Stratum 1: Parallax Social Proof Field */}
-        <div className="absolute inset-0 z-10 pointer-events-none origin-center">
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
+        >
           {REVIEWS.map((r) => {
-            // Apply kinematic scaling inversely proportional to zDepth
-            const scaleFactor = 1 + (scrollYProgress * 20) / r.zDepth;
+            // Mobile: Skip non-configured cards
+            if (isMobile && !r.showOnMobile) return null;
 
-            // Localized fade: The card fades as it physically "passes" the camera (scale > 3)
+            // Halve the Z travel distance on mobile to prevent extreme out-of-bounds scaling
+            const baseZTranslate = (cardProgress * 3000) / r.zDepth;
+            const zTranslate = isMobile ? baseZTranslate * 0.5 : baseZTranslate;
+
             let localOpacity = 1;
-            if (scaleFactor > 3) {
-              localOpacity = Math.max(0, 1 - (scaleFactor - 3) * 0.8);
+            const fadeThreshold = isMobile ? 350 : 700;
+            if (zTranslate > fadeThreshold) {
+              localOpacity = Math.max(0, 1 - (zTranslate - fadeThreshold) / (isMobile ? 150 : 200));
             }
 
-            // Final opacity is the stricter of its local fade and the global sequence fade
             const finalOpacity = Math.min(localOpacity, globalCardOpacity);
+            
+            // Apply mobile-specific positioning and scale down sizes to fit narrow viewports
+            const currentPos = isMobile && r.mobilePos ? r.mobilePos : r.pos;
+            const mobileScale = isMobile ? ' scale(0.65)' : '';
 
             return (
               <div
                 key={r.id}
-                className="absolute bg-[#1a1a24] shadow-[0_4px_28px_rgba(0,0,0,0.5)] p-4 md:p-5 rounded-2xl border border-white/10 hidden lg:flex flex-col gap-3"
+                className="absolute bg-[#1a1a24] shadow-[0_4px_28px_rgba(0,0,0,0.5)] p-4 md:p-5 rounded-2xl border border-white/10 flex flex-col gap-3"
                 style={{
-                  ...r.pos,
+                  ...currentPos,
                   width: r.width,
-                  transform: `scale(${scaleFactor}) rotate(${r.rotate})`,
+                  transform: `translateZ(${zTranslate}px) rotate(${r.rotate})${mobileScale}`,
                   opacity: finalOpacity,
                   willChange: 'transform, opacity'
                 }}
@@ -206,10 +331,9 @@ const CTA = () => {
         </div>
 
         {/* Stratum 1.5: Bifurcating Typography */}
-        <div className="absolute inset-0 z-15 pointer-events-none flex flex-col items-center justify-center gap-2">
-          {/* Top Half Ascends */}
+        <div className="absolute inset-0 z-30 pointer-events-none flex flex-col items-center justify-center gap-2">
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
+            className="split-copy text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
             style={{
               transform: `translateY(-${textTranslate}px)`,
               opacity: textOpacity,
@@ -218,67 +342,54 @@ const CTA = () => {
           >
             Trusted by
           </h1>
-          {/* Bottom Half Descends */}
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
+            className="split-copy text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter text-center leading-none"
             style={{
               transform: `translateY(${textTranslate}px)`,
               opacity: textOpacity,
               willChange: 'transform, opacity'
             }}
           >
-            2,000+ students
+            180+ students
           </h1>
         </div>
 
-        {/* Stratum 2: Radial Expansion Plane */}
+        {/* Stratum 2: Morphing Shell */}
         <div
-          className="absolute tech-grid-bg z-20"
+          className="absolute morph-shell z-20"
           style={{
-            width: '200vmax',
-            height: '200vmax',
-            borderRadius: '50%',
+            width: morphWidth,
+            height: morphHeight,
+            borderRadius: morphRadius,
             top: '50%',
             left: '50%',
-            marginTop: '-100vmax',
-            marginLeft: '-100vmax',
-            transform: `scale(${circleScale})`,
-            border: '2px solid rgba(0,217,255,0.4)',
-            boxShadow: '0 0 100px rgba(0,217,255,0.15) inset',
-            opacity: circleScale > 0 ? 1 : 0,
-            willChange: 'transform',
+            transform: `translate(-50%, -50%) scale(${morphScale})`,
+            opacity: morphProgress > 0 ? 1 : 0,
+            willChange: 'transform, width, height, border-radius',
           }}
-        />
-
-        {/* Stratum 3: Terminal Interface Construction */}
-        <div
-          className={`absolute inset-0 z-30 flex items-center justify-center px-6 transition-opacity duration-300 ${isCtaInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}
-          style={{ opacity: ctaOpacity }}
         >
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-6 top-0 bottom-0 w-px bg-white/5" />
-            <div className="absolute right-6 top-0 bottom-0 w-px bg-white/5" />
-          </div>
-
-          <div className="max-w-7xl mx-auto relative w-full">
-            <div className={`cta-container w-full relative bg-zinc-900 border border-white/10 overflow-hidden ${isCtaInteractive ? 'is-visible' : ''}`}>
-
-              {/* Scrolling Ambient Telemetry */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
-                <div className="scrolling-text whitespace-nowrap text-[8rem] md:text-[12rem] font-black uppercase leading-none text-white">
+          <div className="morph-grid" />
+          <div className="morph-inner-glow" />
+          <div className="morph-center-spine" />
+          <div className="morph-scan-line" />
+          <div
+            className={`morph-shell-content transition-opacity duration-300 ${isCtaInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            style={{ opacity: ctaOpacity }}
+          >
+            <div className={`cta-container relative w-full h-full ${isCtaInteractive ? 'is-visible' : ''}`}>
+              <div className="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none select-none overflow-hidden">
+                <div className="scrolling-text whitespace-nowrap text-[6rem] md:text-[10rem] font-black uppercase leading-none text-white">
                   CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE /// CAMPUS MARKETPLACE /// INIT UPLOAD /// SECURE TRADE ///
                 </div>
               </div>
 
-              {/* Geometric Interface Boundaries */}
-              <div className="absolute top-0 left-0 border-l-2 border-t-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
-              <div className="absolute bottom-0 right-0 border-r-2 border-b-2 border-[#00D9FF] w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
+              <div className="absolute top-0 left-0 border-l-2 border-t-2 border-white/20 w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
+              <div className="absolute bottom-0 right-0 border-r-2 border-b-2 border-white/20 w-12 h-12 md:w-16 md:h-16 pointer-events-none" />
 
-              <div className="relative z-10 px-6 py-12 md:px-8 md:py-24 flex flex-col items-center text-center">
-
+              <div className="relative z-10 w-full h-full px-6 py-12 md:px-8 md:py-24 flex flex-col items-center justify-center text-center">
                 <div className="flex items-center gap-2 mb-8 bg-black/40 border border-white/10 px-3 py-1 backdrop-blur-md">
-                  <div className="w-2 h-2 bg-[#00D9FF] animate-pulse" />
-                  <span className="mono text-[10px] md:text-xs text-[#00D9FF] tracking-widest uppercase">
+                  <div className="w-2 h-2 bg-white/80 animate-pulse" />
+                  <span className="mono text-[10px] md:text-xs text-white/70 tracking-widest uppercase">
                     Network Status: Active
                   </span>
                 </div>
@@ -291,7 +402,7 @@ const CTA = () => {
                 </h2>
 
                 <p className="text-white/60 mono text-xs md:text-base max-w-xl mb-12 leading-relaxed">
-                  // Join 2,000+ Campus students trading daily. <br />
+                  // Join 180+ Campus students trading daily. <br />
                   // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidity.
                 </p>
 
@@ -305,7 +416,6 @@ const CTA = () => {
                     <ArrowRight />
                   </button>
                 </div>
-
               </div>
             </div>
           </div>
