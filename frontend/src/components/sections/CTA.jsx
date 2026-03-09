@@ -15,70 +15,41 @@ const ArrowRight = () => (
   </svg>
 );
 
-// Added `zDepth` to establish a kinematic parallax field.
-// Values closer to 1.0 are "closer" to the camera and fly by faster.
-// Values closer to 4.0 are "further" away and move slower.
+// Mapped cleanly to perimeter zones to prevent center occlusion.
+// Mobile coordinates establish a precise, symmetrical alternating zigzag pattern.
+// Crucially, the vertical band between top 35% and bottom 35% is kept completely empty 
+// on narrow screens so the "Trusted by" text is never physically crossed by flying cards.
 const REVIEWS = [
-  {
-    id: 1, name: "Rahul S.", role: "Engineering",
-    text: "Got my textbooks in literally 10 minutes. Safe and easy.",
-    pos: { top: '8%', left: '4%' }, rotate: '-3deg', width: '230px', zDepth: 1.2
-  },
-  {
-    id: 8, name: "Anita D.", role: "Design",
-    text: "Sold my old T-square to a junior the same day I listed it.",
-    pos: { top: '35%', left: '6%' }, rotate: '2.5deg', width: '240px', zDepth: 2.8
-  },
-  {
-    id: 7, name: "Vikram P.", role: "M.Tech",
-    text: "Found cheap Arduino kits. Saved a ton of money.",
-    pos: { top: '12%', left: '32%' }, rotate: '1deg', width: '220px', zDepth: 3.5
-  },
-  {
-    id: 15, name: "Arjun N.", role: "Electronics",
-    text: "Verified profiles mean I actually trust the person I'm meeting.",
-    pos: { bottom: '25%', left: '8%' }, rotate: '-1.8deg', width: '248px', zDepth: 1.5
-  },
-  {
-    id: 13, name: "Rishabh K.", role: "Pharmacy",
-    text: "Got lab coats for half the price. Great for juniors.",
-    pos: { top: '55%', left: '2%' }, rotate: '4deg', width: '215px', zDepth: 3.2
-  },
-  {
-    id: 3, name: "Aman K.", role: "Mechanical",
-    text: "Listed 6 things, sold 5 in two days. Highly recommend.",
-    pos: { bottom: '8%', left: '28%' }, rotate: '-2.2deg', width: '260px', zDepth: 2.1
-  },
-  {
-    id: 2, name: "Priya M.", role: "B.Tech",
-    text: "Met near the library for the handoff. Super convenient.",
-    pos: { top: '10%', right: '12%' }, rotate: '-1deg', width: '250px', zDepth: 1.1
-  },
-  {
-    id: 10, name: "Kritika S.", role: "Architecture",
-    text: "The UI is so clean. Listed my tools and got inquiries fast.",
-    pos: { top: '28%', right: '4%' }, rotate: '3.5deg', width: '235px', zDepth: 2.5
-  },
-  {
-    id: 14, name: "Dev V.", role: "Comp. Sci",
-    text: "Zero latency on image uploads. Works flawlessly.",
-    pos: { top: '50%', right: '6%' }, rotate: '-2.8deg', width: '240px', zDepth: 1.8
-  },
-  {
-    id: 4, name: "Neha J.", role: "Arts",
-    text: "Smooth experience, zero platform fees. Love it.",
-    pos: { bottom: '22%', right: '8%' }, rotate: '1.2deg', width: '245px', zDepth: 3.8
-  },
-  {
-    id: 9, name: "Rohan J.", role: "Business",
-    text: "Way better than WhatsApp groups. Listings stay fresh.",
-    pos: { top: '18%', right: '35%' }, rotate: '-4deg', width: '220px', zDepth: 2.4
-  },
-  {
-    id: 5, name: "Karan T.", role: "Comp. Sci",
-    text: "Fast uploads, works perfectly on mobile.",
-    pos: { bottom: '8%', right: '30%' }, rotate: '2.1deg', width: '210px', zDepth: 1.6
-  },
+  // --- MOBILE VISIBLE CARDS (Symmetrical Cascade) ---
+  
+  // Left 1 (Very Top)
+  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '12%', left: '4%' }, rotate: '-3deg', width: '250px', zDepth: 1.4, showOnMobile: true, mobilePos: { top: '4%', left: '4%' } },
+  
+  // Right 1 (Mid-Top)
+  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '1.5deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '15%', right: '4%' } },
+
+  // Left 2 (Lower-Top, sits just above text)
+  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '28%', left: '4%' } },
+
+  // --- [ EXCLUSION ZONE: CENTER 38% IS RESERVED FOR TYPOGRAPHY ] ---
+
+  // Right 2 (Upper-Bottom, sits just below text)
+  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '28%', right: '4%' } },
+
+  // Left 3 (Mid-Bottom)
+  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '1.5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '15%', left: '4%' } },
+
+  // Right 3 (Very Bottom)
+  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '6%', right: '34%' }, rotate: '-1deg', width: '220px', zDepth: 2.7, showOnMobile: true, mobilePos: { bottom: '4%', right: '4%' } },
+
+  // --- HIDDEN ON MOBILE (To prevent clutter and maintain the stark geometry) ---
+  
+  { id: 15, name: "Arjun N.", role: "Electronics", text: "Verified profiles mean I actually trust the person I'm meeting.", pos: { bottom: '15%', left: '5%' }, rotate: '2.5deg', width: '260px', zDepth: 1.7, showOnMobile: false },
+  // { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { bottom: '32%', left: '24%' }, rotate: '-2deg', width: '220px', zDepth: 3.5 },
+  { id: 2, name: "Priya M.", role: "B.Tech", text: "Met near the library for the handoff. Super convenient.", pos: { top: '10%', right: '5%' }, rotate: '3.5deg', width: '240px', zDepth: 1.5, showOnMobile: false },
+  { id: 14, name: "Dev V.", role: "Comp. Sci", text: "Zero latency on image uploads. Works flawlessly.", pos: { top: '22%', right: '26%' }, rotate: '-2deg', width: '235px', zDepth: 3.4, showOnMobile: false },
+  { id: 4, name: "Neha J.", role: "Arts", text: "Smooth experience, zero platform fees. Love it.", pos: { bottom: '14%', right: '6%' }, rotate: '-3.5deg', width: '255px', zDepth: 1.6, showOnMobile: false },
+  // { id: 9, name: "Rohan J.", role: "Business", text: "Way better than WhatsApp groups. Listings stay fresh.", pos: { bottom: '30%', right: '25%' }, rotate: '2deg', width: '230px', zDepth: 3.1 },
 ];
 
 const CTA = () => {
