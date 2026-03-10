@@ -171,9 +171,9 @@ const Features = () => {
         .mono { font-family: 'Space Mono', monospace; }
 
         .glass-monolith {
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: none;
+          background: #10101a;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.12);
           border-radius: 32px;
           height: 100%;
           min-height: 500px;
