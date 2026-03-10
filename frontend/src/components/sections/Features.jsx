@@ -1,315 +1,354 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react';
 
 // --- Internal Icons ---
 const ShieldIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-)
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+);
 const ZapIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-)
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+);
 const BagIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-)
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+);
 const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-)
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"><polyline points="20 6 9 17 4 12"/></svg>
-)
-const ArrowUpRight = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-)
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+);
 
-// Reusable Card Component
-const FeatureCard = ({ icon, subtitle, title, desc, delay, color, gradient }) => (
-  <div 
-    className="group relative bg-zinc-900/50 backdrop-blur-sm border border-white/10 p-8 hover:border-white/20 transition-all duration-300 h-full flex flex-col overflow-hidden reveal-on-scroll"
-    style={{ transitionDelay: delay }}
-  >
-    {/* Colorful Gradient Leak */}
-    <div 
-      className="absolute inset-0 transition-opacity duration-500 opacity-60 group-hover:opacity-100"
-      style={{ background: gradient }}
-    />
-
-    {/* Top Color Bar */}
-    <div 
-      className="absolute top-0 left-0 w-full h-1"
-      style={{ background: color }}
-    />
-
-    {/* Content */}
-    <div className="relative z-10 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-8">
-        <div 
-            className="w-12 h-12 flex items-center justify-center text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300"
-            style={{ background: color }}
-        >
-            {icon}
-        </div>
-        <div 
-            className="mono text-[10px] uppercase tracking-widest border border-white/10 px-2 py-1 backdrop-blur-md"
-            style={{ color: color, borderColor: `${color}40` }}
-        >
-            {subtitle}
-        </div>
-        </div>
-
-        <div className="mt-auto">
-        <h3 className="text-2xl font-black text-white mb-4 uppercase tracking-tight group-hover:translate-x-1 transition-transform duration-300">
-            {title}
-        </h3>
-        <p className="text-white/60 text-sm leading-relaxed mono">
-            {desc}
-        </p>
-        </div>
-    </div>
-  </div>
-)
+const FEATURES_DATA = [
+  {
+    id: 1,
+    icon: <ShieldIcon />,
+    subtitle: "Authentication Protocol",
+    title: "Campus Shield",
+    desc: "The walled garden. Access is cryptographically restricted to official institute emails (@sgsits.ac.in). No outsiders. Zero spam.",
+    techContext: "AES-256 / JWT Auth",
+    color: "#00D9FF",
+  },
+  {
+    id: 2,
+    icon: <ZapIcon />,
+    subtitle: "Low Latency",
+    title: "Real-Time Comms",
+    desc: "Negotiate in real-time. Direct peer-to-peer messaging designed for rapid campus meetups.",
+    techContext: "WSS / Socket.io",
+    color: "#8B5CF6",
+  },
+  {
+    id: 3,
+    icon: <BagIcon />,
+    subtitle: "Economy",
+    title: "Zero Commission",
+    desc: "Keep 100% of your sale value. We facilitate the handshake; you handle the exchange.",
+    techContext: "P2P Settlement",
+    color: "#10B981",
+  },
+  {
+    id: 4,
+    icon: <SearchIcon />,
+    subtitle: "Intelligence",
+    title: "Deep Query Search",
+    desc: "Don't just scroll. Filter by branch, specific years, condition, or edition. Find exactly what you need in milliseconds.",
+    techContext: "Full-Text Indexing",
+    color: "#FF6B35",
+  }
+];
 
 const Features = () => {
-  // Intersection Observer Logic
+  const containerRef = useRef(null);
+  const tickingRef = useRef(false);
+  
+  // High-performance DOM refs
+  const cardsRef = useRef([]);
+  const ambientGlowRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const progressTextRef = useRef(null);
+  const dataStreamsRef = useRef([]);
+
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.15, // Trigger when 15% of the element is visible
-      rootMargin: "0px 0px -50px 0px" // Offset slightly so it triggers before bottom
+    // Initial ref arrays setup
+    cardsRef.current = cardsRef.current.slice(0, FEATURES_DATA.length);
+    dataStreamsRef.current = dataStreamsRef.current.slice(0, 3);
+
+    const handleScroll = () => {
+      if (!tickingRef.current) {
+        requestAnimationFrame(() => {
+          if (!containerRef.current) return;
+          const { top, height } = containerRef.current.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          
+          const maxScroll = height - windowHeight;
+          const currentScroll = -top;
+          
+          const progress = Math.max(0, Math.min(currentScroll / maxScroll, 1));
+          const stackProgress = progress * (FEATURES_DATA.length - 1);
+          
+          const activeIndex = Math.min(FEATURES_DATA.length - 1, Math.max(0, Math.round(stackProgress)));
+          const activeColor = FEATURES_DATA[activeIndex].color;
+          
+          // Update ambient glow directly
+          if (ambientGlowRef.current) {
+            ambientGlowRef.current.style.background = `radial-gradient(circle at 70% 50%, ${activeColor}, transparent 60%)`;
+          }
+          
+          // Update data streams directly
+          dataStreamsRef.current.forEach(stream => {
+            if (stream) stream.style.color = activeColor;
+          });
+          
+          // Update progress indicator directly
+          if (progressBarRef.current) {
+            progressBarRef.current.style.width = `${progress * 100}%`;
+            progressBarRef.current.style.background = activeColor;
+          }
+          if (progressTextRef.current) {
+            progressTextRef.current.innerText = `${Math.round(progress * 100)}%`;
+          }
+
+          // Safely update all cards independently
+          cardsRef.current.forEach((card, index) => {
+            if (!card) return;
+            const relativeScroll = stackProgress - index;
+
+            let translateX = 0;
+            let translateY = 0;
+            let rotateZ = 0;
+            let scale = 1;
+            let opacity = 1;
+            const zIndex = FEATURES_DATA.length - index;
+
+            if (relativeScroll > 0) {
+              // EXIT: easeInQuad sweep left with tilt — NO opacity, card stays solid
+              const t = Math.min(relativeScroll, 1);
+              translateX = -(t * t * 750);
+              translateY = -(t * 20);
+              rotateZ = -(t * 7);
+              scale = Math.max(0.92, 1 - t * 0.08);
+              opacity = 1;
+            } else {
+              // WAITING DECK: vertical depth stacking, no horizontal drift
+              const depth = Math.abs(relativeScroll);
+              scale = Math.max(0.88, 1 - depth * 0.04);
+              translateY = depth * 10;
+              translateX = 0;
+              opacity = 1;
+            }
+
+            card.style.zIndex = zIndex;
+            card.style.opacity = opacity;
+            card.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale}) rotate(${rotateZ}deg)`;
+            card.style.pointerEvents = relativeScroll > 0.5 ? 'none' : 'auto';
+
+            // Sub-element active styling manipulation
+            const isActive = Math.abs(relativeScroll) < 0.15;
+            const topStrip = card.querySelector('.top-accent-strip');
+            if (topStrip) topStrip.style.opacity = isActive ? 1 : 0.4;
+
+            const iconBox = card.querySelector('.icon-box');
+            if (iconBox) iconBox.style.boxShadow = isActive ? `0 10px 30px -10px ${FEATURES_DATA[index].color}` : 'none';
+
+            const techContext = card.querySelector('.tech-context');
+            if (techContext) techContext.style.color = isActive ? FEATURES_DATA[index].color : '';
+          });
+
+          tickingRef.current = false;
+        });
+        tickingRef.current = true;
+      }
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target); // Run animation only once
-        }
-      });
-    }, observerOptions);
-
-    const elements = document.querySelectorAll(".reveal-on-scroll");
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Trigger initial state mapping immediately
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <section className="relative bg-[#0A0A0A] overflow-hidden font-sans py-32 border-b border-white/10">
-      
-      {/* --- STYLES --- */}
+    <section ref={containerRef} className="relative w-full h-[400vh] bg-[#050508]">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700;800&family=Space+Mono:wght@400;700&display=swap');
         
         .mono { font-family: 'Space Mono', monospace; }
-        
-        .grid-lines {
+
+        .glass-monolith {
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: none;
+          border-radius: 32px;
+          height: 100%;
+          min-height: 500px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+          transition: border-color 0.4s ease;
+          /* Removed CSS transition for op/tr to lean entirely on hyper-fast direct DOM kinematics */
+          will-change: transform, opacity;
+        }
+
+        .glass-monolith:hover {
+          border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .ambient-glow {
+          position: absolute;
+          inset: 0;
+          opacity: 0.15;
+          filter: blur(120px);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .technical-grid {
           position: absolute;
           inset: 0;
           background-image: 
-            repeating-linear-gradient(0deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px),
-            repeating-linear-gradient(90deg, transparent, transparent 99px, rgba(255,255,255,0.02) 99px, rgba(255,255,255,0.02) 100px);
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          background-size: 60px 60px;
           pointer-events: none;
           z-index: 1;
         }
 
-        @keyframes scanline {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100%); }
-        }
-        
-        .scanline-effect {
+        .data-stream {
           position: absolute;
-          inset: 0;
-          background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.05), transparent);
-          height: 50%;
-          animation: scanline 4s linear infinite;
-          opacity: 0.5;
-          pointer-events: none;
+          width: 1px;
+          height: 200px;
+          background: linear-gradient(to bottom, transparent, currentColor, transparent);
+          opacity: 0.3;
+          animation: streamDrop 4s linear infinite;
         }
 
-        /* --- SCROLL REVEAL ANIMATIONS --- */
-        .reveal-on-scroll {
-          opacity: 0;
-          transform: translateY(40px) scale(0.98);
-          filter: blur(4px);
-          transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), 
-                      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), 
-                      filter 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-          will-change: opacity, transform, filter;
+        @keyframes streamDrop {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100vh); }
         }
 
-        .reveal-on-scroll.is-visible {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          filter: blur(0);
+        @media (max-width: 768px) {
+          .glass-monolith {
+            min-height: 420px;
+            border-radius: 24px;
+          }
         }
       `}</style>
 
-      {/* Background Layers */}
-      <div className="grid-lines" />
-
-      <div className="max-w-[1600px] mx-auto px-6 relative z-10">
+      {/* Sticky Checkpoint */}
+      <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col md:flex-row">
         
-        {/* Header Section */}
-        <div className="grid grid-cols-12 gap-8 mb-20 items-end">
-          <div className="col-span-12 lg:col-span-8 reveal-on-scroll">
-            <div className="inline-block border border-[#00D9FF] px-4 py-1 mono text-xs text-[#00D9FF] tracking-wider mb-6">
-              SYSTEM ARCHITECTURE
-            </div>
-            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.9]">
-              BUILT FOR<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] to-white">
-                MAXIMUM VELOCITY
-              </span>
-            </h2>
-          </div>
-          <div className="col-span-12 lg:col-span-4 reveal-on-scroll" style={{ transitionDelay: '0.1s' }}>
-            <p className="text-white/60 mono text-sm leading-relaxed border-l-2 border-white/20 pl-6">
-              // A marketplace engineered specifically for the Campus ecosystem. 
-              <br/>
-              // Secure protocol. Low latency. Zero friction.
-            </p>
-          </div>
-        </div>
+        <div 
+          ref={ambientGlowRef}
+          className="ambient-glow"
+        />
+        <div className="technical-grid mask-radial-fade-out" />
+        
+        <div ref={el => dataStreamsRef.current[0] = el} className="data-stream left-[10%]" style={{ animationDelay: '0s' }} />
+        <div ref={el => dataStreamsRef.current[1] = el} className="data-stream left-[45%]" style={{ animationDelay: '2s' }} />
+        <div ref={el => dataStreamsRef.current[2] = el} className="data-stream right-[20%]" style={{ animationDelay: '1.5s' }} />
 
-        {/* Grid Layout */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* --- LEFT: Static Pinned Information --- */}
+        <div className="w-full md:w-[35%] lg:w-[40%] h-[40vh] md:h-full flex flex-col justify-center px-6 md:px-12 lg:px-20 z-10 relative">
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#050508] to-transparent pointer-events-none md:hidden" />
           
-          {/* --- TILE 1: CAMPUS SHIELD (BIG) --- */}
-          <div 
-            className="lg:col-span-2 bg-zinc-900/50 backdrop-blur-sm border border-white/10 p-10 relative overflow-hidden group hover:border-white/20 transition-colors duration-500 reveal-on-scroll"
-            style={{ transitionDelay: '0.2s' }}
-          >
-            {/* Color Identity: Cyan */}
-            <div className="absolute inset-0 transition-opacity duration-500 opacity-60 group-hover:opacity-100" style={{ background: 'linear-gradient(135deg, rgba(0,217,255,0.15) 0%, rgba(0,0,0,0) 100%)' }} />
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#00D9FF]" />
-            <div className="scanline-effect opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row gap-12 items-start">
-              <div className="flex-1">
-                 <div className="w-16 h-16 bg-[#00D9FF] flex items-center justify-center text-black mb-8 transform group-hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(0,217,255,0.3)]">
-                  <ShieldIcon />
-                </div>
-                <div className="mono text-xs text-[#00D9FF] mb-2 uppercase tracking-widest font-bold">
-                  Authentication Protocol
-                </div>
-                <h3 className="text-3xl font-black mb-4 text-white uppercase">
-                  Campus Shield
-                </h3>
-                <p className="text-white/60 mono text-sm leading-relaxed max-w-md">
-                  The walled garden. Access is cryptographically restricted to official institute emails (@sgsits.ac.in). No outsiders. Zero spam.
-                </p>
-              </div>
+          <div className="inline-block border border-white/10 px-4 py-1.5 mono text-[10px] md:text-xs text-white/50 tracking-[0.2em] mb-6 md:mb-8 bg-black/40 backdrop-blur-md self-start">
+             SYSTEM CAPABILITIES
+          </div>
+          
+          <h2 className="text-4xl md:text-6xl lg:text-[5rem] font-black text-white uppercase tracking-tighter leading-[0.9] mb-6">
+            BUILT FOR <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">
+              VELOCITY
+            </span>
+          </h2>
+          
+          <p className="text-white/40 mono text-xs md:text-sm leading-relaxed border-l-2 border-white/10 pl-4 md:pl-6 max-w-sm hidden md:block">
+            // A marketplace engineered specifically for the Campus ecosystem. <br/><br/>
+            Scroll down to explore the core modules powering the GS-MARK engine.
+          </p>
 
-              {/* Visual: System Status Box */}
-              <div className="w-full md:w-auto bg-black/80 border border-[#00D9FF]/20 p-6 min-w-[280px] backdrop-blur-md">
-                <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
-                  <span className="mono text-[10px] text-white/40">STATUS CHECK</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"/>
-                    <span className="mono text-[10px] text-[#00D9FF] font-bold">ONLINE</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between mono text-xs">
-                    <span className="text-white/60">DOMAIN</span>
-                    <span className="text-white">sgsits.ac.in</span>
-                  </div>
-                  <div className="flex items-center justify-between mono text-xs">
-                    <span className="text-white/60">ENCRYPTION</span>
-                    <span className="text-white">AES-256</span>
-                  </div>
-                  <div className="mt-4 bg-[#00D9FF]/10 border border-[#00D9FF]/30 p-2 flex items-center gap-2 text-[#00D9FF]">
-                    <CheckIcon />
-                    <span className="text-[10px] font-bold tracking-wider">VERIFIED STUDENT</span>
-                  </div>
-                </div>
-              </div>
+          <div className="mt-12 hidden md:block w-full max-w-sm">
+            <div className="flex justify-between items-end mb-3 mono text-[10px] text-white/40 uppercase tracking-widest">
+              <span>Initialization</span>
+              <span ref={progressTextRef}>0%</span>
+            </div>
+            <div className="h-0.5 w-full bg-white/5 relative overflow-hidden">
+              <div 
+                ref={progressBarRef}
+                className="absolute top-0 left-0 h-full ease-out"
+                style={{ width: '0%', background: FEATURES_DATA[0].color }}
+              />
             </div>
           </div>
-
-          {/* --- TILE 2: LIVE COMMS (SMALL) - Purple --- */}
-          <FeatureCard 
-            icon={<ZapIcon />} 
-            subtitle="LOW LATENCY"
-            title="Real-Time Comms"
-            desc="Negotiate in real-time. Direct peer-to-peer messaging designed for rapid campus meetups."
-            delay="0.3s"
-            color="#8B5CF6"
-            gradient="linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 100%)"
-          />
-
-          {/* --- TILE 3: ZERO COMMISSION (SMALL) - Emerald --- */}
-          <FeatureCard 
-            icon={<BagIcon />}
-            subtitle="ECONOMY"
-            title="Zero Commission"
-            desc="Keep 100% of your sale value. We facilitate the handshake; you handle the exchange."
-            delay="0.4s"
-            color="#10B981"
-            gradient="linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(0,0,0,0) 100%)"
-          />
-
-          {/* --- TILE 4: DEEP QUERY SEARCH (BIG) - Orange --- */}
-          <div 
-            className="lg:col-span-2 bg-zinc-900/50 backdrop-blur-sm border border-white/10 p-10 relative overflow-hidden group hover:border-white/20 transition-colors duration-500 reveal-on-scroll"
-            style={{ transitionDelay: '0.5s' }}
-          >
-             {/* Color Identity: Orange */}
-             <div className="absolute inset-0 transition-opacity duration-500 opacity-60 group-hover:opacity-100" style={{ background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(0,0,0,0) 100%)' }} />
-             <div className="absolute top-0 left-0 w-full h-1 bg-[#FF6B35]" />
-             
-             <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowUpRight />
-             </div>
-
-             <div className="relative z-10 flex flex-col md:flex-row-reverse gap-12 items-center">
-              <div className="flex-1 w-full">
-                 <div className="w-16 h-16 bg-[#FF6B35] flex items-center justify-center text-black mb-8 transform group-hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,107,53,0.3)]">
-                  <SearchIcon />
-                </div>
-                <div className="mono text-xs text-[#FF6B35] mb-2 uppercase tracking-widest font-bold">
-                  Intelligence
-                </div>
-                <h3 className="text-3xl font-black mb-4 text-white uppercase">
-                  Deep Query Search
-                </h3>
-                <p className="text-white/60 mono text-sm leading-relaxed">
-                  Don't just scroll. Filter by branch, specific years, condition, or edition. Find exactly what you need in milliseconds.
-                </p>
-              </div>
-
-              {/* Visual: Search Terminal */}
-              <div className="w-full md:w-1/2 bg-black/80 border border-[#FF6B35]/20 p-1 font-mono text-xs backdrop-blur-md">
-                <div className="bg-white/5 p-2 flex items-center gap-2 mb-1">
-                  <div className="w-3 h-3 rounded-full bg-[#FF6B35]"/>
-                  <span className="text-white/40">QUERY_TERMINAL_V1</span>
-                </div>
-                <div className="p-4 space-y-2 text-white/80 h-40">
-                  <div className="flex gap-2">
-                    <span className="text-[#FF6B35]">{'>'}</span>
-                    <span>search --tag "drafter"</span>
-                  </div>
-                  <div className="text-[#FF6B35]/50 pl-4">Searching database...</div>
-                  <div className="pl-4">
-                    [RESULT] Omega Drafter (Mech) <span className="text-[#10B981]">[AVAILABLE]</span>
-                  </div>
-                   <div className="flex gap-2 mt-4">
-                    <span className="text-[#FF6B35]">{'>'}</span>
-                    <span className="animate-pulse">_</span>
-                  </div>
-                  
-                  {/* Floating Tags */}
-                  <div className="absolute bottom-6 right-6 flex flex-col gap-2 items-end opacity-50">
-                     <span className="bg-white/10 px-2 py-1 text-[10px] text-[#FF6B35]">#Civil</span>
-                     <span className="bg-white/10 px-2 py-1 text-[10px] text-[#FF6B35]">#1stYear</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        {/* --- RIGHT: Stacked Card Swiper System --- */}
+        <div className="w-full md:w-[65%] lg:w-[60%] h-[60vh] md:h-full relative z-20 flex items-center justify-center md:justify-start md:pl-12 overflow-hidden perspective-[1200px]">
+          
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#050508] to-transparent z-40 pointer-events-none hidden md:block" />
+
+          <div className="relative w-[85vw] md:w-[450px] h-[500px]">
+            {FEATURES_DATA.map((feature, index) => (
+              <div
+                key={feature.id}
+                ref={el => cardsRef.current[index] = el}
+                className="absolute inset-0 will-change-transform"
+                style={{ transition: 'transform 0.07s cubic-bezier(0.25,0.46,0.45,0.94)' }}
+              >
+                <div className="glass-monolith group w-full h-full">
+                  <div 
+                    className="absolute top-0 left-0 w-full h-1 transition-opacity duration-300 top-accent-strip" 
+                    style={{ background: feature.color }} 
+                  />
+                  
+                  <div 
+                    className="absolute -top-32 -right-32 w-64 h-64 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
+                    style={{ background: `radial-gradient(${feature.color}, transparent)` }}
+                  />
+
+                  <div className="p-8 md:p-10 flex flex-col z-10 w-full h-full">
+                     <div className="flex justify-between items-start mb-16">
+                       <div 
+                         className="w-16 h-16 shrink-0 flex items-center justify-center text-[#050508] rounded-xl transition-all duration-300 transform group-hover:-translate-y-2 group-hover:rotate-3 icon-box"
+                         style={{ background: feature.color }}
+                       >
+                         {feature.icon}
+                       </div>
+                       <div className="mono text-[10px] text-white/30 uppercase tracking-[0.2em] border border-white/5 px-2 py-1 bg-white/5">
+                         MDL_{feature.id.toString().padStart(2, '0')}
+                       </div>
+                     </div>
+                     
+                     <div className="mt-auto">
+                       <div 
+                         className="mono text-[10px] md:text-xs uppercase tracking-[0.15em] mb-4 font-bold"
+                         style={{ color: feature.color }}
+                       >
+                         // {feature.subtitle}
+                       </div>
+                       <h3 className="text-3xl md:text-4xl font-black mb-6 text-white uppercase tracking-tight leading-[1]">
+                         {feature.title}
+                       </h3>
+                       <p className="text-white/50 text-sm leading-relaxed mono mb-8">
+                         {feature.desc}
+                       </p>
+
+                        <div className="pt-6 mt-6 border-t border-white/10 flex justify-between items-center mono text-[10px] text-white/40 uppercase">
+                          <span>Tech Infrastructure</span>
+                          <span className="transition-colors duration-300 tech-context">
+                            [{feature.techContext}]
+                          </span>
+                        </div>
+                     </div>
+                  </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Features
+export default Features;
