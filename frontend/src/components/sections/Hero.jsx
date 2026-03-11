@@ -698,11 +698,10 @@ const Hero = () => {
         }
 
         .mobile-feature-pill {
-          flex-shrink: 0;
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 12px 18px;
+          padding: 14px 16px;
           border-radius: 16px;
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.08);
@@ -982,46 +981,55 @@ const Hero = () => {
               <div style={{ height: '8vh' }} />
             </div>
 
-            {/* Mobile feature pills - horizontal scroll */}
-            <div className="anim-fade-up delay-500">
-              <div className="mobile-features-scroll px-1">
-                <div className="mobile-feature-pill">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${currentCard.accent}25` }}
-                  >
-                    <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
-                  </div>
-                  <div>
-                    <div className="text-white font-bold text-xs">Verified Only</div>
-                    <div className="text-[10px] text-white/40">College credentials</div>
-                  </div>
+            {/* Mobile feature pills - 2x2 grid */}
+            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3">
+              <div className="mobile-feature-pill">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${currentCard.accent}25` }}
+                >
+                  <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
-                <div className="mobile-feature-pill">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${currentCard.accent}25` }}
-                  >
-                    <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
-                  </div>
-                  <div>
-                    <div className="text-white font-bold text-xs">Instant Meet</div>
-                    <div className="text-[10px] text-white/40">On-campus handover</div>
-                  </div>
+                <div>
+                  <div className="text-white font-bold text-xs">Verified Only</div>
+                  <div className="text-[10px] text-white/40">College credentials</div>
                 </div>
-                <div className="mobile-feature-pill">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${currentCard.accent}25` }}
-                  >
-                    <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
-                  </div>
-                  <div>
-                    <div className="text-white font-bold text-xs">Zero Fees</div>
-                    <div className="text-[10px] text-white/40">100% yours to keep</div>
-                  </div>
+              </div>
+              <div className="mobile-feature-pill">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${currentCard.accent}25` }}
+                >
+                  <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
-                <span className="flex-shrink-0 flex items-center text-white/30 swipe-hint">›</span>
+                <div>
+                  <div className="text-white font-bold text-xs">Instant Meet</div>
+                  <div className="text-[10px] text-white/40">On-campus handover</div>
+                </div>
+              </div>
+              <div className="mobile-feature-pill">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${currentCard.accent}25` }}
+                >
+                  <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
+                </div>
+                <div>
+                  <div className="text-white font-bold text-xs">Zero Fees</div>
+                  <div className="text-[10px] text-white/40">100% yours to keep</div>
+                </div>
+              </div>
+              <div className="mobile-feature-pill">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${currentCard.accent}25` }}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: currentCard.accent }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div>
+                  <div className="text-white font-bold text-xs">Campus Only</div>
+                  <div className="text-[10px] text-white/40">SGSITS exclusive</div>
+                </div>
               </div>
             </div>
 
