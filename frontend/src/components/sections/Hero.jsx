@@ -882,7 +882,7 @@ const Hero = () => {
             </div>
 
             {/* ===== REDESIGNED MOBILE PRODUCT SHOWCASE (STACKING SCROLL) ===== */}
-            <div className="relative w-full pb-[5vh] anim-scale delay-400">
+            <div className="relative w-full anim-scale delay-400">
               {cards.map((card, idx) => (
                 <React.Fragment key={card.id}>
                   <div
@@ -974,12 +974,12 @@ const Hero = () => {
                     </div>
                   </div>
                   {idx !== cards.length - 1 && (
-                    <div style={{ height: '20vh' }} />
+                    <div style={{ height: '12vh' }} />
                   )}
                 </React.Fragment>
               ))}
               {/* Spacer so last card reaches its sticky top before page scrolls away */}
-              <div style={{ height: '60vh' }} />
+              <div style={{ height: '8vh' }} />
             </div>
 
             {/* Mobile feature pills - horizontal scroll */}
