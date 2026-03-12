@@ -128,13 +128,16 @@ const Marketplace = () => {
 
   // Category data with counts
   const categories = [
-    { name: 'Books & Notes', count: 245, slug: 'books' },
-    { name: 'Lab Equipment', count: 89, slug: 'lab' },
-    { name: 'Stationery', count: 156, slug: 'stationery' },
-    { name: 'Electronics', count: 67, slug: 'electronics' },
-    { name: 'Hostel Items', count: 43, slug: 'hostel' },
-    { name: 'Tools', count: 28, slug: 'tools' },
-    { name: 'Miscellaneous', count: 92, slug: 'misc' },
+    { name: 'Books & Notes', count: 245, slug: 'books', emoji: '📚' },
+    { name: 'Lab Equipment', count: 89, slug: 'lab', emoji: '🔬' },
+    { name: 'Stationery', count: 156, slug: 'stationery', emoji: '✏️' },
+    { name: 'Electronics', count: 67, slug: 'electronics', emoji: '⚡' },
+    { name: 'Hostel Items', count: 43, slug: 'hostel', emoji: '🏠' },
+    { name: 'Tools', count: 28, slug: 'tools', emoji: '🔧' },
+    { name: 'Sports & Fitness', count: 0, slug: 'sports', emoji: '⚽' },
+    { name: 'Musical Instruments', count: 0, slug: 'music', emoji: '🎸' },
+    { name: 'Clothing & Uniforms', count: 0, slug: 'clothing', emoji: '👕' },
+    { name: 'Miscellaneous', count: 92, slug: 'misc', emoji: '📦' },
   ];
 
   const branches = [

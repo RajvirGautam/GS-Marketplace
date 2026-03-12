@@ -297,7 +297,10 @@ router.post('/analyze', authenticate, upload.single('image'), async (req, res) =
       books: ['book', 'paper', 'text', 'notebook', 'library', 'publication', 'magazine'],
       stationery: ['pen', 'pencil', 'marker', 'desk', 'office'],
       lab: ['microscope', 'test tube', 'beaker', 'laboratory', 'tool', 'scientific'],
-      hostel: ['bed', 'mattress', 'kettle', 'fan', 'furniture', 'room']
+      hostel: ['bed', 'mattress', 'kettle', 'fan', 'furniture', 'room'],
+      sports: ['ball', 'bat', 'racket', 'dumbbell', 'gym', 'sport', 'fitness', 'cycle', 'bicycle'],
+      music: ['guitar', 'keyboard', 'piano', 'instrument', 'music', 'sound', 'amp', 'ukulele', 'drum'],
+      clothing: ['shirt', 'pant', 'apron', 'coat', 'uniform', 'wear', 'clothing', 'shoe', 'jacket']
     };
 
     for (const [cat, keywords] of Object.entries(categoryKeywords)) {

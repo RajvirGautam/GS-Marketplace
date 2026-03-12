@@ -38,6 +38,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
     { value: 'lab', label: 'Lab Equipment', emoji: '🔬' },
     { value: 'tools', label: 'Tools', emoji: '🔧' },
     { value: 'hostel', label: 'Hostel Items', emoji: '🏠' },
+    { value: 'sports', label: 'Sports & Fitness', emoji: '⚽' },
+    { value: 'music', label: 'Musical Instruments', emoji: '🎸' },
+    { value: 'clothing', label: 'Clothing & Uniforms', emoji: '👕' },
     { value: 'misc', label: 'Miscellaneous', emoji: '📦' },
   ];
 
