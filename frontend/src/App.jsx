@@ -50,8 +50,7 @@ function App() {
       />
       <Hero />
       <Features />
-      <Categories />
-      <RecentListings />
+
       <CTA />
     </>
   )
