@@ -198,6 +198,27 @@ const ZapIcon = () => (
 );
 
 
+// CountUp Component for stats
+const CountUp = ({ end, duration = 1500, prefix = '' }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(Math.floor(easeProgress * end));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [end, duration]);
+
+  return <>{prefix}{count.toLocaleString()}</>;
+};
+
 // Donut Chart Component
 const DonutChart = ({ data, size = 180 }) => {
   const total = data.reduce((sum, d) => sum + d.value, 0);
@@ -1727,10 +1748,10 @@ const UserDashboard = () => {
               {/* 2x2 Stat Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
                 {[
-                  { label: 'Listings', value: stats.totalListings, sub: `${stats.activeListings} active`, color: '#00D9FF' },
-                  { label: 'Views', value: stats.totalViews, sub: `${stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg`, color: '#7C3AED' },
-                  { label: 'Saves', value: stats.totalSaves, sub: 'interested users', color: '#F59E0B' },
-                  { label: 'Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, sub: `${stats.soldListings} sold`, color: '#10B981' },
+                  { label: 'Listings', value: <CountUp end={stats.totalListings} />, sub: `${stats.activeListings} active`, color: '#00D9FF' },
+                  { label: 'Views', value: <CountUp end={stats.totalViews} />, sub: `${stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg`, color: '#7C3AED' },
+                  { label: 'Saves', value: <CountUp end={stats.totalSaves} />, sub: 'interested users', color: '#F59E0B' },
+                  { label: 'Revenue', value: <CountUp end={stats.totalRevenue} prefix="₹" />, sub: `${stats.soldListings} sold`, color: '#10B981' },
                 ].map(s => (
                   <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 14px 12px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}80, transparent)` }} />
@@ -1914,17 +1935,22 @@ const UserDashboard = () => {
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(8,8,8,0.96)', backdropFilter: 'blur(24px)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'stretch', paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {[
             { label: 'Overview', icon: <HomeIcon />, tab: 'Overview' },
+            { label: 'Market', icon: <SearchIcon />, action: () => navigate('/marketplace') },
             { label: 'Listings', icon: <PackageIcon />, tab: 'My Listings' },
             { label: 'Deals', icon: <TrendingIcon />, tab: 'My Deals' },
             { label: 'Saved', icon: <HeartFilledIcon />, tab: 'Saved Products' },
             { label: 'Account', icon: <UsersIcon />, tab: 'My Account' },
           ].map(item => (
             <button
-              key={item.tab}
+              key={item.tab || item.label}
               onClick={() => {
-                setSidebarActive(item.tab);
-                if (item.tab === 'Saved Products') fetchSavedProducts();
-                if (item.tab === 'My Deals' || item.tab === 'Overview') { fetchDeals(); fetchOffers(); }
+                if (item.action) {
+                  item.action();
+                } else {
+                  setSidebarActive(item.tab);
+                  if (item.tab === 'Saved Products') fetchSavedProducts();
+                  if (item.tab === 'My Deals' || item.tab === 'Overview') { fetchDeals(); fetchOffers(); }
+                }
               }}
               style={{ flex: 1, padding: '10px 4px 12px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, color: activeMobileTab === item.tab ? '#00D9FF' : 'rgba(255,255,255,0.35)', transition: 'color 0.15s' }}
             >
@@ -2077,10 +2103,10 @@ const UserDashboard = () => {
                     {/* QUICK STATS ROW */}
                     <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
                       {[
-                        { label: 'Total', value: stats.totalListings, color: '#fff' },
-                        { label: 'Active', value: stats.activeListings, color: '#00D9FF' },
-                        { label: 'Sold', value: stats.soldListings, color: '#10B981' },
-                        { label: 'Pending', value: stats.pendingListings, color: '#F59E0B' },
+                        { label: 'Total', value: <CountUp end={stats.totalListings} />, color: '#fff' },
+                        { label: 'Active', value: <CountUp end={stats.activeListings} />, color: '#00D9FF' },
+                        { label: 'Sold', value: <CountUp end={stats.soldListings} />, color: '#10B981' },
+                        { label: 'Pending', value: <CountUp end={stats.pendingListings} />, color: '#F59E0B' },
                       ].map(s => (
                         <div className="stat-card" key={s.label}>
                           <div className="stat-label">{s.label}</div>
@@ -2775,14 +2801,14 @@ const UserDashboard = () => {
                     <div className="stat-row">
                       <div className="stat-card">
                         <div className="stat-label">Total Listings</div>
-                        <div className="stat-value">{stats.totalListings}</div>
+                        <div className="stat-value"><CountUp end={stats.totalListings} /></div>
                         <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
                           {stats.activeListings} active, {stats.soldListings} sold
                         </div>
                       </div>
                       <div className="stat-card">
                         <div className="stat-label">Total Views</div>
-                        <div className="stat-value">{stats.totalViews}</div>
+                        <div className="stat-value"><CountUp end={stats.totalViews} /></div>
                         <div className="stat-change up">
                           <ArrowUp color="#00D9FF" />
                           {stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg per listing
@@ -2790,14 +2816,14 @@ const UserDashboard = () => {
                       </div>
                       <div className="stat-card">
                         <div className="stat-label">Total Saves</div>
-                        <div className="stat-value">{stats.totalSaves}</div>
+                        <div className="stat-value"><CountUp end={stats.totalSaves} /></div>
                         <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
                           People interested
                         </div>
                       </div>
                       <div className="stat-card">
                         <div className="stat-label">Revenue</div>
-                        <div className="stat-value">₹{stats.totalRevenue.toLocaleString()}</div>
+                        <div className="stat-value"><CountUp end={stats.totalRevenue} prefix="₹" /></div>
                         <div className="stat-change up">
                           <ArrowUp color="#00D9FF" /> {stats.soldListings} items sold
                         </div>
@@ -2815,7 +2841,7 @@ const UserDashboard = () => {
                           <div className="sales-icon-circle"><PackageIcon /></div>
                           <div>
                             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Total Listed Items</div>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{stats.totalListings}</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}><CountUp end={stats.totalListings} /></div>
                           </div>
                         </div>
                         <div className="sales-content">
@@ -2836,7 +2862,7 @@ const UserDashboard = () => {
                         <div className="mini-stat-card">
                           <div className="mini-stat-label">Active Listings</div>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <span className="mini-stat-value">{stats.activeListings}</span>
+                            <span className="mini-stat-value"><CountUp end={stats.activeListings} /></span>
                             <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
                           </div>
                           <div className="mini-stat-sub">Available now</div>
@@ -2844,7 +2870,7 @@ const UserDashboard = () => {
                         <div className="mini-stat-card">
                           <div className="mini-stat-label">Pending Approval</div>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <span className="mini-stat-value">{stats.pendingListings}</span>
+                            <span className="mini-stat-value"><CountUp end={stats.pendingListings} /></span>
                             <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
                           </div>
                           <div className="mini-stat-sub">Awaiting review</div>
