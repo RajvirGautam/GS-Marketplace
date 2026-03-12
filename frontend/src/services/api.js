@@ -42,19 +42,19 @@ export const productAPI = {
 
     if (filters.search) params.append('search', filters.search);
     if (filters.categories && filters.categories.length > 0) {
-      filters.categories.forEach(cat => params.append('category', cat));
+      filters.categories.forEach(cat => params.append('categories', cat));
     }
     if (filters.branches && filters.branches.length > 0) {
-      filters.branches.forEach(branch => params.append('branch', branch));
+      filters.branches.forEach(branch => params.append('branches', branch));
     }
     if (filters.years && filters.years.length > 0) {
-      filters.years.forEach(year => params.append('year', year));
+      filters.years.forEach(year => params.append('years', year));
     }
     if (filters.conditions && filters.conditions.length > 0) {
-      filters.conditions.forEach(cond => params.append('condition', cond));
+      filters.conditions.forEach(cond => params.append('conditions', cond));
     }
     if (filters.types && filters.types.length > 0) {
-      filters.types.forEach(type => params.append('type', type));
+      filters.types.forEach(type => params.append('types', type));
     }
     if (filters.minPrice) params.append('minPrice', filters.minPrice);
     if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);

@@ -28,6 +28,28 @@ const DMIcon = () => (
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
+
+// ── Mobile nav card icons ────────────────────────────────────────────────────
+const MarketplaceIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <path d="M16 10a4 4 0 0 1-8 0"/>
+  </svg>
+);
+const DashboardIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/>
+    <rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="14" y="14" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/>
+  </svg>
+);
+const MessagesIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
 // ────────────────────────────────────────────────────────────────────────────
 
 const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
@@ -78,15 +100,18 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       const isMobile = window.innerWidth < 768;
 
-      const startWidth = isMobile ? 90 : 55;
+      const startWidth = isMobile ? 92 : 55;
       const endWidth = 100;
       const currentWidth = startWidth + ((endWidth - startWidth) * ratio);
 
-      const startOffset = 72;
+      // Desktop: pill is offset right-of-center; mobile: perfectly centered
+      const startOffset = isMobile ? 0 : 72;
       const currentOffset = startOffset * (1 - ratio);
       const currentLeft = `calc(50% - ${currentOffset}px)`;
 
-      const currentTop = 65 - (65 * ratio);
+      // Mobile: start just below the ticker bar (~36px); desktop: start lower
+      const topStart = isMobile ? 48 : 65;
+      const currentTop = topStart - (topStart * ratio);
       const currentRadius = 65 - (65 * ratio);
 
       const el = navRef.current;
@@ -264,7 +289,25 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       </div>
 
       {/* Mobile Menu Toggle */}
-      <div className="flex items-center gap-3 md:hidden">
+      <div className="flex items-center gap-2 md:hidden">
+        {/* Quick-access icons for logged-in users */}
+        {user && (
+          <>
+            <Link
+              to="/chat"
+              className="relative p-2 rounded-full bg-black/5 dark:bg-white/10 text-indigo-800 dark:text-slate-200 ring-1 ring-inset ring-black/5 dark:ring-white/10"
+            >
+              <DMIcon />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-[3px] rounded-full bg-gradient-to-br from-fuchsia-500 to-red-500 text-white text-[8px] font-black flex items-center justify-center ring-1 ring-black/20 animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Link>
+            <NotificationBell dark={false} />
+          </>
+        )}
+
         {!user && (
           <button
             onClick={onConnectClick}
@@ -275,7 +318,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         )}
 
         <button
-          className="text-indigo-950 dark:text-white"
+          className="p-2 rounded-full bg-black/5 dark:bg-white/10 ring-1 ring-inset ring-black/5 dark:ring-white/10 text-indigo-950 dark:text-white"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <Icons.X /> : <Icons.Menu />}
@@ -284,74 +327,87 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+12px)] left-0 w-full p-4 rounded-3xl border border-white/20 flex flex-col gap-2 animate-fade-in-up bg-white/80 dark:bg-black/80 backdrop-blur-2xl shadow-2xl">
-          <Link
-            to="/marketplace"
-            className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Marketplace
-          </Link>
-          <Link
-            to="/dashboard"
-            className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            Dashboard
-          </Link>
-          {user && (
-            <Link
-              to="/chat"
-              className="p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-indigo-900 dark:text-white font-bold text-lg transition-colors flex items-center gap-3"
-              onClick={() => setIsOpen(false)}
-            >
-              Messages
-              {unreadCount > 0 && (
-                <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-gradient-to-br from-fuchsia-500 to-red-500 text-white text-[10px] font-black flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </Link>
-          )}
+        <div className="absolute top-[calc(100%+10px)] left-0 w-full rounded-3xl border border-white/20 dark:border-white/10 overflow-hidden bg-white/75 dark:bg-[#0d0d18]/95 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] animate-fade-in-up">
 
-          {/* Auth Mobile */}
-          {!user ? (
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                onConnectClick();
-              }}
-              className="mt-2 w-full py-4 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-bold rounded-xl shadow-lg"
+          {/* Nav Cards Grid */}
+          <div className="p-3 grid grid-cols-2 gap-2">
+            <Link
+              to="/marketplace"
+              onClick={() => setIsOpen(false)}
+              className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-cyan-500/10 dark:hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all"
             >
-              CONNECT COLLEGE ID
-            </button>
-          ) : (
-            <div className="mt-2 p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-600 to-violet-700 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 group-hover:scale-110 transition-transform">
+                <MarketplaceIcon />
+              </div>
+              <span className="text-sm font-black text-indigo-900 dark:text-white tracking-tight">Marketplace</span>
+            </Link>
+
+            <Link
+              to="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-violet-500/10 dark:hover:bg-violet-500/10 hover:border-violet-500/30 transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/25 group-hover:scale-110 transition-transform">
+                <DashboardIcon />
+              </div>
+              <span className="text-sm font-black text-indigo-900 dark:text-white tracking-tight">Dashboard</span>
+            </Link>
+
+            {user && (
+              <Link
+                to="/chat"
+                onClick={() => setIsOpen(false)}
+                className="group col-span-2 flex items-center gap-4 px-5 py-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-fuchsia-500/10 dark:hover:bg-fuchsia-500/10 hover:border-fuchsia-500/30 transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-600 to-red-500 flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/25 shrink-0 group-hover:scale-110 transition-transform">
+                  <MessagesIcon />
+                </div>
+                <span className="text-sm font-black text-indigo-900 dark:text-white tracking-tight flex-1">Messages</span>
+                {unreadCount > 0 && (
+                  <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-gradient-to-br from-fuchsia-500 to-red-500 text-white text-[10px] font-black flex items-center justify-center shadow-md shadow-fuchsia-500/40 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="mx-3 h-px bg-black/5 dark:bg-white/10" />
+
+          {/* Auth Section */}
+          <div className="p-3">
+            {!user ? (
+              <button
+                onClick={() => { setIsOpen(false); onConnectClick(); }}
+                className="w-full py-4 bg-gradient-to-r from-cyan-600 to-violet-700 text-white font-black rounded-2xl shadow-lg shadow-violet-500/30 text-sm tracking-wide hover:opacity-90 transition-opacity"
+              >
+                CONNECT COLLEGE ID
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
                 <Avatar
                   src={user?.profilePicture}
                   name={user?.fullName || user?.name || user?.email}
                   size={40}
                 />
-                <div className="overflow-hidden">
-                  <div className="text-indigo-900 dark:text-white font-bold truncate">
+                <div className="overflow-hidden flex-1 min-w-0">
+                  <div className="text-indigo-900 dark:text-white font-bold text-sm truncate">
                     {user.fullName || user.name || "Student"}
                   </div>
-                  <div className="text-xs text-indigo-900/50 dark:text-white/50 truncate">{user.email}</div>
+                  <div className="text-[11px] text-indigo-900/50 dark:text-white/40 truncate font-mono">{user.email}</div>
                 </div>
+                <button
+                  onClick={() => { setIsOpen(false); logout(); navigate('/'); }}
+                  className="shrink-0 p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 border border-red-500/15 transition-colors"
+                  title="Logout"
+                >
+                  <LogOutIcon />
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  logout();
-                  navigate('/');
-                }}
-                className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/10 font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                <LogOutIcon /> Logout
-              </button>
-            </div>
-          )}
+            )}
+          </div>
+
         </div>
       )}
     </nav>

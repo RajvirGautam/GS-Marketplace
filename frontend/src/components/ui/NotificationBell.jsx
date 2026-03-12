@@ -140,23 +140,23 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
             onClick={handleClick}
             style={{
                 display: 'flex',
-                gap: 12,
-                padding: '12px 14px',
+                gap: 14,
+                padding: '14px 16px',
                 cursor: 'pointer',
                 background: notif.isRead ? 'transparent' : cfg.bgColor,
-                borderLeft: `3px solid ${notif.isRead ? 'rgba(255,255,255,0.06)' : cfg.accentColor}`,
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderLeft: `3px solid ${notif.isRead ? 'transparent' : cfg.accentColor}`,
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
                 transition: 'background 0.2s',
                 position: 'relative',
             }}
             onMouseEnter={e => e.currentTarget.style.background = cfg.bgColor}
             onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : cfg.bgColor}
         >
-            {/* Icon bubble */}
+            {/* Icon Bubble */}
             <div style={{
-                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
                 background: `${cfg.accentColor}18`,
-                border: `1px solid ${cfg.borderColor}`,
+                border: `1px solid ${cfg.accentColor}30`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: cfg.accentColor,
                 position: 'relative',
@@ -165,13 +165,13 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
                 {/* Stacked count badge on icon */}
                 {isStacked && (
                     <span style={{
-                        position: 'absolute', top: -5, right: -5,
+                        position: 'absolute', top: -4, right: -4,
                         minWidth: 16, height: 16, borderRadius: 8,
                         background: cfg.accentColor,
                         color: '#000',
                         fontSize: 9, fontWeight: 900,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '0 3px',
+                        padding: '0 4px',
                         boxShadow: `0 0 6px ${cfg.accentColor}88`,
                     }}>
                         {notif.count > 9 ? '9+' : notif.count}
@@ -179,48 +179,48 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
                 )}
             </div>
 
-            {/* Text */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Text Content */}
+            <div style={{ flex: 1, minWidth: 0, paddingRight: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                     <span style={{
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.5px',
                         textTransform: 'uppercase', color: cfg.accentColor,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                     }}>
                         {isStacked ? `${notif.count} Messages` : cfg.label}
                     </span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: 8 }}>
                         {timeAgo(notif.createdAt)}
                     </span>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: notif.isRead ? 400 : 600, color: notif.isRead ? 'rgba(255,255,255,0.55)' : '#f1f5f9', lineHeight: 1.4, marginBottom: 2 }}>
+                <div style={{ fontSize: 13, fontWeight: notif.isRead ? 400 : 500, color: notif.isRead ? 'rgba(255,255,255,0.6)' : '#ffffff', lineHeight: 1.4 }}>
                     {notif.title}
                 </div>
                 {notif.body && (
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, marginTop: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {notif.body}
                     </div>
                 )}
             </div>
 
-            {/* Unread dot */}
+            {/* Unread Indicator Dot */}
             {!notif.isRead && (
                 <div style={{
-                    position: 'absolute', top: 14, right: 36,
+                    position: 'absolute', top: 18, right: 34,
                     width: 6, height: 6, borderRadius: '50%',
                     background: cfg.accentColor,
-                    boxShadow: `0 0 6px ${cfg.accentColor}`,
+                    boxShadow: `0 0 8px ${cfg.accentColor}`,
                 }} />
             )}
 
-            {/* Delete button */}
+            {/* Action Buttons */}
             <button
                 onClick={handleDelete}
                 style={{
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'rgba(255,255,255,0.2)', padding: '2px 4px',
-                    fontSize: 14, lineHeight: 1, alignSelf: 'flex-start',
+                    color: 'rgba(255,255,255,0.2)', padding: '4px',
+                    fontSize: 14, lineHeight: 1, position: 'absolute', top: 12, right: 10,
                     transition: 'color 0.15s',
-                    flexShrink: 0,
                 }}
                 onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
@@ -290,41 +290,42 @@ const NotificationBell = ({ dark = true }) => {
 
             {/* Dropdown Panel */}
             {open && (
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 10px)',
-                    right: 0,
-                    width: 370,
-                    maxHeight: 460,
-                    background: '#0c0c14',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 16,
-                    boxShadow: '0 24px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 9999,
-                    animation: 'notifSlideIn 0.2s cubic-bezier(0.34,1.56,0.64,1)',
-                }}>
+                <>
+                {/* Mobile Overlay */}
+                <div 
+                    className="fixed inset-0 z-[9998] sm:hidden"
+                    style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)', animation: 'fadeIn 0.2s' }}
+                    onClick={() => setOpen(false)}
+                />
+
+                <div 
+                    className="notif-panel fixed sm:absolute z-[9999] flex flex-col inset-x-0 bottom-0 sm:inset-auto sm:right-0 sm:top-[calc(100%+8px)] w-full sm:w-[380px] max-h-[85vh] sm:max-h-[480px] rounded-t-[20px] sm:rounded-2xl"
+                    style={{
+                        background: '#0c0c14',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        boxShadow: '0 -10px 40px rgba(0,0,0,0.5), 0 24px 80px rgba(0,0,0,0.8)',
+                        overflow: 'hidden',
+                    }}
+                >
                     {/* Header */}
                     <div style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '14px 16px 12px',
-                        borderBottom: '1px solid rgba(255,255,255,0.08)',
+                        padding: '16px 20px 14px',
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
                         background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
                         flexShrink: 0,
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
                                 Notifications
                             </span>
                             {unreadNotifCount > 0 && (
                                 <span style={{
-                                    fontSize: 10, fontWeight: 800, padding: '2px 7px',
-                                    borderRadius: 20, background: 'rgba(99,102,241,0.2)',
-                                    color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)',
+                                    fontSize: 10, fontWeight: 800, padding: '2px 8px',
+                                    borderRadius: 12, background: 'rgba(99,102,241,0.15)',
+                                    color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)',
                                 }}>
-                                    {unreadNotifCount} new
+                                    {unreadNotifCount} New
                                 </span>
                             )}
                         </div>
@@ -334,7 +335,16 @@ const NotificationBell = ({ dark = true }) => {
                                 style={{
                                     background: 'none', border: 'none', cursor: 'pointer',
                                     fontSize: 11, color: '#818cf8', fontWeight: 600,
-                                    padding: '2px 0',
+                                    padding: '4px 8px', transition: 'all 0.2s',
+                                    borderRadius: 6,
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.color = '#a5b4fc';
+                                    e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.color = '#818cf8';
+                                    e.currentTarget.style.background = 'none';
                                 }}
                             >
                                 Mark all read
@@ -343,12 +353,12 @@ const NotificationBell = ({ dark = true }) => {
                     </div>
 
                     {/* List */}
-                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                    <div className="notif-scroll" style={{ overflowY: 'auto', flex: 1, overscrollBehavior: 'contain' }}>
                         {notifications.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.3)' }}>
-                                <div style={{ fontSize: 32, marginBottom: 10 }}>🔔</div>
-                                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>You're all caught up!</div>
-                                <div style={{ fontSize: 11 }}>New offers, deals, and messages will appear here.</div>
+                            <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(255,255,255,0.3)' }}>
+                                <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.6 }}>🔔</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: 'rgba(255,255,255,0.5)' }}>You're all caught up!</div>
+                                <div style={{ fontSize: 12 }}>New offers, deals, and messages will appear here.</div>
                             </div>
                         ) : (
                             groupNotifications(notifications).map(n => (
@@ -366,11 +376,11 @@ const NotificationBell = ({ dark = true }) => {
                     {/* Footer */}
                     {notifications.length > 0 && (
                         <div style={{
-                            padding: '10px 16px',
-                            borderTop: '1px solid rgba(255,255,255,0.06)',
+                            padding: '12px 16px',
+                            borderTop: '1px solid rgba(255,255,255,0.04)',
                             textAlign: 'center',
                             flexShrink: 0,
-                            background: 'rgba(0,0,0,0.3)',
+                            background: '#0a0a10',
                         }}>
                             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 0.5 }}>
                                 Notifications auto-clear after 30 days
@@ -378,16 +388,44 @@ const NotificationBell = ({ dark = true }) => {
                         </div>
                     )}
                 </div>
+                </>
             )}
 
             <style>{`
                 @keyframes notifSlideIn {
-                    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+                    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
                     to   { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                @keyframes notifSlideUp {
+                    from { opacity: 0; transform: translateY(100%); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to   { opacity: 1; }
+                }
+                @media (max-width: 639px) {
+                    .notif-panel { animation: notifSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+                }
+                @media (min-width: 640px) {
+                    .notif-panel { animation: notifSlideIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
                 }
                 @keyframes pulse {
                     0%, 100% { opacity: 1; }
                     50% { opacity: 0.7; }
+                }
+                .notif-scroll::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .notif-scroll::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .notif-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                }
+                .notif-scroll::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255,255,255,0.2);
                 }
             `}</style>
         </div>

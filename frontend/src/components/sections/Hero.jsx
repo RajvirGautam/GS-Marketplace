@@ -772,7 +772,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <section ref={containerRef} className="hero-enhanced relative pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <section ref={containerRef} className="hero-enhanced relative pt-28 sm:pt-24 pb-20 px-4 sm:px-6 lg:px-8">
 
         {/* Animated gradient mesh */}
         <div
