@@ -14,6 +14,8 @@ const Hero = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  // Mobile auto-cycling card state
+  const [mobileCardIndex, setMobileCardIndex] = useState(0);
   const containerRef = useRef(null);
   const cardRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
@@ -110,7 +112,7 @@ const Hero = () => {
   }, []);
 
 
-  // Auto-rotate cards with transition
+  // Auto-rotate cards (desktop) with transition
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTransitioning(true);
@@ -119,6 +121,15 @@ const Hero = () => {
         setIsTransitioning(false);
       }, 400);
     }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Mobile auto-cycling cards — cards change frequency: 2000ms (2s)
+  const MOBILE_CARD_CHANGE_INTERVAL = 2000; // cards change frequency
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMobileCardIndex((prev) => (prev + 1) % cards.length);
+    }, MOBILE_CARD_CHANGE_INTERVAL);
     return () => clearInterval(interval);
   }, []);
 
@@ -284,18 +295,18 @@ const Hero = () => {
         .anim-fade-right { animation: fadeInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
         .anim-scale { animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-        /* Glassmorphism card - Restored */
+        /* Solid Opaque Stacked Cards */
         .glass-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(20px);
+          background: #0d0d12;
+          background-color: #0d0d12 !important;
           border: 1px solid rgba(255, 255, 255, 0.1);
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .glass-card:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: #15151e;
           border-color: rgba(255, 255, 255, 0.2);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         /* 3D Card */
@@ -321,7 +332,7 @@ const Hero = () => {
           position: relative;
           border-radius: 24px;
           overflow: hidden;
-          background: #0d0d12;
+          background-color: #0d0d12 !important;
           border: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -367,6 +378,11 @@ const Hero = () => {
           opacity: 0;
           transform: translateY(12px);
           transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes progressFill {
+          from { width: 0%; }
+          to { width: 100%; }
         }
 
         /* Navigation dots */
@@ -772,7 +788,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <section ref={containerRef} className="hero-enhanced relative pt-28 sm:pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <section ref={containerRef} className="hero-enhanced relative pt-[160px] sm:pt-32 pb-4 sm:pb-24 px-4 sm:px-6 lg:px-8">
 
         {/* Animated gradient mesh */}
         <div
@@ -806,29 +822,29 @@ const Hero = () => {
           />
         ))}
 
-        <div className="max-w-[1800px] mx-auto relative z-10 pt-8 sm:pt-20">
+        <div className="max-w-[1800px] mx-auto relative z-10 pt-16 sm:pt-20">
 
           {/* ============================= */}
           {/* ===== MOBILE LAYOUT ONLY ===== */}
           {/* ============================= */}
-          <div className="lg:hidden space-y-6 pb-8">
+          <div className="lg:hidden space-y-6 pb-0">
 
             {/* Mobile AI Banner */}
             {showBanner && (
-              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[10px] p-1.5 pr-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-[280px] mx-auto">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 ml-1">
+              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-white/5 backdrop-blur-2xl border border-white/15 rounded-xl p-2 pr-3 shadow-[0_12px_40px_rgba(0,0,0,0.6)] max-w-[320px] mx-auto mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.1))` }}>
                     {/* Rocket Icon matching screenshot */}
-                    <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="w-4 h-4 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5M15.4 12L20.2 7.2A3.38 3.38 0 0 0 15.4 2.4L10.6 7.2c-3.1 1.05-6.6 2.43-6.6 2.43l5.17 5.17c0 0 1.38-3.5 2.43-6.6M12 15.4L7.2 20.2c-1.2 1.2-3.1.2-3.4-1.3l5.5-5.5M10 10l4 4" />
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-[11px] leading-none">AI Listing Autofill is here!</p>
-                    <p className="text-white/60 text-[8px] tracking-wide mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>Snap a photo — AI fills the details</p>
+                    <p className="text-white font-bold text-xs leading-none tracking-wide">AI Listed Autofill</p>
+                    <p className="text-white/60 text-[9px] tracking-wide mt-1 uppercase mono">Snap a photo to fill</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
                       if (user) { setShowAddModal(true); }
@@ -837,12 +853,12 @@ const Hero = () => {
                         setShowConnectModal(true);
                       }
                     }}
-                    className="hero-cta-button flex-shrink-0 font-semibold text-[11px] px-3 py-1.5 rounded-[10px] text-white/90 whitespace-nowrap"
+                    className="hero-cta-button flex-shrink-0 font-bold text-[11px] px-3.5 py-1.5 rounded-lg text-white/95 whitespace-nowrap shadow-xl"
                     style={{ '--accent-color': currentCard.accent }}
                   >
                     Try now →
                   </button>
-                  <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/50 hover:text-white transition-colors p-1">
+                  <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/40 hover:text-white transition-colors p-1" title="Dismiss">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                   </button>
                 </div>
@@ -850,54 +866,90 @@ const Hero = () => {
             )}
 
             {/* Mobile headline - compact */}
-            <div className="text-center anim-fade-up delay-200">
+            <div className="text-center anim-fade-up delay-200 space-y-5">
               <h1 className="text-[clamp(2.8rem,14vw,4.5rem)] leading-[0.92] font-black text-white tracking-tight">
                 <span className="block">TRADE</span>
                 <span className="block" style={{ color: currentCard.accent }}>DIRECTLY</span>
                 <span className="block">ON CAMPUS</span>
               </h1>
-              <p className="text-sm text-white/60 mt-4 px-4 leading-relaxed max-w-sm mx-auto">
-                Engineering essentials from <span className="font-semibold text-white/80">verified students</span>.
-                <span className="font-bold" style={{ color: currentCard.accent }}> No shipping. No fees.</span>
+              <p className="text-sm text-white/60 px-4 leading-relaxed max-w-sm mx-auto font-medium">
+                Engineering essentials from <span className="font-semibold text-white/90">verified students</span>.
+                <span className="font-bold block mt-1" style={{ color: currentCard.accent }}> No shipping. No fees.</span>
               </p>
             </div>
 
             {/* Mobile stats strip */}
-            <div className="glass-card rounded-2xl overflow-hidden anim-fade-up delay-300">
+            <div className="glass-card rounded-2xl overflow-hidden anim-fade-up delay-300 border border-white/10 shadow-lg">
               <div className="mobile-stats-strip">
                 <div className="mobile-stat-item">
-                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>100%</div>
-                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Verified</div>
+                  <div className="text-3xl font-black" style={{ color: currentCard.accent }}>100%</div>
+                  <div className="mono text-[8px] text-white/50 mt-2 uppercase tracking-widest font-semibold">Verified</div>
                 </div>
                 <div className="mobile-stat-item">
-                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>24/7</div>
-                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Support</div>
+                  <div className="text-3xl font-black" style={{ color: currentCard.accent }}>24/7</div>
+                  <div className="mono text-[8px] text-white/50 mt-2 uppercase tracking-widest font-semibold">Support</div>
                 </div>
                 <div className="mobile-stat-item">
-                  <div className="text-2xl font-black" style={{ color: currentCard.accent }}>0₹</div>
-                  <div className="mono text-[9px] text-white/50 mt-1 uppercase tracking-widest">Fees</div>
+                  <div className="text-3xl font-black" style={{ color: currentCard.accent }}>0₹</div>
+                  <div className="mono text-[8px] text-white/50 mt-2 uppercase tracking-widest font-semibold">Fees</div>
                 </div>
               </div>
             </div>
 
-            {/* ===== REDESIGNED MOBILE PRODUCT SHOWCASE (STACKING SCROLL) ===== */}
+            {/* ===== MOBILE PRODUCT SHOWCASE (AUTO-CYCLING STACK) ===== */}
             <div className="relative w-full anim-scale delay-400">
-              {cards.map((card, idx) => (
-                <React.Fragment key={card.id}>
-                  <div
-                    className="sticky-card-wrapper"
-                    style={{
-                      top: `calc(90px + ${idx * 24}px)`,
-                      zIndex: idx + 10,
-                    }}
-                  >
+              <div className="grid" style={{ gridTemplateAreas: "'stack'" }}>
+                {cards.map((card, idx) => {
+                  let state = 'hidden';
+                  if (idx === mobileCardIndex) state = 'active';
+                  else if (idx === (mobileCardIndex + 1) % cards.length) state = 'next';
+                  else if (idx === (mobileCardIndex - 1 + cards.length) % cards.length) state = 'prev';
+
+                  let zIndex = 10;
+                  let opacity = 0;
+                  let transform = 'scale(0.85) translateY(40px)';
+                  
+                  if (state === 'active') {
+                    zIndex = 30;
+                    opacity = 1;
+                    transform = 'scale(1) translateY(0)';
+                  } else if (state === 'next') {
+                    zIndex = 20;
+                    opacity = 0.6;
+                    transform = 'scale(0.95) translateY(20px)';
+                  } else if (state === 'prev') {
+                    zIndex = 40;
+                    opacity = 0;
+                    transform = 'scale(1.05) translateY(-20px)';
+                  }
+
+                  return (
                     <div
+                      key={card.id}
                       style={{
-                        '--accent-color': card.accent,
-                        animationDelay: `${400 + (idx * 100)}ms`
+                        gridArea: 'stack',
+                        zIndex,
+                        opacity,
+                        transform,
+                        transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+                        pointerEvents: state === 'active' ? 'auto' : 'none',
+                        '--accent-color': card.accent
                       }}
                     >
-                      <div className="mobile-product-card shadow-[0_15px_35px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/5">
+                      <div className="mobile-product-card shadow-[0_15px_35px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/8 relative overflow-hidden">
+                        {/* Progress Bar at the top of the card */}
+                        {state === 'active' && (
+                          <div className="absolute top-0 left-0 right-0 h-1.5 z-50 bg-white/10">
+                            <div 
+                              key={`progress-${mobileCardIndex}`}
+                              className="h-full w-0"
+                              style={{ 
+                                animation: `progressFill ${MOBILE_CARD_CHANGE_INTERVAL}ms linear forwards`,
+                                background: card.accent 
+                              }}
+                            />
+                          </div>
+                        )}
                         <div className="mobile-product-image">
                           <img
                             src={card.image}
@@ -924,8 +976,8 @@ const Hero = () => {
                           </div>
                         </div>
 
-                        <div className="p-5">
-                          <div className="flex items-center gap-3 mb-4">
+                        <div className="p-5 space-y-4">
+                          <div className="flex items-center gap-3">
                             <div
                               className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs"
                               style={{ background: `linear-gradient(135deg, ${card.accent}, ${card.accent}99)` }}
@@ -938,32 +990,32 @@ const Hero = () => {
                             </div>
                           </div>
 
-                          <p className="text-xs text-white/50 leading-relaxed mb-4">
+                          <p className="text-xs text-white/60 leading-relaxed font-medium">
                             {card.description}
                           </p>
 
-                          <div className="flex flex-wrap gap-1.5 mb-5">
-                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                          <div className="flex flex-wrap gap-2">
+                            <span className="text-[10px] px-2.5 py-1.5 rounded-md bg-white/8 text-white/60 mono font-semibold border border-white/10 hover:border-white/20 transition-colors">
                               📍 Campus Pickup
                             </span>
-                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                            <span className="text-[10px] px-2.5 py-1.5 rounded-md bg-white/8 text-white/60 mono font-semibold border border-white/10 hover:border-white/20 transition-colors">
                               ⚡ Instant
                             </span>
-                            <span className="text-[10px] px-2.5 py-1 rounded-md bg-white/5 text-white/50 mono font-semibold border border-white/5">
+                            <span className="text-[10px] px-2.5 py-1.5 rounded-md bg-white/8 text-white/60 mono font-semibold border border-white/10 hover:border-white/20 transition-colors">
                               🛡️ Verified
                             </span>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 pt-2">
                             <button
-                              className="action-pill mono text-white flex-1 justify-center text-xs"
-                              style={{ background: card.accent }}
+                              className="action-pill mono text-white flex-1 justify-center text-xs font-bold"
+                              style={{ background: card.accent, boxShadow: `0 4px 12px ${card.accent}30` }}
                             >
                               View Details →
                             </button>
                             <button
-                              className="action-pill mono text-white/80 flex-1 justify-center text-xs"
-                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                              className="action-pill mono text-white/80 flex-1 justify-center text-xs font-bold hover:text-white"
+                              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
                             >
                               💬 Message
                             </button>
@@ -971,19 +1023,27 @@ const Hero = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {idx !== cards.length - 1 && (
-                    <div style={{ height: '12vh' }} />
-                  )}
-                </React.Fragment>
-              ))}
-              {/* Spacer so last card reaches its sticky top before page scrolls away */}
-              <div style={{ height: '8vh' }} />
+                  );
+                })}
+              </div>
+
+              {/* Navigation dots for mobile card */}
+              <div className="flex items-center justify-center gap-2 mt-8">
+                {cards.map((card, idx) => (
+                  <button
+                    key={card.id}
+                    onClick={() => setMobileCardIndex(idx)}
+                    className={`nav-dot ${mobileCardIndex === idx ? 'active' : ''}`}
+                    style={mobileCardIndex === idx ? { background: card.accent } : {}}
+                    aria-label={`Go to card ${idx + 1}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Mobile feature pills - 2x2 grid */}
             <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3">
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
@@ -992,10 +1052,10 @@ const Hero = () => {
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Verified Only</div>
-                  <div className="text-[10px] text-white/40">College credentials</div>
+                  <div className="text-[9px] text-white/50">ID verified</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
@@ -1004,10 +1064,10 @@ const Hero = () => {
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Instant Meet</div>
-                  <div className="text-[10px] text-white/40">On-campus handover</div>
+                  <div className="text-[9px] text-white/50">On-campus</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
@@ -1016,10 +1076,10 @@ const Hero = () => {
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Zero Fees</div>
-                  <div className="text-[10px] text-white/40">100% yours to keep</div>
+                  <div className="text-[9px] text-white/50">100% yours</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
@@ -1028,7 +1088,7 @@ const Hero = () => {
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Campus Only</div>
-                  <div className="text-[10px] text-white/40">SGSITS exclusive</div>
+                  <div className="text-[9px] text-white/50">Exclusive</div>
                 </div>
               </div>
             </div>
@@ -1187,9 +1247,9 @@ const Hero = () => {
                           e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                         }}
                       >
-                        <div className="product-showcase shadow-[0_25px_60px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/5">
+                        <div className="product-showcase shadow-[0_25px_60px_rgba(0,0,0,1)] bg-[#0d0d12] border border-white/10" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
                           {/* Top strip - seller info */}
-                          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
                             <div className="flex items-center gap-3">
                               <div
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm"
@@ -1239,12 +1299,12 @@ const Hero = () => {
                             </div>
 
                             {/* Details side */}
-                            <div className="p-8 lg:p-10 flex flex-col justify-between relative">
+                            <div className="p-8 lg:p-10 flex flex-col justify-between relative bg-[#0d0d12]" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
                               <div
                                 className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
                                 style={{ background: card.accent }}
                               />
-                              <div className="relative">
+                              <div className="relative z-10">
                                 <h3 className="text-2xl lg:text-4xl font-black text-white leading-tight mb-4">
                                   {card.title}
                                 </h3>
@@ -1252,13 +1312,13 @@ const Hero = () => {
                                   {card.description}
                                 </p>
                                 <div className="flex flex-wrap gap-2 mb-8">
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/80 mono font-semibold border border-white/10">
                                     📍 On Campus Pickup
                                   </span>
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/80 mono font-semibold border border-white/10">
                                     ⚡ Instant Meet
                                   </span>
-                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/60 mono font-semibold border border-white/5">
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/5 text-white/80 mono font-semibold border border-white/10">
                                     🛡️ Verified Seller
                                   </span>
                                 </div>
