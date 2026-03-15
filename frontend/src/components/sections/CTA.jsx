@@ -21,29 +21,29 @@ const ArrowRight = () => (
 // on narrow screens so the "Trusted by" text is never physically crossed by flying cards.
 const REVIEWS = [
   // --- MOBILE VISIBLE CARDS (Symmetrical Cascade) ---
-  
+
   // Left 1 (Very Top)
-  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '12%', left: '4%' }, rotate: '-3deg', width: '250px', zDepth: 1.4, showOnMobile: true, mobilePos: { top: '4%', left: '4%' } },
-  
+  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '12%', left: '4%' }, rotate: '-3deg', width: '250px', zDepth: 1.4, showOnMobile: true, mobilePos: { top: '8%', left: '4%' } },
+
   // Right 1 (Mid-Top)
-  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '1.5deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '15%', right: '4%' } },
+  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '1.5deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '20%', right: '4%' } },
 
   // Left 2 (Lower-Top, sits just above text)
-  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '28%', left: '4%' } },
+  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '33%', left: '4%' } },
 
   // --- [ EXCLUSION ZONE: CENTER 38% IS RESERVED FOR TYPOGRAPHY ] ---
 
   // Right 2 (Upper-Bottom, sits just below text)
-  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '28%', right: '4%' } },
+  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '33%', right: '4%' } },
 
   // Left 3 (Mid-Bottom)
-  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '1.5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '15%', left: '4%' } },
+  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '1.5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '20%', left: '4%' } },
 
   // Right 3 (Very Bottom)
-  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '6%', right: '34%' }, rotate: '-1deg', width: '220px', zDepth: 2.7, showOnMobile: true, mobilePos: { bottom: '4%', right: '4%' } },
+  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '6%', right: '34%' }, rotate: '-1deg', width: '220px', zDepth: 2.7, showOnMobile: true, mobilePos: { bottom: '8%', right: '4%' } },
 
   // --- HIDDEN ON MOBILE (To prevent clutter and maintain the stark geometry) ---
-  
+
   { id: 15, name: "Arjun N.", role: "Electronics", text: "Verified profiles mean I actually trust the person I'm meeting.", pos: { bottom: '15%', left: '5%' }, rotate: '2.5deg', width: '260px', zDepth: 1.7, showOnMobile: false },
   // { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { bottom: '32%', left: '24%' }, rotate: '-2deg', width: '220px', zDepth: 3.5 },
   { id: 2, name: "Priya M.", role: "B.Tech", text: "Met near the library for the handoff. Super convenient.", pos: { top: '10%', right: '5%' }, rotate: '3.5deg', width: '240px', zDepth: 1.5, showOnMobile: false },
@@ -74,7 +74,7 @@ const CTA = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
@@ -83,11 +83,12 @@ const CTA = () => {
 
   // --- Strict Sequenced Kinematics --- 
 
-  // Phase 1 (Cards Zoom): Introduce a delay. 
-  // Scroll 0.0 -> 0.1 is a "dead zone" so users can read the initial state.
-  // Cards fly and fade completely between 0.1 and 0.4.
-  const cardProgress = Math.max(0, Math.min((scrollYProgress - 0.1) / 0.3, 1));
-  const globalCardOpacity = 1 - Math.max(0, (cardProgress - 0.8) / 0.2);
+  // Phase 1 (Cards Entrance): Delay slightly, then cascade fade them all in from 0.05 to 0.20
+  const fadeProgress = Math.max(0, Math.min((scrollYProgress - 0.05) / 0.15, 1));
+
+  // Phase 1.5 (Cards Zoom): After fading in completely, fly toward the camera (0.20 -> 0.45)
+  const zoomProgress = Math.max(0, Math.min((scrollYProgress - 0.20) / 0.25, 1));
+  const globalCardOpacity = 1 - Math.max(0, (zoomProgress - 0.8) / 0.2);
 
   // Phase 2 (Text Split): Keep the copy visible while the circle opens through the middle.
   const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.22, 1));
@@ -281,22 +282,43 @@ const CTA = () => {
           className="absolute inset-0 z-10 pointer-events-none"
           style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
         >
-          {REVIEWS.map((r) => {
+          {REVIEWS.map((r, index) => {
             // Mobile: Skip non-configured cards
             if (isMobile && !r.showOnMobile) return null;
 
+            // --- STAGGERED ENTRANCE ANIMATION ---
+            // Determine how many cards are actively shown
+            const visibleCount = isMobile ? REVIEWS.filter(c => c.showOnMobile).length : REVIEWS.length;
+            // Map the current card's index to a relative ordering index (for mobile we need to recount)
+            const activeIndex = isMobile 
+              ? REVIEWS.filter(c => c.showOnMobile).findIndex(c => c.id === r.id) 
+              : index;
+
+            // Calculate individualized fade-in progress (0 to 1) based on index
+            // The total fadeProgress (0 to 1) is divided into overlapping segments.
+            const delay = activeIndex * (0.6 / visibleCount); 
+            const individualProgress = Math.max(0, Math.min((fadeProgress - delay) * 2.5, 1));
+            
+            // Fade-in opacity and slide-up distance based on individual progress
+            const entranceOpacity = individualProgress;
+            const slideUpY = (1 - individualProgress) * 30; // Starts 30px down, slides to 0px
+
+            // --- Z-AXIS ZOOM ANIMATION ---
             // Halve the Z travel distance on mobile to prevent extreme out-of-bounds scaling
-            const baseZTranslate = (cardProgress * 3000) / r.zDepth;
+            // (Z-axis zoom only starts ticking up on zoomProgress, after fade is complete)
+            const baseZTranslate = (zoomProgress * 3000) / r.zDepth;
             const zTranslate = isMobile ? baseZTranslate * 0.5 : baseZTranslate;
 
+            // --- EXISTING FADE-OUT LOGIC ---
             let localOpacity = 1;
             const fadeThreshold = isMobile ? 350 : 700;
             if (zTranslate > fadeThreshold) {
               localOpacity = Math.max(0, 1 - (zTranslate - fadeThreshold) / (isMobile ? 150 : 200));
             }
 
-            const finalOpacity = Math.min(localOpacity, globalCardOpacity);
-            
+            // The final opacity combines the entrance fade, the depth fade-out, and the global scene fade-out.
+            const finalOpacity = Math.min(entranceOpacity, localOpacity, globalCardOpacity);
+
             // Apply mobile-specific positioning and scale down sizes to fit narrow viewports
             const currentPos = isMobile && r.mobilePos ? r.mobilePos : r.pos;
             const mobileScale = isMobile ? ' scale(0.65)' : '';
@@ -308,7 +330,7 @@ const CTA = () => {
                 style={{
                   ...currentPos,
                   width: r.width,
-                  transform: `translateZ(${zTranslate}px) rotate(${r.rotate})${mobileScale}`,
+                  transform: `translateZ(${zTranslate}px) translateY(${slideUpY}px) rotate(${r.rotate})${mobileScale}`,
                   opacity: finalOpacity,
                   willChange: 'transform, opacity'
                 }}
@@ -402,14 +424,14 @@ const CTA = () => {
                 </h2>
 
                 <p className="text-white/60 mono text-xs md:text-base max-w-xl mb-12 leading-relaxed">
-                  // Join 180+ Campus students trading daily. <br />
-                  // Upload latency: &lt; 30 seconds. Zero fees. Instant liquidity.
+                  // Join 180+ students network. <br />
+                  // Upload latency: &lt; 30 seconds.   <br /> // Zero fees. Instant liquidity.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                   <button className="btn-brutal flex items-center justify-center gap-3 text-sm md:text-base">
                     <UploadIcon />
-                    <span>Initialize Upload</span>
+                    <span>List a product</span>
                   </button>
                   <button className="btn-brutal btn-outline flex items-center justify-center gap-3 text-sm md:text-base">
                     <span>View Guidelines</span>
