@@ -535,7 +535,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {isLogin ? 'LOGGING IN...' : (ocrProgress > 0 ? `SCANNING... ${ocrProgress}%` : 'PREPARING IMAGE...')}
+          {isLogin ? 'LOGGING IN...' : 'VERIFYING IDENTITY...'}
         </span>
       );
     }
@@ -549,7 +549,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     if (verificationStatus === 'failed') {
       return (
         <span className="flex items-center gap-2 text-red-500 font-bold mono text-xs uppercase">
-          <Icons.AlertCircle size={16} /> VERIFICATION FAILED. CHECK LOGS & RETRY
+          <Icons.AlertCircle size={16} /> VERIFICATION FAILED. PLEASE TRY AGAIN.
         </span>
       );
     }
@@ -632,7 +632,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-2 h-2 bg-[#00D9FF] animate-pulse"></div>
                 <span className="text-[10px] font-bold mono text-[#00D9FF] uppercase tracking-wider">
-                  {isProcessing ? `AI SCANNING ${ocrProgress}%` : 'SECURED VERIFICATION ACTIVE'}
+                  {isProcessing ? 'AI SCANNING...' : 'SECURED VERIFICATION ACTIVE'}
                 </span>
               </div>
               <p className="text-[10px] text-white/50 mono leading-relaxed">
@@ -768,7 +768,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
                       className="w-full input-brutal px-4 py-3 text-sm"
                       placeholder="0801CS211234"
                     />
-                    <p className="text-[9px] text-white/40 mono mt-1">Case insensitive • AI will handle OCR errors</p>
+                    <p className="text-[9px] text-white/40 mono mt-1">Case insensitive</p>
                   </div>
                 </div>
 
@@ -839,51 +839,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               {getButtonContent()}
             </NeonButton>
 
-            {/* Debug Panel */}
-            {(extractedText || debugInfo.length > 0) && (
-              <div className="debug-panel p-4 space-y-2 mt-6">
-                <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#00D9FF]/20">
-                  <span className="font-bold uppercase text-[#00D9FF]">// AI VERIFICATION LOG</span>
-                  <button
-                    onClick={() => {
-                      setExtractedText('');
-                      setDebugInfo([]);
-                    }}
-                    className="text-[8px] text-white/40 hover:text-white uppercase tracking-wider px-2 py-1 border border-white/10 hover:border-white/30 transition-colors"
-                  >
-                    CLEAR
-                  </button>
-                </div>
 
-                <div className="space-y-0.5 max-h-48 overflow-y-auto pr-2">
-                  {debugInfo.map((info, i) => (
-                    <div
-                      key={i}
-                      className={`text-[9px] leading-relaxed ${info.includes('✅') || info.includes('✓') ? 'text-green-400' :
-                        info.includes('❌') || info.includes('✗') ? 'text-red-400' :
-                          info.includes('⚠️') ? 'text-yellow-400' :
-                            info.includes('═══') ? 'text-[#00D9FF] font-bold' :
-                              info.includes('🎉') ? 'text-green-300 font-bold' :
-                                'text-white/70'
-                        }`}
-                    >
-                      {info}
-                    </div>
-                  ))}
-                </div>
-
-                {extractedText && (
-                  <details className="mt-4 pt-3 border-t border-[#00D9FF]/20">
-                    <summary className="cursor-pointer text-[10px] text-[#00D9FF] hover:text-white uppercase tracking-wider">
-                      📄 View Raw OCR Text ({extractedText.length} characters)
-                    </summary>
-                    <div className="mt-3 p-3 bg-black/50 border border-white/5 text-[9px] text-white/60 max-h-32 overflow-y-auto break-all leading-relaxed font-mono">
-                      {extractedText}
-                    </div>
-                  </details>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
