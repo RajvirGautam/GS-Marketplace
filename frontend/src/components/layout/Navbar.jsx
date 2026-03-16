@@ -23,27 +23,27 @@ const LogOutIcon = () => (
 // -------------------
 
 // ── Mobile nav card icons ────────────────────────────────────────────────────
-const MarketplaceIcon = ({ className="w-5 h-5" }) => (
+const MarketplaceIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <path d="M16 10a4 4 0 0 1-8 0"/>
+    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <path d="M16 10a4 4 0 0 1-8 0" />
   </svg>
 );
-const DashboardIcon = ({ className="w-5 h-5" }) => (
+const DashboardIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7" rx="1"/>
-    <rect x="14" y="3" width="7" height="7" rx="1"/>
-    <rect x="14" y="14" width="7" height="7" rx="1"/>
-    <rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
   </svg>
 );
-const MessagesIcon = ({ className="w-5 h-5" }) => (
+const MessagesIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
-const UserIcon = ({ className="w-5 h-5" }) => (
+const UserIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
     <circle cx="12" cy="7" r="4"></circle>
@@ -134,7 +134,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       const topStart = isMobile ? 52 : 65;
       const topEnd = isMobile ? 12 : 0; // Stick to top on desktop
       const currentTop = topStart - ((topStart - topEnd) * ratio);
-      
+
       const currentRadius = isMobile ? 24 : 65 - (65 * ratio); // Go square on desktop
 
       const el = navRef.current;
@@ -185,18 +185,22 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         hover:md:bg-white/20 dark:hover:md:bg-white/5
       `}
     >
+      {/* Background gradient for the logo */}
+      <div
+        className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_right,rgba(59,130,246,1)_0%,rgba(59,130,246,0)_20%)]"
+        style={{ borderRadius: 'inherit' }}
+      ></div>
+
       {/* ===== DESKTOP MENU ===== */}
-      <div className="hidden md:flex items-center justify-between w-full">
+      <div className="relative z-10 hidden md:flex items-center justify-between w-full">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 flex-shrink-0 pl-2">
-          <div className="w-9 h-9 bg-gradient-to-tr from-cyan-600 to-violet-700 dark:from-cyan-500 dark:to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white shrink-0">
-            <Icons.Zap />
-          </div>
-          <span className="text-xl font-black text-indigo-950 dark:text-white tracking-tighter whitespace-nowrap">
-            Campus<span className="text-cyan-700 dark:text-cyan-400">.MKT</span>
+          <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773618022/CampusMarketplace-removebg-preview_kutxp3.png" alt="Campus Marketplace" className="h-8 w-auto" />
+          <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '0.9rem' }}>
+            Campus <br /> Marketplace
           </span>
         </Link>
-        
+
         {/* Desktop Links & Actions */}
         <div className="flex items-center gap-6 text-sm font-bold text-indigo-900 dark:text-slate-200">
           <Link to="/marketplace" className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm">Marketplace</Link>
@@ -237,11 +241,16 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       </div>
 
       {/* ===== MOBILE MENU (DOCK STYLE) ===== */}
-      <div className="flex md:hidden items-center justify-evenly w-full px-1">
-        <MobileNavItem path="/" active={location.pathname === '/'} icon={<Icons.Zap className={`w-[20px] h-[20px] ${location.pathname==='/' ? 'text-white' : ''}`} />} label="Home" />
+      <div className="relative z-10 flex md:hidden items-center justify-evenly w-full px-1">
+        <Link to="/" className="shrink-0 flex-1 flex flex-col justify-center items-center p-1 gap-1">
+          <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773618022/CampusMarketplace-removebg-preview_kutxp3.png" alt="Campus Marketplace" className="h-5 w-auto brightness-0 invert" />
+          <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none text-center" style={{ fontSize: '0.45rem' }}>
+            Campus<br/>Marketplace
+          </span>
+        </Link>
         <MobileNavItem path="/marketplace" active={location.pathname === '/marketplace'} icon={<MarketplaceIcon className="w-[20px] h-[20px]" />} label="Market" />
         <MobileNavItem path="/dashboard" active={location.pathname === '/dashboard'} icon={<DashboardIcon className="w-[20px] h-[20px]" />} label="Dash" />
-        
+
         {user ? (
           <>
             <MobileNavItem path="/chat" active={location.pathname === '/chat'} icon={<MessagesIcon className="w-[20px] h-[20px]" />} label="Chat" badge={unreadCount} />
