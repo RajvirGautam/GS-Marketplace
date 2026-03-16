@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import AddProductModal from './AddProductModal'
 import ConnectIdModal from '../auth/ConnectIdModal'
+import Grainient from '../ui/Grainient'
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -193,10 +194,11 @@ const Hero = () => {
         
         .hero-enhanced {
           font-family: 'Manrope', sans-serif;
-          background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 50%, #000000 100%);
+          background: #050508; /* Dark base so WebGL canvas has a fallback */
           position: relative;
-          overflow: visible; /* Prevent any chance of the 4th card clipping */
+          overflow-x: clip; /* Fixes horizontal overflow without breaking position: sticky */
           min-height: 100vh;
+          isolation: isolate; /* Create a local stacking context */
         }
 
         .mono { font-family: 'Space Mono', monospace; }
@@ -233,7 +235,7 @@ const Hero = () => {
         /* Grid overlay */
         .grid-overlay {
           position: absolute;
-          inset: 0;
+          inset: -50px; /* Provide bleed for the 50px translation animation */
           background-image: 
             linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
@@ -295,17 +297,47 @@ const Hero = () => {
         .anim-fade-right { animation: fadeInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
         .anim-scale { animation: scaleIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-        /* Solid Opaque Stacked Cards */
+        /* Glassmorphic Feature Cards */
         .glass-card {
-          background: #0d0d12;
-          background-color: #0d0d12 !important;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        .glass-card::before {
+          content: '';
+          position: absolute;
+          inset: 1px;
+          border-radius: inherit;
+          background: linear-gradient(135deg, var(--accent-color), rgba(255, 255, 255, 0.14));
+          opacity: 0.1;
+          transition: opacity 0.4s ease;
+          z-index: -2;
+        }
+
+        .glass-card::after {
+          content: '';
+          position: absolute;
+          inset: -40%;
+          background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+          transform: translateX(-120%) rotate(10deg);
+          transition: transform 0.7s ease;
+          z-index: -1;
+        }
+
+        .glass-card:hover::after {
+          transform: translateX(120%) rotate(10deg);
+        }
+
         .glass-card:hover {
-          background: #15151e;
-          border-color: rgba(255, 255, 255, 0.2);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+          border-color: rgba(255, 255, 255, 0.3);
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
@@ -327,32 +359,34 @@ const Hero = () => {
           will-change: transform;
         }
 
-        /* Product card redesign - Kept Opaque Dark */
+        /* Product card redesign - Premium Opaque */
         .product-showcase {
           position: relative;
           border-radius: 24px;
           overflow: hidden;
-          background-color: #0d0d12 !important;
-          border: 1px solid rgba(255,255,255,0.05);
+          isolation: isolate;
+          background: #12121a;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .product-showcase::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at top right, var(--accent-color), transparent 60%);
+          opacity: 0.06;
+          pointer-events: none;
+          z-index: 0;
         }
 
         .product-showcase::before {
           content: '';
           position: absolute;
           inset: 0;
-          border-radius: 24px;
-          padding: 1px;
-          background: linear-gradient(135deg, var(--accent-color) 0%, transparent 40%, transparent 60%, var(--accent-color) 100%);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          opacity: 0.4;
-          transition: opacity 0.4s;
+          background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
           pointer-events: none;
-        }
-
-        .product-showcase:hover::before {
-          opacity: 0.8;
+          z-index: 0;
         }
 
         .product-image-wrapper {
@@ -629,27 +663,25 @@ const Hero = () => {
           animation: marquee 25s linear infinite;
         }
 
-        /* Mobile hero card - full bleed style */
+        /* Mobile hero card - Premium Opaque */
         .mobile-product-card {
           position: relative;
           border-radius: 20px;
           overflow: hidden;
-          background: #0d0d12;
-          border: 1px solid rgba(255,255,255,0.05);
+          isolation: isolate;
+          background: #12121a;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.08);
         }
 
-        .mobile-product-card::before {
+        .mobile-product-card::after {
           content: '';
           position: absolute;
           inset: 0;
-          border-radius: 20px;
-          padding: 1px;
-          background: linear-gradient(135deg, var(--accent-color) 0%, transparent 50%, var(--accent-color) 100%);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          opacity: 0.3;
+          background: radial-gradient(circle at top right, var(--accent-color), transparent 60%);
+          opacity: 0.06;
           pointer-events: none;
+          z-index: 0;
         }
 
         .mobile-product-image {
@@ -719,9 +751,23 @@ const Hero = () => {
           gap: 10px;
           padding: 14px 16px;
           border-radius: 16px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(10px);
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-feature-pill::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, var(--accent-color), transparent);
+          opacity: 0.1;
+          z-index: -1;
         }
 
         /* Swipe indicator animation */
@@ -788,7 +834,32 @@ const Hero = () => {
         </div>
       </div>
 
-      <section ref={containerRef} className="hero-enhanced relative pt-[160px] sm:pt-32 pb-4 sm:pb-24 px-4 sm:px-6 lg:px-8">
+      <section ref={containerRef} className="hero-enhanced relative pt-[160px] sm:pt-32 lg:pt-28 pb-4 sm:pb-24 px-4 sm:px-6 lg:px-8">
+
+        <Grainient
+          color1="#61177c"
+          color2="#5227FF"
+          color3="#000000"
+          timeSpeed={1.3}
+          colorBalance={0.07}
+          warpStrength={1}
+          warpFrequency={5}
+          warpSpeed={2}
+          warpAmplitude={50}
+          blendAngle={0}
+          blendSoftness={0.05}
+          rotationAmount={500}
+          noiseScale={2}
+          grainAmount={0.1}
+          grainScale={2}
+          grainAnimated={false}
+          contrast={1.5}
+          gamma={1}
+          saturation={0.2}
+          centerX={0}
+          centerY={0}
+          zoom={0.9}
+        />
 
         {/* Animated gradient mesh */}
         <div
@@ -822,7 +893,7 @@ const Hero = () => {
           />
         ))}
 
-        <div className="max-w-[1800px] mx-auto relative z-10 pt-16 sm:pt-20">
+        <div className="max-w-[1800px] mx-auto relative z-10 pt-16 sm:pt-20 lg:pt-14">
 
           {/* ============================= */}
           {/* ===== MOBILE LAYOUT ONLY ===== */}
@@ -831,9 +902,9 @@ const Hero = () => {
 
             {/* Mobile AI Banner */}
             {showBanner && (
-              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-white/5 backdrop-blur-2xl border border-white/15 rounded-xl p-2 pr-3 shadow-[0_12px_40px_rgba(0,0,0,0.6)] max-w-[320px] mx-auto mb-4">
+              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-[#0d0d14] border border-white/10 rounded-xl p-2 pr-3 shadow-[0_12px_40px_rgba(0,0,0,0.6)] max-w-[320px] mx-auto mb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.1))` }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.05))` }}>
                     {/* Rocket Icon matching screenshot */}
                     <svg className="w-4 h-4 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5M15.4 12L20.2 7.2A3.38 3.38 0 0 0 15.4 2.4L10.6 7.2c-3.1 1.05-6.6 2.43-6.6 2.43l5.17 5.17c0 0 1.38-3.5 2.43-6.6M12 15.4L7.2 20.2c-1.2 1.2-3.1.2-3.4-1.3l5.5-5.5M10 10l4 4" />
@@ -908,7 +979,7 @@ const Hero = () => {
                   let zIndex = 10;
                   let opacity = 0;
                   let transform = 'scale(0.85) translateY(40px)';
-                  
+
                   if (state === 'active') {
                     zIndex = 30;
                     opacity = 1;
@@ -936,16 +1007,16 @@ const Hero = () => {
                         '--accent-color': card.accent
                       }}
                     >
-                      <div className="mobile-product-card shadow-[0_15px_35px_rgba(0,0,0,0.8)] bg-[#0d0d12] border border-white/8 relative overflow-hidden">
+                      <div className="mobile-product-card relative overflow-hidden">
                         {/* Progress Bar at the top of the card */}
                         {state === 'active' && (
                           <div className="absolute top-0 left-0 right-0 h-1.5 z-50 bg-white/10">
-                            <div 
+                            <div
                               key={`progress-${mobileCardIndex}`}
                               className="h-full w-0"
-                              style={{ 
+                              style={{
                                 animation: `progressFill ${MOBILE_CARD_CHANGE_INTERVAL}ms linear forwards`,
-                                background: card.accent 
+                                background: card.accent
                               }}
                             />
                           </div>
@@ -1042,20 +1113,20 @@ const Hero = () => {
             </div>
 
             {/* Mobile feature pills - 2x2 grid */}
-            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3">
-              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
+            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3" style={{ '--accent-color': currentCard.accent }}>
+              <div className="mobile-feature-pill">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
                 >
-                  <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.Cpu className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-xs">Verified Only</div>
-                  <div className="text-[9px] text-white/50">ID verified</div>
+                  <div className="text-white font-bold text-xs">AI Smart Listing</div>
+                  <div className="text-[9px] text-white/50">Instant Gear Specs</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
+              <div className="mobile-feature-pill">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
@@ -1063,32 +1134,32 @@ const Hero = () => {
                   <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-xs">Instant Meet</div>
-                  <div className="text-[9px] text-white/50">On-campus</div>
+                  <div className="text-white font-bold text-xs">Campus Exchange</div>
+                  <div className="text-[9px] text-white/50">Zero Shipping</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
+              <div className="mobile-feature-pill">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
                 >
-                  <Icons.CheckCircle className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.DrafterTools className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-xs">Zero Fees</div>
-                  <div className="text-[9px] text-white/50">100% yours</div>
+                  <div className="text-white font-bold text-xs">Engineering Hub</div>
+                  <div className="text-[9px] text-white/50">Built for Engineers</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill bg-white/8 border border-white/20 shadow-md">
+              <div className="mobile-feature-pill">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: `${currentCard.accent}25` }}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: currentCard.accent }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <Icons.ShieldCheck className="w-4 h-4" style={{ color: currentCard.accent }} />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-xs">Campus Only</div>
-                  <div className="text-[9px] text-white/50">Exclusive</div>
+                  <div className="text-white font-bold text-xs">Verified Only</div>
+                  <div className="text-[9px] text-white/50">ID Verified Students</div>
                 </div>
               </div>
             </div>
@@ -1247,9 +1318,9 @@ const Hero = () => {
                           e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                         }}
                       >
-                        <div className="product-showcase shadow-[0_25px_60px_rgba(0,0,0,1)] bg-[#0d0d12] border border-white/10" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
+                        <div className="product-showcase">
                           {/* Top strip - seller info */}
-                          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
+                          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/20">
                             <div className="flex items-center gap-3">
                               <div
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm"
@@ -1299,10 +1370,12 @@ const Hero = () => {
                             </div>
 
                             {/* Details side */}
-                            <div className="p-8 lg:p-10 flex flex-col justify-between relative bg-[#0d0d12]" style={{ background: '#0d0d12', backgroundColor: '#0d0d12' }}>
+                            <div className="p-8 lg:p-10 flex flex-col justify-between relative">
                               <div
-                                className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
-                                style={{ background: card.accent }}
+                                className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
+                                style={{
+                                  background: `radial-gradient(circle at top right, ${card.accent}, transparent 70%)`
+                                }}
                               />
                               <div className="relative z-10">
                                 <h3 className="text-2xl lg:text-4xl font-black text-white leading-tight mb-4">
@@ -1360,54 +1433,54 @@ const Hero = () => {
               <div className="space-y-8">
 
                 {/* Feature 1 */}
-                <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4 mb-4">
+                <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
+                  <div className="flex items-start gap-4">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >
-                      <Icons.CheckCircle className="w-6 h-6" />
+                      <Icons.Cpu className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-white text-lg mb-2">Verified Only</h4>
+                      <h4 className="font-bold text-white text-lg mb-1">AI Smart Listing</h4>
                       <p className="text-sm text-white/70 leading-relaxed">
-                        Student authentication. Every user verified through college credentials.
+                        Snap a photo and get your gear listed instantly. Our AI handles categories and specs for you.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Feature 2 */}
-                <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4 mb-4">
+                <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
+                  <div className="flex items-start gap-4">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >
                       <Icons.Zap className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-white text-lg mb-2">Instant Meet</h4>
+                      <h4 className="font-bold text-white text-lg mb-1">Campus Exchange</h4>
                       <p className="text-sm text-white/70 leading-relaxed">
-                        Face-to-face handover on campus. No shipping delays or costs.
+                        Meet sellers at the library or workshops for instant handovers. No shipping, zero wait.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Feature 3 */}
-                <div className="glass-card p-6 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4 mb-4">
+                <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
+                  <div className="flex items-start gap-4">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
                     >
-                      <Icons.CheckCircle className="w-6 h-6" />
+                      <Icons.DrafterTools className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-white text-lg mb-2">Zero Fees</h4>
+                      <h4 className="font-bold text-white text-lg mb-1">Engineering Hub</h4>
                       <p className="text-sm text-white/70 leading-relaxed">
-                        Direct peer-to-peer. Keep 100% of your sale price.
+                        Find Arduinos, Drafters, and Lab Kits at student prices. Built for engineers, by engineers.
                       </p>
                     </div>
                   </div>
