@@ -286,38 +286,30 @@ const CTA = () => {
             // Mobile: Skip non-configured cards
             if (isMobile && !r.showOnMobile) return null;
 
-            // --- STAGGERED ENTRANCE ANIMATION ---
-            // Determine how many cards are actively shown
-            const visibleCount = isMobile ? REVIEWS.filter(c => c.showOnMobile).length : REVIEWS.length;
-            // Map the current card's index to a relative ordering index (for mobile we need to recount)
-            const activeIndex = isMobile 
-              ? REVIEWS.filter(c => c.showOnMobile).findIndex(c => c.id === r.id) 
-              : index;
-
-            // Calculate individualized fade-in progress (0 to 1) based on index
-            // The total fadeProgress (0 to 1) is divided into overlapping segments.
-            const delay = activeIndex * (0.6 / visibleCount); 
-            const individualProgress = Math.max(0, Math.min((fadeProgress - delay) * 2.5, 1));
+            // --- STAGGERED ENTRANCE AND ZOOM ---
+            // Each group of 2 cards takes about 20% of the scroll window to zoom past.
+            // We stagger the groups by 4% of the scroll window.
+            const groupSize = 2;
+            const staggerStep = 0.04;
+            const individualDuration = 0.22;
+            const groupIndex = Math.floor(index / groupSize);
+            const startWindow = 0.12 + (groupIndex * staggerStep);
             
-            // Fade-in opacity and slide-up distance based on individual progress
-            const entranceOpacity = individualProgress;
-            const slideUpY = (1 - individualProgress) * 30; // Starts 30px down, slides to 0px
+            const cardZoomProgress = Math.max(0, Math.min((scrollYProgress - startWindow) / individualDuration, 1));
 
-            // --- Z-AXIS ZOOM ANIMATION ---
-            // Halve the Z travel distance on mobile to prevent extreme out-of-bounds scaling
-            // (Z-axis zoom only starts ticking up on zoomProgress, after fade is complete)
-            const baseZTranslate = (zoomProgress * 3000) / r.zDepth;
+            // Z-axis movement: cards fly toward camera
+            const baseZTranslate = (cardZoomProgress * 3200) / r.zDepth;
             const zTranslate = isMobile ? baseZTranslate * 0.5 : baseZTranslate;
 
-            // --- EXISTING FADE-OUT LOGIC ---
-            let localOpacity = 1;
+            // --- FADE-OUT LOGIC BASED ON DEPTH ---
+            let depthOpacity = 1;
             const fadeThreshold = isMobile ? 350 : 700;
             if (zTranslate > fadeThreshold) {
-              localOpacity = Math.max(0, 1 - (zTranslate - fadeThreshold) / (isMobile ? 150 : 200));
+              depthOpacity = Math.max(0, 1 - (zTranslate - fadeThreshold) / (isMobile ? 150 : 200));
             }
 
-            // The final opacity combines the entrance fade, the depth fade-out, and the global scene fade-out.
-            const finalOpacity = Math.min(entranceOpacity, localOpacity, globalCardOpacity);
+            // Final opacity: depth fade out * global scene capture (cards are visible from the start)
+            const finalOpacity = Math.min(depthOpacity, globalCardOpacity);
 
             // Apply mobile-specific positioning and scale down sizes to fit narrow viewports
             const currentPos = isMobile && r.mobilePos ? r.mobilePos : r.pos;
@@ -330,7 +322,7 @@ const CTA = () => {
                 style={{
                   ...currentPos,
                   width: r.width,
-                  transform: `translateZ(${zTranslate}px) translateY(${slideUpY}px) rotate(${r.rotate})${mobileScale}`,
+                  transform: `translateZ(${zTranslate}px) rotate(${r.rotate})${mobileScale}`,
                   opacity: finalOpacity,
                   willChange: 'transform, opacity'
                 }}
