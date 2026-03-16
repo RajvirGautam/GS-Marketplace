@@ -29,10 +29,12 @@ const wrapper = (content) => `
               
               <!-- Header / Logo -->
               <div style="text-align: center; margin-bottom: 32px;">
-                <div style="display: inline-block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 24px;">
-                  <span style="font-size: 20px; font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, #00D9FF, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #00D9FF;">
-                    GS MARKETPLACE
-                  </span>
+                <div style="display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px;">
+                  <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" style="height: 48px; width: auto; display: block;" />
+                  <!-- Using fallback sans-serif fonts in emails is safer, but we can match the weight/case -->
+                  <div style="font-family: 'Montserrat', 'Inter', -apple-system, sans-serif; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: -1px; line-height: 1.0; font-size: 16px; margin-top: 4px; text-align: left;">
+                    CAMPUS<br/>MARKETPLACE
+                  </div>
                 </div>
               </div>
 

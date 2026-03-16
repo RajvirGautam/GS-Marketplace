@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import Tesseract from 'tesseract.js';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Icons from '../../assets/icons/Icons';
 import NeonButton from '../ui/NeonButton';
@@ -603,14 +604,14 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
 
-          <div className="relative z-10 flex items-center md:items-start md:flex-col gap-4 md:gap-0">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#00D9FF] flex-shrink-0 flex items-center justify-center md:mb-6 border border-white/10 text-black shadow-[4px_4px_0px_white]">
-              <Icons.ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
-            </div>
+          <div className="relative z-10 flex items-center md:items-start md:flex-col gap-4 md:gap-0 mt-4 md:mt-0">
+            <Link to="/" className="flex items-center gap-3 cursor-pointer mb-6" onClick={onClose}>
+              <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" className="h-10 md:h-12 w-auto" />
+              <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '1.2rem' }}>
+                Campus<br/>Marketplace
+              </span>
+            </Link>
             <div>
-              <h2 className="text-xl md:text-2xl font-black uppercase leading-tight md:mb-2 tracking-tighter">
-                Secure Campus<br className="hidden md:block" /> Network
-              </h2>
               <p className="hidden md:block text-white/60 text-xs font-medium mono border-l-2 border-[#00D9FF] pl-3 mt-1">
                 // Join the exclusive marketplace for Campus. <br />
                 // Verified students only. No middlemen.

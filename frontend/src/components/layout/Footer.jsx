@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 // --- Internal Icons ---
 const ZapIcon = () => (
@@ -78,16 +79,16 @@ const Footer = () => {
           {/* BRAND COLUMN */}
           <div className="col-span-2 md:col-span-5 space-y-6 sm:space-y-8">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#00D9FF] flex items-center justify-center text-black shrink-0">
-                <ZapIcon />
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter leading-none">
-                  Campus<span className="text-[#00D9FF]">.MARKET</span>
-                </h2>
-                <div className="mono text-[10px] text-white/40 tracking-widest">
-                  SYS_VER_2.4.0 // STABLE
+              <Link to="/">
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" className="h-10 w-auto" />
+                  <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '1.2rem' }}>
+                    Campus<br/>Marketplace
+                  </span>
                 </div>
+              </Link>
+              <div className="mono text-[10px] text-white/40 tracking-widest mt-2 ml-2">
+                SYS_VER_2.4.0 // STABLE
               </div>
             </div>
 
