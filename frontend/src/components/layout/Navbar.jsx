@@ -77,6 +77,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const navRef = useRef(null)
   const dropdownRef = useRef(null)
+  const mobileDropdownRef = useRef(null)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -98,7 +99,10 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   // Click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const isOutsideDesktop = dropdownRef.current && !dropdownRef.current.contains(event.target);
+      const isOutsideMobile = mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target);
+      
+      if (isOutsideDesktop && isOutsideMobile) {
         setShowUserMenu(false);
       }
     };
@@ -244,9 +248,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
       <div className="relative z-10 flex md:hidden items-center justify-evenly w-full px-1">
         <Link to="/" className="shrink-0 flex-1 flex flex-col justify-center items-center p-1 gap-1">
           <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773618022/CampusMarketplace-removebg-preview_kutxp3.png" alt="Campus Marketplace" className="h-5 w-auto brightness-0 invert" />
-          <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none text-center" style={{ fontSize: '0.45rem' }}>
-            Campus<br/>Marketplace
-          </span>
+
         </Link>
         <MobileNavItem path="/marketplace" active={location.pathname === '/marketplace'} icon={<MarketplaceIcon className="w-[20px] h-[20px]" />} label="Market" />
         <MobileNavItem path="/dashboard" active={location.pathname === '/dashboard'} icon={<DashboardIcon className="w-[20px] h-[20px]" />} label="Dash" />
@@ -258,7 +260,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
               <NotificationBell dark={true} />
             </div>
             {/* Minimal Avatar for Logout toggle */}
-            <div className="relative pr-1 flex-1 flex justify-center">
+            <div ref={mobileDropdownRef} className="relative pr-1 flex-1 flex justify-center">
               <button onClick={() => setShowUserMenu(!showUserMenu)} className="p-0.5 rounded-full border border-transparent dark:border-white/10 shadow-sm active:scale-95 transition-transform" title="Account">
                 <Avatar src={user?.profilePicture} name={user?.fullName || user?.name || user?.email} size={30} style={{ fontSize: '12px', fontWeight: 'bold' }} />
               </button>
