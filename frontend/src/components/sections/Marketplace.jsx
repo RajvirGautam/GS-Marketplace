@@ -657,13 +657,18 @@ const Marketplace = () => {
         {/* ====== DESKTOP VIEW ====== */}
         <div className="hidden md:block">
           {/* Header */}
-          <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10">
-            <div className="max-w-[1800px] mx-auto px-6 py-4">
+          <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 overflow-hidden relative">
+            {/* Background gradient for the logo */}
+            <div className="absolute inset-y-0 left-0 pointer-events-none bg-[linear-gradient(to_right,rgba(59,130,246,1)_0%,rgba(59,130,246,0)_100%)] w-[14%] z-0" style={{ opacity: 0.8 }}></div>
+
+            <div className="max-w-[1800px] mx-auto px-6 py-4 relative z-10">
               <div className="flex items-center gap-6">
                 <Link to="/">
-                  <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">S</div>
-                    <span>Campus<span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">.MKT</span></span>
+                  <div className="hidden md:flex items-center gap-2 cursor-pointer">
+                    <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773618022/CampusMarketplace-removebg-preview_kutxp3.png" alt="Campus Marketplace" className="h-8 w-auto" />
+                    <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '0.9rem' }}>
+                      Campus<br />Marketplace
+                    </span>
                   </div>
                 </Link>
 
@@ -1268,20 +1273,28 @@ const Marketplace = () => {
                 )}
               </div>
             ) : (
-              <Link to="/login" className="w-8 h-8 rounded-full bg-white/10 flex flex-col items-center justify-center text-white/50">
+              <button onClick={() => setIsLoginOpen(true)} className="w-8 h-8 rounded-full bg-white/10 flex flex-col items-center justify-center text-white/50 hover:bg-white/20 transition-colors">
                 <span className="text-xs">👤</span>
-              </Link>
+              </button>
             )}
 
             <Link to="/">
-              <div className="text-lg font-bold text-white flex items-center gap-1.5 cursor-pointer">
-                <div className="w-6 h-6 rounded bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-black text-[10px]">S</div>
-                <span>Campus<span className="text-[#00D9FF]">.MKT</span></span>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773618022/CampusMarketplace-removebg-preview_kutxp3.png" alt="Campus Marketplace" className="h-6 w-auto" />
+                <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-0.5" style={{ fontSize: '0.65rem' }}>
+                  Campus<br />Marketplace
+                </span>
               </div>
             </Link>
 
             <div className="flex items-center gap-3">
-              {user && <NotificationBell dark={true} />}
+              {user ? (
+                <NotificationBell dark={true} />
+              ) : (
+                <button onClick={() => setIsLoginOpen(true)} className="btn-glass px-3 py-1 text-xs" style={{ padding: '6px 12px' }}>
+                  Login
+                </button>
+              )}
             </div>
           </div>
 
@@ -1414,18 +1427,18 @@ const Marketplace = () => {
             <GridIcon />
             <span className="text-[9px] font-bold mt-1">Home</span>
           </button>
-          <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+          <button onClick={() => user ? navigate('/dashboard') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
             <span className="text-[9px] font-bold mt-1">Dashboard</span>
           </button>
 
-          <button onClick={() => setIsAddProductOpen(true)} className="relative -top-5 flex flex-col items-center group">
+          <button onClick={() => user ? setIsAddProductOpen(true) : setIsLoginOpen(true)} className="relative -top-5 flex flex-col items-center group">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-2xl shadow-lg shadow-cyan-900/40 group-active:scale-95 transition-transform">
               +
             </div>
           </button>
 
-          <Link to="/chat" className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
+          <button onClick={() => user ? navigate('/chat') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
             <span className="text-[9px] font-bold mt-1">Messages</span>
             {unreadCount > 0 && (
@@ -1433,8 +1446,8 @@ const Marketplace = () => {
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
-          </Link>
-          <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+          </button>
+          <button onClick={() => user ? setShowUserMenu(!showUserMenu) : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
             <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
               <Avatar
                 src={user?.profilePicture}

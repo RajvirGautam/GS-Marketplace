@@ -1718,9 +1718,11 @@ const UserDashboard = () => {
         <div className="noise-overlay" />
         {/* Mobile Top Bar */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: '#fff' }}>S</div>
-            <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>Campus<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" style={{ height: '24px', width: 'auto' }} />
+            <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '0.6rem' }}>
+              Campus<br />Marketplace
+            </span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <NotificationBell dark={true} />
@@ -1982,18 +1984,11 @@ const UserDashboard = () => {
 
 
                 {/* Logo / Branding */}
-                <Link to="/">
-                  <div className="text-xl font-bold text-white hidden md:flex items-center gap-2 cursor-pointer">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white font-extrabold text-sm">
-                      S
-                    </div>
-                    <span>
-                      Campus
-                      <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
-                        .MKT
-                      </span>
-                    </span>
-                  </div>
+                <Link to="/" className="flex items-center gap-2 cursor-pointer">
+                  <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" className="h-8 w-auto hidden md:block" />
+                  <span className="hidden md:block font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '0.9rem' }}>
+                    Campus<br/>Marketplace
+                  </span>
                 </Link>
 
               </div>
@@ -2034,9 +2029,11 @@ const UserDashboard = () => {
 
             <div className="sidebar-spacer" />
             <div className="sidebar-brand">
-              <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 11, color: '#fff' }}>S</div>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>Campus<span style={{ background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>.MKT</span></span>
+              <Link to="/" className="flex items-center gap-2 cursor-pointer" style={{ textDecoration: 'none' }}>
+                <img src="https://res.cloudinary.com/rajvirgautam/image/upload/v1773613904/CampusMarketplace_gemesr.png" alt="Campus Marketplace" style={{ height: '22px', width: 'auto' }} />
+                <span className="font-['Montserrat'] font-black text-white uppercase tracking-tighter leading-none mt-1" style={{ fontSize: '0.65rem' }}>
+                  Campus<br/>Marketplace
+                </span>
               </Link>
             </div>
           </aside>
