@@ -24,6 +24,7 @@ body {
 html, body {
   transition: background-color var(--transition-speed) var(--transition-curve), 
               color var(--transition-speed) var(--transition-curve);
+  overflow-x: hidden;
 }
 
 /* Global Animations - Add this to your main CSS file (index.css or tailwind.css) */
