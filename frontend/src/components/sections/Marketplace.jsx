@@ -1501,7 +1501,7 @@ const Marketplace = () => {
               </button>
             </div>
 
-            <div className="space-y-6 max-h-[50vh] overflow-y-auto custom-scrollbar">
+            <div className="space-y-6 max-h-[65vh] overflow-y-auto custom-scrollbar">
               {/* Categories */}
               <div>
                 <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
@@ -1522,6 +1522,33 @@ const Marketplace = () => {
                 </div>
               </div>
 
+              {/* Price Range */}
+              <div className="pt-6 border-t border-white/10">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
+                  <span className="text-[11px] text-[#00D9FF] font-mono">₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}</span>
+                </div>
+                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
+                  <div style={{ position: 'absolute', width: '100%', height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 10 }} />
+                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / 10000) * 100}%`, right: `${100 - (draftPriceRange[1] / 10000) * 100}%`, height: 4, background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', borderRadius: 10 }} />
+                  <input type="range" min="0" max="10000" step="100" value={draftPriceRange[0]}
+                    onChange={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setDraftPriceRange([val, draftPriceRange[1]]); }}
+                    onTouchEnd={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
+                    onMouseUp={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
+                    style={{ position: 'absolute', width: '100%', zIndex: 4 }} />
+                  <input type="range" min="0" max="10000" step="100" value={draftPriceRange[1]}
+                    onChange={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setDraftPriceRange([draftPriceRange[0], val]); }}
+                    onTouchEnd={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
+                    onMouseUp={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
+                    style={{ position: 'absolute', width: '100%', zIndex: 3 }} />
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-[9px] text-white/25 mono">₹0</span>
+                  <span className="text-[9px] text-white/25 mono">₹5k</span>
+                  <span className="text-[9px] text-white/25 mono">₹10k</span>
+                </div>
+              </div>
+
               {/* Condition */}
               <div className="pt-6 border-t border-white/10">
                 <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
@@ -1536,6 +1563,66 @@ const Marketplace = () => {
                       />
                       <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
                         {cond}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Seller's Branch */}
+              <div className="pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
+                <div className="space-y-3">
+                  {branches.map(branch => (
+                    <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedBranches.includes(branch.slug)}
+                        onChange={() => toggleBranch(branch.slug)}
+                      />
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {branch.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Seller's Year */}
+              <div className="pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
+                <div className="space-y-3">
+                  {years.map(year => (
+                    <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedYears.includes(year.value)}
+                        onChange={() => toggleYear(year.value)}
+                      />
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {year.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Item Type */}
+              <div className="pt-6 border-t border-white/10">
+                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
+                <div className="space-y-3">
+                  {itemTypes.map(type => (
+                    <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="modern-checkbox"
+                        checked={selectedTypes.includes(type.value)}
+                        onChange={() => toggleType(type.value)}
+                      />
+                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                        {type.label}
                       </span>
                     </label>
                   ))}
