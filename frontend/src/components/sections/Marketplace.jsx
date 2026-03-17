@@ -657,7 +657,7 @@ const Marketplace = () => {
         {/* ====== DESKTOP VIEW ====== */}
         <div className="hidden md:block">
           {/* Header */}
-          <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 overflow-hidden relative">
+          <header className="sticky top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-xl border-b border-white/10 relative">
             {/* Background gradient for the logo */}
             <div className="absolute inset-y-0 left-0 pointer-events-none bg-[linear-gradient(to_right,rgba(59,130,246,1)_0%,rgba(59,130,246,0)_100%)] w-[14%] z-0" style={{ opacity: 0.8 }}></div>
 
