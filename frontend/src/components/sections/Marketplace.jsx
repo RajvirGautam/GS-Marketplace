@@ -1447,7 +1447,7 @@ const Marketplace = () => {
               </span>
             )}
           </button>
-          <button onClick={() => user ? setShowUserMenu(!showUserMenu) : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+          <button onClick={() => user ? navigate('/dashboard?tab=My Account') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
             <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
               <Avatar
                 src={user?.profilePicture}
