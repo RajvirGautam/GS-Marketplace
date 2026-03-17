@@ -232,8 +232,10 @@ const ProductPage = () => {
     setIsNavigating(true);
 
     const transitionData = sessionStorage.getItem('productTransition');
+    const isMobile = window.innerWidth < 768;
 
-    if (transitionData && mainImgRef.current && product) {
+    // Skip animation on mobile to prevent image flash glitch
+    if (!isMobile && transitionData && mainImgRef.current && product) {
       try {
         const { rect, scrollY } = JSON.parse(transitionData);
         const mainImg = mainImgRef.current;
@@ -294,11 +296,16 @@ const ProductPage = () => {
         }
       }
     } else {
+      // Mobile: skip animation, navigate directly with scroll restore
+      const scrollY = transitionData ? (() => { try { return JSON.parse(transitionData).scrollY; } catch { return 0; } })() : 0;
       sessionStorage.removeItem('productTransition');
       if (location.state?.fromChat) {
         navigate(`/chat/${location.state.conversationId}`);
       } else {
-        navigate('/marketplace');
+        navigate('/marketplace', {
+          state: { scrollY: scrollY },
+          replace: false
+        });
       }
     }
   };
@@ -437,7 +444,7 @@ const ProductPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white/50 font-mono">
-        Loading Neural Data...
+        Loading product details...
       </div>
     );
   }
