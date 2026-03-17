@@ -843,6 +843,11 @@ const Chat = () => {
         navigate(`/chat/${convId}`, { replace: true });
         setMessages([]);
         setIsScrolledToBottom(false);
+        // On mobile: push a history entry so browser "back" goes to inbox (/chat) not the previous app route
+        if (window.innerWidth <= 768) {
+            window.history.pushState({ chatInbox: true }, '', '/chat');
+            window.history.pushState({ chatConv: convId }, '', `/chat/${convId}`);
+        }
     };
 
     return (
@@ -868,6 +873,8 @@ const Chat = () => {
           background-image:
             repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px),
             repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.06) 59px, rgba(255,255,255,0.06) 60px);
+          will-change: transform;
+          transform: translateZ(0);
         }
 
         @keyframes skeletonPulse {
