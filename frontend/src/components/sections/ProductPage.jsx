@@ -277,12 +277,10 @@ const ProductPage = () => {
 
             // Navigate back with scroll position
             if (location.state?.fromChat) {
-              navigate(`/chat/${location.state.conversationId}`);
+              navigate(-1);
             } else {
-              navigate('/marketplace', {
-                state: { scrollY: scrollY },
-                replace: false
-              });
+              sessionStorage.setItem('marketplaceScrollY', scrollY);
+              window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
             }
           }, 600);
         });
@@ -290,9 +288,9 @@ const ProductPage = () => {
         console.error('Back transition error:', error);
         sessionStorage.removeItem('productTransition');
         if (location.state?.fromChat) {
-          navigate(`/chat/${location.state.conversationId}`);
+          navigate(-1);
         } else {
-          navigate('/marketplace');
+          window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
         }
       }
     } else {
@@ -300,12 +298,10 @@ const ProductPage = () => {
       const scrollY = transitionData ? (() => { try { return JSON.parse(transitionData).scrollY; } catch { return 0; } })() : 0;
       sessionStorage.removeItem('productTransition');
       if (location.state?.fromChat) {
-        navigate(`/chat/${location.state.conversationId}`);
+        navigate(-1);
       } else {
-        navigate('/marketplace', {
-          state: { scrollY: scrollY },
-          replace: false
-        });
+        sessionStorage.setItem('marketplaceScrollY', scrollY);
+        window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
       }
     }
   };

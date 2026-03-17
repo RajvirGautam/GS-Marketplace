@@ -362,10 +362,12 @@ const Marketplace = () => {
 
   // Restore scroll position
   useEffect(() => {
-    if (location.state?.scrollY) {
+    const savedScrollY = location.state?.scrollY || sessionStorage.getItem('marketplaceScrollY');
+    if (savedScrollY) {
       setTimeout(() => {
-        window.scrollTo(0, location.state.scrollY);
-        window.history.replaceState({}, document.title);
+        window.scrollTo(0, Number(savedScrollY));
+        sessionStorage.removeItem('marketplaceScrollY');
+        if (location.state?.scrollY) window.history.replaceState({}, document.title);
       }, 100);
     }
   }, [location]);
