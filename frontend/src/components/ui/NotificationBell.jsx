@@ -182,16 +182,22 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
             </div>
 
             {/* Text Content */}
-            <div style={{ flex: 1, minWidth: 0, paddingRight: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{
-                        fontSize: 11, fontWeight: 700, letterSpacing: '0.5px',
-                        textTransform: 'uppercase', color: cfg.accentColor,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-                    }}>
-                        {isStacked ? `${notif.count} Messages` : cfg.label}
-                    </span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: 8 }}>
+            <div style={{ flex: 1, minWidth: 0, paddingRight: 28, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2, gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                        <span style={{
+                            fontSize: 11, fontWeight: 700, letterSpacing: '0.5px',
+                            textTransform: 'uppercase', color: cfg.accentColor,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                        }}>
+                            {isStacked ? `${notif.count} Messages` : cfg.label}
+                        </span>
+                        {/* Unread dot — inline with label, not absolute */}
+                        {!notif.isRead && (
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: cfg.accentColor, flexShrink: 0, boxShadow: `0 0 6px ${cfg.accentColor}` }} />
+                        )}
+                    </div>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>
                         {timeAgo(notif.createdAt)}
                     </span>
                 </div>
@@ -204,16 +210,6 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
                     </div>
                 )}
             </div>
-
-            {/* Unread Indicator Dot */}
-            {!notif.isRead && (
-                <div style={{
-                    position: 'absolute', top: 18, right: 34,
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: cfg.accentColor,
-                    boxShadow: `0 0 8px ${cfg.accentColor}`,
-                }} />
-            )}
 
             {/* Action Buttons */}
             <button
@@ -267,48 +263,39 @@ const NotificationBell = ({ dark = true }) => {
     const innerContent = (
         <>
             {/* Header */}
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '16px 20px 14px',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
-                flexShrink: 0,
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
                         Notifications
                     </span>
                     {unreadNotifCount > 0 && (
-                        <span style={{
-                            fontSize: 10, fontWeight: 800, padding: '2px 8px',
-                            borderRadius: 12, background: 'rgba(99,102,241,0.15)',
-                            color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)',
-                        }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 12, background: 'rgba(99,102,241,0.15)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)' }}>
                             {unreadNotifCount} New
                         </span>
                     )}
                 </div>
-                {unreadNotifCount > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {unreadNotifCount > 0 && (
+                        <button
+                            onClick={markAllNotifsRead}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#818cf8', fontWeight: 600, padding: '4px 8px', transition: 'all 0.2s', borderRadius: 6 }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#a5b4fc'; e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = '#818cf8'; e.currentTarget.style.background = 'none'; }}
+                        >
+                            Mark all read
+                        </button>
+                    )}
+                    {/* Close button — visible on mobile, subtle on desktop */}
                     <button
-                        onClick={markAllNotifsRead}
-                        style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            fontSize: 11, color: '#818cf8', fontWeight: 600,
-                            padding: '4px 8px', transition: 'all 0.2s',
-                            borderRadius: 6,
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.color = '#a5b4fc';
-                            e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.color = '#818cf8';
-                            e.currentTarget.style.background = 'none';
-                        }}
+                        onClick={() => setOpen(false)}
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0 }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                        title="Close"
                     >
-                        Mark all read
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     </button>
-                )}
+                </div>
             </div>
 
             {/* List */}
