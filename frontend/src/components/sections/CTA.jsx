@@ -29,12 +29,12 @@ const REVIEWS = [
   { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '1.5deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '20%', right: '4%' } },
 
   // Left 2 (Lower-Top, sits just above text)
-  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '33%', left: '4%' } },
+  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '26%', left: '4%' } },
 
   // --- [ EXCLUSION ZONE: CENTER 38% IS RESERVED FOR TYPOGRAPHY ] ---
 
   // Right 2 (Upper-Bottom, sits just below text)
-  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '33%', right: '4%' } },
+  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '26%', right: '4%' } },
 
   // Left 3 (Mid-Bottom)
   { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '1.5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '20%', left: '4%' } },

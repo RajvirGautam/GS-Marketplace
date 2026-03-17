@@ -902,7 +902,7 @@ const Hero = () => {
 
             {/* Mobile AI Banner */}
             {showBanner && (
-              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 bg-[#0d0d14] border border-white/10 rounded-xl p-2 pr-3 shadow-[0_12px_40px_rgba(0,0,0,0.6)] max-w-[320px] mx-auto mb-4">
+              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 rounded-xl p-2 pr-3 max-w-[320px] mx-auto mb-4" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.22)', boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 1px rgba(255,255,255,0.04)' }}>
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.05))` }}>
                     {/* Rocket Icon matching screenshot */}
@@ -1239,7 +1239,7 @@ const Hero = () => {
 
                 {/* AI Listing Banner */}
                 {showBanner && (
-                  <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pr-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] scale-90 origin-left">
+                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06))', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.24)', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)' }}>
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 ml-1" style={{ background: 'rgba(0,217,255,0.1)' }}>
                         <svg className="w-3.5 h-3.5 text-[#00D9FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
