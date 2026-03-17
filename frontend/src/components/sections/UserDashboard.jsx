@@ -1692,6 +1692,12 @@ const UserDashboard = () => {
           border-color: rgba(239,68,68,0.3); 
         }
 
+        /* Essential for ensuring mobile buttons get events instead of overlapping parents */
+        .listing-action-btn {
+          position: relative;
+          z-index: 10;
+        }
+
         /* ═══════════ MODAL - SOFT BRUTALISM ═══════════ */
         .modal-backdrop {
           position: fixed;
