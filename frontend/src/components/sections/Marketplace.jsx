@@ -175,6 +175,22 @@ const Marketplace = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Auto-open AddProductModal when navigating from CTA "List a product"
+  useEffect(() => {
+    const fromState = location.state?.openList;
+    const fromStorage = sessionStorage.getItem('marketplace_openList');
+    if (fromState || fromStorage) {
+      sessionStorage.removeItem('marketplace_openList');
+      if (user) {
+        setIsAddProductOpen(true);
+      } else {
+        setIsLoginOpen(true);
+      }
+      // Clear the location state flag
+      window.history.replaceState({}, '', window.location.pathname + window.location.search);
+    }
+  }, []);
+
   // Fetch products from backend
   useEffect(() => {
     fetchProducts();

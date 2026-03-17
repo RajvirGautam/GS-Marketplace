@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import ConnectIdModal from '../auth/ConnectIdModal';
 
 const UploadIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter">
@@ -56,6 +59,25 @@ const CTA = () => {
   const containerRef = useRef(null);
   const [scrollYProgress, setScrollYProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [showConnect, setShowConnect] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleListProduct = () => {
+    if (user) {
+      navigate('/marketplace', { state: { openList: true } });
+    } else {
+      // Store intent in sessionStorage before modal opens (ConnectIdModal does a hard redirect on success)
+      sessionStorage.setItem('marketplace_openList', '1');
+      setShowConnect(true);
+    }
+  };
+
+  // This fires if user is already logged in by the time they close the modal without hard redirect
+  const handleConnectClose = () => {
+    setShowConnect(false);
+    // If auth loaded user during modal session (edge case), still navigate
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -421,7 +443,7 @@ const CTA = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <button className="btn-brutal flex items-center justify-center gap-3 text-sm md:text-base">
+                  <button onClick={handleListProduct} className="btn-brutal flex items-center justify-center gap-3 text-sm md:text-base">
                     <UploadIcon />
                     <span>List a product</span>
                   </button>
@@ -436,6 +458,10 @@ const CTA = () => {
         </div>
 
       </div>
+      <ConnectIdModal
+        isOpen={showConnect}
+        onClose={handleConnectClose}
+      />
     </section>
   );
 };
