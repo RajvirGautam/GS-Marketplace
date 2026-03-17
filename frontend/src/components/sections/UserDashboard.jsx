@@ -1754,6 +1754,11 @@ const UserDashboard = () => {
             </span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button title="Marketplace" onClick={() => navigate('/marketplace')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, cursor: 'pointer', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}>
+               <SearchIcon />
+               <span style={{ fontSize: 11, fontWeight: 700 }}>Market</span>
+            </button>
+            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)' }} />
             <NotificationBell dark={true} />
             <button onClick={() => setSidebarActive('My Account')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
               <Avatar
@@ -1966,7 +1971,6 @@ const UserDashboard = () => {
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(8,8,8,0.96)', backdropFilter: 'blur(24px)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'stretch', paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {[
             { label: 'Overview', icon: <HomeIcon />, tab: 'Overview' },
-            { label: 'Market', icon: <SearchIcon />, action: () => navigate('/marketplace') },
             { label: 'Listings', icon: <PackageIcon />, tab: 'My Listings' },
             { label: 'Deals', icon: <TrendingIcon />, tab: 'My Deals' },
             { label: 'Saved', icon: <HeartFilledIcon />, tab: 'Saved Products' },
