@@ -340,8 +340,7 @@ const ProductPage = () => {
       setLoading(true);
       try {
         console.log('🔍 Fetching product ID:', id);
-        const response = await fetch(`http://localhost:5001/api/products/${id}`);
-        const data = await response.json();
+        const data = await productAPI.getById(id);
 
         console.log('✅ Product response:', data);
 
