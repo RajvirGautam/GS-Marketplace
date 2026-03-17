@@ -1754,9 +1754,8 @@ const UserDashboard = () => {
             </span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button title="Marketplace" onClick={() => navigate('/marketplace')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, cursor: 'pointer', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}>
-               <SearchIcon />
-               <span style={{ fontSize: 11, fontWeight: 700 }}>Market</span>
+            <button title="Marketplace" onClick={() => navigate('/marketplace')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20, cursor: 'pointer', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}>
+               <span style={{ fontSize: 11, fontWeight: 700 }}>Marketplace</span>
             </button>
             <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)' }} />
             <NotificationBell dark={true} />
@@ -1851,7 +1850,7 @@ const UserDashboard = () => {
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleViewProduct(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
                         <button onClick={() => handleEditProduct(listing)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>Edit</button>
-                        <button onClick={() => handleDelete(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Del</button>
+                        <button onClick={() => handleDelete(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Delete</button>
                       </div>
                     </div>
                   </div>
@@ -1924,10 +1923,15 @@ const UserDashboard = () => {
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {confirmed.map(deal => (
-                      <div key={deal._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                        <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#00D9FF', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
-                        <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }}>SOLD</span>
+                      <div key={deal._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 10 }}>
+                          <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#00D9FF', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
+                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)', flexShrink: 0 }}>SOLD</span>
+                        </div>
+                        <button onClick={() => setDealHistoryOpen(deal)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                          📋 View Timeline
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -2967,7 +2971,7 @@ const UserDashboard = () => {
                               <div className="listing-actions">
                                 <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
                                 <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
-                                <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DEL</button>
+                                <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
                                 {listing.status === 'active' && (
                                   <button className="listing-action-btn" onClick={() => handleMarkAsSold(listing._id)}>SOLD</button>
                                 )}
