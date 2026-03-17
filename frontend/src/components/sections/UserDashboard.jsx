@@ -3087,8 +3087,10 @@ const UserDashboard = () => {
               </div >
             </div >
           </div >
+        </div >
+      </div >
 
-          {/* DELETE MODAL */}
+      {/* DELETE MODAL */}
           {
             showDeleteModal && (
               <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)}>
@@ -3137,8 +3139,6 @@ const UserDashboard = () => {
             onClose={(success) => { setIsEditProductOpen(false); setEditingProduct(null); if (success) fetchDashboardData(); }}
             product={editingProduct}
           />
-        </div >
-      </div >
     </>
   );
 };
