@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../../context/SocketContext';
 
@@ -262,6 +264,91 @@ const NotificationBell = ({ dark = true }) => {
         ? 'btn-glass' // Marketplace / Dashboard glass button style
         : 'p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-slate-200 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors';
 
+    const innerContent = (
+        <>
+            {/* Header */}
+            <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '16px 20px 14px',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
+                flexShrink: 0,
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
+                        Notifications
+                    </span>
+                    {unreadNotifCount > 0 && (
+                        <span style={{
+                            fontSize: 10, fontWeight: 800, padding: '2px 8px',
+                            borderRadius: 12, background: 'rgba(99,102,241,0.15)',
+                            color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)',
+                        }}>
+                            {unreadNotifCount} New
+                        </span>
+                    )}
+                </div>
+                {unreadNotifCount > 0 && (
+                    <button
+                        onClick={markAllNotifsRead}
+                        style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            fontSize: 11, color: '#818cf8', fontWeight: 600,
+                            padding: '4px 8px', transition: 'all 0.2s',
+                            borderRadius: 6,
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.color = '#a5b4fc';
+                            e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.color = '#818cf8';
+                            e.currentTarget.style.background = 'none';
+                        }}
+                    >
+                        Mark all read
+                    </button>
+                )}
+            </div>
+
+            {/* List */}
+            <div className="notif-scroll" style={{ overflowY: 'auto', flex: 1, overscrollBehavior: 'contain' }}>
+                {notifications.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.6 }}>🔔</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: 'rgba(255,255,255,0.5)' }}>You're all caught up!</div>
+                        <div style={{ fontSize: 12 }}>New offers, deals, and messages will appear here.</div>
+                    </div>
+                ) : (
+                    groupNotifications(notifications).map(n => (
+                        <NotifCard
+                            key={n.stackedIds ? n.stackedIds[0] : n._id}
+                            notif={n}
+                            onRead={markNotifRead}
+                            onDelete={deleteNotif}
+                            onClose={() => setOpen(false)}
+                        />
+                    ))
+                )}
+            </div>
+
+            {/* Footer */}
+            {notifications.length > 0 && (
+                <div style={{
+                    padding: '12px 16px',
+                    borderTop: '1px solid rgba(255,255,255,0.04)',
+                    textAlign: 'center',
+                    flexShrink: 0,
+                    background: '#0a0a10',
+                }}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 0.5 }}>
+                        Notifications auto-clear after 30 days
+                    </span>
+                </div>
+            )}
+        </>
+    );
+
     return (
         <div ref={ref} style={{ position: 'relative' }}>
             {/* Bell Button */}
@@ -291,103 +378,45 @@ const NotificationBell = ({ dark = true }) => {
             {/* Dropdown Panel */}
             {open && (
                 <>
-                {/* Mobile Overlay */}
-                <div 
-                    className="fixed inset-0 z-[9998] sm:hidden"
-                    style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)', animation: 'fadeIn 0.2s' }}
-                    onClick={() => setOpen(false)}
-                />
-
-                <div 
-                    className="notif-panel fixed sm:absolute z-[9999] flex flex-col inset-x-0 bottom-0 sm:inset-auto sm:right-0 sm:top-[calc(100%+8px)] w-full sm:w-[380px] max-h-[85vh] sm:max-h-[480px] rounded-t-[20px] sm:rounded-2xl"
-                    style={{
-                        background: '#0c0c14',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        boxShadow: '0 -10px 40px rgba(0,0,0,0.5), 0 24px 80px rgba(0,0,0,0.8)',
-                        overflow: 'hidden',
-                    }}
-                >
-                    {/* Header */}
-                    <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '16px 20px 14px',
-                        borderBottom: '1px solid rgba(255,255,255,0.06)',
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
-                        flexShrink: 0,
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
-                                Notifications
-                            </span>
-                            {unreadNotifCount > 0 && (
-                                <span style={{
-                                    fontSize: 10, fontWeight: 800, padding: '2px 8px',
-                                    borderRadius: 12, background: 'rgba(99,102,241,0.15)',
-                                    color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)',
-                                }}>
-                                    {unreadNotifCount} New
-                                </span>
-                            )}
+                    {/* Desktop Panel */}
+                    <div className="hidden sm:block">
+                        <div 
+                            className="notif-panel absolute z-[9999] flex flex-col right-0 top-[calc(100%+8px)] w-[380px] max-h-[480px] rounded-2xl"
+                            style={{
+                                background: '#0c0c14',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                boxShadow: '0 -10px 40px rgba(0,0,0,0.5), 0 24px 80px rgba(0,0,0,0.8)',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {innerContent}
                         </div>
-                        {unreadNotifCount > 0 && (
-                            <button
-                                onClick={markAllNotifsRead}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    fontSize: 11, color: '#818cf8', fontWeight: 600,
-                                    padding: '4px 8px', transition: 'all 0.2s',
-                                    borderRadius: 6,
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.color = '#a5b4fc';
-                                    e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.color = '#818cf8';
-                                    e.currentTarget.style.background = 'none';
-                                }}
-                            >
-                                Mark all read
-                            </button>
-                        )}
                     </div>
 
-                    {/* List */}
-                    <div className="notif-scroll" style={{ overflowY: 'auto', flex: 1, overscrollBehavior: 'contain' }}>
-                        {notifications.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(255,255,255,0.3)' }}>
-                                <div style={{ fontSize: 36, marginBottom: 12, opacity: 0.6 }}>🔔</div>
-                                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: 'rgba(255,255,255,0.5)' }}>You're all caught up!</div>
-                                <div style={{ fontSize: 12 }}>New offers, deals, and messages will appear here.</div>
-                            </div>
-                        ) : (
-                            groupNotifications(notifications).map(n => (
-                                <NotifCard
-                                    key={n.stackedIds ? n.stackedIds[0] : n._id}
-                                    notif={n}
-                                    onRead={markNotifRead}
-                                    onDelete={deleteNotif}
-                                    onClose={() => setOpen(false)}
+                    {/* Mobile Portal */}
+                    <div className="sm:hidden">
+                        {createPortal(
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-[9998]"
+                                    style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)', animation: 'fadeIn 0.2s' }}
+                                    onClick={() => setOpen(false)}
                                 />
-                            ))
+                                <div 
+                                    className="notif-panel fixed z-[9999] flex flex-col inset-x-0 bottom-0 w-full max-h-[85vh] rounded-t-[20px]"
+                                    style={{
+                                        background: '#0c0c14',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        boxShadow: '0 -10px 40px rgba(0,0,0,0.5), 0 24px 80px rgba(0,0,0,0.8)',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    {innerContent}
+                                </div>
+                            </>,
+                            document.body
                         )}
                     </div>
-
-                    {/* Footer */}
-                    {notifications.length > 0 && (
-                        <div style={{
-                            padding: '12px 16px',
-                            borderTop: '1px solid rgba(255,255,255,0.04)',
-                            textAlign: 'center',
-                            flexShrink: 0,
-                            background: '#0a0a10',
-                        }}>
-                            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 0.5 }}>
-                                Notifications auto-clear after 30 days
-                            </span>
-                        </div>
-                    )}
-                </div>
                 </>
             )}
 
