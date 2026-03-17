@@ -659,6 +659,8 @@ const UserDashboard = () => {
     } else if (tab === 'deals') {
       setSidebarActive('My Deals');
       setDealsSubTab('deals');
+    } else if (tab) {
+      setSidebarActive(tab);
     }
     // Clear the param from the URL so navigating back works cleanly
     if (tab) navigate(location.pathname, { replace: true });
