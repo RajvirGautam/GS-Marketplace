@@ -697,7 +697,7 @@ const Chat = () => {
 
     // ── Sync URL param ──
     useEffect(() => {
-        if (conversationId) setActiveConvId(conversationId);
+        setActiveConvId(conversationId || null);
     }, [conversationId]);
 
     // ── Scroll to bottom (only when near bottom or explicitly triggered) ──
@@ -707,7 +707,7 @@ const Chat = () => {
 
         if (!isScrolledToBottom) {
             if (!msgsLoading || messages.length > 0) {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+                area.scrollTop = area.scrollHeight;
                 setIsScrolledToBottom(true);
             }
             return;
@@ -715,13 +715,13 @@ const Chat = () => {
 
         if (shouldScrollRef.current) {
             // Explicit jump (conversation switch or message sent by us)
-            messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+            area.scrollTop = area.scrollHeight;
             shouldScrollRef.current = false;
         } else {
             // Poll update: only scroll if already near the bottom
             const distFromBottom = area.scrollHeight - area.scrollTop - area.clientHeight;
             if (distFromBottom < 150) {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                area.scrollTo({ top: area.scrollHeight, behavior: 'smooth' });
             }
         }
     }, [messages, isScrolledToBottom, msgsLoading]);
