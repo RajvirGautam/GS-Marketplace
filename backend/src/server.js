@@ -20,6 +20,17 @@ import './config/cloudinary.js';
 
 dotenv.config();
 
+// ─── Crash diagnostics ────────────────────────────────────────────────────────
+process.on('uncaughtException', (err) => {
+  console.error('💥 UNCAUGHT EXCEPTION:', err.message, err.stack);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('💥 UNHANDLED REJECTION:', reason);
+  process.exit(1);
+});
+// ──────────────────────────────────────────────────────────────────────────────
+
 const app = express();
 const httpServer = createServer(app);
 
