@@ -571,7 +571,30 @@ const Chat = () => {
     const navigate = useNavigate();
     const { conversationId } = useParams();
     const { user } = useAuth();
-    const { socket, markConversationRead } = useSocket();
+    // Socket Context
+    const {
+        socket, unreadCount, markConversationRead,
+        toasts, dismissToast
+    } = useSocket();
+
+    // ── Fixes for scroll, sidebar reset & hw back nav ─────────────────────────
+    useEffect(() => {
+        window.scrollTo(0, 0); // Open chat page unscrolled
+
+        const handlePopState = (e) => {
+            // Hardware back on mobile -> if in inbox goes to marketplace
+            if (!activeConvId && window.innerWidth <= 768) {
+                navigate('/marketplace');
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [activeConvId, navigate]);
+
+    // Clear mobile sidebar when changing/exiting convs
+    useEffect(() => {
+        setShowMobileSidebar(false);
+    }, [activeConvId]);
 
     const [conversations, setConversations] = useState([]);
     const [activeConvId, setActiveConvId] = useState(conversationId || null);
@@ -1081,7 +1104,7 @@ const Chat = () => {
           .mobile-only { display: flex; }
         }
         @media (max-width: 768px) {
-          .chat-root { height: 100vh; height: 100dvh; }
+          .chat-root { position: fixed; top: 0; left: 0; right: 0; bottom: 0; height: 100dvh; z-index: 100; }
           .chat-body { padding: 0; gap: 0; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
           .conv-list, .chat-thread, .product-sidebar { 
              width: 100%; border-radius: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -1438,7 +1461,7 @@ const Chat = () => {
                                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 999 }} onClick={() => setShowMobileSidebar(false)} />
                             )}
                             <div className={`product-sidebar ${showMobileSidebar ? 'mobile-open' : ''}`}>
-                                <div className="mobile-sidebar-close" onClick={() => setShowMobileSidebar(false)}>
+                                <div style={{ display: window.innerWidth <= 1024 ? 'flex' : 'none', justifyContent: 'flex-end', paddingBottom: 20, cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }} onClick={() => setShowMobileSidebar(false)}>
                                     <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <XIcon />
                                     </div>
