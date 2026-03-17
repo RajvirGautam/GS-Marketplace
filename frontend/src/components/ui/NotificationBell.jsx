@@ -132,6 +132,7 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
     };
 
     const handleDelete = (e) => {
+        e.preventDefault();
         e.stopPropagation();
         const ids = notif.stackedIds || [notif._id];
         ids.forEach(id => onDelete(id));
@@ -277,7 +278,7 @@ const NotificationBell = ({ dark = true }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {unreadNotifCount > 0 && (
                         <button
-                            onClick={markAllNotifsRead}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAllNotifsRead(); }}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#818cf8', fontWeight: 600, padding: '4px 8px', transition: 'all 0.2s', borderRadius: 6 }}
                             onMouseEnter={e => { e.currentTarget.style.color = '#a5b4fc'; e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = '#818cf8'; e.currentTarget.style.background = 'none'; }}
