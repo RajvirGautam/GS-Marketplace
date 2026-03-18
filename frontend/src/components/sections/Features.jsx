@@ -13,6 +13,84 @@ const BagIcon = () => (
 const SearchIcon = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
 );
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"><polyline points="20 6 9 17 4 12" /></svg>
+);
+
+// --- Per-card Graphics ---
+const ShieldGraphic = ({ color }) => (
+  <div className="mx-7 md:mx-9 mt-5 bg-black/60 border rounded-xl p-4 backdrop-blur-md" style={{ borderColor: `${color}25` }}>
+    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/8">
+      <span className="mono text-[9px] text-white/35 uppercase tracking-widest">Status Check</span>
+      <div className="flex items-center gap-1.5">
+        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: color }} />
+        <span className="mono text-[9px] font-bold" style={{ color }}>ONLINE</span>
+      </div>
+    </div>
+    <div className="space-y-2">
+      <div className="flex justify-between mono text-[10px]">
+        <span className="text-white/40">DOMAIN</span>
+        <span className="text-white/80">sgsits.ac.in</span>
+      </div>
+      <div className="flex justify-between mono text-[10px]">
+        <span className="text-white/40">ENCRYPTION</span>
+        <span className="text-white/80">AES-256</span>
+      </div>
+      <div className="mt-3 flex items-center gap-2 px-2 py-1.5 rounded" style={{ background: `${color}14`, border: `1px solid ${color}30`, color }}>
+        <CheckIcon />
+        <span className="mono text-[9px] font-bold tracking-wider">VERIFIED STUDENT</span>
+      </div>
+    </div>
+  </div>
+);
+
+const ZapGraphic = ({ color }) => (
+  <div className="mx-7 md:mx-9 mt-5 space-y-2">
+    {[{ label: 'Msg Latency', val: '< 40ms', w: '85%' }, { label: 'P2P Link', val: 'Direct', w: '100%' }, { label: 'Uptime', val: '99.8%', w: '92%' }].map(row => (
+      <div key={row.label}>
+        <div className="flex justify-between mono text-[9px] text-white/35 mb-1">
+          <span>{row.label}</span><span style={{ color }}>{row.val}</span>
+        </div>
+        <div className="h-1 w-full rounded-full bg-white/5">
+          <div className="h-1 rounded-full transition-all duration-1000" style={{ width: row.w, background: `linear-gradient(90deg, ${color}80, ${color})` }} />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const BagGraphic = ({ color }) => {
+  const rows = [
+    { label: 'Platform Fee', val: '0%', bold: false },
+    { label: 'Hidden Charges', val: '₹0', bold: false },
+    { label: 'Your Cut', val: '100%', bold: true },
+  ];
+  return (
+    <div className="mx-7 md:mx-9 mt-5 bg-black/60 border rounded-xl p-4 backdrop-blur-md" style={{ borderColor: `${color}25` }}>
+      {rows.map(row => (
+        <div key={row.label} className="flex justify-between mono text-[10px] py-2 border-b border-white/5 last:border-0">
+          <span className="text-white/40">{row.label}</span>
+          <span className={row.bold ? 'font-black' : 'text-white/70'} style={row.bold ? { color } : {}}>{row.val}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TerminalGraphic = ({ color }) => (
+  <div className="mx-7 md:mx-9 mt-5 bg-black/70 border rounded-xl overflow-hidden" style={{ borderColor: `${color}25` }}>
+    <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5" style={{ background: `${color}0a` }}>
+      <div className="w-2 h-2 rounded-full" style={{ background: color }} />
+      <span className="mono text-[9px] text-white/35 tracking-wider">QUERY_TERMINAL_V1</span>
+    </div>
+    <div className="p-3 space-y-1.5 mono text-[10px]">
+      <div className="flex gap-2"><span style={{ color }}>{'>'}</span><span className="text-white/70">search --tag "drafter"</span></div>
+      <div className="text-white/25 pl-4">Searching database...</div>
+      <div className="pl-4 text-white/60">[RESULT] Omega Drafter <span className="text-[#10B981]">[AVAIL]</span></div>
+      <div className="flex gap-2 pt-1"><span style={{ color }}>{'>'}</span><span className="animate-pulse text-white/40">_</span></div>
+    </div>
+  </div>
+);
 
 const FEATURES_DATA = [
   {
@@ -23,6 +101,7 @@ const FEATURES_DATA = [
     desc: "The walled garden. Access is cryptographically restricted to official institute emails (@sgsits.ac.in). No outsiders. Zero spam.",
     techContext: "AES-256 / JWT Auth",
     color: "#00D9FF",
+    graphic: (color) => <ShieldGraphic color={color} />,
   },
   {
     id: 2,
@@ -32,6 +111,7 @@ const FEATURES_DATA = [
     desc: "Negotiate in real-time. Direct peer-to-peer messaging designed for rapid campus meetups.",
     techContext: "WSS / Socket.io",
     color: "#8B5CF6",
+    graphic: (color) => <ZapGraphic color={color} />,
   },
   {
     id: 3,
@@ -41,6 +121,7 @@ const FEATURES_DATA = [
     desc: "Keep 100% of your sale value. We facilitate the handshake; you handle the exchange.",
     techContext: "P2P Settlement",
     color: "#10B981",
+    graphic: (color) => <BagGraphic color={color} />,
   },
   {
     id: 4,
@@ -50,6 +131,7 @@ const FEATURES_DATA = [
     desc: "Don't just scroll. Filter by branch, specific years, condition, or edition. Find exactly what you need in milliseconds.",
     techContext: "Full-Text Indexing",
     color: "#FF6B35",
+    graphic: (color) => <TerminalGraphic color={color} />,
   }
 ];
 
@@ -179,9 +261,13 @@ const Features = () => {
         .mono { font-family: 'Space Mono', monospace; }
 
         .glass-monolith {
-          background: #10101a;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.12);
+          background: rgba(14, 14, 22, 0.55);
+          backdrop-filter: blur(20px) saturate(160%);
+          -webkit-backdrop-filter: blur(20px) saturate(160%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 
+            0 32px 64px -12px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
           border-radius: 32px;
           height: 100%;
           min-height: 500px;
@@ -189,13 +275,29 @@ const Features = () => {
           flex-direction: column;
           position: relative;
           overflow: hidden;
-          transition: border-color 0.4s ease;
-          /* Removed CSS transition for op/tr to lean entirely on hyper-fast direct DOM kinematics */
           will-change: transform, opacity;
         }
 
         .glass-monolith:hover {
-          border-color: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        @keyframes scanline {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100%); }
+        }
+        .card-scanline {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.04), transparent);
+          height: 50%;
+          animation: scanline 5s linear infinite;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s;
+        }
+        .glass-monolith:hover .card-scanline {
+          opacity: 1;
         }
 
         .ambient-glow {
@@ -301,53 +403,71 @@ const Features = () => {
                 className="absolute inset-0 will-change-transform"
                 style={{ transition: 'transform 0.07s cubic-bezier(0.25,0.46,0.45,0.94)' }}
               >
-                <div className="glass-monolith group w-full h-full bg-[#0B0B13]">
+                <div className="glass-monolith group w-full h-full">
+
+                  {/* Gradient leak — colored per card */}
                   <div
-                    className="absolute top-0 left-0 w-full h-1 transition-opacity duration-300 top-accent-strip"
-                    style={{ background: feature.color }}
+                    className="absolute inset-0 transition-opacity duration-500 opacity-50 group-hover:opacity-80 pointer-events-none top-accent-strip"
+                    style={{ background: `linear-gradient(135deg, ${feature.color}22 0%, transparent 60%)` }}
                   />
 
-                  {/* Subtle top gradient */}
-                  <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none" />
+                  {/* Scanline */}
+                  <div className="card-scanline" />
 
-                  <div className="p-8 md:p-10 flex flex-col z-10 w-full h-full relative">
-                    {/* Inner Glow */}
+                  {/* ── UPPER HALF ── */}
+                  <div className="p-7 md:p-9 flex justify-between items-start">
+
+                    {/* Square colored icon box (like reference) */}
                     <div
-                      className="absolute top-12 left-8 w-24 h-24 rounded-full opacity-0 transition-opacity duration-500 blur-[40px] pointer-events-none icon-glow-bg"
-                      style={{ background: feature.color }}
-                    />
-
-                    <div className="flex justify-between items-start mb-8 md:mb-16 relative z-10">
-                      <div
-                        className="w-14 h-14 md:w-16 md:h-16 shrink-0 flex items-center justify-center rounded-[18px] transition-all duration-300 icon-box bg-white/5"
-                        style={{ color: feature.color, border: '1px solid rgba(255,255,255,0.05)' }}
-                      >
-                        <div className="scale-[1.2] md:scale-[1.4] flex items-center justify-center" style={{ filter: `drop-shadow(0 0 12px ${feature.color})` }}>
-                          {feature.icon}
-                        </div>
-                      </div>
-                      <div className="mono text-[10px] md:text-xs text-white/40 uppercase tracking-widest border border-white/5 px-3 py-1.5 bg-black/40 rounded-lg backdrop-blur-md shadow-inner">
-                        MDL_{feature.id.toString().padStart(2, '0')}
+                      className="w-14 h-14 md:w-16 md:h-16 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 icon-box"
+                      style={{
+                        background: feature.color,
+                        color: '#000',
+                        boxShadow: `0 0 24px ${feature.color}55`,
+                      }}
+                    >
+                      <div className="scale-[1.15] flex items-center justify-center">
+                        {feature.icon}
                       </div>
                     </div>
 
+                    {/* Subtitle tag — top right */}
+                    <div
+                      className="mono text-[9px] md:text-[11px] uppercase tracking-widest border px-2.5 py-1 md:px-3 md:py-1.5 backdrop-blur-md font-bold"
+                      style={{ color: feature.color, borderColor: `${feature.color}40` }}
+                    >
+                      {feature.subtitle}
+                    </div>
+                  </div>
+
+                  {/* ── CARD GRAPHIC ── */}
+                  {feature.graphic && feature.graphic(feature.color)}
+
+                  {/* ── DIVIDER ── */}
+                  <div
+                    className="mx-7 md:mx-9 transition-opacity duration-300 top-accent-strip"
+                    style={{ height: '1px', background: `linear-gradient(to right, ${feature.color}60, rgba(255,255,255,0.06), transparent)` }}
+                  />
+
+                  {/* ── LOWER HALF ── */}
+                  <div className="p-7 md:p-9 pt-6 md:pt-7 flex flex-col flex-1">
+                    {/* Inner Glow on icon area */}
+                    <div
+                      className="absolute top-8 left-8 w-20 h-20 rounded-full opacity-0 transition-opacity duration-500 blur-[50px] pointer-events-none icon-glow-bg"
+                      style={{ background: feature.color }}
+                    />
+
                     <div className="mt-auto relative z-10">
-                      <div
-                        className="mono text-[11px] md:text-[13px] uppercase tracking-[0.15em] mb-3 md:mb-4 font-bold"
-                        style={{ color: feature.color }}
-                      >
-                         // {feature.subtitle}
-                      </div>
-                      <h3 className="text-[2rem] md:text-[2.5rem] font-black mb-4 md:mb-6 text-white uppercase tracking-tighter leading-[1.1]">
+                      <h3 className="text-[2rem] md:text-[2.5rem] font-black mb-3 text-white uppercase tracking-tighter leading-[1.1] group-hover:translate-x-0.5 transition-transform duration-300">
                         {feature.title}
                       </h3>
-                      <p className="text-[#a0a0ab] text-[13px] md:text-[15px] leading-[1.7] mono mb-8 font-medium">
+                      <p className="text-white/55 text-[13px] md:text-[15px] leading-[1.75] mono">
                         {feature.desc}
                       </p>
 
-                      <div className="pt-5 md:pt-6 mt-4 md:mt-6 border-t border-white/10 flex justify-between items-center mono text-[9px] md:text-[11px] text-[#60606b] uppercase tracking-wider font-semibold">
-                        <span>Tech Infrastructure</span>
-                        <span className="transition-colors duration-300 tech-context text-right ml-2 font-bold" style={{ color: feature.color }}>
+                      <div className="pt-5 md:pt-7 mt-6 border-t border-white/[0.06] flex justify-between items-center mono text-[9px] md:text-[11px] text-white/30 uppercase tracking-wider font-semibold">
+                        <span>Tech Stack</span>
+                        <span className="transition-colors duration-300 tech-context font-bold" style={{ color: feature.color }}>
                           [{feature.techContext}]
                         </span>
                       </div>

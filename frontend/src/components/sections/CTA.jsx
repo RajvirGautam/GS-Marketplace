@@ -316,7 +316,7 @@ const CTA = () => {
             const individualDuration = 0.22;
             const groupIndex = Math.floor(index / groupSize);
             const startWindow = 0.12 + (groupIndex * staggerStep);
-            
+
             const cardZoomProgress = Math.max(0, Math.min((scrollYProgress - startWindow) / individualDuration, 1));
 
             // Z-axis movement: cards fly toward camera
@@ -340,7 +340,7 @@ const CTA = () => {
             return (
               <div
                 key={r.id}
-                className="absolute bg-[#1a1a24] shadow-[0_4px_28px_rgba(0,0,0,0.5)] p-4 md:p-5 rounded-2xl border border-white/10 flex flex-col gap-3"
+                className="absolute backdrop-blur-[12px] bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.45)] p-5 md:p-6 rounded-[28px] border border-white/10 flex flex-col gap-4 overflow-hidden"
                 style={{
                   ...currentPos,
                   width: r.width,
@@ -349,18 +349,28 @@ const CTA = () => {
                   willChange: 'transform, opacity'
                 }}
               >
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
+                {/* Top highlight glow */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                <div className="flex items-center gap-3.5 mb-1 relative z-10">
+                  <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white/90 shadow-inner">
                     {r.name.charAt(0)}
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-white/90 leading-tight">{r.name}</p>
-                    <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{r.role}</p>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-white/95 leading-tight">{r.name}</p>
+                      <div className="w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" title="Verified" />
+                    </div>
+                    <p className="text-[11px] text-white/40 font-medium uppercase tracking-[0.08em] mt-1">{r.role}</p>
                   </div>
                 </div>
-                <p className="text-[13px] text-white/60 leading-relaxed">
+
+                <p className="text-[14px] text-white/70 leading-[1.6] relative z-10 font-medium italic">
                   "{r.text}"
                 </p>
+
+                {/* Subtle bottom shine */}
+                <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[40%] bg-white/5 blur-[40px] rounded-full pointer-events-none" />
               </div>
             );
           })}
