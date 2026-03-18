@@ -1,13 +1,9 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-// ─── Transporter ─────────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PWD,
-    },
-});
+// ─── Setup SendGrid ──────────────────────────────────────────────────────────
+if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 /**
  * Fire-and-forget email sender.
@@ -16,20 +12,21 @@ const transporter = nodemailer.createTransport({
  * @param {{ to: string, subject: string, html: string }} options
  */
 export async function sendMail({ to, subject, html }) {
-    if (!process.env.MAIL_USER || !process.env.MAIL_PWD) {
-        console.warn('[mailer] MAIL_USER or MAIL_PWD not set — skipping email send.');
+    if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
+        console.warn('[mailer] SENDGRID_API_KEY or SENDGRID_FROM_EMAIL not set — skipping email send.');
         return;
     }
 
     try {
-        const info = await transporter.sendMail({
-            from: `"GS Marketplace" <${process.env.MAIL_USER}>`,
+        const msg = {
             to,
+            from: `"GS Marketplace" <${process.env.SENDGRID_FROM_EMAIL}>`,
             subject,
             html,
-        });
-        console.log(`[mailer] Email sent to ${to} → ${info.messageId}`);
+        };
+        await sgMail.send(msg);
+        console.log(`[mailer] Email sent to ${to} via SendGrid`);
     } catch (err) {
-        console.error(`[mailer] Failed to send email to ${to}:`, err.message);
+        console.error(`[mailer] Failed to send email to ${to}:`, err.response ? err.response.body : err.message);
     }
 }
