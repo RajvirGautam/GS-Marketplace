@@ -141,10 +141,22 @@ router.get('/', async (req, res) => {
     const maxPriceItem = await Product.findOne({ status: 'active' }).sort({ price: -1 }).select('price');
     const globalMaxPrice = maxPriceItem ? maxPriceItem.price : 10000;
 
+    // Build a price histogram over ALL active listings (unfiltered by price) for the area-curve widget
+    const NUM_BUCKETS = 20;
+    const bucketSize = globalMaxPrice / NUM_BUCKETS;
+    const allActivePrices = await Product.find({ status: 'active' }).select('price');
+    const priceHistogram = Array(NUM_BUCKETS).fill(0);
+    allActivePrices.forEach(({ price }) => {
+      if (price == null) return;
+      const idx = Math.min(Math.floor(price / bucketSize), NUM_BUCKETS - 1);
+      priceHistogram[idx]++;
+    });
+
     res.json({
       success: true,
       products,
       globalMaxPrice,
+      priceHistogram,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

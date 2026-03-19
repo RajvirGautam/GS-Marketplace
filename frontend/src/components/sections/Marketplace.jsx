@@ -71,6 +71,96 @@ const ListIcon = () => (
 );
 
 
+// ─── Price Distribution Histogram ───────────────────────────────────────────
+// Renders a smooth bezier area curve above the dual-handle range slider.
+// histogram: number[] — count per price bucket
+// maxPrice, minSelected, maxSelected: for shading the selected region
+const PriceHistogram = ({ histogram, maxPrice, minSelected, maxSelected }) => {
+  if (!histogram || histogram.length === 0) return null;
+
+  const W = 200; // SVG viewBox width
+  const H = 52;  // SVG viewBox height
+  const n = histogram.length;
+  const peak = Math.max(...histogram, 1);
+  const pad = 2; // small side padding so the curve doesn't clip
+
+  // Build evenly-spaced x,y points for each bucket midpoint
+  const pts = histogram.map((v, i) => ({
+    x: pad + ((i + 0.5) / n) * (W - pad * 2),
+    y: H - 4 - ((v / peak) * (H - 8)),
+  }));
+
+  // Add anchor points at both edges so the area closes nicely at baseline
+  const allPts = [
+    { x: pad, y: H - 4 },
+    ...pts,
+    { x: W - pad, y: H - 4 },
+  ];
+
+  // Catmull-Rom → cubic bezier conversion for smooth curves
+  const toCubicBezier = (points) => {
+    if (points.length < 2) return '';
+    let d = `M ${points[0].x},${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const p0 = points[Math.max(i - 2, 0)];
+      const p1 = points[i - 1];
+      const p2 = points[i];
+      const p3 = points[Math.min(i + 1, points.length - 1)];
+      const alpha = 0.5;
+      const cp1x = p1.x + (p2.x - p0.x) * alpha / 3;
+      const cp1y = p1.y + (p2.y - p0.y) * alpha / 3;
+      const cp2x = p2.x - (p3.x - p1.x) * alpha / 3;
+      const cp2y = p2.y - (p3.y - p1.y) * alpha / 3;
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  };
+
+  const linePath = toCubicBezier(allPts);
+  // Close the area back to baseline
+  const areaPath = linePath + ` L ${W - pad},${H - 4} L ${pad},${H - 4} Z`;
+
+  // Map selected range to SVG x coords for clip rect
+  const clipX = pad + (minSelected / maxPrice) * (W - pad * 2);
+  const clipW = ((maxSelected - minSelected) / maxPrice) * (W - pad * 2);
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      style={{ width: '100%', height: H, display: 'block', overflow: 'visible' }}
+    >
+      <defs>
+        {/* gradient for selected (lit) region */}
+        <linearGradient id="histGradSel" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#10B981" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#34D399" stopOpacity="0.85" />
+        </linearGradient>
+
+        {/* clip path for the selected range */}
+        <clipPath id="selClip">
+          <rect x={clipX} y={0} width={clipW} height={H} />
+        </clipPath>
+        {/* clip path for everything outside selected range */}
+        <clipPath id="unselClip">
+          <rect x={pad} y={0} width={clipX - pad} height={H} />
+          <rect x={clipX + clipW} y={0} width={(W - pad) - (clipX + clipW)} height={H} />
+        </clipPath>
+      </defs>
+
+      {/* Unselected region — dimmed */}
+      <path d={areaPath} fill="rgba(255,255,255,0.08)" clipPath="url(#unselClip)" />
+
+      {/* Selected region — lit with gradient */}
+      <path d={areaPath} fill="url(#histGradSel)" clipPath="url(#selClip)" />
+
+      {/* Thin baseline */}
+      <line x1={pad} y1={H - 4} x2={W - pad} y2={H - 4} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+    </svg>
+  );
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 const Marketplace = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -98,6 +188,7 @@ const Marketplace = () => {
   const [maxPriceLimit, setMaxPriceLimit] = useState(10000);
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [draftPriceRange, setDraftPriceRange] = useState([0, 10000]);
+  const [priceHistogram, setPriceHistogram] = useState([]);
 
   // Products state
   const [products, setProducts] = useState([]);
@@ -233,12 +324,12 @@ const Marketplace = () => {
         setPagination(response.pagination);
         if (response.globalMaxPrice && response.globalMaxPrice !== maxPriceLimit) {
           setMaxPriceLimit(response.globalMaxPrice);
-          // If the range was at the old max, update it to the new max
           if (priceRange[1] === maxPriceLimit) {
             setPriceRange([priceRange[0], response.globalMaxPrice]);
             setDraftPriceRange([draftPriceRange[0], response.globalMaxPrice]);
           }
         }
+        if (response.priceHistogram) setPriceHistogram(response.priceHistogram);
         console.log('✅ Loaded', response.products.length, 'products');
       }
     } catch (error) {
@@ -561,10 +652,10 @@ const Marketplace = () => {
           -webkit-appearance: none;
           width: 16px;
           height: 16px;
-          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          background: linear-gradient(135deg, #10B981, #34D399);
           cursor: pointer;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         /* Tags */
@@ -615,20 +706,20 @@ const Marketplace = () => {
           -webkit-appearance: none;
           width: 18px;
           height: 18px;
-          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          background: linear-gradient(135deg, #10B981, #34D399);
           cursor: pointer;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(0,217,255,0.5);
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
           border: 2.5px solid #0A0A0A;
           pointer-events: auto;
         }
         input[type="range"]::-moz-range-thumb {
           width: 18px;
           height: 18px;
-          background: linear-gradient(135deg, #00D9FF, #7C3AED);
+          background: linear-gradient(135deg, #10B981, #34D399);
           cursor: pointer;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(0,217,255,0.5);
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
           border: 2.5px solid #0A0A0A;
           pointer-events: auto;
         }
@@ -909,9 +1000,9 @@ const Marketplace = () => {
                   </div>
                 </div>
 
-                {/* Price Range - Dual Handle */}
+                {/* Price Range - Histogram + Dual Handle */}
                 <div className="mb-8 pt-6 border-t border-white/10">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col items-start gap-1">
                       <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
                       {(draftPriceRange[0] !== 0 || draftPriceRange[1] !== maxPriceLimit) && (
@@ -921,34 +1012,41 @@ const Marketplace = () => {
                             setDraftPriceRange([0, maxPriceLimit]);
                             setCurrentPage(1);
                           }}
-                          className="text-[9px] font-bold text-[#00D9FF] hover:underline mono bg-[#00D9FF]/10 px-2 py-0.5 rounded-sm"
+                          className="text-[9px] font-bold text-[#10B981] hover:underline mono bg-[#10B981]/10 px-2 py-0.5 rounded-sm"
                         >
                           RESET
                         </button>
                       )}
                     </div>
-
-                    <span className="text-[11px] text-[#00D9FF] font-mono mt-0.5">
+                    <span className="text-[11px] text-[#10B981] font-mono mt-0.5">
                       ₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}
                     </span>
                   </div>
 
-                  <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
+                  {/* Histogram area curve */}
+                  <PriceHistogram
+                    histogram={priceHistogram}
+                    maxPrice={maxPriceLimit}
+                    minSelected={draftPriceRange[0]}
+                    maxSelected={draftPriceRange[1]}
+                  />
+
+                  <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
                     {/* Track background */}
                     <div style={{
                       position: 'absolute', width: '100%', height: 4,
                       background: 'rgba(255,255,255,0.1)', borderRadius: 10,
                     }} />
-                    {/* Filled range between handles — follows draft for smooth visual */}
+                    {/* Filled range between handles */}
                     <div style={{
                       position: 'absolute',
                       left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`,
                       right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`,
                       height: 4,
-                      background: 'linear-gradient(90deg, #00D9FF, #7C3AED)',
+                      background: 'linear-gradient(90deg, #10B981, #34D399)',
                       borderRadius: 10,
                     }} />
-                    {/* Min handle — updates draft on drag, commits on release */}
+                    {/* Min handle */}
                     <input
                       type="range" min="0" max={maxPriceLimit} step="100"
                       value={draftPriceRange[0]}
@@ -1535,13 +1633,19 @@ const Marketplace = () => {
 
               {/* Price Range */}
               <div className="pt-6 border-t border-white/10">
-                <div className="flex justify-between items-center mb-3">
+                <div className="flex justify-between items-center mb-2">
                   <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
-                  <span className="text-[11px] text-[#00D9FF] font-mono">₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}</span>
+                  <span className="text-[11px] text-[#10B981] font-mono">₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}</span>
                 </div>
-                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
+                <PriceHistogram
+                  histogram={priceHistogram}
+                  maxPrice={maxPriceLimit}
+                  minSelected={draftPriceRange[0]}
+                  maxSelected={draftPriceRange[1]}
+                />
+                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
                   <div style={{ position: 'absolute', width: '100%', height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 10 }} />
-                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`, right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`, height: 4, background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', borderRadius: 10 }} />
+                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`, right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`, height: 4, background: 'linear-gradient(90deg, #10B981, #34D399)', borderRadius: 10 }} />
                   <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[0]}
                     onChange={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setDraftPriceRange([val, draftPriceRange[1]]); }}
                     onTouchEnd={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
@@ -1555,8 +1659,8 @@ const Marketplace = () => {
                 </div>
                 <div className="flex justify-between mt-2">
                   <span className="text-[9px] text-white/25 mono">₹0</span>
-                  <span className="text-[9px] text-white/25 mono">₹5k</span>
-                  <span className="text-[9px] text-white/25 mono">₹10k</span>
+                  <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.5 / 1000).toFixed(1)}k</span>
+                  <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit / 1000).toFixed(1)}k</span>
                 </div>
               </div>
 
