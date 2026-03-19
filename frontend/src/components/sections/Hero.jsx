@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import Icons from '../../assets/icons/Icons'
 import { useAuth } from '../../context/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
+import { showInfo } from '../../utils/toast'
+import Grainient from '../ui/Grainient'
+
 import AddProductModal from './AddProductModal'
 import ConnectIdModal from '../auth/ConnectIdModal'
-import Grainient from '../ui/Grainient'
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -212,6 +214,22 @@ const Hero = () => {
           animation: meshMove 20s ease-in-out infinite;
         }
 
+        /* Grid overlay */
+        .grid-overlay {
+          position: absolute;
+          inset: -50px; /* Provide bleed for the 50px translation animation */
+          background-image: 
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          background-size: 50px 50px;
+          animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+
         @keyframes meshMove {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(50px, -50px) scale(1.1); }
@@ -232,21 +250,7 @@ const Hero = () => {
           100% { transform: translate(var(--tx), var(--ty)); }
         }
 
-        /* Grid overlay */
-        .grid-overlay {
-          position: absolute;
-          inset: -50px; /* Provide bleed for the 50px translation animation */
-          background-image: 
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-          background-size: 50px 50px;
-          animation: gridMove 20s linear infinite;
-        }
 
-        @keyframes gridMove {
-          0% { transform: translate(0, 0); }
-          100% { transform: translate(50px, 50px); }
-        }
 
         /* Marquee - FIXED at top */
         @keyframes marquee {
@@ -302,43 +306,20 @@ const Hero = () => {
           position: relative;
           isolation: isolate;
           overflow: hidden;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
-          backdrop-filter: blur(25px);
-          -webkit-backdrop-filter: blur(25px);
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+          background: rgba(14, 14, 22, 0.55);
+          backdrop-filter: blur(20px) saturate(160%);
+          -webkit-backdrop-filter: blur(20px) saturate(160%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 
+            0 32px 64px -12px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          border-radius: 20px;
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        .glass-card::before {
-          content: '';
-          position: absolute;
-          inset: 1px;
-          border-radius: inherit;
-          background: linear-gradient(135deg, var(--accent-color), rgba(255, 255, 255, 0.14));
-          opacity: 0.1;
-          transition: opacity 0.4s ease;
-          z-index: -2;
-        }
-
-        .glass-card::after {
-          content: '';
-          position: absolute;
-          inset: -40%;
-          background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
-          transform: translateX(-120%) rotate(10deg);
-          transition: transform 0.7s ease;
-          z-index: -1;
-        }
-
-        .glass-card:hover::after {
-          transform: translateX(120%) rotate(10deg);
-        }
-
         .glass-card:hover {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
-          border-color: rgba(255, 255, 255, 0.3);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          border-color: rgba(255, 255, 255, 0.14);
+          background: rgba(14, 14, 22, 0.65);
         }
 
         /* 3D Card */
@@ -346,6 +327,33 @@ const Hero = () => {
           transform-style: preserve-3d;
           transition: transform 0.2s ease-out;
           will-change: transform;
+        }
+
+        @keyframes scanline {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100%); }
+        }
+        .card-scanline {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.04), transparent);
+          height: 100%;
+          animation: scanline 8s linear infinite;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s;
+          z-index: 2;
+        }
+        .group:hover .card-scanline {
+          opacity: 1;
+        }
+
+        .top-accent-strip {
+          position: absolute;
+          inset: 0;
+          transition: opacity 0.5s ease;
+          pointer-events: none;
+          z-index: 1;
         }
 
         /* Scroll Stack Animation Core Styles */
@@ -362,12 +370,15 @@ const Hero = () => {
         /* Product card redesign - Premium Opaque */
         .product-showcase {
           position: relative;
-          border-radius: 24px;
+          border-radius: 32px;
           overflow: hidden;
           isolation: isolate;
-          background: #12121a;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+          background: rgb(14, 14, 22);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 
+            0 32px 64px -12px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          transition: all 0.4s ease;
         }
 
         .product-showcase::after {
@@ -666,12 +677,14 @@ const Hero = () => {
         /* Mobile hero card - Premium Opaque */
         .mobile-product-card {
           position: relative;
-          border-radius: 20px;
+          border-radius: 24px;
           overflow: hidden;
           isolation: isolate;
-          background: #12121a;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+          background: rgb(14, 14, 22);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 
+            0 15px 40px -10px rgba(0, 0, 0, 0.7), 
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .mobile-product-card::after {
@@ -754,11 +767,9 @@ const Hero = () => {
           position: relative;
           isolation: isolate;
           overflow: hidden;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          backdrop-filter: blur(25px);
-          -webkit-backdrop-filter: blur(25px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+          background: rgb(14, 14, 22);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .mobile-feature-pill::before {
@@ -833,7 +844,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
       <section ref={containerRef} className="hero-enhanced relative pt-[160px] sm:pt-32 lg:pt-28 pb-4 sm:pb-24 px-4 sm:px-6 lg:px-8">
 
         <Grainient
@@ -902,8 +912,10 @@ const Hero = () => {
 
             {/* Mobile AI Banner */}
             {showBanner && (
-              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 rounded-xl p-2 pr-3 max-w-[320px] mx-auto mb-4" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.22)', boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 1px rgba(255,255,255,0.04)' }}>
-                <div className="flex items-center gap-2.5">
+              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 rounded-xl p-2 pr-3 max-w-[320px] mx-auto mb-4 group relative overflow-hidden" style={{ background: 'rgba(14, 14, 22, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+                <div className="card-scanline" />
+                <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                <div className="flex items-center gap-2.5 relative z-10">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.05))` }}>
                     {/* Rocket Icon matching screenshot */}
                     <svg className="w-4 h-4 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -920,7 +932,7 @@ const Hero = () => {
                     onClick={() => {
                       if (user) { setShowAddModal(true); }
                       else {
-                        toast.error('Sign in to continue', { style: { background: '#0F0F0F', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontFamily: 'Space Mono, monospace', fontSize: '12px' } });
+                        showInfo('Sign In Required', 'Please connect your ID to continue.');
                         setShowConnectModal(true);
                       }
                     }}
@@ -950,8 +962,9 @@ const Hero = () => {
             </div>
 
             {/* Mobile stats strip */}
-            <div className="glass-card rounded-2xl overflow-hidden anim-fade-up delay-300 border border-white/10 shadow-lg">
-              <div className="mobile-stats-strip">
+            <div className="glass-card rounded-2xl overflow-hidden anim-fade-up delay-300 group">
+              <div className="card-scanline" />
+              <div className="mobile-stats-strip relative z-10">
                 <div className="mobile-stat-item">
                   <div className="text-3xl font-black" style={{ color: currentCard.accent }}>100%</div>
                   <div className="mono text-[8px] text-white/50 mt-2 uppercase tracking-widest font-semibold">Verified</div>
@@ -1007,7 +1020,9 @@ const Hero = () => {
                         '--accent-color': card.accent
                       }}
                     >
-                      <div className="mobile-product-card relative overflow-hidden">
+                      <div className="mobile-product-card relative overflow-hidden group">
+                        <div className="card-scanline" />
+                        <div className="top-accent-strip opacity-30" style={{ background: `linear-gradient(135deg, ${card.accent}44 0%, transparent 60%)` }} />
                         {/* Progress Bar at the top of the card */}
                         {state === 'active' && (
                           <div className="absolute top-0 left-0 right-0 h-1.5 z-50 bg-white/10">
@@ -1114,9 +1129,11 @@ const Hero = () => {
 
             {/* Mobile feature pills - 2x2 grid */}
             <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3" style={{ '--accent-color': currentCard.accent }}>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill group relative overflow-hidden">
+                <div className="card-scanline" />
+                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
                   style={{ background: `${currentCard.accent}25` }}
                 >
                   <Icons.Cpu className="w-4 h-4" style={{ color: currentCard.accent }} />
@@ -1126,9 +1143,11 @@ const Hero = () => {
                   <div className="text-[9px] text-white/50">Instant Gear Specs</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill group relative overflow-hidden">
+                <div className="card-scanline" />
+                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
                   style={{ background: `${currentCard.accent}25` }}
                 >
                   <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
@@ -1138,9 +1157,11 @@ const Hero = () => {
                   <div className="text-[9px] text-white/50">Zero Shipping</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill group relative overflow-hidden">
+                <div className="card-scanline" />
+                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
                   style={{ background: `${currentCard.accent}25` }}
                 >
                   <Icons.DrafterTools className="w-4 h-4" style={{ color: currentCard.accent }} />
@@ -1150,9 +1171,11 @@ const Hero = () => {
                   <div className="text-[9px] text-white/50">Built for Engineers</div>
                 </div>
               </div>
-              <div className="mobile-feature-pill">
+              <div className="mobile-feature-pill group relative overflow-hidden">
+                <div className="card-scanline" />
+                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
                   style={{ background: `${currentCard.accent}25` }}
                 >
                   <Icons.ShieldCheck className="w-4 h-4" style={{ color: currentCard.accent }} />
@@ -1239,8 +1262,10 @@ const Hero = () => {
 
                 {/* AI Listing Banner */}
                 {showBanner && (
-                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06))', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.24)', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)' }}>
-                    <div className="flex items-center gap-3">
+                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left group relative overflow-hidden" style={{ background: 'rgba(14, 14, 22, 0.55)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+                    <div className="card-scanline" />
+                    <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                    <div className="flex items-center gap-3 relative z-10">
                       <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 ml-1" style={{ background: 'rgba(0,217,255,0.1)' }}>
                         <svg className="w-3.5 h-3.5 text-[#00D9FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
@@ -1256,7 +1281,7 @@ const Hero = () => {
                         onClick={() => {
                           if (user) { setShowAddModal(true); }
                           else {
-                            toast.error('Sign in to continue', { style: { background: '#0F0F0F', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', fontFamily: 'Space Mono, monospace', fontSize: '12px' } });
+                            showInfo('Sign In Required', 'Please connect your ID to continue.');
                             setShowConnectModal(true);
                           }
                         }}
@@ -1318,7 +1343,9 @@ const Hero = () => {
                           e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                         }}
                       >
-                        <div className="product-showcase">
+                        <div className="product-showcase group">
+                          <div className="card-scanline" />
+                          <div className="top-accent-strip opacity-30" style={{ background: `linear-gradient(135deg, ${card.accent}44 0%, transparent 60%)` }} />
                           {/* Top strip - seller info */}
                           <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/20">
                             <div className="flex items-center gap-3">
@@ -1434,7 +1461,9 @@ const Hero = () => {
 
                 {/* Feature 1 */}
                 <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
-                  <div className="flex items-start gap-4">
+                  <div className="card-scanline" />
+                  <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}33 0%, transparent 60%)` }} />
+                  <div className="flex items-start gap-4 relative z-10">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
@@ -1452,7 +1481,9 @@ const Hero = () => {
 
                 {/* Feature 2 */}
                 <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
-                  <div className="flex items-start gap-4">
+                  <div className="card-scanline" />
+                  <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}33 0%, transparent 60%)` }} />
+                  <div className="flex items-start gap-4 relative z-10">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
@@ -1470,7 +1501,9 @@ const Hero = () => {
 
                 {/* Feature 3 */}
                 <div className="glass-card p-6 rounded-2xl group transition-all duration-300 cursor-pointer" style={{ '--accent-color': currentCard.accent }}>
-                  <div className="flex items-start gap-4">
+                  <div className="card-scanline" />
+                  <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}33 0%, transparent 60%)` }} />
+                  <div className="flex items-start gap-4 relative z-10">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white icon-pulse shadow-xl flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, ${currentCard.accent}, ${currentCard.accent}aa)` }}
@@ -1487,11 +1520,8 @@ const Hero = () => {
                 </div>
 
               </div>
-
             </div>
-
           </div>
-
         </div>
 
         {/* Bottom timestamp */}
@@ -1501,12 +1531,7 @@ const Hero = () => {
 
       </section>
 
-      {/* Modals */}
-      <Toaster
-        position="bottom-center"
-        toastOptions={{ duration: 3000 }}
-        containerStyle={{ zIndex: 99999 }}
-      />
+
       <AddProductModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
       <ConnectIdModal isOpen={showConnectModal} onClose={() => setShowConnectModal(false)} />
     </>

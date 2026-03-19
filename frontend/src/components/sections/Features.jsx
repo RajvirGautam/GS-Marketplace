@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import DarkVeil from '../ui/DarkVeil';
+
 
 // --- Internal Icons ---
 const ShieldIcon = () => (
@@ -141,15 +143,12 @@ const Features = () => {
 
   // High-performance DOM refs
   const cardsRef = useRef([]);
-  const ambientGlowRef = useRef(null);
   const progressBarRef = useRef(null);
   const progressTextRef = useRef(null);
-  const dataStreamsRef = useRef([]);
 
   useEffect(() => {
     // Initial ref arrays setup
     cardsRef.current = cardsRef.current.slice(0, FEATURES_DATA.length);
-    dataStreamsRef.current = dataStreamsRef.current.slice(0, 3);
 
     const handleScroll = () => {
       if (!tickingRef.current) {
@@ -166,16 +165,6 @@ const Features = () => {
 
           const activeIndex = Math.min(FEATURES_DATA.length - 1, Math.max(0, Math.round(stackProgress)));
           const activeColor = FEATURES_DATA[activeIndex].color;
-
-          // Update ambient glow directly
-          if (ambientGlowRef.current) {
-            ambientGlowRef.current.style.background = `radial-gradient(circle at 70% 50%, ${activeColor}, transparent 60%)`;
-          }
-
-          // Update data streams directly
-          dataStreamsRef.current.forEach(stream => {
-            if (stream) stream.style.color = activeColor;
-          });
 
           // Update progress indicator directly
           if (progressBarRef.current) {
@@ -231,9 +220,9 @@ const Features = () => {
 
             const iconBox = card.querySelector('.icon-box');
             if (iconBox) {
-              iconBox.style.boxShadow = isActive ? `inset 0 0 20px ${FEATURES_DATA[index].color}15, 0 10px 40px -10px ${FEATURES_DATA[index].color}50` : 'none';
-              iconBox.style.borderColor = isActive ? `${FEATURES_DATA[index].color}40` : 'rgba(255,255,255,0.05)';
-              iconBox.style.background = isActive ? `${FEATURES_DATA[index].color}10` : 'rgba(255,255,255,0.02)';
+              iconBox.style.boxShadow = isActive ? `inset 0 0 20px ${FEATURES_DATA[index].color}20, 0 10px 40px -10px ${FEATURES_DATA[index].color}60` : `0 0 24px ${FEATURES_DATA[index].color}30`;
+              iconBox.style.borderColor = isActive ? `${FEATURES_DATA[index].color}70` : `${FEATURES_DATA[index].color}40`;
+              iconBox.style.background = isActive ? `${FEATURES_DATA[index].color}35` : `${FEATURES_DATA[index].color}25`;
             }
 
             const techContext = card.querySelector('.tech-context');
@@ -254,7 +243,7 @@ const Features = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative w-full h-[400vh] bg-[#050508]">
+    <section ref={containerRef} className="relative w-full h-[400vh]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700;800&family=Space+Mono:wght@400;700&display=swap');
         
@@ -300,40 +289,6 @@ const Features = () => {
           opacity: 1;
         }
 
-        .ambient-glow {
-          position: absolute;
-          inset: 0;
-          opacity: 0.15;
-          filter: blur(120px);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .technical-grid {
-          position: absolute;
-          inset: 0;
-          background-image: 
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        .data-stream {
-          position: absolute;
-          width: 1px;
-          height: 200px;
-          background: linear-gradient(to bottom, transparent, currentColor, transparent);
-          opacity: 0.3;
-          animation: streamDrop 4s linear infinite;
-        }
-
-        @keyframes streamDrop {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100vh); }
-        }
-
         @media (max-width: 768px) {
           .glass-monolith {
             min-height: 100%;
@@ -345,15 +300,19 @@ const Features = () => {
       {/* Sticky Checkpoint */}
       <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col md:flex-row">
 
-        <div
-          ref={ambientGlowRef}
-          className="ambient-glow"
-        />
-        <div className="technical-grid mask-radial-fade-out" />
+        {/* Shared animated background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <DarkVeil
+            hueShift={0}
+            noiseIntensity={0.04}
+            scanlineIntensity={0}
+            speed={1.0}
+            scanlineFrequency={0}
+            warpAmount={0.5}
+            resolutionScale={1}
+          />
+        </div>
 
-        <div ref={el => dataStreamsRef.current[0] = el} className="data-stream left-[10%]" style={{ animationDelay: '0s' }} />
-        <div ref={el => dataStreamsRef.current[1] = el} className="data-stream left-[45%]" style={{ animationDelay: '2s' }} />
-        <div ref={el => dataStreamsRef.current[2] = el} className="data-stream right-[20%]" style={{ animationDelay: '1.5s' }} />
 
         {/* --- LEFT: Static Pinned Information --- */}
         <div className="w-full md:w-[35%] lg:w-[40%] h-[45vh] md:h-full flex flex-col justify-center px-6 md:px-12 lg:px-20 z-10 relative pt-10 md:pt-0">
@@ -419,11 +378,12 @@ const Features = () => {
 
                     {/* Square colored icon box (like reference) */}
                     <div
-                      className="w-14 h-14 md:w-16 md:h-16 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 icon-box"
+                      className="w-14 h-14 md:w-16 md:h-16 shrink-0 flex items-center justify-center transition-all duration-300 group-hover:scale-105 icon-box"
                       style={{
-                        background: feature.color,
-                        color: '#000',
-                        boxShadow: `0 0 24px ${feature.color}55`,
+                        background: `${feature.color}25`,
+                        border: `1px solid ${feature.color}40`,
+                        color: feature.color,
+                        boxShadow: `0 0 24px ${feature.color}30`,
                       }}
                     >
                       <div className="scale-[1.15] flex items-center justify-center">

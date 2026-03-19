@@ -12,12 +12,14 @@ import RecentListings from './components/sections/RecentListings'
 import CTA from './components/sections/CTA'
 import Marketplace from './components/sections/Marketplace'
 import UserDashboard from './components/sections/UserDashboard'
+import DarkVeil from './components/ui/DarkVeil'
 import ConnectIdModal from './components/auth/ConnectIdModal'
 import AuthCallback from './pages/AuthCallback'
 import VerificationGuard from './components/auth/VerificationGuard'
 import SellerProfile from './components/sections/SellerProfile'
 import Chat from './components/sections/Chat'
 import ChatNotificationToast from './components/ui/ChatNotificationToast'
+import { Toaster } from 'react-hot-toast'
 
 // Only show footer on non-chat and product pages
 function ConditionalFooter() {
@@ -48,8 +50,25 @@ function App() {
         toggleTheme={toggleTheme}
         onConnectClick={() => setIsLoginOpen(true)}
       />
-      <Hero />
-      <Features />
+      <div className="relative">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="sticky top-0 w-full h-screen overflow-hidden">
+            <DarkVeil
+              hueShift={0}
+              noiseIntensity={0.04}
+              scanlineIntensity={0}
+              speed={1.0}
+              scanlineFrequency={0}
+              warpAmount={0.5}
+              resolutionScale={1}
+            />
+          </div>
+        </div>
+        <div className="relative z-10">
+          <Hero />
+          <Features />
+        </div>
+      </div>
 
       <CTA />
     </>
@@ -85,6 +104,29 @@ function App() {
 
             {/* 🔴 Global real-time chat toast notifications */}
             <ChatNotificationToast />
+
+            {/* Global toast renderer */}
+            <Toaster
+              position="bottom-right"
+              gutter={12}
+              containerStyle={{ zIndex: 99999 }}
+              toastOptions={{
+                duration: 5000,
+                style: {
+                  background: 'rgba(10, 10, 18, 0.75)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8)',
+                  borderRadius: '20px',
+                  padding: '0',
+                  maxWidth: '400px',
+                  width: '360px',
+                  color: '#fff',
+                  fontFamily: '"Manrope", sans-serif',
+                },
+              }}
+            />
           </div>
         </SocketProvider>
       </Router>
