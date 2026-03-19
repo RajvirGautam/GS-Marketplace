@@ -95,6 +95,7 @@ const Marketplace = () => {
   const [selectedYears, setSelectedYears] = useState([]);
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
+  const [maxPriceLimit, setMaxPriceLimit] = useState(10000);
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [draftPriceRange, setDraftPriceRange] = useState([0, 10000]);
 
@@ -230,6 +231,14 @@ const Marketplace = () => {
       if (response.success) {
         setProducts(response.products);
         setPagination(response.pagination);
+        if (response.globalMaxPrice && response.globalMaxPrice !== maxPriceLimit) {
+          setMaxPriceLimit(response.globalMaxPrice);
+          // If the range was at the old max, update it to the new max
+          if (priceRange[1] === maxPriceLimit) {
+            setPriceRange([priceRange[0], response.globalMaxPrice]);
+            setDraftPriceRange([draftPriceRange[0], response.globalMaxPrice]);
+          }
+        }
         console.log('✅ Loaded', response.products.length, 'products');
       }
     } catch (error) {
@@ -281,8 +290,8 @@ const Marketplace = () => {
     setSelectedYears([]);
     setSelectedConditions([]);
     setSelectedTypes([]);
-    setPriceRange([0, 10000]);
-    setDraftPriceRange([0, 10000]);
+    setPriceRange([0, maxPriceLimit]);
+    setDraftPriceRange([0, maxPriceLimit]);
     setSearchQuery('');
     setDebouncedSearch('');
     setCurrentPage(1);
@@ -296,7 +305,7 @@ const Marketplace = () => {
     if (selectedYears.length > 0) count += selectedYears.length;
     if (selectedConditions.length > 0) count += selectedConditions.length;
     if (selectedTypes.length > 0) count += selectedTypes.length;
-    if (priceRange[0] !== 0 || priceRange[1] !== 10000) count++;
+    if (priceRange[0] !== 0 || priceRange[1] !== maxPriceLimit) count++;
     return count;
   };
 
@@ -313,8 +322,8 @@ const Marketplace = () => {
       setSelectedYears([]);
       setSelectedConditions([]);
       setSelectedTypes([]);
-      setPriceRange([0, 10000]);
-      setDraftPriceRange([0, 10000]);
+      setPriceRange([0, maxPriceLimit]);
+      setDraftPriceRange([0, maxPriceLimit]);
       // then apply the specific filter
       apply();
       setActiveQuickFilter(key);
@@ -333,7 +342,7 @@ const Marketplace = () => {
       key: 'under500',
       label: 'Under ₹500',
       apply: () => { setPriceRange([0, 500]); setDraftPriceRange([0, 500]); },
-      clear: () => { setPriceRange([0, 10000]); setDraftPriceRange([0, 10000]); },
+      clear: () => { setPriceRange([0, maxPriceLimit]); setDraftPriceRange([0, maxPriceLimit]); },
     },
     {
       key: 'barter',
@@ -905,11 +914,11 @@ const Marketplace = () => {
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex flex-col items-start gap-1">
                       <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
-                      {(draftPriceRange[0] !== 0 || draftPriceRange[1] !== 10000) && (
+                      {(draftPriceRange[0] !== 0 || draftPriceRange[1] !== maxPriceLimit) && (
                         <button
                           onClick={() => {
-                            setPriceRange([0, 10000]);
-                            setDraftPriceRange([0, 10000]);
+                            setPriceRange([0, maxPriceLimit]);
+                            setDraftPriceRange([0, maxPriceLimit]);
                             setCurrentPage(1);
                           }}
                           className="text-[9px] font-bold text-[#00D9FF] hover:underline mono bg-[#00D9FF]/10 px-2 py-0.5 rounded-sm"
@@ -933,15 +942,15 @@ const Marketplace = () => {
                     {/* Filled range between handles — follows draft for smooth visual */}
                     <div style={{
                       position: 'absolute',
-                      left: `${(draftPriceRange[0] / 10000) * 100}%`,
-                      right: `${100 - (draftPriceRange[1] / 10000) * 100}%`,
+                      left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`,
+                      right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`,
                       height: 4,
                       background: 'linear-gradient(90deg, #00D9FF, #7C3AED)',
                       borderRadius: 10,
                     }} />
                     {/* Min handle — updates draft on drag, commits on release */}
                     <input
-                      type="range" min="0" max="10000" step="100"
+                      type="range" min="0" max={maxPriceLimit} step="100"
                       value={draftPriceRange[0]}
                       onChange={(e) => {
                         const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100);
@@ -961,7 +970,7 @@ const Marketplace = () => {
                     />
                     {/* Max handle */}
                     <input
-                      type="range" min="0" max="10000" step="100"
+                      type="range" min="0" max={maxPriceLimit} step="100"
                       value={draftPriceRange[1]}
                       onChange={(e) => {
                         const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100);
@@ -984,10 +993,10 @@ const Marketplace = () => {
                   {/* Scale labels */}
                   <div className="flex justify-between mt-2">
                     <span className="text-[9px] text-white/25 mono">₹0</span>
-                    <span className="text-[9px] text-white/25 mono">₹2.5k</span>
-                    <span className="text-[9px] text-white/25 mono">₹5k</span>
-                    <span className="text-[9px] text-white/25 mono">₹7.5k</span>
-                    <span className="text-[9px] text-white/25 mono">₹10k</span>
+                    <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.25 / 1000).toFixed(1)}k</span>
+                    <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.5 / 1000).toFixed(1)}k</span>
+                    <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.75 / 1000).toFixed(1)}k</span>
+                    <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit / 1000).toFixed(1)}k</span>
                   </div>
                 </div>
 
@@ -1532,13 +1541,13 @@ const Marketplace = () => {
                 </div>
                 <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
                   <div style={{ position: 'absolute', width: '100%', height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 10 }} />
-                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / 10000) * 100}%`, right: `${100 - (draftPriceRange[1] / 10000) * 100}%`, height: 4, background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', borderRadius: 10 }} />
-                  <input type="range" min="0" max="10000" step="100" value={draftPriceRange[0]}
+                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`, right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`, height: 4, background: 'linear-gradient(90deg, #00D9FF, #7C3AED)', borderRadius: 10 }} />
+                  <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[0]}
                     onChange={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setDraftPriceRange([val, draftPriceRange[1]]); }}
                     onTouchEnd={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
                     onMouseUp={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
                     style={{ position: 'absolute', width: '100%', zIndex: 4 }} />
-                  <input type="range" min="0" max="10000" step="100" value={draftPriceRange[1]}
+                  <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[1]}
                     onChange={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setDraftPriceRange([draftPriceRange[0], val]); }}
                     onTouchEnd={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
                     onMouseUp={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}

@@ -138,9 +138,13 @@ router.get('/', async (req, res) => {
 
     console.log('✅ Found', products.length, 'products out of', total, 'total');
 
+    const maxPriceItem = await Product.findOne({ status: 'active' }).sort({ price: -1 }).select('price');
+    const globalMaxPrice = maxPriceItem ? maxPriceItem.price : 10000;
+
     res.json({
       success: true,
       products,
+      globalMaxPrice,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),

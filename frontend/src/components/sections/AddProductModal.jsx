@@ -1,7 +1,7 @@
 // src/components/dashboard/AddProductModal.jsx
 import React, { useState, useRef } from 'react';
 import { productAPI } from '../../services/api';
-import toast, { Toaster } from 'react-hot-toast';
+import { showError, showLoading, showSuccess, showInfo, updateToast } from '../../utils/toast';
 
 const AddProductModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
@@ -79,15 +79,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + images.length > 5) {
-      toast.error('Maximum 5 images allowed', {
-        style: {
-          background: '#0F0F0F',
-          color: '#fff',
-          border: '1px solid rgba(239,68,68,0.3)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '12px',
-        },
-      });
+      showError('Too Many Images', 'You can upload a maximum of 5 images per listing.');
       setErrors({ ...errors, images: 'Maximum 5 images allowed' });
       return;
     }
@@ -124,7 +116,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
   const handleAIFill = async () => {
     if (images.length === 0) {
-      toast.error('Upload an image first for AI analysis');
+      showError('No Image', 'Upload an image first so the AI can analyze it.');
       return;
     }
 
@@ -139,13 +131,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
       });
     }, 400);
 
-    const toastId = toast.loading('✨ Analyzing image with AI...', {
-      style: {
-        background: '#0F0F0F', color: '#00D9FF',
-        border: '1px solid rgba(0,217,255,0.3)',
-        fontFamily: 'Space Mono, monospace', fontSize: '12px',
-      },
-    });
+    const toastId = showLoading('Analyzing with AI...', 'Snapping a look at your image — hang tight!');
 
     try {
       const res = await productAPI.generateListing(images[0]);
@@ -167,22 +153,14 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
         setAiFilledFields(true);
 
-        toast.success('✨ All fields filled by AI — review & edit!', {
-          id: toastId,
-          style: {
-            background: '#0F0F0F', color: '#00D9FF',
-            border: '2px solid rgba(0,217,255,0.5)',
-            fontFamily: 'Space Mono, monospace', fontSize: '11px',
-            fontWeight: '700', letterSpacing: '0.5px',
-          },
-        });
+        updateToast(toastId, 'success', 'AI Fill Complete!', 'All fields filled — review and edit before submitting.');
       } else {
-        toast.error('AI analysis failed. Try manual input.', { id: toastId });
+        updateToast(toastId, 'error', 'AI Failed', 'Analysis failed. Please try manual input.');
       }
     } catch (err) {
       console.error('AI Fill error:', err);
       const msg = err?.response?.data?.message || 'AI Analysis failed. Try manual input.';
-      toast.error(msg, { id: toastId });
+      updateToast(toastId, 'error', 'AI Failed', msg);
     } finally {
       clearInterval(progressInterval);
       setAiProgress(100);
@@ -253,15 +231,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     setUploadProgress(0);
 
-    const toastId = toast.loading('Creating product listing...', {
-      style: {
-        background: '#0F0F0F',
-        color: '#fff',
-        border: '1px solid rgba(0,217,255,0.3)',
-        fontFamily: 'Space Mono, monospace',
-        fontSize: '12px',
-      },
-    });
+    const toastId = showLoading('Creating listing...', 'Uploading your product — this may take a moment.');
 
     try {
       const filteredHighlights = highlights.filter((h) => h.trim());
@@ -300,37 +270,13 @@ const AddProductModal = ({ isOpen, onClose }) => {
       setUploadProgress(100);
 
       if (response.success) {
-        toast.success('🎉 PRODUCT LISTED SUCCESSFULLY!', {
-          id: toastId,
-          style: {
-            background: '#0F0F0F',
-            color: '#00D9FF',
-            border: '2px solid #00D9FF',
-            fontFamily: 'Space Mono, monospace',
-            fontSize: '11px',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
-          },
-        });
+        updateToast(toastId, 'success', 'Product Listed!', 'Your listing is now live on the marketplace.');
         handleClose();
-        setTimeout(() => window.location.reload(), 1000);
+        setTimeout(() => window.location.reload(), 1200);
       }
     } catch (error) {
       console.error('Error creating product:', error);
-      toast.error(error.response?.data?.message || 'FAILED TO CREATE PRODUCT', {
-        id: toastId,
-        style: {
-          background: '#0F0F0F',
-          color: '#EF4444',
-          border: '2px solid rgba(239,68,68,0.5)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        },
-      });
+      updateToast(toastId, 'error', 'Listing Failed', error.response?.data?.message || 'Failed to create the product listing.');
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
@@ -366,24 +312,6 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Custom Toaster with higher z-index */}
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#0F0F0F',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.2)',
-            fontFamily: 'Space Mono, monospace',
-            fontSize: '12px',
-          },
-        }}
-        containerStyle={{
-          zIndex: 99999, // Higher than modal
-        }}
-      />
-
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 

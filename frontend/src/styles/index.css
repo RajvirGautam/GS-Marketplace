@@ -6,6 +6,16 @@
   box-sizing: border-box;
 }
 
+/* Toast loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Custom toast wrapper — allow pointer events */
+[data-hot-toast] > div {
+  max-width: none !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

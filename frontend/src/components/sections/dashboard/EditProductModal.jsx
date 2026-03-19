@@ -1,7 +1,7 @@
 // src/components/dashboard/EditProductModal.jsx
 import React, { useState, useEffect } from 'react';
 import { productAPI } from '../../../services/api';
-import toast, { Toaster } from 'react-hot-toast';
+import { showError, showLoading, showSuccess, updateToast } from '../../../utils/toast';
 
 const EditProductModal = ({ isOpen, onClose, product }) => {
   const [formData, setFormData] = useState({
@@ -132,34 +132,12 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
 
     // Validation
     if (!formData.title || !formData.description || !formData.category) {
-      toast.error('PLEASE FILL IN ALL REQUIRED FIELDS', {
-        style: {
-          background: '#0F0F0F',
-          color: '#EF4444',
-          border: '2px solid rgba(239,68,68,0.5)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        },
-      });
+      showError('Missing Fields', 'Please fill in all required fields before saving.');
       return;
     }
 
     if (formData.type === 'sale' && !formData.price) {
-      toast.error('PRICE IS REQUIRED FOR SELLING', {
-        style: {
-          background: '#0F0F0F',
-          color: '#EF4444',
-          border: '2px solid rgba(239,68,68,0.5)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        },
-      });
+      showError('Price Required', 'A price is required for listings marked For Sale.');
       return;
     }
 
@@ -167,15 +145,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setIsSubmitting(true);
       setUpdateProgress(0);
 
-      const toastId = toast.loading('Updating product...', {
-        style: {
-          background: '#0F0F0F',
-          color: '#fff',
-          border: '1px solid rgba(0,217,255,0.3)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '12px',
-        },
-      });
+      const toastId = showLoading('Updating product...', 'Saving your changes to the listing.');
 
       // Simulate progress
       setUpdateProgress(30);
@@ -199,50 +169,14 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setUpdateProgress(100);
 
       if (response.success) {
-        console.log('✅ Product updated successfully');
-        toast.success('✅ PRODUCT UPDATED SUCCESSFULLY!', {
-          id: toastId,
-          style: {
-            background: '#0F0F0F',
-            color: '#00D9FF',
-            border: '2px solid #00D9FF',
-            fontFamily: 'Space Mono, monospace',
-            fontSize: '11px',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
-          },
-        });
-        setTimeout(() => onClose(true), 1000); // Pass true to indicate success
+        updateToast(toastId, 'success', 'Product Updated!', 'Your listing has been saved successfully.');
+        setTimeout(() => onClose(true), 1200);
       } else {
-        toast.error(response.message || 'FAILED TO UPDATE PRODUCT', {
-          id: toastId,
-          style: {
-            background: '#0F0F0F',
-            color: '#EF4444',
-            border: '2px solid rgba(239,68,68,0.5)',
-            fontFamily: 'Space Mono, monospace',
-            fontSize: '11px',
-            fontWeight: '700',
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
-          },
-        });
+        updateToast(toastId, 'error', 'Update Failed', response.message || 'Failed to update the product.');
       }
     } catch (err) {
       console.error('❌ Error updating product:', err);
-      toast.error(err.response?.data?.message || 'FAILED TO UPDATE PRODUCT', {
-        style: {
-          background: '#0F0F0F',
-          color: '#EF4444',
-          border: '2px solid rgba(239,68,68,0.5)',
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        },
-      });
+      showError('Update Failed', err.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
       setUpdateProgress(0);
@@ -253,24 +187,6 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
 
   return (
     <>
-      {/* Custom Toaster with higher z-index */}
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#0F0F0F',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.2)',
-            fontFamily: 'Space Mono, monospace',
-            fontSize: '12px',
-          },
-        }}
-        containerStyle={{
-          zIndex: 99999, // Higher than modal
-        }}
-      />
-
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
