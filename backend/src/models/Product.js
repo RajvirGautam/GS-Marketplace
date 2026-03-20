@@ -106,7 +106,8 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ title: 'text', description: 'text' });
 productSchema.index({ seller: 1, status: 1 });
 productSchema.index({ category: 1, status: 1 });
-productSchema.index({ createdAt: -1 });
+productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, price: 1 });
 
 // Virtual for calculating "time ago"
 productSchema.virtual('postedDate').get(function () {
@@ -121,13 +122,6 @@ productSchema.virtual('postedDate').get(function () {
   return `${Math.floor(days / 30)} months ago`;
 });
 
-// Populate seller info when querying - FIXED
-productSchema.pre(/^find/, function () {
-  this.populate({
-    path: 'seller',
-    select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
-  });
-});
 
 
 

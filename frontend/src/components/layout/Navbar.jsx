@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
 import NotificationBell from '../ui/NotificationBell'
 import Avatar from '../ui/Avatar'
+import { showInfo } from '../../utils/toast'
 
 // --- LOCAL ICONS ---
 const ChevronDown = () => (
@@ -82,6 +83,14 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { unreadCount } = useSocket()
+
+  // Guard: show toast if not logged in when clicking Dashboard
+  const handleDashboardClick = (e) => {
+    if (!user) {
+      e.preventDefault();
+      showInfo('Login Required', 'Login to view your dashboard!');
+    }
+  };
 
   // Helper to get the display name
   const getDisplayName = () => {
@@ -208,7 +217,7 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
         {/* Desktop Links & Actions */}
         <div className="flex items-center gap-6 text-sm font-bold text-indigo-900 dark:text-slate-200">
           <Link to="/marketplace" className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm">Marketplace</Link>
-          <Link to="/dashboard" className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm">Dashboard</Link>
+          <Link to="/dashboard" onClick={handleDashboardClick} className="hover:text-fuchsia-600 dark:hover:text-cyan-400 transition-colors drop-shadow-sm">Dashboard</Link>
           <div className="h-4 w-[1px] bg-indigo-950/10 dark:bg-white/10 mx-1"></div>
           {user && (
             <Link to="/chat" className="relative p-2 rounded-full border border-transparent bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-slate-200 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors" title="Messages">
@@ -251,7 +260,13 @@ const Navbar = ({ isDark, toggleTheme, onConnectClick }) => {
 
         </Link>
         <MobileNavItem path="/marketplace" active={location.pathname === '/marketplace'} icon={<MarketplaceIcon className="w-[20px] h-[20px]" />} label="Market" />
-        <MobileNavItem path="/dashboard" active={location.pathname === '/dashboard'} icon={<DashboardIcon className="w-[20px] h-[20px]" />} label="Dash" />
+        <MobileNavItem
+          path="/dashboard"
+          onClick={!user ? (e) => { e.preventDefault(); showInfo('Login Required', 'Login to view your dashboard!'); } : undefined}
+          active={location.pathname === '/dashboard'}
+          icon={<DashboardIcon className="w-[20px] h-[20px]" />}
+          label="Dash"
+        />
 
         {user ? (
           <>

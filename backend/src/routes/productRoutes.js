@@ -125,29 +125,33 @@ router.get('/', async (req, res) => {
 
     console.log('🔍 Search filter:', JSON.stringify(filter, null, 2));
 
-    const products = await Product.find(filter)
-      .populate({
-        path: 'seller',
-        select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
-      })
-      .sort(sort)
-      .limit(parseInt(limit))
-      .skip(skip);
-
-    const total = await Product.countDocuments(filter);
+    // Run all independent DB queries in parallel
+    const [products, total, priceStatsAgg] = await Promise.all([
+      Product.find(filter)
+        .populate({
+          path: 'seller',
+          select: 'fullName email enrollmentNumber isVerified branch year profilePicture'
+        })
+        .sort(sort)
+        .limit(parseInt(limit))
+        .skip(skip)
+        .lean(),
+      Product.countDocuments(filter),
+      // Single aggregation pass: get max price + all prices for histogram
+      // Aggregations bypass Mongoose middleware (no accidental populate)
+      Product.aggregate([
+        { $match: { status: 'active', price: { $exists: true, $ne: null } } },
+        { $group: { _id: null, maxPrice: { $max: '$price' }, prices: { $push: '$price' } } }
+      ])
+    ]);
 
     console.log('✅ Found', products.length, 'products out of', total, 'total');
 
-    const maxPriceItem = await Product.findOne({ status: 'active' }).sort({ price: -1 }).select('price');
-    const globalMaxPrice = maxPriceItem ? maxPriceItem.price : 10000;
-
-    // Build a price histogram over ALL active listings (unfiltered by price) for the area-curve widget
+    const globalMaxPrice = priceStatsAgg[0]?.maxPrice || 10000;
     const NUM_BUCKETS = 20;
     const bucketSize = globalMaxPrice / NUM_BUCKETS;
-    const allActivePrices = await Product.find({ status: 'active' }).select('price');
     const priceHistogram = Array(NUM_BUCKETS).fill(0);
-    allActivePrices.forEach(({ price }) => {
-      if (price == null) return;
+    (priceStatsAgg[0]?.prices || []).forEach((price) => {
       const idx = Math.min(Math.floor(price / bucketSize), NUM_BUCKETS - 1);
       priceHistogram[idx]++;
     });

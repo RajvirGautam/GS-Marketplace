@@ -107,15 +107,13 @@ function App() {
 
             {/* Global toast renderer */}
             <Toaster
-              position="bottom-right"
+              position="bottom-center"
               gutter={12}
               containerStyle={{ zIndex: 99999 }}
               toastOptions={{
                 duration: 5000,
                 style: {
-                  background: 'rgba(10, 10, 18, 0.75)',
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
+                  background: '#0A0A12',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8)',
                   borderRadius: '20px',

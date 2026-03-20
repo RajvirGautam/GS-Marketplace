@@ -3,9 +3,7 @@
 import toast from 'react-hot-toast';
 
 const BASE_STYLE = {
-  background: 'rgba(10, 10, 18, 0.75)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
+  background: '#0A0A12',
   border: '1px solid rgba(255, 255, 255, 0.08)',
   boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.06)',
   borderRadius: '20px',
@@ -52,7 +50,8 @@ function buildToast({ type, title, message, actions, toastRef }) {
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
-        background: gradientFor(type),
+        backgroundColor: '#0A0A12', // Solid base
+        backgroundImage: gradientFor(type), // Gradient overlay
       }}
     >
       {/* Close button */}
