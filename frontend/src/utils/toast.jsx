@@ -3,15 +3,16 @@
 import toast from 'react-hot-toast';
 
 const BASE_STYLE = {
-  background: '#0A0A12',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
-  boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.06)',
-  borderRadius: '20px',
+  background: 'rgba(7, 10, 18, 0.92)',
+  border: '1px solid rgba(148, 163, 184, 0.18)',
+  boxShadow: '0 18px 48px -20px rgba(0, 0, 0, 0.95), 0 6px 18px -10px rgba(0, 217, 255, 0.28), inset 0 1px 0 rgba(255,255,255,0.08)',
+  borderRadius: '18px',
   padding: '0',
-  maxWidth: '400px',
-  width: '360px',
+  maxWidth: '390px',
+  width: 'min(92vw, 360px)',
   color: '#fff',
   fontFamily: '"Manrope", sans-serif',
+  backdropFilter: 'blur(12px)',
 };
 
 // --- Custom JSX Renderer --
