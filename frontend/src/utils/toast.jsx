@@ -21,20 +21,20 @@ const BASE_STYLE = {
 
 function iconCircle(type) {
   const map = {
-    success: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', icon: '✓', color: '#10B981' },
-    error:   { bg: 'rgba(239,68,68,0.15)',  border: 'rgba(239,68,68,0.35)',  icon: '✕', color: '#EF4444' },
-    loading: { bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.35)', icon: '↑', color: '#818CF8' },
-    info:    { bg: 'rgba(0,217,255,0.12)',  border: 'rgba(0,217,255,0.35)',  icon: 'ℹ', color: '#00D9FF' },
+    success: { bg: 'rgba(16,185,129,0.14)', border: 'rgba(16,185,129,0.3)', icon: '✓', color: '#34D399' },
+    error:   { bg: 'rgba(248,113,113,0.14)',  border: 'rgba(248,113,113,0.3)',  icon: '✕', color: '#F87171' },
+    loading: { bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.3)', icon: '↻', color: '#60A5FA' },
+    info:    { bg: 'rgba(0,217,255,0.14)',  border: 'rgba(0,217,255,0.3)',  icon: 'i', color: '#22D3EE' },
   };
   return map[type] || map.info;
 }
 
 function gradientFor(type) {
   const map = {
-    success: 'radial-gradient(ellipse at top right, rgba(16,185,129,0.15) 0%, transparent 60%)',
-    error:   'radial-gradient(ellipse at top right, rgba(239,68,68,0.15) 0%, transparent 60%)',
-    loading: 'radial-gradient(ellipse at top right, rgba(99,102,241,0.12) 0%, transparent 60%)',
-    info:    'radial-gradient(ellipse at top right, rgba(0,217,255,0.12) 0%, transparent 60%)',
+    success: 'linear-gradient(130deg, rgba(6,10,22,0.95) 0%, rgba(5,22,23,0.9) 100%), radial-gradient(ellipse at top right, rgba(16,185,129,0.2) 0%, transparent 55%)',
+    error:   'linear-gradient(130deg, rgba(6,10,22,0.95) 0%, rgba(27,13,20,0.9) 100%), radial-gradient(ellipse at top right, rgba(248,113,113,0.2) 0%, transparent 55%)',
+    loading: 'linear-gradient(130deg, rgba(6,10,22,0.95) 0%, rgba(10,17,30,0.9) 100%), radial-gradient(ellipse at top right, rgba(59,130,246,0.2) 0%, transparent 55%)',
+    info:    'linear-gradient(130deg, rgba(6,10,22,0.95) 0%, rgba(7,20,33,0.9) 100%), radial-gradient(ellipse at top right, rgba(0,217,255,0.2) 0%, transparent 55%)',
   };
   return map[type] || 'none';
 }
