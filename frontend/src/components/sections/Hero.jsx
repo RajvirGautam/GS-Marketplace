@@ -127,8 +127,8 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Mobile auto-cycling cards — cards change frequency: 2000ms (2s)
-  const MOBILE_CARD_CHANGE_INTERVAL = 2000; // cards change frequency
+  // Mobile auto-cycling cards — cards change frequency (ms)
+  const MOBILE_CARD_CHANGE_INTERVAL = 1000; 
   useEffect(() => {
     const interval = setInterval(() => {
       setMobileCardIndex((prev) => (prev + 1) % cards.length);
@@ -1262,7 +1262,14 @@ const Hero = () => {
 
                 {/* AI Listing Banner */}
                 {showBanner && (
-                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left group relative overflow-hidden" style={{ background: 'rgba(14, 14, 22, 0.55)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left group relative overflow-hidden" 
+                    style={{ 
+                      background: 'rgba(14, 14, 22, 0.55)', 
+                      backdropFilter: 'blur(20px) saturate(160%)', 
+                      WebkitBackdropFilter: 'blur(20px) saturate(160%)', 
+                      border: '1px solid rgba(255, 255, 255, 0.08)', 
+                      boxShadow: '0 32px 64px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06)' 
+                    }}>
                     <div className="card-scanline" />
                     <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
                     <div className="flex items-center gap-3 relative z-10">

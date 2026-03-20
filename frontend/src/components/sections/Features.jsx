@@ -315,7 +315,7 @@ const Features = () => {
 
 
         {/* --- LEFT: Static Pinned Information --- */}
-        <div className="w-full md:w-[35%] lg:w-[40%] h-[45vh] md:h-full flex flex-col justify-center px-6 md:px-12 lg:px-20 z-10 relative pt-10 md:pt-0">
+        <div className="w-full md:w-[35%] lg:w-[40%] h-[38vh] md:h-full flex flex-col justify-center px-6 md:px-12 lg:px-20 z-10 relative pt-10 md:pt-0">
           <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#050508] to-transparent pointer-events-none md:hidden" />
 
           <div className="inline-block border border-white/10 px-3 py-1 md:px-4 md:py-1.5 mono text-[9px] md:text-xs text-white/50 tracking-[0.2em] mb-4 md:mb-8 bg-black/40 backdrop-blur-md self-start">
@@ -352,9 +352,9 @@ const Features = () => {
         </div>
 
         {/* --- RIGHT: Stacked Card Swiper System --- */}
-        <div className="w-full md:w-[65%] lg:w-[60%] h-[55vh] md:h-full relative z-20 flex items-center justify-center md:justify-start md:pl-24 lg:pl-32 overflow-hidden perspective-[1200px]">
+        <div className="w-full md:w-[65%] lg:w-[60%] h-[62vh] md:h-full relative z-20 flex items-start justify-center md:items-center md:justify-start pt-4 md:pt-0 md:pl-24 lg:pl-32 overflow-hidden perspective-[1200px]">
 
-          <div className="relative w-[90vw] max-w-[360px] md:max-w-none md:w-[450px] h-[380px] md:h-[500px]">
+          <div className="relative w-[90vw] max-w-[360px] md:max-w-none md:w-[450px] h-[420px] md:h-[500px]">
             {FEATURES_DATA.map((feature, index) => (
               <div
                 key={feature.id}
@@ -374,7 +374,7 @@ const Features = () => {
                   <div className="card-scanline" />
 
                   {/* ── UPPER HALF ── */}
-                  <div className="p-7 md:p-9 flex justify-between items-start">
+                  <div className="p-5 md:p-9 flex justify-between items-start">
 
                     {/* Square colored icon box (like reference) */}
                     <div
@@ -410,7 +410,7 @@ const Features = () => {
                   />
 
                   {/* ── LOWER HALF ── */}
-                  <div className="p-7 md:p-9 pt-6 md:pt-7 flex flex-col flex-1">
+                  <div className="p-5 md:p-9 pt-6 md:pt-7 flex flex-col flex-1">
                     {/* Inner Glow on icon area */}
                     <div
                       className="absolute top-8 left-8 w-20 h-20 rounded-full opacity-0 transition-opacity duration-500 blur-[50px] pointer-events-none icon-glow-bg"
