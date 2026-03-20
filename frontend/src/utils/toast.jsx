@@ -41,50 +41,26 @@ function gradientFor(type) {
 
 function buildToast({ type, title, message, actions, toastRef }) {
   const c = iconCircle(type);
+  const text = message ? `${title} · ${message}` : title;
   return (t) => (
     <div
       style={{
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: '20px',
-        padding: '20px',
+        borderRadius: '18px',
+        padding: '8px 10px',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        backgroundColor: '#0A0A12', // Solid base
-        backgroundImage: gradientFor(type), // Gradient overlay
+        alignItems: 'center',
+        gap: '8px',
+        backgroundImage: gradientFor(type),
       }}
     >
-      {/* Close button */}
-      <button
-        onClick={() => toast.dismiss(t.id)}
-        style={{
-          position: 'absolute',
-          top: '14px',
-          right: '14px',
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '8px',
-          color: 'rgba(255,255,255,0.5)',
-          width: '24px',
-          height: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          fontSize: '12px',
-          lineHeight: 1,
-        }}
-      >
-        ✕
-      </button>
-
-      {/* Icon + Title row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '28px' }}>
+      {/* Icon + single-line text */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
         <div
           style={{
-            width: '36px',
-            height: '36px',
+            width: '24px',
+            height: '24px',
             borderRadius: '50%',
             background: c.bg,
             border: `1px solid ${c.border}`,
@@ -93,55 +69,46 @@ function buildToast({ type, title, message, actions, toastRef }) {
             justifyContent: 'center',
             color: c.color,
             fontWeight: '700',
-            fontSize: '15px',
+            fontSize: type === 'info' ? '12px' : '11px',
             flexShrink: 0,
           }}
         >
-          {type === 'loading' ? (
-            <span
-              style={{
-                display: 'inline-block',
-                width: '14px',
-                height: '14px',
-                borderRadius: '50%',
-                border: `2px solid ${c.color}`,
-                borderTopColor: 'transparent',
-                animation: 'spin 0.7s linear infinite',
-              }}
-            />
-          ) : (
-            c.icon
-          )}
+          {c.icon}
         </div>
-        <span style={{ fontWeight: '700', fontSize: '15px', color: '#fff', letterSpacing: '-0.01em' }}>
-          {title}
-        </span>
-      </div>
-
-      {/* Message */}
-      {message && (
-        <p style={{ margin: '0', fontSize: '13px', color: 'rgba(255,255,255,0.65)', lineHeight: '1.6', paddingLeft: '48px' }}>
-          {message}
+        <p
+          style={{
+            margin: 0,
+            fontSize: '12px',
+            color: '#E2E8F0',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: 1.25,
+            letterSpacing: '-0.005em',
+          }}
+        >
+          {text}
         </p>
-      )}
+      </div>
 
       {/* Actions */}
       {actions && actions.length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', paddingLeft: '48px' }}>
+        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
           {actions.map((action, i) => (
             <button
               key={i}
               onClick={() => { toast.dismiss(t.id); action.onClick?.(); }}
               style={{
-                padding: '8px 18px',
-                borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: i === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
-                color: '#fff',
+                padding: '4px 9px',
+                borderRadius: '999px',
+                border: i === 0 ? `1px solid ${c.border}` : '1px solid rgba(148,163,184,0.28)',
+                background: i === 0 ? c.bg : 'rgba(148,163,184,0.12)',
+                color: '#E2E8F0',
                 fontWeight: '600',
-                fontSize: '12px',
+                fontSize: '10px',
                 cursor: 'pointer',
                 fontFamily: 'inherit',
+                letterSpacing: '0.01em',
               }}
             >
               {action.label}
@@ -149,6 +116,28 @@ function buildToast({ type, title, message, actions, toastRef }) {
           ))}
         </div>
       )}
+
+      <button
+        onClick={() => toast.dismiss(t.id)}
+        style={{
+          background: 'rgba(148,163,184,0.11)',
+          border: '1px solid rgba(148,163,184,0.22)',
+          borderRadius: '999px',
+          color: 'rgba(241,245,249,0.65)',
+          width: '20px',
+          height: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          fontSize: '10px',
+          lineHeight: 1,
+          transition: 'all 0.18s ease',
+          flexShrink: 0,
+        }}
+      >
+        ✕
+      </button>
     </div>
   );
 }
