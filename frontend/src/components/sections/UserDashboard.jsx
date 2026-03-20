@@ -1797,25 +1797,37 @@ const UserDashboard = () => {
                 ))}
               </div>
               {/* Quick Stats Card */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 14 }}>Quick Insights</div>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5, marginBottom: 12 }}>Quick Insights</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
                 {quickStatsItems.map((qs, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: i < quickStatsItems.length - 1 ? 12 : 0, marginBottom: i < quickStatsItems.length - 1 ? 12 : 0, borderBottom: i < quickStatsItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <span style={{ fontSize: 20 }}>{qs.icon}</span>
-                    <div style={{ flex: 1 }}><div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{qs.label}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{qs.sub}</div></div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: qs.color }}>{qs.value}</div>
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 4 }}>{qs.label}</div>
+                        <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>{qs.value}</div>
+                    </div>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                       <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: qs.color, boxShadow: `0 0 10px ${qs.color}50` }} />
+                    </div>
                   </div>
                 ))}
+                </div>
               </div>
+
               {/* Recent Activity Card */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 14 }}>Recent Activity</div>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5, marginBottom: 12 }}>Recent Activity</div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px' }}>
                 {activityItems.map((a, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', paddingBottom: i < activityItems.length - 1 ? 12 : 0, marginBottom: i < activityItems.length - 1 ? 12 : 0, borderBottom: i < activityItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: a.color, marginTop: 5, flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}><div style={{ fontSize: 13, color: '#fff', lineHeight: 1.4 }}>{a.text}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{a.time}</div></div>
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: i < activityItems.length - 1 ? 16 : 0, marginBottom: i < activityItems.length - 1 ? 16 : 0, borderBottom: i < activityItems.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: a.color, marginTop: 6, flexShrink: 0, boxShadow: `0 0 8px ${a.color}50` }} />
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.4 }}>{a.text}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{a.time}</div>
+                    </div>
                   </div>
                 ))}
+                </div>
               </div>
               <button onClick={() => setIsAddProductOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <PlusIcon /> + List a New Product
@@ -3053,37 +3065,40 @@ const UserDashboard = () => {
               {/* RIGHT PANEL */}
               < div className="content-right" >
                 {/* ACTIVITY */}
-                < div className="right-section-title" > Activity</div >
+                <div className="right-section-title" style={{ fontSize: '14px', letterSpacing: '0.5px' }}>Recent Activity</div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {
                   activityItems.map((n, i) => (
-                    <div className="notif-item" key={i}>
-                      <div className="notif-dot" style={{ background: n.color }} />
-                      <div>
-                        <div className="notif-text">{n.text}</div>
-                        <div className="notif-time">{n.time}</div>
+                    <div className="notif-item" key={i} style={{ padding: 0 }}>
+                      <div className="notif-dot" style={{ background: n.color, marginTop: '7px', borderRadius: '50%', width: '8px', height: '8px', boxShadow: `0 0 8px ${n.color}50` }} />
+                      <div style={{ flex: 1 }}>
+                        <div className="notif-text" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>{n.text}</div>
+                        <div className="notif-time" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '4px' }}>{n.time}</div>
                       </div>
                     </div>
                   ))
                 }
+                </div>
 
-                < hr className="divider" />
+                <hr className="divider" style={{ margin: '24px 0', borderColor: 'rgba(255,255,255,0.04)' }} />
 
                 {/* QUICK STATS */}
-                < div className="right-section-title" > Quick Stats</div >
+                <div className="right-section-title" style={{ fontSize: '14px', letterSpacing: '0.5px' }}>Quick Insights</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                 {
                   quickStatsItems.map((a, i) => (
-                    <div className="activity-item" key={i} style={{ alignItems: 'flex-start' }}>
-                      <div className="activity-icon" style={{ background: `${a.color}20`, color: a.color, fontSize: 14, minWidth: 34, height: 34 }}>
-                        {a.icon}
-                      </div>
+                    <div className="activity-item" key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', alignItems: 'center', transition: 'all 0.2s', cursor: 'default' }}>
                       <div style={{ flex: 1 }}>
-                        <div className="notif-time" style={{ marginBottom: 1 }}>{a.label}</div>
-                        <div style={{ fontWeight: 800, fontSize: 18, color: a.color, lineHeight: 1.1 }}>{a.value}</div>
-                        <div className="notif-time" style={{ marginTop: 1 }}>{a.sub}</div>
+                        <div className="notif-time" style={{ marginBottom: '6px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{a.label}</div>
+                        <div style={{ fontWeight: 800, fontSize: '24px', color: '#fff', letterSpacing: '-0.5px' }}>{a.value}</div>
+                      </div>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: a.color, boxShadow: `0 0 12px ${a.color}40` }} />
                       </div>
                     </div>
                   ))
                 }
+                </div>
               </div >
             </div >
           </div >

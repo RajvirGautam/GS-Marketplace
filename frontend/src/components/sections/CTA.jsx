@@ -114,7 +114,7 @@ const CTA = () => {
 
   // Phase 2 (Text Split): Keep the copy visible while the circle opens through the middle.
   const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.22, 1));
-  const textTranslate = textSplitProgress * (isMobile ? 70 : 110);
+  const textTranslate = textSplitProgress * (isMobile ? 120 : 250);
   const textOpacity = 1 - Math.max(0, (textSplitProgress - 0.86) / 0.14);
 
   // Phase 3 (Morph Shell): Replace the circle with a panel that grows into the CTA frame.

@@ -258,7 +258,7 @@ const DeleteConfirmModal = ({ onClose, onConfirm, deleting }) => {
 
 const OfferCard = ({ message, currentUserId, onRespond, responding }) => {
     const { offerData, sender } = message;
-    const isSender = sender._id === currentUserId || sender._id?.toString() === currentUserId?.toString();
+    const isSender = sender?._id === currentUserId || sender?._id?.toString() === currentUserId?.toString();
     const isPending = offerData?.status === 'pending';
 
     const statusColors = {
@@ -577,6 +577,9 @@ const Chat = () => {
         toasts, dismissToast
     } = useSocket();
 
+    const [conversations, setConversations] = useState([]);
+    const [activeConvId, setActiveConvId] = useState(conversationId || null);
+
     // ── Fixes for scroll, sidebar reset & hw back nav ─────────────────────────
     useEffect(() => {
         window.scrollTo(0, 0); // Open chat page unscrolled
@@ -595,9 +598,6 @@ const Chat = () => {
     useEffect(() => {
         setShowMobileSidebar(false);
     }, [activeConvId]);
-
-    const [conversations, setConversations] = useState([]);
-    const [activeConvId, setActiveConvId] = useState(conversationId || null);
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [sending, setSending] = useState(false);
