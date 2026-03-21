@@ -298,7 +298,7 @@ const Features = () => {
       `}</style>
 
       {/* Sticky Checkpoint */}
-      <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col md:flex-row">
+      <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col md:flex-row relative">
 
         {/* Shared animated background */}
         <div className="absolute inset-0 z-0 pointer-events-none">
