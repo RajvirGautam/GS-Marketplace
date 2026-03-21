@@ -235,6 +235,20 @@ export const chatAPI = {
     });
     return data;
   },
+  uploadMedia: async (file) => {
+    const formData = new FormData();
+    formData.append('media', file);
+    const { data } = await api.post('/chat/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data; // { success, url, mediaType }
+  },
+  sendMediaMessage: async (conversationId, mediaUrl, mediaType, caption = '') => {
+    const { data } = await api.post(`/chat/conversations/${conversationId}/media-url`, {
+      mediaUrl, mediaType, caption
+    });
+    return data;
+  },
   sendOffer: async (conversationId, amount, note = '') => {
     const { data } = await api.post(`/chat/conversations/${conversationId}/offer`, { amount, note });
     return data;
