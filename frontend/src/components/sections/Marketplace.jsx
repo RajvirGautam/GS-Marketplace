@@ -1546,43 +1546,71 @@ const Marketplace = () => {
 
         </div>
 
-        {/* Mobile Bottom Navigation (Sticky) */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/10 px-6 py-3 flex items-center justify-between z-50">
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex flex-col items-center gap-1 text-[#00D9FF]">
-            <GridIcon />
-            <span className="text-[9px] font-bold mt-1">Home</span>
-          </button>
-          <button onClick={() => user ? navigate('/dashboard') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
-            <span className="text-[9px] font-bold mt-1">Dashboard</span>
-          </button>
-
-          <button onClick={() => user ? setIsAddProductOpen(true) : setIsLoginOpen(true)} className="relative -top-5 flex flex-col items-center group">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-2xl shadow-lg shadow-cyan-900/40 group-active:scale-95 transition-transform">
-              +
-            </div>
+        {/* Mobile Bottom Navigation (Sticky Wrapper) */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+          {/* Centered '+' button - Outside the mask so it's visible */}
+          <button 
+            onClick={() => user ? setIsAddProductOpen(true) : setIsLoginOpen(true)} 
+            className="absolute left-1/2 -translate-x-1/2 -top-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all active:scale-90 hover:scale-105 z-[60]"
+          >
+            +
           </button>
 
-          <button onClick={() => user ? navigate('/chat') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-            <span className="text-[9px] font-bold mt-1">Messages</span>
-            {unreadCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white bg-gradient-to-br from-pink-500 to-red-500 border border-black">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-          <button onClick={() => user ? navigate('/dashboard?tab=My Account') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
-            <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
-              <Avatar
-                src={user?.profilePicture}
-                name={user?.fullName || user?.name || user?.email}
-                size={20}
-                style={{ fontSize: '10px', fontWeight: '800' }}
-              />
+          {/* The notched background and icons */}
+          <div 
+            className="relative flex items-center justify-between px-6 h-[64px]"
+            style={{
+              background: 'rgba(10,10,10,0.95)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '20px 20px 0 0',
+              mask: 'radial-gradient(circle 31px at 50% 0, transparent 31px, #fff 0)',
+              WebkitMask: 'radial-gradient(circle 31px at 50% 0, transparent 31px, #fff 0)',
+            }}
+          >
+            {/* Notch border arc */}
+            <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: '64px' }}>
+              <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path 
+                  d="M10 0.5 H169 A31 31 0 0 0 231 0.5 H390" 
+                  stroke="rgba(255,255,255,0.12)" 
+                  strokeWidth="1"
+                />
+              </svg>
             </div>
-            <span className="text-[9px] font-bold mt-1">Profile</span>
-          </button>
+
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex flex-col items-center gap-1 text-[#00D9FF]">
+              <GridIcon />
+              <span className="text-[9px] font-bold mt-1">Home</span>
+            </button>
+            <button onClick={() => user ? navigate('/dashboard') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <span className="text-[9px] font-bold mt-1">Dashboard</span>
+            </button>
+
+            <div className="w-12" /> {/* Space for the + button */}
+
+            <button onClick={() => user ? navigate('/chat') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              <span className="text-[9px] font-bold mt-1">Messages</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white bg-gradient-to-br from-pink-500 to-red-500 border border-black">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => user ? navigate('/dashboard?tab=My Account') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
+                <Avatar
+                  src={user?.profilePicture}
+                  name={user?.fullName || user?.name || user?.email}
+                  size={20}
+                  style={{ fontSize: '10px', fontWeight: '800' }}
+                />
+              </div>
+              <span className="text-[9px] font-bold mt-1">Profile</span>
+            </button>
+          </div>
         </div>
 
         {/* Hiding old mobile Add Button since we added a sticky bottom nav */}
