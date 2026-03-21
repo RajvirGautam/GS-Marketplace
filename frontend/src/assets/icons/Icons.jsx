@@ -1,7 +1,7 @@
 const Icons = {
   // Navigation & UI
-  Zap: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  Zap: (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
     </svg>
   ),
@@ -62,8 +62,8 @@ const Icons = {
       <path d="M16 10a4 4 0 0 1-8 0" />
     </svg>
   ),
-  Cpu: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  Cpu: (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect width="16" height="16" x="4" y="4" rx="2" />
       <rect width="6" height="6" x="9" y="9" rx="1" />
       <path d="M15 2v2" />
@@ -84,8 +84,8 @@ const Icons = {
   ),
 
   // Engineering Vectors
-  DrafterTools: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  DrafterTools: (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="m12 19 7-7 3 3-7 7-3-3z" />
       <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
       <path d="m2 2 7.5 8.6L4.2 15.3" />
