@@ -27,7 +27,7 @@ const upload = multer({
 const uploadToCloudinary = (buffer, folder = 'chat', resourceType = 'auto') => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-            { folder, resource_type: resourceType },
+            { folder, resource_type: resourceType, quality: 'auto', fetch_format: 'auto' },
             (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
@@ -252,6 +252,76 @@ router.post('/conversations/:id/messages', authenticate, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
+// POST /api/chat/upload
+// Upload a file to Cloudinary immediately and return the URL (no message created)
+// ─────────────────────────────────────────────
+router.post('/upload', authenticate, upload.single('media'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+        const isVideo = req.file.mimetype.startsWith('video/');
+        const isImage = req.file.mimetype.startsWith('image/');
+        const resourceType = isVideo ? 'video' : isImage ? 'image' : 'raw';
+        const result = await uploadToCloudinary(req.file.buffer, 'chat', resourceType);
+        const mediaType = isVideo ? 'video' : isImage ? 'image' : 'file';
+        res.json({ success: true, url: result.secure_url, mediaType });
+    } catch (err) {
+        console.error('Error pre-uploading media:', err);
+        res.status(500).json({ success: false, message: 'Upload failed', error: err.message });
+    }
+});
+
+// POST /api/chat/conversations/:id/media-url
+// Create a chat message from an already-uploaded Cloudinary URL (fast send path)
+// ─────────────────────────────────────────────
+router.post('/conversations/:id/media-url', authenticate, async (req, res) => {
+    try {
+        const { mediaUrl, mediaType, caption = '' } = req.body;
+        if (!mediaUrl || !mediaType) return res.status(400).json({ success: false, message: 'mediaUrl and mediaType required' });
+
+        const conversation = await Conversation.findById(req.params.id);
+        if (!conversation) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+        const isParticipant = conversation.participants.some(p => p.toString() === req.user._id.toString());
+        if (!isParticipant) return res.status(403).json({ success: false, message: 'Access denied' });
+
+        const message = await Message.create({
+            conversation: req.params.id,
+            sender: req.user._id,
+            type: 'media',
+            content: caption,
+            mediaUrl,
+            mediaType,
+            readBy: [req.user._id]
+        });
+
+        await Conversation.findByIdAndUpdate(req.params.id, {
+            lastMessage: message._id,
+            lastMessageAt: new Date()
+        });
+
+        const populated = await Message.findById(message._id).populate('sender', 'fullName profilePicture');
+        emitToRecipients(conversation, req.user._id, populated);
+
+        const senderName = populated.sender?.fullName || 'Someone';
+        conversation.participants.forEach(participantId => {
+            if (participantId.toString() !== req.user._id.toString()) {
+                createAndEmitNotification(
+                    participantId,
+                    'new_message',
+                    `${senderName} sent ${mediaType === 'image' ? 'a photo' : mediaType === 'video' ? 'a video' : 'a file'}`,
+                    '',
+                    { conversationId: conversation._id }
+                );
+            }
+        });
+
+        res.status(201).json({ success: true, message: populated });
+    } catch (err) {
+        console.error('Error sending media message:', err);
+        res.status(500).json({ success: false, message: 'Server error', error: err.message });
+    }
+});
+
 // POST /api/chat/conversations/:id/media
 // Upload media (image/video/file) and send as message
 // ─────────────────────────────────────────────
