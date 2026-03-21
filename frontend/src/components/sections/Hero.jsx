@@ -767,9 +767,13 @@ const Hero = () => {
           position: relative;
           isolation: isolate;
           overflow: hidden;
-          background: rgb(14, 14, 22);
+          background: rgba(14, 14, 22, 0.55);
+          backdrop-filter: blur(20px) saturate(160%);
+          -webkit-backdrop-filter: blur(20px) saturate(160%);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          box-shadow: 
+            0 16px 32px -8px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .mobile-feature-pill::before {
@@ -777,7 +781,7 @@ const Hero = () => {
           position: absolute;
           inset: 0;
           background: linear-gradient(135deg, var(--accent-color), transparent);
-          opacity: 0.1;
+          opacity: 0.18;
           z-index: -1;
         }
 
@@ -1128,61 +1132,61 @@ const Hero = () => {
             </div>
 
             {/* Mobile feature pills - 2x2 grid */}
-            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3" style={{ '--accent-color': currentCard.accent }}>
+            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3" style={{ '--accent-color': '#00D9FF' }}>
               <div className="mobile-feature-pill group relative overflow-hidden">
                 <div className="card-scanline" />
-                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ background: `${currentCard.accent}25` }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
+                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
                 >
-                  <Icons.Cpu className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.Cpu className="w-4 h-4 text-white stroke-white drop-shadow-md" />
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">AI Smart Listing</div>
-                  <div className="text-[9px] text-white/50">Instant Gear Specs</div>
+                  <div className="text-[9px] text-white/65">Instant Gear Specs</div>
                 </div>
               </div>
               <div className="mobile-feature-pill group relative overflow-hidden">
                 <div className="card-scanline" />
-                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ background: `${currentCard.accent}25` }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
+                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
                 >
-                  <Icons.Zap className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.Zap className="w-4 h-4 text-white stroke-white drop-shadow-md" />
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Campus Exchange</div>
-                  <div className="text-[9px] text-white/50">Zero Shipping</div>
+                  <div className="text-[9px] text-white/65">Zero Shipping</div>
                 </div>
               </div>
               <div className="mobile-feature-pill group relative overflow-hidden">
                 <div className="card-scanline" />
-                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ background: `${currentCard.accent}25` }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
+                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
                 >
-                  <Icons.DrafterTools className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.DrafterTools className="w-4 h-4 text-white stroke-white drop-shadow-md" />
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Engineering Hub</div>
-                  <div className="text-[9px] text-white/50">Built for Engineers</div>
+                  <div className="text-[9px] text-white/65">Built for Engineers</div>
                 </div>
               </div>
               <div className="mobile-feature-pill group relative overflow-hidden">
                 <div className="card-scanline" />
-                <div className="top-accent-strip opacity-10" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
+                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ background: `${currentCard.accent}25` }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
+                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
                 >
-                  <Icons.ShieldCheck className="w-4 h-4" style={{ color: currentCard.accent }} />
+                  <Icons.ShieldCheck className="w-4 h-4 text-white stroke-white drop-shadow-md" />
                 </div>
                 <div>
                   <div className="text-white font-bold text-xs">Verified Only</div>
-                  <div className="text-[9px] text-white/50">ID Verified Students</div>
+                  <div className="text-[9px] text-white/65">ID Verified Students</div>
                 </div>
               </div>
             </div>
