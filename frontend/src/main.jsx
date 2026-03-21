@@ -7,3 +7,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
+// Reveal after first paint — prevents FOUC from Tailwind CDN processing delay
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.getElementById('root').style.opacity = '1';
+}));
