@@ -368,17 +368,17 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
   // Build timeline steps from available timestamps
   const steps = [
     {
-      icon: '💬',
+      icon: '',
       label: deal.source === 'chat' ? 'Price negotiated via Chat' : 'Offer Submitted',
       desc: deal.source === 'chat'
         ? `A price of ₹${deal.agreedPrice} was negotiated in chat`
         : `An offer of ₹${deal.agreedPrice} was submitted${isSeller ? ` by ${otherName}` : ` to ${otherName}`}`,
       time: deal.createdAt,
-      color: '#00D9FF',
+      color: '#3B82F6',
       done: true,
     },
     {
-      icon: '✅',
+      icon: '',
       label: 'Offer Accepted',
       desc: deal.source === 'chat'
         ? `Agreed price locked via chat negotiation`
@@ -388,11 +388,11 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       done: true,
     },
     {
-      icon: '🤝',
+      icon: '',
       label: 'Deal Opened',
       desc: `Both parties committed — agreed price ₹${deal.agreedPrice}`,
       time: deal.createdAt,
-      color: '#7C3AED',
+      color: '#8B5CF6',
       done: true,
     },
     {
@@ -404,7 +404,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       done: deal.dealStatus === 'sold',
     },
     {
-      icon: '⭐',
+      icon: '',
       label: 'Buyer Review',
       desc: (() => {
         if (isBuyer) {
@@ -423,7 +423,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       hideDetails: isSeller && !!deal.buyerReview?.submittedAt
     },
     {
-      icon: '⭐',
+      icon: '',
       label: 'Seller Review',
       desc: (() => {
         if (isSeller) {
@@ -460,17 +460,17 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
         style={{
           width: '100%', maxWidth: 480,
           background: 'rgba(14,14,14,0.95)',
-          border: '1.5px solid rgba(255,255,255,0.1)',
+          border: 'none',
           borderRadius: 16,
           overflow: 'hidden',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
           animation: 'slideUp 0.25s ease',
         }}
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(0,217,255,0.08), rgba(124,58,237,0.08))',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(255,255,255,0.03)',
+          borderBottom: 'none',
           padding: '20px 20px 16px',
           position: 'relative',
         }}>
@@ -478,15 +478,15 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
             onClick={onClose}
             style={{
               position: 'absolute', top: 14, right: 14,
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.06)', border: 'none',
               borderRadius: 6, color: 'rgba(255,255,255,0.5)',
               width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', fontSize: 14, lineHeight: 1,
             }}
           >✕</button>
 
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#00D9FF', marginBottom: 10 }}>
-            📋 Deal History
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, textTransform: 'none', color: '#3B82F6', marginBottom: 10 }}>
+            Deal History
           </div>
 
           {/* Product row */}
@@ -494,7 +494,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
             <img
               src={deal.product?.images?.[0] || '/placeholder.jpg'}
               alt=""
-              style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', border: 'none' }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -506,7 +506,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 <span style={{
-                  fontSize: 14, fontWeight: 800, color: '#00D9FF',
+                  fontSize: 14, fontWeight: 800, color: '#3B82F6',
                   fontFamily: 'JetBrains Mono, monospace',
                 }}>₹{deal.agreedPrice}</span>
                 {deal.product?.price && deal.agreedPrice !== deal.product.price && (
@@ -514,8 +514,8 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
                 )}
                 <span style={{
                   fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
-                  textTransform: 'uppercase', letterSpacing: 1, padding: '2px 7px',
-                  borderRadius: 4, border: '1px solid rgba(16,185,129,0.3)',
+                  textTransform: 'none', letterSpacing: 1, padding: '2px 7px',
+                  borderRadius: 4, border: 'none',
                   background: 'rgba(16,185,129,0.1)', color: '#10B981'
                 }}>SOLD</span>
               </div>
@@ -525,7 +525,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
 
         {/* Timeline */}
         <div style={{ padding: '20px 24px 24px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'none', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>
             Order Timeline
           </div>
           <div style={{ position: 'relative' }}>
@@ -864,8 +864,8 @@ const UserDashboard = () => {
       color: ['#00D9FF', '#7C3AED', '#F59E0B', '#10B981', '#EF4444', '#EC4899'][idx % 6]
     }))
     : [
-      { label: 'Electronics', value: 5, color: '#00D9FF' },
-      { label: 'Books', value: 3, color: '#7C3AED' },
+      { label: 'Electronics', value: 5, color: '#3B82F6' },
+      { label: 'Books', value: 3, color: '#8B5CF6' },
       { label: 'Clothes', value: 2, color: '#F59E0B' },
       { label: 'Others', value: 1, color: '#10B981' },
     ];
@@ -890,7 +890,7 @@ const UserDashboard = () => {
         text: `"${l.title}" new listing`,
         ts: new Date(l.createdAt),
         time: getTimeAgo(l.createdAt),
-        color: '#00D9FF'
+        color: '#3B82F6'
       });
       if (l.status === 'sold') {
         all.push({
@@ -910,7 +910,7 @@ const UserDashboard = () => {
         text: `Price offer of \u20b9${o.offerPrice} sent to ${toName} for "${title}"`,
         ts: new Date(o.createdAt),
         time: getTimeAgo(o.createdAt),
-        color: '#00D9FF'
+        color: '#3B82F6'
       });
     });
 
@@ -966,7 +966,7 @@ const UserDashboard = () => {
         text: `Deal in progress for "${title}" at \u20b9${d.agreedPrice}`,
         ts: new Date(d.createdAt),
         time: getTimeAgo(d.createdAt),
-        color: '#7C3AED'
+        color: '#8B5CF6'
       });
     });
 
@@ -991,8 +991,8 @@ const UserDashboard = () => {
       : '0.0';
     const healthyListings = listings.filter(l => l.status === 'active').length;
     return [
-      { label: 'Sell-through rate', value: `${sellThrough}%`, sub: `${stats.soldListings}/${stats.totalListings} sold`, color: '#00D9FF' },
-      { label: 'Avg views / listing', value: avgViews, sub: `${stats.totalViews} total views`, color: '#7C3AED' },
+      { label: 'Sell-through rate', value: `${sellThrough}%`, sub: `${stats.soldListings}/${stats.totalListings} sold`, color: '#3B82F6' },
+      { label: 'Avg views / listing', value: avgViews, sub: `${stats.totalViews} total views`, color: '#8B5CF6' },
       { label: 'Save rate', value: `${saveRate}%`, sub: `of viewers save`, color: '#F59E0B' },
       { label: 'Active listings', value: healthyListings, sub: `of ${stats.totalListings} total`, color: '#10B981' },
     ];
@@ -1783,8 +1783,8 @@ const UserDashboard = () => {
               {/* 2x2 Stat Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
                 {[
-                  { label: 'Listings', value: <CountUp end={stats.totalListings} />, sub: `${stats.activeListings} active`, color: '#00D9FF' },
-                  { label: 'Views', value: <CountUp end={stats.totalViews} />, sub: `${stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg`, color: '#7C3AED' },
+                  { label: 'Listings', value: <CountUp end={stats.totalListings} />, sub: `${stats.activeListings} active`, color: '#3B82F6' },
+                  { label: 'Views', value: <CountUp end={stats.totalViews} />, sub: `${stats.totalListings > 0 ? Math.round(stats.totalViews / stats.totalListings) : 0} avg`, color: '#8B5CF6' },
                   { label: 'Saves', value: <CountUp end={stats.totalSaves} />, sub: 'interested users', color: '#F59E0B' },
                   { label: 'Revenue', value: <CountUp end={stats.totalRevenue} prefix="₹" />, sub: `${stats.soldListings} sold`, color: '#10B981' },
                 ].map(s => (
@@ -1858,7 +1858,7 @@ const UserDashboard = () => {
                     <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{listing.title}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>{getStatusBadge(listing.status)}<span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span></div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 15 }}>{getPriceDisplay(listing)}</div>
+                      <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 15 }}>{getPriceDisplay(listing)}</div>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleViewProduct(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
                         <button onClick={() => handleEditProduct(listing)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>Edit</button>
@@ -1882,8 +1882,8 @@ const UserDashboard = () => {
             <>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>My Deals</div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                {[['negotiations', '🤝 Active'], ['confirmed', '✅ Confirmed']].map(([val, label]) => (
-                  <button key={val} onClick={() => setDealsSubTab(val)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: `1px solid ${dealsSubTab === val ? 'rgba(0,217,255,0.4)' : 'rgba(255,255,255,0.1)'}`, background: dealsSubTab === val ? 'rgba(0,217,255,0.1)' : 'rgba(255,255,255,0.03)', color: dealsSubTab === val ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>{label}</button>
+                {[['negotiations', 'Active'], ['confirmed', 'Confirmed']].map(([val, label]) => (
+                  <button key={val} onClick={() => setDealsSubTab(val)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: 'none', background: dealsSubTab === val ? 'rgba(0,217,255,0.1)' : 'rgba(255,255,255,0.03)', color: dealsSubTab === val ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>{label}</button>
                 ))}
               </div>
               {dealsLoading || offersLoading ? (
@@ -1897,14 +1897,15 @@ const UserDashboard = () => {
                   ...pSent.map(o => ({ ...o, _t: 'sent' })),
                   ...aDeal.map(d => ({ ...d, _t: 'deal' })),
                 ];
-                if (!all.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>🤝</div><div style={{ fontSize: 14, marginTop: 10 }}>No active negotiations</div></div>;
+                if (!all.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>·</div><div style={{ fontSize: 14, marginTop: 10 }}>No active negotiations</div></div>;
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {all.map((item, i) => {
-                      const color = item._t === 'received' ? '#F59E0B' : item._t === 'sent' ? '#00D9FF' : '#10B981';
+                      const color = item._t === 'received' ? '#3B82F6' : item._t === 'sent' ? '#F59E0B' : '#8B5CF6';
+                      const bgRaw = item._t === 'received' ? 'rgba(59,130,246,0.12)' : item._t === 'sent' ? 'rgba(245,158,11,0.12)' : 'rgba(139,92,246,0.12)';
                       const label = item._t === 'received' ? 'INCOMING' : item._t === 'sent' ? 'SENT' : 'ACTIVE';
                       return (
-                        <div key={item._id + i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
+                        <div key={item._id + i} style={{ background: bgRaw, border: 'none', borderRadius: 12, padding: 14 }}>
                           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
                             <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={item.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                             <div style={{ flex: 1, minWidth: 0 }}>
@@ -1912,18 +1913,18 @@ const UserDashboard = () => {
                               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{item._t === 'received' ? `From: ${item.buyer?.fullName}` : item._t === 'sent' ? `To: ${item.seller?.fullName}` : `via ${item.source}`}</div>
                             </div>
                             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: '#00D9FF' }}>₹{item.offerPrice || item.agreedPrice}</div>
-                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, background: `${color}18`, color, border: `1px solid ${color}40`, display: 'inline-block', marginTop: 3 }}>{label}</span>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6' }}>₹{item.offerPrice || item.agreedPrice}</div>
+                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'none', padding: '2px 7px', borderRadius: 4, background: `${color}18`, color, border: 'none', display: 'inline-block', marginTop: 3 }}>{label}</span>
                             </div>
                           </div>
                           {item._t === 'received' && (
                             <div style={{ display: 'flex', gap: 8 }}>
-                              <button onClick={() => handleOfferStatus(item._id, 'accepted')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Accept</button>
-                              <button onClick={() => handleOfferStatus(item._id, 'rejected')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#EF4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✕ Reject</button>
+                              <button onClick={() => handleOfferStatus(item._id, 'accepted')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Accept</button>
+                              <button onClick={() => handleOfferStatus(item._id, 'rejected')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.06)', color: '#EF4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Reject</button>
                             </div>
                           )}
-                          {item._t === 'sent' && <button onClick={() => handleOfferStatus(item._id, 'cancelled')} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel Offer</button>}
-                          {item._t === 'deal' && (() => { const isSel = (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId; return isSel ? <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>📦 Mark as Handed Over</button> : <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(0,217,255,0.35)', background: 'rgba(0,217,255,0.07)', color: '#00D9FF', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>✓ Confirm Received</button>; })()}
+                          {item._t === 'sent' && <button onClick={() => handleOfferStatus(item._id, 'cancelled')} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel Offer</button>}
+                          {item._t === 'deal' && (() => { const isSel = (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId; return isSel ? <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Mark Handed Over</button> : <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(0,217,255,0.07)', color: '#3B82F6', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Confirm Received</button>; })()}
                         </div>
                       );
                     })}
@@ -1931,18 +1932,18 @@ const UserDashboard = () => {
                 );
               })() : (() => {
                 const confirmed = deals.filter(d => d.dealStatus === 'sold');
-                if (!confirmed.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>✅</div><div style={{ fontSize: 14, marginTop: 10 }}>No confirmed deals yet</div></div>;
+                if (!confirmed.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>/</div><div style={{ fontSize: 14, marginTop: 10 }}>No confirmed deals yet</div></div>;
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {confirmed.map(deal => (
-                      <div key={deal._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
+                      <div key={deal._id} style={{ background: 'rgba(16,185,129,0.12)', border: 'none', borderRadius: 12, padding: 14 }}>
                         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 10 }}>
                           <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#00D9FF', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
-                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)', flexShrink: 0 }}>SOLD</span>
+                          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#3B82F6', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
+                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'none', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: 'none', flexShrink: 0 }}>SOLD</span>
                         </div>
-                        <button onClick={() => setDealHistoryOpen(deal)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                          📋 View Timeline
+                        <button onClick={() => setDealHistoryOpen(deal)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                          View Timeline
                         </button>
                       </div>
                     ))}
@@ -1965,7 +1966,7 @@ const UserDashboard = () => {
                     <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{item.title}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{item.category} · {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}</div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 15 }}>{getPriceDisplay(item)}</div>
+                      <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 15 }}>{getPriceDisplay(item)}</div>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleViewProduct(item._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
                         <button onClick={async () => { try { const res = await productAPI.toggleSave(item._id); if (res.success && !res.saved) { setSavedProducts(prev => prev.filter(p => p._id !== item._id)); toggleSavedId(item._id); } } catch (e) { } }} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Unsave</button>
@@ -2150,7 +2151,7 @@ const UserDashboard = () => {
                     <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
                       {[
                         { label: 'Total', value: <CountUp end={stats.totalListings} />, color: '#fff' },
-                        { label: 'Active', value: <CountUp end={stats.activeListings} />, color: '#00D9FF' },
+                        { label: 'Active', value: <CountUp end={stats.activeListings} />, color: '#3B82F6' },
                         { label: 'Sold', value: <CountUp end={stats.soldListings} />, color: '#10B981' },
                         { label: 'Pending', value: <CountUp end={stats.pendingListings} />, color: '#F59E0B' },
                       ].map(s => (
@@ -2162,7 +2163,7 @@ const UserDashboard = () => {
                     </div>
 
                     {/* FILTER TABS + LISTINGS GRID */}
-                    <div className="card" style={{ padding: 20 }}>
+                    <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                         <div className="listing-tabs" style={{ marginBottom: 0 }}>
                           {['all', 'active', 'sold', 'pending'].map(tab => (
@@ -2193,7 +2194,7 @@ const UserDashboard = () => {
                                 </div>
                               </div>
                               <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
+                                <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
                                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
                                   👁 {listing.views || 0} views · 🤍 {listing.saves || 0} saves
                                 </div>
@@ -2204,7 +2205,7 @@ const UserDashboard = () => {
                               <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
                               <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
                               {listing.status === 'active' && (
-                                <button className="listing-action-btn" style={{ color: '#10B981', borderColor: 'rgba(16,185,129,0.3)' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
+                                <button className="listing-action-btn" style={{ color: '#10B981', border: 'none' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
                               )}
                             </div>
                           </div>
@@ -2235,14 +2236,14 @@ const UserDashboard = () => {
 
                     {/* Sub-tab pills */}
                     <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                      {[['negotiations', '🤝 Negotiations'], ['confirmed', '✅ Confirmed Deals']].map(([key, label]) => (
+                      {[['negotiations', 'Negotiations'], ['confirmed', 'Confirmed Deals']].map(([key, label]) => (
                         <button
                           key={key}
                           onClick={() => setDealsSubTab(key)}
                           style={{
                             padding: '8px 20px',
                             borderRadius: 30,
-                            border: `1.5px solid ${dealsSubTab === key ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                            border: 'none',
                             background: dealsSubTab === key ? 'rgba(0,217,255,0.1)' : 'transparent',
                             color: dealsSubTab === key ? '#00D9FF' : 'rgba(255,255,255,0.4)',
                             fontWeight: 700,
@@ -2275,7 +2276,7 @@ const UserDashboard = () => {
                         if (!hasAnything) {
                           return (
                             <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                              <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤝</div>
+                              <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>·</div>
                               <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No negotiations yet</div>
                               <div style={{ fontSize: 13 }}>Make or receive an offer to start negotiating</div>
                             </div>
@@ -2287,12 +2288,12 @@ const UserDashboard = () => {
 
                             {/* ── PENDING OFFERS RECEIVED (seller) ── */}
                             {pendingReceived.length > 0 && (
-                              <div className="card" style={{ padding: 20 }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
                                   Incoming Offers
                                 </div>
                                 {pendingReceived.map(offer => (
-                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(59,130,246,0.12)' }}>
                                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                                       <div className="listing-img" style={{ width: 52, height: 52 }}>
                                         <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
@@ -2309,24 +2310,24 @@ const UserDashboard = () => {
                                         )}
                                       </div>
                                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{offer.offerPrice}</div>
                                         {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
                                       </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                                       <button
                                         className="listing-action-btn"
-                                        style={{ padding: '6px 14px', fontSize: 11, borderColor: 'rgba(16,185,129,0.4)', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
+                                        style={{ padding: '6px 14px', fontSize: 11, border: 'none', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
                                         onClick={() => handleOfferStatus(offer._id, 'accepted')}
                                       >
-                                        ✓ Accept
+                                        Accept
                                       </button>
                                       <button
                                         className="listing-action-btn del"
                                         style={{ padding: '6px 14px', fontSize: 11 }}
                                         onClick={() => handleOfferStatus(offer._id, 'rejected')}
                                       >
-                                        ✕ Reject
+                                        Reject
                                       </button>
                                     </div>
                                   </div>
@@ -2336,12 +2337,12 @@ const UserDashboard = () => {
 
                             {/* ── PENDING OFFERS SENT (buyer) ── */}
                             {pendingSent.length > 0 && (
-                              <div className="card" style={{ padding: 20 }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
                                   Offers You Sent
                                 </div>
                                 {pendingSent.map(offer => (
-                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(59,130,246,0.12)' }}>
                                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                                       <div className="listing-img" style={{ width: 52, height: 52 }}>
                                         <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
@@ -2353,15 +2354,15 @@ const UserDashboard = () => {
                                         </div>
                                       </div>
                                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{offer.offerPrice}</div>
+                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{offer.offerPrice}</div>
                                         {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
-                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
+                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'none', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
                                       </div>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                       <button
                                         className="listing-action-btn"
-                                        style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', borderColor: 'rgba(239,68,68,0.3)' }}
+                                        style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', border: 'none' }}
                                         onClick={() => handleOfferStatus(offer._id, 'cancelled')}
                                       >
                                         Cancel Offer
@@ -2374,8 +2375,8 @@ const UserDashboard = () => {
 
                             {/* ── ACCEPTED DEALS (awaiting seller confirm) ── */}
                             {activeDeals.length > 0 && (
-                              <div className="card" style={{ padding: 20 }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>
+                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
                                   Accepted — Awaiting Handoff
                                 </div>
                                 {activeDeals.map((deal) => {
@@ -2383,7 +2384,7 @@ const UserDashboard = () => {
                                   const isSeller = sellerId?.toString() === currentUserId;
                                   const otherParty = isSeller ? deal.buyer : deal.seller;
                                   return (
-                                    <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10 }}>
+                                    <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(139,92,246,0.12)' }}>
                                       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                                         <div className="listing-img" style={{ width: 52, height: 52 }}>
                                           <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
@@ -2399,38 +2400,38 @@ const UserDashboard = () => {
                                           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>via {deal.source === 'chat' ? 'Chat' : 'Offer'}</div>
                                         </div>
                                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                          <div style={{ fontSize: 17, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                          <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{deal.agreedPrice}</div>
                                           {deal.product?.price && deal.agreedPrice !== deal.product.price && (
                                             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</div>
                                           )}
-                                          <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
+                                          <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'none', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
                                         </div>
                                       </div>
                                       {/* Seller: Mark as Handed Over */}
                                       {isSeller && (
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '11px 14px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: 'none', borderRadius: 8, padding: '11px 14px' }}>
                                           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
                                             Ready to hand over the item?
                                           </div>
                                           <button
                                             onClick={() => handleConfirmSold(deal._id)}
-                                            style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(16,185,129,0.5)', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                            style={{ padding: '7px 16px', borderRadius: 6, border: 'none', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                                           >
-                                            📦 Handed Over
+                                            Handed Over
                                           </button>
                                         </div>
                                       )}
                                       {/* Buyer: Mark as Received */}
                                       {!isSeller && (
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)', borderRadius: 8, padding: '11px 14px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: 'none', borderRadius: 8, padding: '11px 14px' }}>
                                           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
                                             Got the item? Confirm receipt here.
                                           </div>
                                           <button
                                             onClick={() => handleConfirmSold(deal._id)}
-                                            style={{ padding: '7px 16px', borderRadius: 6, border: '1.5px solid rgba(0,217,255,0.4)', background: 'rgba(0,217,255,0.1)', color: '#00D9FF', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                                            style={{ padding: '7px 16px', borderRadius: 6, border: 'none', background: 'rgba(0,217,255,0.1)', color: '#3B82F6', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                                           >
-                                            ✓ Received Item
+                                            Received Item
                                           </button>
                                         </div>
                                       )}
@@ -2450,7 +2451,7 @@ const UserDashboard = () => {
                       if (confirmedDeals.length === 0) {
                         return (
                           <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>✅</div>
+                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>/</div>
                             <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No confirmed deals yet</div>
                             <div style={{ fontSize: 13 }}>Deals move here once the seller confirms them as sold</div>
                           </div>
@@ -2492,9 +2493,9 @@ const UserDashboard = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                       <span style={{
                                         fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
-                                        textTransform: 'uppercase', letterSpacing: 1, padding: '2px 8px',
+                                        textTransform: 'none', letterSpacing: 1, padding: '2px 8px',
                                         borderRadius: 4,
-                                        border: `1px solid ${deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.3)' : 'rgba(0,217,255,0.3)'}`,
+                                        border: 'none',
                                         background: deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.1)' : 'rgba(0,217,255,0.1)',
                                         color: deal.dealStatus === 'sold' ? '#10B981' : '#00D9FF'
                                       }}>
@@ -2506,7 +2507,7 @@ const UserDashboard = () => {
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                    <div style={{ fontSize: 18, fontWeight: 800, color: '#00D9FF' }}>₹{deal.agreedPrice}</div>
+                                    <div style={{ fontSize: 18, fontWeight: 800, color: '#3B82F6' }}>₹{deal.agreedPrice}</div>
                                     {deal.product?.price && deal.agreedPrice !== deal.product.price && (
                                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
                                         ₹{deal.product.price}
@@ -2521,7 +2522,7 @@ const UserDashboard = () => {
                             {isSeller && deal.dealStatus === 'active' && (
                               <div style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)',
+                                background: 'rgba(16,185,129,0.05)', border: 'none',
                                 borderRadius: 8, padding: '10px 14px'
                               }}>
                                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
@@ -2531,13 +2532,13 @@ const UserDashboard = () => {
                                   onClick={() => handleConfirmSold(deal._id)}
                                   style={{
                                     padding: '7px 16px', borderRadius: 6,
-                                    border: '1.5px solid rgba(16,185,129,0.5)',
+                                    border: 'none',
                                     background: 'rgba(16,185,129,0.15)', color: '#10B981',
                                     fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
                                     cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
                                   }}
                                 >
-                                  ✓ Confirm as Sold
+                                  Confirm Sold
                                 </button>
                               </div>
                             )}
@@ -2546,7 +2547,7 @@ const UserDashboard = () => {
                             {isBuyer && deal.dealStatus === 'sold' && (
                               deal.buyerReview?.submittedAt ? (
                                 <div style={{
-                                  background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                                  background: 'rgba(124,58,237,0.08)', border: 'none',
                                   borderRadius: 8, padding: '10px 14px'
                                 }}>
                                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the seller</div>
@@ -2563,11 +2564,11 @@ const UserDashboard = () => {
                                 </div>
                               ) : (
                                 <div style={{
-                                  background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                                  background: 'rgba(124,58,237,0.08)', border: 'none',
                                   borderRadius: 8, padding: '12px 14px'
                                 }}>
                                   <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                    ⭐ Rate the seller
+                                    Rate Seller
                                   </div>
                                   <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
                                     {[1, 2, 3, 4, 5].map(star => (
@@ -2598,7 +2599,7 @@ const UserDashboard = () => {
                                     rows={2}
                                     style={{
                                       width: '100%', background: 'rgba(255,255,255,0.04)',
-                                      border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
+                                      border: 'none', borderRadius: 6,
                                       color: '#fff', fontSize: 12, padding: '8px 10px',
                                       fontFamily: 'inherit', resize: 'none', outline: 'none',
                                       marginBottom: 10
@@ -2610,7 +2611,7 @@ const UserDashboard = () => {
                                     style={{
                                       padding: '7px 18px', borderRadius: 6, border: 'none',
                                       background: r.rating
-                                        ? 'linear-gradient(135deg, #7C3AED, #00D9FF)'
+                                        ? 'rgba(255,255,255,0.1)'
                                         : 'rgba(255,255,255,0.08)',
                                       color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
                                       fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
@@ -2630,7 +2631,7 @@ const UserDashboard = () => {
                                   {/* 
                                   {deal.buyerReview?.submittedAt && (
                                     <div style={{
-                                      background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+                                      background: 'rgba(245,158,11,0.08)', border: 'none',
                                       borderRadius: 8, padding: '10px 14px'
                                     }}>
                                       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review of you</div>
@@ -2650,7 +2651,7 @@ const UserDashboard = () => {
                                 {/* Seller's review of buyer */}
                                 {deal.sellerReview?.submittedAt ? (
                                   <div style={{
-                                    background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
+                                    background: 'rgba(16,185,129,0.08)', border: 'none',
                                     borderRadius: 8, padding: '10px 14px'
                                   }}>
                                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the buyer</div>
@@ -2667,11 +2668,11 @@ const UserDashboard = () => {
                                   </div>
                                 ) : (
                                   <div style={{
-                                    background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
+                                    background: 'rgba(16,185,129,0.06)', border: 'none',
                                     borderRadius: 8, padding: '12px 14px'
                                   }}>
                                     <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                      ⭐ Rate the buyer
+                                      Rate Buyer
                                     </div>
                                     <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
                                       {[1, 2, 3, 4, 5].map(star => (
@@ -2702,7 +2703,7 @@ const UserDashboard = () => {
                                       rows={2}
                                       style={{
                                         width: '100%', background: 'rgba(255,255,255,0.04)',
-                                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
+                                        border: 'none', borderRadius: 6,
                                         color: '#fff', fontSize: 12, padding: '8px 10px',
                                         fontFamily: 'inherit', resize: 'none', outline: 'none',
                                         marginBottom: 10
@@ -2714,7 +2715,7 @@ const UserDashboard = () => {
                                       style={{
                                         padding: '7px 18px', borderRadius: 6, border: 'none',
                                         background: r.rating
-                                          ? 'linear-gradient(135deg, #10B981, #00D9FF)'
+                                          ? 'rgba(255,255,255,0.1)'
                                           : 'rgba(255,255,255,0.08)',
                                         color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
                                         fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
@@ -2735,9 +2736,9 @@ const UserDashboard = () => {
                                 style={{
                                   display: 'inline-flex', alignItems: 'center', gap: 6,
                                   padding: '7px 14px', borderRadius: 8,
-                                  border: '1.5px solid rgba(0,217,255,0.25)',
+                                  border: 'none',
                                   background: 'rgba(0,217,255,0.06)',
-                                  color: '#00D9FF', fontFamily: 'inherit',
+                                  color: '#3B82F6', fontFamily: 'inherit',
                                   fontSize: 11, fontWeight: 700, cursor: 'pointer',
                                   transition: 'all 0.15s',
                                   letterSpacing: 0.4,
@@ -2745,7 +2746,7 @@ const UserDashboard = () => {
                                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.45)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.25)'; }}
                               >
-                                📋 Deal History
+                                Deal History
                               </button>
                             </div>
                           </div>
@@ -2773,7 +2774,7 @@ const UserDashboard = () => {
                       </button>
                     </div>
 
-                    <div className="card" style={{ padding: 20 }}>
+                    <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
                       {savedLoading ? (
                         <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
                           Loading saved products...
@@ -2793,7 +2794,7 @@ const UserDashboard = () => {
                                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(item.createdAt)}</div>
                               </div>
                               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 18 }}>{getPriceDisplay(item)}</div>
+                                <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 18 }}>{getPriceDisplay(item)}</div>
                                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
                                   {item.saves || 0} saves · {item.views || 0} views
                                 </div>
@@ -2805,7 +2806,7 @@ const UserDashboard = () => {
                               </button>
                               <button
                                 className="listing-action-btn del"
-                                style={{ color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                                style={{ color: '#EF4444', border: 'none' }}
                                 onClick={async () => {
                                   try {
                                     const res = await productAPI.toggleSave(item._id);
@@ -2911,7 +2912,7 @@ const UserDashboard = () => {
                           <div className="mini-stat-label">Active Listings</div>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                             <span className="mini-stat-value"><CountUp end={stats.activeListings} /></span>
-                            <span style={{ color: '#00D9FF', fontSize: 11, fontWeight: 600 }}>↑</span>
+                            <span style={{ color: '#3B82F6', fontSize: 11, fontWeight: 600 }}>↑</span>
                           </div>
                           <div className="mini-stat-sub">Available now</div>
                         </div>
@@ -2977,7 +2978,7 @@ const UserDashboard = () => {
                                   </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontWeight: 800, color: '#00D9FF', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
+                                  <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 16 }}>{getPriceDisplay(listing)}</div>
                                 </div>
                               </div>
                               <div className="listing-actions">
@@ -3005,7 +3006,7 @@ const UserDashboard = () => {
                         <div className="card-header">
                           <span className="card-title">Top Performing</span>
                           <button
-                            style={{ background: 'none', border: 'none', color: '#00D9FF', fontSize: 11, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
+                            style={{ background: 'none', border: 'none', color: '#3B82F6', fontSize: 11, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
                             onClick={() => setSidebarActive('My Listings')}
                           >
                             See All →
@@ -3080,7 +3081,7 @@ const UserDashboard = () => {
                 }
                 </div>
 
-                <hr className="divider" style={{ margin: '24px 0', borderColor: 'rgba(255,255,255,0.04)' }} />
+                <hr className="divider" style={{ margin: '24px 0', border: 'none' }} />
 
                 {/* QUICK STATS */}
                 <div className="right-section-title" style={{ fontSize: '14px', letterSpacing: '0.5px' }}>Quick Insights</div>
