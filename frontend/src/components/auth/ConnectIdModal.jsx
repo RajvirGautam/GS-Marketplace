@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Icons from '../../assets/icons/Icons';
 import NeonButton from '../ui/NeonButton';
-import LoginGraphic from './LoginGraphic.png';
+import AuthIllustration from './AuthIllustration.png';
 
 // --- Styles for the Modal Animation ---
 const modalStyles = `
@@ -621,7 +621,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
 
           <div className="relative z-10 hidden md:flex flex-1 items-center justify-center py-6">
             <img
-              src={LoginGraphic}
+              src={AuthIllustration}
               alt="Security Graphic"
               className="w-full max-w-[240px] h-auto object-contain drop-shadow-xl animate-float-slow opacity-90"
             />
