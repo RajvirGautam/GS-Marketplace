@@ -539,7 +539,7 @@ const ConvItem = ({ conv, currentUserId, isActive, onClick }) => {
         <button
             onClick={onClick}
             style={{
-                width: '100%', textAlign: 'left', border: 'none',
+                width: '100%', textAlign: 'left',
                 padding: '14px 16px',
                 borderRadius: '20px',
                 marginBottom: '10px',
