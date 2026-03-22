@@ -1332,10 +1332,12 @@ const UserDashboard = () => {
         }
 
         .stat-value {
-          font-size: 24px;
+          font-size: 32px;
           font-weight: 800;
           color: #fff;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
+          font-family: 'JetBrains Mono', monospace;
+          line-height: 1;
         }
 
         .stat-change {
@@ -1436,34 +1438,42 @@ const UserDashboard = () => {
         .side-stats {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 12px;
         }
 
         .mini-stat-card {
           background: rgba(255,255,255,0.02);
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
-          padding: 18px;
+          padding: 14px 16px;
           flex: 1;
           backdrop-filter: blur(10px);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .mini-stat-label {
           font-size: 11px;
-          color: rgba(255,255,255,0.4);
-          margin-bottom: 6px;
+          color: rgba(255,255,255,0.45);
+          margin-bottom: 2px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 600;
         }
 
         .mini-stat-value {
-          font-size: 22px;
+          font-size: 32px;
           font-weight: 800;
           color: #fff;
+          font-family: 'JetBrains Mono', monospace;
+          line-height: 1;
         }
 
         .mini-stat-sub {
           font-size: 10px;
-          color: rgba(255,255,255,0.35);
-          margin-top: 2px;
+          color: rgba(255,255,255,0.3);
+          margin-top: 4px;
         }
 
         /* ═══════════ BOTTOM ROW ═══════════ */
@@ -2852,10 +2862,10 @@ const UserDashboard = () => {
                     {/* STAT CARDS */}
                     <div className="stat-row">
                       <div className="stat-card">
-                        <div className="stat-label">Total Listings</div>
-                        <div className="stat-value"><CountUp end={stats.totalListings} /></div>
-                        <div className="stat-change" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                          {stats.activeListings} active, {stats.soldListings} sold
+                        <div className="stat-label">Active Listings</div>
+                        <div className="stat-value"><CountUp end={stats.activeListings} /></div>
+                        <div className="stat-change up">
+                          <ArrowUp color="#00D9FF" /> {stats.activeListings} items live now
                         </div>
                       </div>
                       <div className="stat-card">
@@ -2912,20 +2922,28 @@ const UserDashboard = () => {
 
                       <div className="side-stats">
                         <div className="mini-stat-card">
-                          <div className="mini-stat-label">Active Listings</div>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <span className="mini-stat-value"><CountUp end={stats.activeListings} /></span>
-                            <span style={{ color: '#3B82F6', fontSize: 11, fontWeight: 600 }}>↑</span>
+                          <div className="mini-stat-label">Total Listings</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span className="mini-stat-value"><CountUp end={stats.totalListings} /></span>
+                            <span style={{ color: '#3B82F6', fontSize: 16, fontWeight: 600, display: 'flex' }}><PackageIcon /></span>
                           </div>
-                          <div className="mini-stat-sub">Available now</div>
+                          <div className="mini-stat-sub">{stats.activeListings} active · {stats.soldListings} sold</div>
                         </div>
                         <div className="mini-stat-card">
                           <div className="mini-stat-label">Pending Approval</div>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span className="mini-stat-value"><CountUp end={stats.pendingListings} /></span>
-                            <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600 }}>⏳</span>
+                            <span style={{ color: '#F59E0B', fontSize: 14, fontWeight: 600, display: 'flex' }}>⏳</span>
                           </div>
                           <div className="mini-stat-sub">Awaiting review</div>
+                        </div>
+                        <div className="mini-stat-card">
+                          <div className="mini-stat-label">Offers Received</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span className="mini-stat-value"><CountUp end={offersReceived.length} /></span>
+                            <span style={{ color: '#8B5CF6', display: 'flex' }}><MessageIcon /></span>
+                          </div>
+                          <div className="mini-stat-sub">Across all listings</div>
                         </div>
                       </div>
                     </div>
