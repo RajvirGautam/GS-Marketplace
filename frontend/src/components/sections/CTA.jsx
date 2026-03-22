@@ -105,31 +105,28 @@ const CTA = () => {
 
   // --- Strict Sequenced Kinematics --- 
 
-  // Phase 1 (Cards Entrance): Delay slightly, then cascade fade them all in from 0.05 to 0.20
-  const fadeProgress = Math.max(0, Math.min((scrollYProgress - 0.05) / 0.15, 1));
-
-  // Phase 1.5 (Cards Zoom): After fading in completely, fly toward the camera (0.20 -> 0.45)
-  const zoomProgress = Math.max(0, Math.min((scrollYProgress - 0.20) / 0.25, 1));
+  // Phase 1.5 (Cards Zoom): General zoom progress tracker (0.25 -> 0.55)
+  const zoomProgress = Math.max(0, Math.min((scrollYProgress - 0.25) / 0.30, 1));
   const globalCardOpacity = 1 - Math.max(0, (zoomProgress - 0.8) / 0.2);
 
-  // Phase 2 (Text Split): Keep the copy visible while the circle opens through the middle.
-  const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.22, 1));
+  // Phase 2 (Text Split): Keep the copy visible while the circle opens through the middle. (0.50 -> 0.70)
+  const textSplitProgress = Math.max(0, Math.min((scrollYProgress - 0.50) / 0.20, 1));
   const textTranslate = textSplitProgress * (isMobile ? 120 : 250);
   const textOpacity = 1 - Math.max(0, (textSplitProgress - 0.86) / 0.14);
 
-  // Phase 3 (Morph Shell): Replace the circle with a panel that grows into the CTA frame.
-  const morphProgress = Math.max(0, Math.min((scrollYProgress - 0.48) / 0.28, 1));
+  // Phase 3 (Morph Shell): Replace the circle with a panel that grows into the CTA frame. (0.55 -> 0.80)
+  const morphProgress = Math.max(0, Math.min((scrollYProgress - 0.55) / 0.25, 1));
   const morphWidth = `min(${12 + (morphProgress * 76)}vw, 1120px)`;
   const morphHeight = `min(${18 + (morphProgress * 50)}vh, 720px)`;
   const morphRadius = `${Math.max(isMobile ? 18 : 28, 999 - (morphProgress * 960))}px`;
   const morphScale = 0.88 + (morphProgress * 0.14);
 
-  // Phase 4 (CTA Reveal): Fade in as the shell nears its final frame.
-  const ctaOpacity = Math.max(0, Math.min((morphProgress - 0.72) / 0.28, 1));
+  // Phase 4 (CTA Reveal): Fade in as the shell nears its final frame. (0.75 -> 1.0)
+  const ctaOpacity = Math.max(0, Math.min((morphProgress - 0.75) / 0.25, 1));
   const isCtaInteractive = ctaOpacity > 0.85;
 
   return (
-    <section ref={containerRef} className="relative w-full h-[400vh] bg-[#0a0a0f]">
+    <section ref={containerRef} className="relative w-full h-[600vh] bg-[#0a0a0f]">
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
@@ -315,7 +312,7 @@ const CTA = () => {
             const staggerStep = 0.04;
             const individualDuration = 0.22;
             const groupIndex = Math.floor(index / groupSize);
-            const startWindow = 0.12 + (groupIndex * staggerStep);
+            const startWindow = 0.25 + (groupIndex * staggerStep);
 
             const cardZoomProgress = Math.max(0, Math.min((scrollYProgress - startWindow) / individualDuration, 1));
 
