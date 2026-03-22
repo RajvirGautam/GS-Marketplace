@@ -1000,16 +1000,13 @@ const UserDashboard = () => {
 
   const sidebarDashItems = [
     { label: 'Overview', icon: <HomeIcon /> },
-    { label: 'Marketplace', icon: <CartIcon />, action: () => navigate('/marketplace') },
     { label: 'My Listings', icon: <PackageIcon /> },
     { label: 'Saved Products', icon: <HeartFilledIcon /> },
     { label: 'My Deals', icon: <TrendingIcon /> },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon />, action: () => navigate('/chat') },
-    { label: 'Reviews', icon: <StarIcon /> },
     { label: 'My Account', icon: <UsersIcon /> },
-    { label: 'Settings', icon: <SettingsIcon /> },
     { label: 'Logout', icon: <HelpIcon />, action: () => { logout(); navigate('/'); } },
   ];
 
@@ -2098,9 +2095,15 @@ const UserDashboard = () => {
                 <span className="current">Overview</span>
               </div>
               <div className="topbar-actions">
-                <button className="topbar-icon-btn" title="Dark Mode"><MoonIcon /></button>
+                <button
+                  className="topbar-icon-btn"
+                  title="Marketplace"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px', width: 'auto', color: 'rgba(255,255,255,0.6)' }}
+                  onClick={() => navigate('/marketplace')}
+                >
+                  <CartIcon /> <span style={{ fontSize: 13, fontWeight: 700 }}>Marketplace</span>
+                </button>
                 <NotificationBell dark={true} />
-                <button className="topbar-icon-btn" title="Language"><GlobeIcon /></button>
                 <button
                   style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
                   onClick={() => setIsAddProductOpen(true)}
