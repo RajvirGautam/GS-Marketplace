@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import CATEGORIES from '../config/categories.js';
 
 const productSchema = new mongoose.Schema(
   {
@@ -29,7 +30,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ['books', 'lab', 'stationery', 'electronics', 'hostel', 'misc', 'tools']
+      enum: CATEGORIES.map(c => c.slug)
     },
     tag: {
       type: String,
