@@ -7,6 +7,48 @@ import cloudinary from '../config/cloudinary.js';
 
 const router = express.Router();
 
+// ========== DEMO LOGIN ==========
+
+router.post('/demo-login', async (req, res) => {
+  try {
+    const demoUser = await User.findOne({ isDemoUser: true });
+    if (!demoUser) {
+      return res.status(404).json({ error: 'Demo user not found. Please run: node backend/src/scripts/seedDemoUser.js' });
+    }
+
+    const accessToken = generateAccessToken(demoUser._id);
+    const refreshToken = generateRefreshToken(demoUser._id);
+
+    demoUser.refreshToken = refreshToken;
+    await demoUser.save();
+
+    console.log('Demo login successful:', demoUser._id);
+
+    res.json({
+      success: true,
+      message: 'Demo login successful',
+      accessToken,
+      refreshToken,
+      user: {
+        id: demoUser._id,
+        email: demoUser.email,
+        fullName: demoUser.fullName,
+        enrollmentNumber: demoUser.enrollmentNumber,
+        branch: demoUser.branch,
+        year: demoUser.year,
+        isVerified: demoUser.isVerified,
+        verificationStatus: demoUser.verificationStatus,
+        profilePicture: demoUser.profilePicture,
+        authProvider: demoUser.authProvider,
+        isDemoUser: true
+      }
+    });
+  } catch (error) {
+    console.error('Demo login error:', error);
+    res.status(500).json({ error: 'Demo login failed' });
+  }
+});
+
 // ========== LOCAL AUTH ==========
 
 // Register with email/password + ID verification
