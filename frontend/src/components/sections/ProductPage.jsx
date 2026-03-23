@@ -92,6 +92,7 @@ const ProductPage = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -111,6 +112,24 @@ const ProductPage = () => {
   const mainImgRef = useRef(null);
   const transitionImgRef = useRef(null);
   const viewTracked = useRef(false); // guard against StrictMode double-fire
+
+  // Fetch categories for mapping slugs to names
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await productAPI.getCategories();
+        if (res.success) setCategories(res.categories);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCats();
+  }, []);
+
+  const getCategoryName = (slug) => {
+    const cat = categories.find(c => c.slug === slug);
+    return cat ? cat.name : slug;
+  };
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -890,7 +909,7 @@ const ProductPage = () => {
           <div className="card area-header fade-in delay-1 flex flex-col justify-between min-h-[180px]">
             <div>
               <div className="text-sm font-bold opacity-60 uppercase tracking-widest mb-3 flex items-center gap-2">
-                Marketplace <span className="opacity-40">/</span> <span className="text-white">{product.category}</span>
+                Marketplace <span className="opacity-40">/</span> <span className="text-white">{getCategoryName(product.category)}</span>
               </div>
               <div className="flex gap-2 mb-4">
                 <span className="tag-pill" style={{ color: product.accent, borderColor: product.accent }}>
@@ -1079,7 +1098,7 @@ const ProductPage = () => {
 
           {/* Mobile Breadcrumb overlaying bottom of image */}
           <div className="absolute bottom-4 left-4 text-[10px] font-bold opacity-80 uppercase tracking-widest flex items-center gap-2 z-10">
-            Marketplace <span className="opacity-40">/</span> <span className="text-[#00D9FF] drop-shadow-md">{product.category}</span>
+            Marketplace <span className="opacity-40">/</span> <span className="text-[#00D9FF] drop-shadow-md">{getCategoryName(product.category)}</span>
           </div>
         </div>
 
