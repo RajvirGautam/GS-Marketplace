@@ -84,6 +84,10 @@ const userSchema = new mongoose.Schema({
   totalSales: {
     type: Number,
     default: 0
+  },
+  isDemoUser: {
+    type: Boolean,
+    default: false
   }
 });
 
