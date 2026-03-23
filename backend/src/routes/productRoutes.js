@@ -5,6 +5,7 @@ import Deal from '../models/Deal.js';
 import { authenticate } from '../middleware/auth.js';
 import multer from 'multer';
 import cloudinary from '../config/cloudinary.js';
+import CATEGORIES from '../config/categories.js';
 
 const router = express.Router();
 
@@ -22,6 +23,34 @@ const upload = multer({
 });
 
 // ==================== PUBLIC ROUTES ====================
+
+// GET all available categories with active item counts
+router.get('/categories', async (req, res) => {
+  try {
+    const counts = await Product.aggregate([
+      { $match: { status: 'active' } },
+      { $group: { _id: '$category', count: { $sum: 1 } } }
+    ]);
+
+    const countMap = {};
+    counts.forEach(c => {
+      countMap[c._id] = c.count;
+    });
+
+    const dynamicCategories = CATEGORIES.map(cat => ({
+      ...cat,
+      count: countMap[cat.slug] || 0
+    }));
+
+    res.json({
+      success: true,
+      categories: dynamicCategories
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ success: false, message: 'Error fetching categories' });
+  }
+});
 
 // GET all products with filters (ENHANCED SEARCH)
 router.get('/', async (req, res) => {
@@ -313,14 +342,16 @@ router.post('/analyze', authenticate, upload.single('image'), async (req, res) =
     let suggestedCategory = 'misc';
 
     const categoryKeywords = {
-      electronics: ['phone', 'laptop', 'computer', 'circuit', 'gadget', 'tech', 'electronic', 'cable', 'battery'],
-      books: ['book', 'paper', 'text', 'notebook', 'library', 'publication', 'magazine'],
-      stationery: ['pen', 'pencil', 'marker', 'desk', 'office'],
-      lab: ['microscope', 'test tube', 'beaker', 'laboratory', 'tool', 'scientific'],
-      hostel: ['bed', 'mattress', 'kettle', 'fan', 'furniture', 'room'],
-      sports: ['ball', 'bat', 'racket', 'dumbbell', 'gym', 'sport', 'fitness', 'cycle', 'bicycle'],
-      music: ['guitar', 'keyboard', 'piano', 'instrument', 'music', 'sound', 'amp', 'ukulele', 'drum'],
-      clothing: ['shirt', 'pant', 'apron', 'coat', 'uniform', 'wear', 'clothing', 'shoe', 'jacket']
+      electronics: ['phone', 'laptop', 'computer', 'circuit', 'gadget', 'tech', 'electronic', 'cable', 'battery', 'charger', 'mouse', 'keyboard', 'monitor', 'screen'],
+      books: ['book', 'paper', 'text', 'notebook', 'library', 'publication', 'magazine', 'novel', 'manga', 'comic'],
+      stationery: ['pen', 'pencil', 'marker', 'desk', 'office', 'eraser', 'sharpener', 'rule', 'scale', 'compass'],
+      lab: ['microscope', 'test tube', 'beaker', 'laboratory', 'tool', 'scientific', 'pipette', 'flask', 'bunsen'],
+      hostel: ['bed', 'mattress', 'kettle', 'fan', 'furniture', 'room', 'pillow', 'bucket', 'mug', 'clothespin'],
+      sports: ['ball', 'bat', 'racket', 'dumbbell', 'gym', 'sport', 'fitness', 'cycle', 'bicycle', 'helmet', 'jersey'],
+      music: ['guitar', 'keyboard', 'piano', 'instrument', 'music', 'sound', 'amp', 'ukulele', 'drum', 'flute', 'violin'],
+      clothing: ['shirt', 'pant', 'apron', 'coat', 'uniform', 'wear', 'clothing', 'shoe', 'jacket', 'hoodie', 'tshirt', 'jeans'],
+      tools: ['hammer', 'screwdriver', 'wrench', 'drill', 'saw', 'plier', 'measuring tape', 'level'],
+      misc: ['item', 'object', 'thing', 'stuff']
     };
 
     for (const [cat, keywords] of Object.entries(categoryKeywords)) {
