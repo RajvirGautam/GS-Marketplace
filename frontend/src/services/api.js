@@ -137,6 +137,10 @@ export const productAPI = {
     const { data } = await api.get(`/products/price-suggestion?category=${category}&condition=${condition}`);
     return data;
   },
+  getCategories: async () => {
+    const { data } = await api.get('/products/categories');
+    return data;
+  },
 };
 
 
