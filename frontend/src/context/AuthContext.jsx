@@ -178,6 +178,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Demo login (no password required)
+  const loginAsDemo = async () => {
+    try {
+      const { data } = await axios.post(`${API_URL}/auth/demo-login`);
+
+      Cookies.set('accessToken', data.accessToken, { expires: 7 });
+      Cookies.set('refreshToken', data.refreshToken, { expires: 30 });
+      setAccessToken(data.accessToken);
+      setUser(data.user);
+      fetchSavedIds();
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Demo login failed'
+      };
+    }
+  };
+
   // Google OAuth
   const loginWithGoogle = () => {
     window.location.href = `${API_URL}/auth/google`;
@@ -199,6 +219,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loginWithGoogle,
+    loginAsDemo,
     updateUser,
     authAxios,
     isAuthenticated: !!user
