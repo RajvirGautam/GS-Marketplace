@@ -5,6 +5,7 @@ import { showError, showLoading, showSuccess, showInfo, updateToast } from '../.
 
 const AddProductModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
+  const modalScrollRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -31,7 +32,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [isPriceLoading, setIsPriceLoading] = useState(false);
 
-  const categories = [
+  const [categories, setCategories] = useState([
     { value: 'books', label: 'Books & Notes', emoji: '📚' },
     { value: 'electronics', label: 'Electronics', emoji: '⚡' },
     { value: 'stationery', label: 'Stationery', emoji: '✏️' },
@@ -42,7 +43,35 @@ const AddProductModal = ({ isOpen, onClose }) => {
     { value: 'music', label: 'Musical Instruments', emoji: '🎸' },
     { value: 'clothing', label: 'Clothing & Uniforms', emoji: '👕' },
     { value: 'misc', label: 'Miscellaneous', emoji: '📦' },
-  ];
+  ]);
+
+  // Fetch dynamic categories on mount
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await productAPI.getCategories();
+        if (res.success) {
+          // Map backend response (slug, name, emoji) to frontend (value, label, emoji)
+          const mapped = res.categories.map(cat => ({
+            value: cat.slug,
+            label: cat.name,
+            emoji: cat.emoji
+          }));
+          setCategories(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Scroll to top when step changes
+  React.useEffect(() => {
+    if (modalScrollRef.current) {
+      modalScrollRef.current.scrollTo(0, 0);
+    }
+  }, [currentStep, isOpen]);
 
   const branches = [
     { value: 'all', label: 'All Branches' },
@@ -712,7 +741,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
       {/* Modal */}
       <div className="modal-container">
-        <div className="modal-content add-product-modal">
+        <div className="modal-content add-product-modal" ref={modalScrollRef}>
           <div className="noise-overlay"></div>
           <div className="grid-lines"></div>
 
@@ -794,30 +823,51 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     onClick={handleAIFill}
                     disabled={isAIAnalyzing}
                     style={{
-                      width: '100%', marginBottom: 24,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                      padding: '13px 20px',
-                      background: isAIAnalyzing
-                        ? 'rgba(0,217,255,0.06)'
-                        : 'linear-gradient(135deg, rgba(0,217,255,0.12), rgba(124,58,237,0.12))',
-                      border: `1.5px solid ${isAIAnalyzing ? 'rgba(0,217,255,0.2)' : 'rgba(0,217,255,0.4)'}`,
-                      borderRadius: 6,
-                      color: '#00D9FF',
-                      fontFamily: 'Space Mono, monospace',
-                      fontSize: 12, fontWeight: 700, letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      cursor: isAIAnalyzing ? 'default' : 'pointer',
-                      opacity: 1,
-                      transition: 'all 0.2s',
+                      width: '100%',
+                      marginBottom: 24,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                      padding: '14px 20px',
+                      background: isAIAnalyzing ? '#1D4ED8' : '#2563EB',
+                      border: 'none',
+                      borderRadius: 8,
+                      color: '#FFFFFF',
+                      fontFamily: 'Manrope, sans-serif',
+                      fontSize: 14, fontWeight: 700, letterSpacing: 0.5,
+                      cursor: isAIAnalyzing ? 'wait' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isAIAnalyzing) {
+                        e.currentTarget.style.background = '#1D4ED8';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(37, 99, 235, 0.6)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isAIAnalyzing) {
+                        e.currentTarget.style.background = '#2563EB';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.4)';
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      if (!isAIAnalyzing) {
+                        e.currentTarget.style.transform = 'translateY(1px)';
+                      }
                     }}
                   >
-                    {!isAIAnalyzing && <span style={{ fontSize: 16 }}>✨</span>}
+                    {!isAIAnalyzing && (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
+                      </svg>
+                    )}
                     {isAIAnalyzing ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
-                        <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${aiProgress}%`, background: '#00D9FF', transition: 'width 0.3s ease-out' }} />
+                        <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${aiProgress}%`, background: '#FFFFFF', transition: 'width 0.3s ease-out' }} />
                         </div>
-                        <span style={{ minWidth: 40, textAlign: 'right', fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>{aiProgress}%</span>
+                        <span style={{ minWidth: 40, textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.9)' }}>{aiProgress}%</span>
                       </div>
                     ) : 'Fill All Fields with AI'}
                   </button>
@@ -826,34 +876,38 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 {/* ── AI FILLED BANNER ── */}
                 {aiFilledFields && (
                   <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: 'linear-gradient(135deg, rgba(0,217,255,0.07), rgba(124,58,237,0.07))',
-                    border: '1px solid rgba(0,217,255,0.25)',
-                    borderRadius: 6, padding: '10px 14px', marginBottom: 20,
+                    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+                    background: 'rgba(37, 99, 235, 0.1)',
+                    border: '1px solid rgba(37, 99, 235, 0.4)',
+                    borderRadius: 8, padding: '12px 16px', marginBottom: 20,
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 14 }}>✨</span>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#60A5FA" style={{ marginTop: 2, flexShrink: 0 }}>
+                        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
+                      </svg>
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#00D9FF', fontFamily: 'Space Mono, monospace', letterSpacing: 0.5 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#DBEAFE', fontFamily: 'Manrope, sans-serif' }}>
                           Fields auto-filled by AI
                         </div>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-                          Title · Description · Category · Condition · Highlights · Specs — review before submitting
+                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: 1.4 }}>
+                          Title · Description · Category · Condition · Highlights · Specs — please review before submitting
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={clearAIFill}
                       style={{
-                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                        color: 'rgba(255,255,255,0.5)', borderRadius: 4, padding: '4px 10px',
-                        fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                        fontFamily: 'Space Mono, monospace', letterSpacing: 0.5,
-                        transition: 'all 0.15s', whiteSpace: 'nowrap',
+                        padding: '6px 12px', background: 'transparent',
+                        border: 'none', borderRadius: 6,
+                        color: '#60A5FA', fontSize: 12, fontWeight: 700,
+                        cursor: 'pointer', fontFamily: 'Manrope, sans-serif',
+                        transition: 'all 0.2s ease', marginLeft: 16, flexShrink: 0
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
-                    >✕ CLEAR</button>
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37, 99, 235, 0.15)'; e.currentTarget.style.color = '#93C5FD'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#60A5FA'; }}
+                    >
+                      CLEAR
+                    </button>
                   </div>
                 )}
 
@@ -933,7 +987,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                       placeholder="0.00"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      className="input-brutal pl-8"
+                      className="input-brutal pl-11"
                     />
                   </div>
                   {errors.price && <p className="error-text">{errors.price}</p>}
