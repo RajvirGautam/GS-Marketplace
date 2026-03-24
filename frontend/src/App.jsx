@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { SocketProvider } from './context/SocketContext'
+import { OnboardingProvider } from './context/OnboardingContext'
 import Navbar from './components/layout/Navbar'
 import ProductPage from './components/sections/ProductPage'
 import Footer from './components/layout/Footer'
@@ -19,6 +20,7 @@ import VerificationGuard from './components/auth/VerificationGuard'
 import SellerProfile from './components/sections/SellerProfile'
 import Chat from './components/sections/Chat'
 import ChatNotificationToast from './components/ui/ChatNotificationToast'
+import OnboardingOverlay from './components/ui/OnboardingOverlay'
 import { Toaster } from 'react-hot-toast'
 
 // Only show footer on non-chat and product pages
@@ -78,6 +80,7 @@ function App() {
     <AuthProvider>
       <Router>
         <SocketProvider>
+          <OnboardingProvider>
           <div className="min-h-screen app-background font-sans selection:bg-cyan-200 selection:text-cyan-900 dark:selection:bg-cyan-500/30 dark:selection:text-cyan-200">
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -105,6 +108,9 @@ function App() {
             {/* 🔴 Global real-time chat toast notifications */}
             <ChatNotificationToast />
 
+            {/* Onboarding tour overlay */}
+            <OnboardingOverlay />
+
             {/* Global toast renderer */}
             <Toaster
               position="bottom-center"
@@ -126,6 +132,7 @@ function App() {
               }}
             />
           </div>
+          </OnboardingProvider>
         </SocketProvider>
       </Router>
     </AuthProvider>
