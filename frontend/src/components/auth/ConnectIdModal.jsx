@@ -91,13 +91,24 @@ const modalStyles = `
   .debug-panel::-webkit-scrollbar-thumb {
     background: rgba(0, 217, 255, 0.3);
   }
+
+  .bg-signature-texture {
+      background: linear-gradient(135deg, #2D3436 0%, #6366f1 25%, #a855f7 50%, #ec4899 75%, #f43f5e 100%);
+      background-size: 200% 200%;
+      animation: gradient-shift 15s ease infinite;
+  }
+  @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+  }
 `;
 
 const ConnectIdModal = ({ isOpen, onClose }) => {
   const [mounted, setMounted] = useState(false);
   const [animating, setAnimating] = useState(null); // null=idle, true=entering, false=exiting
   const closeTimerRef = useRef(null);
-  const { register, login, loginWithGoogle } = useAuth();
+  const { register, login, loginWithGoogle, loginAsDemo } = useAuth();
 
   const [activeTab, setActiveTab] = useState('manual');
   const [dragActive, setDragActive] = useState(false);
@@ -361,6 +372,24 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
     loginWithGoogle();
   };
 
+  const handleDemoLogin = async () => {
+    setIsProcessing(true);
+    try {
+      const result = await loginAsDemo();
+      if (result.success) {
+        onClose();
+        sessionStorage.setItem('triggerOnboarding', 'true');
+        window.location.href = '/marketplace';
+      } else {
+        alert(result.error || 'Demo login failed. Make sure the seed script has been run.');
+      }
+    } catch (err) {
+      alert('Demo login failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const addDebugInfo = (message) => {
     setDebugInfo(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
@@ -384,6 +413,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
         addDebugInfo('✅ Login successful!');
         setTimeout(() => {
           onClose();
+          sessionStorage.setItem('triggerOnboarding', 'true');
           window.location.href = '/marketplace';
         }, 500);
       } else {
@@ -495,6 +525,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           setVerificationStatus('success');
           setTimeout(() => {
             onClose();
+            sessionStorage.setItem('triggerOnboarding', 'true');
             window.location.href = '/marketplace';
           }, 1500);
         } else {
@@ -675,7 +706,7 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Google Button */}
-          <div className="mb-6">
+          <div className="mb-3">
             <button
               onClick={handleGoogleLogin}
               disabled={isProcessing}
@@ -689,6 +720,31 @@ const ConnectIdModal = ({ isOpen, onClose }) => {
               </svg>
               {isLogin ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE'}
             </button>
+          </div>
+
+          {/* Demo Sign In Button */}
+          <div className="mb-6 flex flex-col items-center gap-4 group">
+            <button
+              onClick={handleDemoLogin}
+              disabled={isProcessing}
+              className="w-full bg-signature-texture text-white px-4 py-3 md:px-8 md:py-3.5 flex items-center justify-between gap-3 md:gap-6 transition-all duration-500 hover:scale-[1.02] active:scale-95 ring-1 ring-white/40 shadow-[0_0_20px_rgba(99,102,241,0.6),0_0_40px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.8),0_0_60px_rgba(99,102,241,0.4)] group-hover:brightness-110 disabled:opacity-50 border border-white/10 rounded-sm"
+            >
+              <div className="flex items-center gap-3 md:gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 md:w-6 md:h-6">
+                  <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                </svg>
+                <span className="uppercase tracking-[0.1em] md:tracking-[0.15em] text-[10px] md:text-sm font-semibold">
+                  {isProcessing ? 'LOADING...' : 'Dummy Sign In'}
+                </span>
+              </div>
+              <span className="bg-white/10 px-2 py-0.5 text-[8px] md:text-[9px] font-bold tracking-widest rounded-sm border border-white/20">DEMO</span>
+            </button>
+            <div className="flex flex-col gap-1 w-full items-center">
+              <p className="text-[9px] md:text-[10px] tracking-[0.12em] text-white/50 font-medium uppercase text-center">
+                NO ACCOUNT NEEDED – EXPLORE WITH PRE-LOADED DEMO DATA
+              </p>
+              <div className="h-[1px] w-0 group-hover:w-full bg-white/20 transition-all duration-700"></div>
+            </div>
           </div>
 
           <div className="flex items-center gap-4 mb-6">
