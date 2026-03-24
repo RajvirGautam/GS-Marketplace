@@ -8,6 +8,7 @@ import EditProductModal from './dashboard/EditProductModal';
 import MyAccount from './dashboard/MyAccount';
 import NotificationBell from '../ui/NotificationBell';
 import Avatar from '../ui/Avatar';
+import { useOnboarding } from '../../context/OnboardingContext';
 
 const HeartFilledIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
@@ -368,7 +369,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
   // Build timeline steps from available timestamps
   const steps = [
     {
-      icon: '',
+      icon: '💬',
       label: deal.source === 'chat' ? 'Price negotiated via Chat' : 'Offer Submitted',
       desc: deal.source === 'chat'
         ? `A price of ₹${deal.agreedPrice} was negotiated in chat`
@@ -378,7 +379,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       done: true,
     },
     {
-      icon: '',
+      icon: '🤝',
       label: 'Offer Accepted',
       desc: deal.source === 'chat'
         ? `Agreed price locked via chat negotiation`
@@ -388,7 +389,7 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       done: true,
     },
     {
-      icon: '',
+      icon: '⚡',
       label: 'Deal Opened',
       desc: `Both parties committed — agreed price ₹${deal.agreedPrice}`,
       time: deal.createdAt,
@@ -402,44 +403,6 @@ const DealHistoryModal = ({ deal, onClose, currentUserId }) => {
       time: deal.dealStatus === 'sold' ? deal.updatedAt : null,
       color: '#F59E0B',
       done: deal.dealStatus === 'sold',
-    },
-    {
-      icon: '',
-      label: 'Buyer Review',
-      desc: (() => {
-        if (isBuyer) {
-          return deal.buyerReview?.rating
-            ? `You rated the seller ${deal.buyerReview.rating}/5${deal.buyerReview.comment ? ` — "${deal.buyerReview.comment.slice(0, 60)}${deal.buyerReview.comment.length > 60 ? '…' : ''}"` : ''}`
-            : "You haven't reviewed the seller yet";
-        }
-        return deal.buyerReview?.rating
-          ? "Buyer has submitted a review"
-          : 'Waiting for buyer to leave a review';
-      })(),
-      time: deal.buyerReview?.submittedAt || null,
-      color: '#EC4899',
-      done: !!deal.buyerReview?.submittedAt,
-      // Only show details if the current user is the BUYER (the one who wrote it)
-      hideDetails: isSeller && !!deal.buyerReview?.submittedAt
-    },
-    {
-      icon: '',
-      label: 'Seller Review',
-      desc: (() => {
-        if (isSeller) {
-          return deal.sellerReview?.rating
-            ? `You rated the buyer ${deal.sellerReview.rating}/5${deal.sellerReview.comment ? ` — "${deal.sellerReview.comment.slice(0, 60)}${deal.sellerReview.comment.length > 60 ? '…' : ''}"` : ''}`
-            : "You haven't reviewed the buyer yet";
-        }
-        return deal.sellerReview?.rating
-          ? "Seller has submitted a review"
-          : 'Waiting for seller to leave a review';
-      })(),
-      time: deal.sellerReview?.submittedAt || null,
-      color: '#10B981',
-      done: !!deal.sellerReview?.submittedAt,
-      // Only show details if the current user is the SELLER (the one who wrote it)
-      hideDetails: isBuyer && !!deal.sellerReview?.submittedAt
     },
   ];
 
@@ -626,6 +589,12 @@ const UserDashboard = () => {
 
   // Robust current-user ID — works whether auth returns id or _id
   const currentUserId = (user?._id || user?.id || '').toString();
+
+  // Register sidebar setter for onboarding tour
+  const { registerTabSetter } = useOnboarding();
+  useEffect(() => {
+    registerTabSetter(setSidebarActive);
+  }, [registerTabSetter, setSidebarActive]);
 
   // Mouse glow effect
   useEffect(() => {
@@ -999,10 +968,10 @@ const UserDashboard = () => {
   })();
 
   const sidebarDashItems = [
-    { label: 'Overview', icon: <HomeIcon /> },
-    { label: 'My Listings', icon: <PackageIcon /> },
-    { label: 'Saved Products', icon: <HeartFilledIcon /> },
-    { label: 'My Deals', icon: <TrendingIcon /> },
+    { label: 'Overview', icon: <HomeIcon />, onboarding: 'dash-overview' },
+    { label: 'My Listings', icon: <PackageIcon />, onboarding: 'dash-listings' },
+    { label: 'Saved Products', icon: <HeartFilledIcon />, onboarding: 'dash-saved' },
+    { label: 'My Deals', icon: <TrendingIcon />, onboarding: 'dash-deals' },
   ];
   const sidebarSettItems = [
     { label: 'Messages', icon: <MessageIcon />, action: () => navigate('/chat') },
@@ -1170,13 +1139,14 @@ const UserDashboard = () => {
         }
 
         .sidebar-item.active {
-          background: linear-gradient(135deg, #00D9FF, #7C3AED);
-          color: #0A0A0A;
+          background: #F5F5F7;
+          color: #111111;
           font-weight: 700;
           border-color: transparent;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .sidebar-item.active svg { stroke: #0A0A0A; }
+        .sidebar-item.active svg { stroke: #111111; }
 
         .sidebar-spacer { flex: 1; }
 
@@ -1188,6 +1158,40 @@ const UserDashboard = () => {
           font-size: 12px;
           font-weight: 700;
           color: rgba(255,255,255,0.3);
+        }
+
+        /* Mesh Gradient Button (Desktop) */
+        .btn-mesh-desktop {
+          background: radial-gradient(circle at 20% 30%, #4c1d95 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, #9333ea 0%, transparent 50%),
+                      radial-gradient(circle at 50% 50%, #7c3aed 0%, #1e1b4b 100%);
+          box-shadow: 
+            0 0 15px rgba(167, 139, 250, 0.4), 
+            inset 0 0 8px rgba(255, 255, 255, 0.3);
+          transition: all 0.3s ease;
+          border: none;
+          border-radius: 9999px;
+          padding: 9px 18px;
+          color: white;
+          font-weight: 700;
+          font-size: 13px;
+          letter-spacing: 0.025em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Manrope', sans-serif;
+          cursor: pointer;
+        }
+
+        .btn-mesh-desktop:hover {
+          transform: scale(1.02);
+          box-shadow: 
+            0 0 25px rgba(167, 139, 250, 0.6), 
+            inset 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-mesh-desktop:active {
+          transform: scale(0.98);
         }
 
         /* ═══════════ MAIN ═══════════ */
@@ -2060,6 +2064,7 @@ const UserDashboard = () => {
                   setSidebarActive(item.label);
                   if (item.action) item.action();
                 }}
+                data-onboarding={item.onboarding}
               >
                 {item.icon}
                 {item.label}
@@ -2115,7 +2120,7 @@ const UserDashboard = () => {
                 </button>
                 <NotificationBell dark={true} />
                 <button
-                  style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', border: 'none', borderRadius: 50, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                  className="btn-mesh-desktop"
                   onClick={() => setIsAddProductOpen(true)}
                   title="List a Product"
                 >

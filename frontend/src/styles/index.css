@@ -104,3 +104,84 @@ html, body {
 .animate-catchy-content {
   animation: slideInBlur 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* Liquid Button (Desktop & Mobile) */
+.btn-liquid {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  color: white;
+  /* Thick black outer border imitating the dark track */
+  background: transparent;
+  border: 4px solid #101014;
+  /* Outer purple glow */
+  box-shadow: 0 0 35px -5px rgba(124, 58, 237, 0.6);
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Inner white rim and liquid mask */
+.btn-liquid-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  z-index: 0;
+  /* The white glow around the liquid rim */
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.8), inset 0 0 3px rgba(255,255,255,1);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+
+/* The actual liquid gradient */
+.btn-liquid-inner::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(135deg, #7C3AED, #00D9FF, #ff00ff, #7C3AED);
+  background-size: 300% 300%;
+  animation: liquid-gradient-bg 6s ease-in-out infinite alternate;
+  opacity: 0.95;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+@keyframes liquid-gradient-bg {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.btn-liquid:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 45px -5px rgba(124, 58, 237, 0.9);
+  border-color: #1a1a20;
+}
+.btn-liquid:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Desktop sizing */
+.btn-liquid-desktop {
+  padding: 10px 24px;
+  font-size: 14px;
+  min-height: 44px;
+}
+
+/* Mobile sizing (perfect circle or smaller pill) */
+.btn-liquid-mobile {
+  width: 56px;
+  height: 56px;
+  font-size: 28px;
+  padding: 0;
+}

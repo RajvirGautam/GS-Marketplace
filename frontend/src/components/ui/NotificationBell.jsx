@@ -11,9 +11,7 @@ const TYPE_CONFIG = {
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
         ),
-        accentColor: '#818cf8',
-        bgColor: 'rgba(99,102,241,0.12)',
-        borderColor: 'rgba(99,102,241,0.35)',
+        solidColor: '#3B82F6', // Blue
         label: 'New Offer',
         navTarget: () => '/dashboard?tab=negotiations',
     },
@@ -24,9 +22,7 @@ const TYPE_CONFIG = {
                 <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
         ),
-        accentColor: '#34d399',
-        bgColor: 'rgba(16,185,129,0.1)',
-        borderColor: 'rgba(16,185,129,0.3)',
+        solidColor: '#10B981', // Emerald
         label: 'Deal Done',
         navTarget: () => '/dashboard?tab=deals',
     },
@@ -36,9 +32,7 @@ const TYPE_CONFIG = {
                 <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
             </svg>
         ),
-        accentColor: '#f87171',
-        bgColor: 'rgba(239,68,68,0.08)',
-        borderColor: 'rgba(239,68,68,0.25)',
+        solidColor: '#EF4444', // Red
         label: 'Offer Declined',
         navTarget: () => '/dashboard?tab=negotiations',
     },
@@ -48,9 +42,7 @@ const TYPE_CONFIG = {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         ),
-        accentColor: '#22d3ee',
-        bgColor: 'rgba(34,211,238,0.08)',
-        borderColor: 'rgba(34,211,238,0.2)',
+        solidColor: '#8B5CF6', // Purple
         label: 'Message',
         navTarget: (meta) => meta?.conversationId ? `/chat/${meta.conversationId}` : '/chat',
     },
@@ -60,9 +52,7 @@ const TYPE_CONFIG = {
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
         ),
-        accentColor: '#fbbf24',
-        bgColor: 'rgba(251,191,36,0.08)',
-        borderColor: 'rgba(251,191,36,0.25)',
+        solidColor: '#F59E0B', // Amber
         label: 'Deal Confirmed',
         navTarget: () => '/dashboard?tab=deals',
     },
@@ -71,20 +61,16 @@ const TYPE_CONFIG = {
 // ── Time ago helper ───────────────────────────────────────────────────────────
 function timeAgo(dateStr) {
     const diff = (Date.now() - new Date(dateStr)) / 1000;
-    if (diff < 60) return 'just now';
+    if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
 }
 
 // ── Group same-conversation message notifications into one card ────────────────
-// Returns a new array where all new_message notifs sharing a conversationId are
-// collapsed into a single entry. The entry keeps the newest notif's data but
-// adds a `count` field for how many were stacked and `stackedIds` so we can
-// mark/delete them all at once. Non-message notifs pass through unchanged.
 function groupNotifications(notifs) {
     const grouped = [];
-    const seen = {}; // conversationId → index in `grouped`
+    const seen = {}; 
 
     for (const n of notifs) {
         const convId = n.meta?.conversationId;
@@ -138,92 +124,61 @@ const NotifCard = ({ notif, onRead, onDelete, onClose }) => {
     return (
         <div
             onClick={handleClick}
-            style={{
-                display: 'flex',
-                gap: 12,
-                padding: '12px 14px',
-                cursor: 'pointer',
-                background: notif.isRead ? 'transparent' : cfg.bgColor,
-                borderLeft: `3px solid ${notif.isRead ? 'rgba(255,255,255,0.06)' : cfg.accentColor}`,
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                transition: 'background 0.2s',
-                position: 'relative',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = cfg.bgColor}
-            onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : cfg.bgColor}
+            className={`notif-item-card ${notif.isRead ? '' : 'unread'}`}
         >
             {/* Icon bubble */}
             <div style={{
-                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                background: `${cfg.accentColor}18`,
-                border: `1px solid ${cfg.borderColor}`,
+                width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+                background: cfg.solidColor,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: cfg.accentColor,
-                position: 'relative',
+                color: '#fff',
+                position: 'relative'
             }}>
                 {cfg.icon}
                 {/* Stacked count badge on icon */}
                 {isStacked && (
                     <span style={{
-                        position: 'absolute', top: -5, right: -5,
+                        position: 'absolute', top: -4, right: -4,
                         minWidth: 16, height: 16, borderRadius: 8,
-                        background: cfg.accentColor,
-                        color: '#000',
-                        fontSize: 9, fontWeight: 900,
+                        background: '#1A1A1A',
+                        border: `2px solid ${cfg.solidColor}`,
+                        color: cfg.solidColor,
+                        fontSize: 10, fontWeight: 900,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '0 3px',
-                        boxShadow: `0 0 6px ${cfg.accentColor}88`,
+                        lineHeight: 1
                     }}>
                         {notif.count > 9 ? '9+' : notif.count}
                     </span>
                 )}
             </div>
 
-            {/* Text */}
+            {/* Text Content */}
             <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{
-                        fontSize: 11, fontWeight: 700, letterSpacing: '0.5px',
-                        textTransform: 'uppercase', color: cfg.accentColor,
-                    }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginRight: 6 }}>
                         {isStacked ? `${notif.count} Messages` : cfg.label}
                     </span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0, marginLeft: 8 }}>
-                        {timeAgo(notif.createdAt)}
-                    </span>
+                    {!notif.isRead && (
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.solidColor, flexShrink: 0 }} />
+                    )}
                 </div>
-                <div style={{ fontSize: 13, fontWeight: notif.isRead ? 400 : 600, color: notif.isRead ? 'rgba(255,255,255,0.55)' : '#f1f5f9', lineHeight: 1.4, marginBottom: 2 }}>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.4, marginBottom: 4 }}>
                     {notif.title}
                 </div>
                 {notif.body && (
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {notif.body}
                     </div>
                 )}
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 6, fontWeight: 600 }}>
+                    {timeAgo(notif.createdAt)}
+                </div>
             </div>
 
-            {/* Unread dot */}
-            {!notif.isRead && (
-                <div style={{
-                    position: 'absolute', top: 14, right: 36,
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: cfg.accentColor,
-                    boxShadow: `0 0 6px ${cfg.accentColor}`,
-                }} />
-            )}
-
-            {/* Delete button */}
+            {/* Delete button (only visible on hover through CSS) */}
             <button
                 onClick={handleDelete}
-                style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'rgba(255,255,255,0.2)', padding: '2px 4px',
-                    fontSize: 14, lineHeight: 1, alignSelf: 'flex-start',
-                    transition: 'color 0.15s',
-                    flexShrink: 0,
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
+                className="notif-delete-btn"
                 title="Dismiss"
             >✕</button>
         </div>
@@ -275,13 +230,11 @@ const NotificationBell = ({ dark = true }) => {
                 {unreadNotifCount > 0 && (
                     <span style={{
                         position: 'absolute', top: -4, right: -4,
-                        minWidth: 17, height: 17, borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #c026d3, #ef4444)',
-                        boxShadow: '0 0 8px rgba(192,38,211,0.55)',
-                        color: '#fff', fontSize: 9, fontWeight: 900,
+                        minWidth: 16, height: 16, borderRadius: '50%',
+                        background: '#EF4444',
+                        color: '#fff', fontSize: 10, fontWeight: 900,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         padding: '0 3px',
-                        animation: 'pulse 2s infinite',
                     }}>
                         {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
                     </span>
@@ -290,65 +243,42 @@ const NotificationBell = ({ dark = true }) => {
 
             {/* Dropdown Panel */}
             {open && (
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 10px)',
-                    right: 0,
-                    width: 370,
-                    maxHeight: 460,
-                    background: '#0c0c14',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 16,
-                    boxShadow: '0 24px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 9999,
-                    animation: 'notifSlideIn 0.2s cubic-bezier(0.34,1.56,0.64,1)',
-                }}>
+                <div className="notif-dropdown">
                     {/* Header */}
-                    <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '14px 16px 12px',
-                        borderBottom: '1px solid rgba(255,255,255,0.08)',
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))',
-                        flexShrink: 0,
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', letterSpacing: 0.2 }}>
+                    <div className="notif-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <span style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: 0.2 }}>
                                 Notifications
                             </span>
                             {unreadNotifCount > 0 && (
                                 <span style={{
-                                    fontSize: 10, fontWeight: 800, padding: '2px 7px',
-                                    borderRadius: 20, background: 'rgba(99,102,241,0.2)',
-                                    color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)',
+                                    fontSize: 12, fontWeight: 800, padding: '3px 10px',
+                                    borderRadius: 12, background: 'rgba(255,255,255,0.1)',
+                                    color: '#fff'
                                 }}>
-                                    {unreadNotifCount} new
+                                    {unreadNotifCount} New
                                 </span>
                             )}
                         </div>
                         {unreadNotifCount > 0 && (
                             <button
                                 onClick={markAllNotifsRead}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    fontSize: 11, color: '#818cf8', fontWeight: 600,
-                                    padding: '2px 0',
-                                }}
+                                className="notif-mark-read"
                             >
-                                Mark all read
+                                Mark all as read
                             </button>
                         )}
                     </div>
 
                     {/* List */}
-                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                    <div className="notif-list custom-scrollbar">
                         {notifications.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.3)' }}>
-                                <div style={{ fontSize: 32, marginBottom: 10 }}>🔔</div>
-                                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>You're all caught up!</div>
-                                <div style={{ fontSize: 11 }}>New offers, deals, and messages will appear here.</div>
+                            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(255,255,255,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: 48, height: 48, borderRadius: 24, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                                    <BellSVG />
+                                </div>
+                                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>You're all caught up!</div>
+                                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', maxWidth: 220 }}>New offers, deals, and messages will appear here.</div>
                             </div>
                         ) : (
                             groupNotifications(notifications).map(n => (
@@ -365,29 +295,138 @@ const NotificationBell = ({ dark = true }) => {
 
                     {/* Footer */}
                     {notifications.length > 0 && (
-                        <div style={{
-                            padding: '10px 16px',
-                            borderTop: '1px solid rgba(255,255,255,0.06)',
-                            textAlign: 'center',
-                            flexShrink: 0,
-                            background: 'rgba(0,0,0,0.3)',
-                        }}>
-                            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 0.5 }}>
-                                Notifications auto-clear after 30 days
-                            </span>
+                        <div className="notif-footer">
+                            Notifications automatically clear after 30 days
                         </div>
                     )}
                 </div>
             )}
 
             <style>{`
-                @keyframes notifSlideIn {
-                    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-                    to   { opacity: 1; transform: translateY(0) scale(1); }
+                .notif-dropdown {
+                    position: absolute;
+                    top: calc(100% + 14px);
+                    right: 0;
+                    width: 360px;
+                    max-height: 80vh;
+                    background: #121212; /* Solid minimal dark background */
+                    border: 1px solid rgba(255, 255, 255, 0.08); /* Clean thin border */
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    flex-direction: column;
+                    z-index: 10000;
+                    animation: notifSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    overflow: hidden;
+                    font-family: 'Manrope', sans-serif;
                 }
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.7; }
+
+                .notif-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 24px 24px 16px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                    flex-shrink: 0;
+                }
+
+                .notif-mark-read {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 13px;
+                    color: rgba(255, 255, 255, 0.4);
+                    font-weight: 700;
+                    padding: 6px 10px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                }
+                .notif-mark-read:hover {
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.08);
+                }
+
+                .notif-list {
+                    overflow-y: auto;
+                    flex: 1;
+                    padding: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .notif-item-card {
+                    display: flex;
+                    gap: 14px;
+                    padding: 16px;
+                    border-radius: 16px;
+                    cursor: pointer;
+                    position: relative;
+                    transition: background 0.15s ease;
+                    border: none;
+                    background: transparent;
+                }
+                .notif-item-card.unread {
+                    background: rgba(255, 255, 255, 0.03); /* slight solid boost for unread */
+                }
+                .notif-item-card:hover {
+                    background: rgba(255, 255, 255, 0.06) !important;
+                }
+
+                .notif-delete-btn {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    color: rgba(255,255,255,0.2);
+                    width: 24px;
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    transition: all 0.2s ease;
+                }
+                .notif-item-card:hover .notif-delete-btn {
+                    color: rgba(255,255,255,0.6);
+                }
+                .notif-delete-btn:hover {
+                    color: #EF4444 !important;
+                    background: rgba(239, 68, 68, 0.1);
+                    border-radius: 50%;
+                }
+
+                .notif-footer {
+                    padding: 14px;
+                    text-align: center;
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.3);
+                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    flex-shrink: 0;
+                }
+
+                @media (max-width: 768px) {
+                    .notif-dropdown {
+                        position: fixed;
+                        top: 72px; /* Clears top header/notch */
+                        left: 12px;
+                        right: 12px;
+                        width: auto;
+                        max-height: calc(100vh - 120px);
+                        border-radius: 24px;
+                        box-shadow: 0 40px 100px rgba(0, 0, 0, 1);
+                    }
+                    .notif-delete-btn {
+                        color: rgba(255,255,255,0.4); /* Always visible on mobile */
+                    }
+                }
+
+                @keyframes notifSlideIn {
+                    0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+                    100% { opacity: 1; transform: translateY(0) scale(1); }
                 }
             `}</style>
         </div>
