@@ -28,6 +28,7 @@ const AuthCallback = () => {
 
       // Redirect to marketplace
       setTimeout(() => {
+        sessionStorage.setItem('triggerOnboarding', 'true');
         navigate('/marketplace');
       }, 1000);
     } else {
