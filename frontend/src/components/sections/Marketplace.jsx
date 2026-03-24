@@ -9,6 +9,7 @@ import AddProductModal from './AddProductModal';
 import NotificationBell from '../ui/NotificationBell';
 import ConnectIdModal from '../auth/ConnectIdModal';
 import Avatar from '../ui/Avatar';
+import { useOnboarding } from '../../context/OnboardingContext';
 
 
 // --- Internal Icons ---
@@ -166,6 +167,7 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { unreadCount } = useSocket();
+  const { startOnboarding } = useOnboarding();
 
   // State Management
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -198,6 +200,17 @@ const Marketplace = () => {
   const productsPerPage = 24;
   const glowRef = useRef(null);
 
+  // Trigger onboarding on mount if flagged
+  useEffect(() => {
+    if (sessionStorage.getItem('triggerOnboarding') === 'true') {
+      sessionStorage.removeItem('triggerOnboarding');
+      // Slight delay to ensure elements are rendered
+      setTimeout(() => {
+        startOnboarding();
+      }, 500);
+    }
+  }, [startOnboarding]);
+
   useEffect(() => {
     let animationFrameId;
     const handler = (e) => {
@@ -218,19 +231,34 @@ const Marketplace = () => {
     };
   }, []);
 
-  // Category data with counts
-  const categories = [
-    { name: 'Books & Notes', count: 245, slug: 'books', emoji: '📚' },
-    { name: 'Lab Equipment', count: 89, slug: 'lab', emoji: '🔬' },
-    { name: 'Stationery', count: 156, slug: 'stationery', emoji: '✏️' },
-    { name: 'Electronics', count: 67, slug: 'electronics', emoji: '⚡' },
-    { name: 'Hostel Items', count: 43, slug: 'hostel', emoji: '🏠' },
-    { name: 'Tools', count: 28, slug: 'tools', emoji: '🔧' },
+  // Category data with counts (now dynamic)
+  const [categories, setCategories] = useState([
+    { name: 'Books & Notes', count: 0, slug: 'books', emoji: '📚' },
+    { name: 'Lab Equipment', count: 0, slug: 'lab', emoji: '🔬' },
+    { name: 'Stationery', count: 0, slug: 'stationery', emoji: '✏️' },
+    { name: 'Electronics', count: 0, slug: 'electronics', emoji: '⚡' },
+    { name: 'Hostel Items', count: 0, slug: 'hostel', emoji: '🏠' },
+    { name: 'Tools', count: 0, slug: 'tools', emoji: '🔧' },
     { name: 'Sports & Fitness', count: 0, slug: 'sports', emoji: '⚽' },
     { name: 'Musical Instruments', count: 0, slug: 'music', emoji: '🎸' },
     { name: 'Clothing & Uniforms', count: 0, slug: 'clothing', emoji: '👕' },
-    { name: 'Miscellaneous', count: 92, slug: 'misc', emoji: '📦' },
-  ];
+    { name: 'Miscellaneous', count: 0, slug: 'misc', emoji: '📦' },
+  ]);
+
+  // Fetch dynamic categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await productAPI.getCategories();
+        if (res.success) {
+          setCategories(res.categories);
+        }
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const branches = [
     { name: 'Computer Science', count: 142, slug: 'cs' },
@@ -757,6 +785,40 @@ const Marketplace = () => {
           backdrop-filter: blur(8px);
         }
         .filter-backdrop.open { opacity: 1; pointer-events: all; }
+
+        /* Liquid Button (Desktop & Mobile) */
+        /* Mesh Gradient Button (Desktop) */
+        .btn-mesh-desktop {
+          background: radial-gradient(circle at 20% 30%, #4c1d95 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, #9333ea 0%, transparent 50%),
+                      radial-gradient(circle at 50% 50%, #7c3aed 0%, #1e1b4b 100%);
+          box-shadow: 
+            0 0 15px rgba(167, 139, 250, 0.4), 
+            inset 0 0 8px rgba(255, 255, 255, 0.3);
+          transition: all 0.3s ease;
+          border: none;
+          border-radius: 9999px;
+          padding: 9px 18px;
+          color: white;
+          font-weight: 700;
+          font-size: 13px;
+          letter-spacing: 0.025em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Manrope', sans-serif;
+        }
+
+        .btn-mesh-desktop:hover {
+          transform: scale(1.02);
+          box-shadow: 
+            0 0 25px rgba(167, 139, 250, 0.6), 
+            inset 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-mesh-desktop:active {
+          transform: scale(0.98);
+        }
       `}</style>
 
       <div className="theme-root relative">
@@ -819,9 +881,10 @@ const Marketplace = () => {
 
                 <button
                   onClick={() => setIsAddProductOpen(true)}
-                  className="btn-primary hidden md:flex"
+                  className="btn-mesh-desktop hidden md:flex"
+                  data-onboarding="list-item"
                 >
-                  + List Item
+                  <span className="relative z-10">+ List Item</span>
                 </button>
 
                 {user && (
@@ -830,6 +893,7 @@ const Marketplace = () => {
                     className="btn-glass hidden md:flex relative"
                     style={{ padding: '9px 16px' }}
                     title="Messages"
+                    data-onboarding="chat-icon"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -845,7 +909,7 @@ const Marketplace = () => {
                 )}
 
                 {/* Notification Bell */}
-                {user && <NotificationBell dark={true} />}
+                {user && <span data-onboarding="notification-bell"><NotificationBell dark={true} /></span>}
 
                 {user && (
                   <button
@@ -1414,7 +1478,9 @@ const Marketplace = () => {
 
             <div className="flex items-center gap-3">
               {user ? (
-                <NotificationBell dark={true} />
+                <span data-onboarding="notification-bell" className="flex items-center">
+                  <NotificationBell dark={true} />
+                </span>
               ) : (
                 <button onClick={() => setIsLoginOpen(true)} className="btn-glass px-3 py-1 text-xs" style={{ padding: '6px 12px' }}>
                   Login
@@ -1448,7 +1514,7 @@ const Marketplace = () => {
           <div className="px-4 py-4 overflow-x-auto custom-scrollbar flex gap-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <button
               onClick={() => { setSelectedCategories([]); setCurrentPage(1); }}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.length === 0 ? 'bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white' : 'bg-white/5 text-white/60 border border-white/10'}`}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.length === 0 ? 'bg-[#1E3A8A] text-white' : 'bg-white/5 text-white/60'}`}
             >
               All
             </button>
@@ -1459,7 +1525,7 @@ const Marketplace = () => {
                   setSelectedCategories([cat.slug]);
                   setCurrentPage(1);
                 }}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.includes(cat.slug) ? 'bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] text-white' : 'bg-white/5 text-white/60 border border-white/10'}`}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${selectedCategories.includes(cat.slug) ? 'bg-[#059669] text-white' : 'bg-white/5 text-white/60'}`}
               >
                 {cat.name}
               </button>
@@ -1474,10 +1540,10 @@ const Marketplace = () => {
 
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="flex items-center gap-1.5 text-xs text-[#00D9FF] font-bold bg-[#00D9FF]/10 px-3 py-1.5 rounded-lg border border-[#00D9FF]/20"
+              className="flex items-center gap-1.5 text-xs text-white font-bold bg-[#059669] px-3 py-1.5 rounded-lg border-none"
             >
               <FilterIcon /> Filters
-              {getActiveFilterCount() > 0 && <span className="ml-1 w-4 h-4 rounded-full bg-[#00D9FF] text-black flex items-center justify-center text-[9px]">{getActiveFilterCount()}</span>}
+              {getActiveFilterCount() > 0 && <span className="ml-1 w-4 h-4 rounded-full bg-white text-[#059669] flex items-center justify-center text-[9px] font-black">{getActiveFilterCount()}</span>}
             </button>
           </div>
 
@@ -1512,7 +1578,7 @@ const Marketplace = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 px-4">
+            <div className="grid grid-cols-2 gap-3 px-4" data-onboarding="product-grid">
               {products.map((product, index) => (
                 <div key={product._id} className="h-full">
                   <ProductCard product={product} viewMode="grid" index={index} />
@@ -1548,68 +1614,79 @@ const Marketplace = () => {
 
         {/* Mobile Bottom Navigation (Sticky Wrapper) */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-          {/* Centered '+' button - Outside the mask so it's visible */}
-          <button 
-            onClick={() => user ? setIsAddProductOpen(true) : setIsLoginOpen(true)} 
-            className="absolute left-1/2 -translate-x-1/2 -top-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all active:scale-90 hover:scale-105 z-[60]"
-          >
-            +
-          </button>
-
-          {/* The notched background and icons */}
           <div 
-            className="relative flex items-center justify-between px-6 h-[64px]"
+            className="relative flex items-center h-[64px] px-2"
             style={{
               background: 'rgba(10,10,10,0.95)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               borderRadius: '20px 20px 0 0',
-              mask: 'radial-gradient(circle 31px at 50% 0, transparent 31px, #fff 0)',
-              WebkitMask: 'radial-gradient(circle 31px at 50% 0, transparent 31px, #fff 0)',
+              borderTop: '1px solid rgba(255,255,255,0.08)'
             }}
           >
-            {/* Notch border arc */}
-            <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: '64px' }}>
-              <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path 
-                  d="M10 0.5 H169 A31 31 0 0 0 231 0.5 H390" 
-                  stroke="rgba(255,255,255,0.12)" 
-                  strokeWidth="1"
-                />
-              </svg>
+            {/* Evenly spaced 5 elements */}
+            <div className="flex-1 flex flex-col items-center">
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+                className="flex flex-col items-center gap-1 text-[#00D9FF]"
+              >
+                <GridIcon />
+                <span className="text-[9px] font-bold mt-1">Home</span>
+              </button>
             </div>
 
-            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex flex-col items-center gap-1 text-[#00D9FF]">
-              <GridIcon />
-              <span className="text-[9px] font-bold mt-1">Home</span>
-            </button>
-            <button onClick={() => user ? navigate('/dashboard') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
-              <span className="text-[9px] font-bold mt-1">Dashboard</span>
-            </button>
+            <div className="flex-1 flex flex-col items-center">
+              <button 
+                onClick={() => user ? navigate('/dashboard') : setIsLoginOpen(true)} 
+                className="flex flex-col items-center gap-1 text-white/50 hover:text-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+                <span className="text-[9px] font-bold mt-1">Dashboard</span>
+              </button>
+            </div>
 
-            <div className="w-12" /> {/* Space for the + button */}
+            <div className="flex-1 flex flex-col items-center relative h-full">
+              <button 
+                onClick={() => user ? setIsAddProductOpen(true) : setIsLoginOpen(true)} 
+                className="absolute -top-[28px] w-14 h-14 rounded-full bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] flex items-center justify-center text-white text-3xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] transition-all active:scale-95 z-[60]"
+                data-onboarding="list-item"
+              >
+                +
+              </button>
+            </div>
 
-            <button onClick={() => user ? navigate('/chat') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-              <span className="text-[9px] font-bold mt-1">Messages</span>
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white bg-gradient-to-br from-pink-500 to-red-500 border border-black">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-            <button onClick={() => user ? navigate('/dashboard?tab=My Account') : setIsLoginOpen(true)} className="flex flex-col items-center gap-1 text-white/50 hover:text-white">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
-                <Avatar
-                  src={user?.profilePicture}
-                  name={user?.fullName || user?.name || user?.email}
-                  size={20}
-                  style={{ fontSize: '10px', fontWeight: '800' }}
-                />
-              </div>
-              <span className="text-[9px] font-bold mt-1">Profile</span>
-            </button>
+            <div className="flex-1 flex flex-col items-center">
+              <button 
+                onClick={() => user ? navigate('/chat') : setIsLoginOpen(true)} 
+                className="flex flex-col items-center gap-1 text-white/50 hover:text-white relative" 
+                data-onboarding="chat-icon"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                <span className="text-[9px] font-bold mt-1">Messages</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white bg-gradient-to-br from-pink-500 to-red-500 border border-black">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center">
+              <button 
+                onClick={() => user ? navigate('/dashboard?tab=My Account') : setIsLoginOpen(true)} 
+                className="flex flex-col items-center gap-1 text-white/50 hover:text-white"
+              >
+                <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden">
+                  <Avatar
+                    src={user?.profilePicture}
+                    name={user?.fullName || user?.name || user?.email}
+                    size={20}
+                    style={{ fontSize: '10px', fontWeight: '800' }}
+                  />
+                </div>
+                <span className="text-[9px] font-bold mt-1">Profile</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1630,163 +1707,166 @@ const Marketplace = () => {
         ></div>
 
         <div className={`filter-drawer ${mobileFilterOpen ? 'open' : ''} lg:hidden`}>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-              <h3 className="text-sm font-bold text-white uppercase mono">Filters</h3>
-              <button onClick={() => setMobileFilterOpen(false)} className="text-white/60">
-                <XIcon />
-              </button>
-            </div>
+          {/* STICKY HEADER */}
+          <div className="sticky top-0 bg-[#0F0F0F] z-[30] px-6 py-4 flex items-center justify-between border-b border-white/10">
+            <h3 className="text-sm font-bold text-white uppercase mono">Filters</h3>
+            <button 
+              onClick={() => setMobileFilterOpen(false)} 
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/60 active:bg-white/10 active:scale-95 transition-all"
+            >
+              <XIcon />
+            </button>
+          </div>
 
-            <div className="space-y-6 max-h-[65vh] overflow-y-auto custom-scrollbar">
-              {/* Categories */}
-              <div>
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
-                <div className="space-y-3">
-                  {categories.map(cat => (
-                    <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedCategories.includes(cat.slug)}
-                        onChange={() => toggleCategory(cat.slug)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {cat.emoji} {cat.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="pt-6 border-t border-white/10">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
-                  <span className="text-[11px] text-[#10B981] font-mono">₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}</span>
-                </div>
-                <PriceHistogram
-                  histogram={priceHistogram}
-                  maxPrice={maxPriceLimit}
-                  minSelected={draftPriceRange[0]}
-                  maxSelected={draftPriceRange[1]}
-                />
-                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
-                  <div style={{ position: 'absolute', width: '100%', height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 10 }} />
-                  <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`, right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`, height: 4, background: 'linear-gradient(90deg, #10B981, #34D399)', borderRadius: 10 }} />
-                  <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[0]}
-                    onChange={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setDraftPriceRange([val, draftPriceRange[1]]); }}
-                    onTouchEnd={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
-                    onMouseUp={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
-                    style={{ position: 'absolute', width: '100%', zIndex: 4 }} />
-                  <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[1]}
-                    onChange={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setDraftPriceRange([draftPriceRange[0], val]); }}
-                    onTouchEnd={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
-                    onMouseUp={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
-                    style={{ position: 'absolute', width: '100%', zIndex: 3 }} />
-                </div>
-                <div className="flex justify-between mt-2">
-                  <span className="text-[9px] text-white/25 mono">₹0</span>
-                  <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.5 / 1000).toFixed(1)}k</span>
-                  <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit / 1000).toFixed(1)}k</span>
-                </div>
-              </div>
-
-              {/* Condition */}
-              <div className="pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
-                <div className="space-y-3">
-                  {conditions.map(cond => (
-                    <label key={cond} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedConditions.includes(cond)}
-                        onChange={() => toggleCondition(cond)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {cond}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Seller's Branch */}
-              <div className="pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
-                <div className="space-y-3">
-                  {branches.map(branch => (
-                    <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedBranches.includes(branch.slug)}
-                        onChange={() => toggleBranch(branch.slug)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {branch.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Seller's Year */}
-              <div className="pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
-                <div className="space-y-3">
-                  {years.map(year => (
-                    <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedYears.includes(year.value)}
-                        onChange={() => toggleYear(year.value)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {year.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Item Type */}
-              <div className="pt-6 border-t border-white/10">
-                <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
-                <div className="space-y-3">
-                  {itemTypes.map(type => (
-                    <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        className="modern-checkbox"
-                        checked={selectedTypes.includes(type.value)}
-                        onChange={() => toggleType(type.value)}
-                      />
-                      <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
-                        {type.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+          <div className="p-6 pt-2 space-y-6 max-h-[calc(70vh-140px)] overflow-y-auto custom-scrollbar">
+            {/* Categories */}
+            <div>
+              <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Categories</h4>
+              <div className="space-y-3">
+                {categories.map(cat => (
+                  <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="modern-checkbox"
+                      checked={selectedCategories.includes(cat.slug)}
+                      onChange={() => toggleCategory(cat.slug)}
+                    />
+                    <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                      {cat.emoji} {cat.name}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-[#0F0F0F] border-t border-white/10 p-4 flex gap-3 mt-8 -mx-6 -mb-6">
-              <button
-                onClick={clearAllFilters}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white text-sm font-bold rounded-xl"
-              >
-                Show Results
-              </button>
+            {/* Price Range */}
+            <div className="pt-6 border-t border-white/10">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-[11px] text-white/40 uppercase font-bold mono">Price Range</h4>
+                <span className="text-[11px] text-[#10B981] font-mono">₹{draftPriceRange[0].toLocaleString()} – ₹{draftPriceRange[1].toLocaleString()}</span>
+              </div>
+              <PriceHistogram
+                histogram={priceHistogram}
+                maxPrice={maxPriceLimit}
+                minSelected={draftPriceRange[0]}
+                maxSelected={draftPriceRange[1]}
+              />
+              <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
+                <div style={{ position: 'absolute', width: '100%', height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 10 }} />
+                <div style={{ position: 'absolute', left: `${(draftPriceRange[0] / maxPriceLimit) * 100}%`, right: `${100 - (draftPriceRange[1] / maxPriceLimit) * 100}%`, height: 4, background: 'linear-gradient(90deg, #10B981, #34D399)', borderRadius: 10 }} />
+                <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[0]}
+                  onChange={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setDraftPriceRange([val, draftPriceRange[1]]); }}
+                  onTouchEnd={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
+                  onMouseUp={(e) => { const val = Math.min(parseInt(e.target.value), draftPriceRange[1] - 100); setPriceRange([val, draftPriceRange[1]]); setCurrentPage(1); }}
+                  style={{ position: 'absolute', width: '100%', zIndex: 4 }} />
+                <input type="range" min="0" max={maxPriceLimit} step="100" value={draftPriceRange[1]}
+                  onChange={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setDraftPriceRange([draftPriceRange[0], val]); }}
+                  onTouchEnd={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
+                  onMouseUp={(e) => { const val = Math.max(parseInt(e.target.value), draftPriceRange[0] + 100); setPriceRange([draftPriceRange[0], val]); setCurrentPage(1); }}
+                  style={{ position: 'absolute', width: '100%', zIndex: 3 }} />
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="text-[9px] text-white/25 mono">₹0</span>
+                <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit * 0.5 / 1000).toFixed(1)}k</span>
+                <span className="text-[9px] text-white/25 mono">₹{(maxPriceLimit / 1000).toFixed(1)}k</span>
+              </div>
             </div>
+
+            {/* Condition */}
+            <div className="pt-6 border-t border-white/10">
+              <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Condition</h4>
+              <div className="space-y-3">
+                {conditions.map(cond => (
+                  <label key={cond} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="modern-checkbox"
+                      checked={selectedConditions.includes(cond)}
+                      onChange={() => toggleCondition(cond)}
+                    />
+                    <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                      {cond}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Seller's Branch */}
+            <div className="pt-6 border-t border-white/10">
+              <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Branch</h4>
+              <div className="space-y-3">
+                {branches.map(branch => (
+                  <label key={branch.slug} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="modern-checkbox"
+                      checked={selectedBranches.includes(branch.slug)}
+                      onChange={() => toggleBranch(branch.slug)}
+                    />
+                    <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                      {branch.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Seller's Year */}
+            <div className="pt-6 border-t border-white/10">
+              <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Seller's Year</h4>
+              <div className="space-y-3">
+                {years.map(year => (
+                  <label key={year.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="modern-checkbox"
+                      checked={selectedYears.includes(year.value)}
+                      onChange={() => toggleYear(year.value)}
+                    />
+                    <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                      {year.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Item Type */}
+            <div className="pt-6 border-t border-white/10">
+              <h4 className="text-[11px] text-white/40 uppercase mb-4 font-bold mono">Item Type</h4>
+              <div className="space-y-3">
+                {itemTypes.map(type => (
+                  <label key={type.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="modern-checkbox"
+                      checked={selectedTypes.includes(type.value)}
+                      onChange={() => toggleType(type.value)}
+                    />
+                    <span className="text-sm font-medium text-white/60 group-hover:text-white transition-colors flex-1">
+                      {type.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* STICKY FOOTER */}
+          <div className="sticky bottom-0 bg-[#0F0F0F] border-t border-white/10 p-6 flex gap-3 z-[30]">
+            <button
+              onClick={clearAllFilters}
+              className="flex-1 px-4 py-3.5 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl active:scale-95 transition-all"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => setMobileFilterOpen(false)}
+              className="flex-1 px-4 py-3.5 bg-[#F5F5F7] text-black text-sm font-bold rounded-xl active:scale-95 transition-all"
+            >
+              Show Results
+            </button>
           </div>
         </div>
 

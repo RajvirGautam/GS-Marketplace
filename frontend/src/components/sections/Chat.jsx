@@ -1570,7 +1570,7 @@ const Chat = () => {
         .emoji-btn:hover { color: rgba(255,255,255,0.7); }
       `}</style>
 
-            <div className="chat-root">
+            <div className="chat-root" data-onboarding="chat-page">
                 <div className="chat-grid-bg" />
 
                 {/* Topbar */}
