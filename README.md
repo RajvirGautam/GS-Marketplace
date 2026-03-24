@@ -3,7 +3,7 @@
 A full-stack marketplace application built for college ecosystems, allowing students to securely buy, sell, and trade items within the community.
 
 ## Features
-- **Student Authentication:** Secure sign-up and login via Clerk and Google OAuth to ensure ONLY verified students can access the platform.
+- **Student Authentication:** Secure sign-up and login via Google OAuth to ensure ONLY verified students can access the platform.
 - **Product Listings & AI Auto-fill:** Sell your items effortlessly. Upload an image of your product, and the integrated AI vision model automatically extracts details and populates the listing.
 - **Real-Time Bidding & Offers:** Make and receive real-time offers on products. Sellers can accept, decline, or negotiate.
 - **Live Chat & Negotiation:** Seamless, real-time messaging powered by Socket.io allows buyers and sellers to negotiate deals intuitively.
@@ -39,7 +39,7 @@ A full-stack marketplace application built for college ecosystems, allowing stud
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - A MongoDB instance (e.g., MongoDB Atlas or local setup)
-- API Keys for Clerk, Cloudinary, and AI services (OpenAI/GenAI/Groq)
+- API Keys for Cloudinary, and AI services (OpenAI/GenAI/Groq)
 
 ### Installation
 1. Clone the repository:
