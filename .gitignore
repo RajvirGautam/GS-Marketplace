@@ -22,4 +22,6 @@ frontend/src/theme.js
 # Unused backend files
 backend/src/config/database.js
 backend/src/controllers/authController.js
-backend/src/middleware/ClerkAuth.js
+
+dummyProducts.md
+dummyUsers.md
