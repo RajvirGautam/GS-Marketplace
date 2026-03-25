@@ -99,6 +99,9 @@ export const OnboardingProvider = ({ children }) => {
     if (stepIndex < 0 || stepIndex >= ONBOARDING_STEPS.length) return;
     const step = ONBOARDING_STEPS[stepIndex];
 
+    // Close any onboarding-triggered dropdowns from the previous step
+    window.dispatchEvent(new Event('onboarding:close-notifications'));
+
     // Navigate if needed
     if (location.pathname !== step.route) {
       let targetRoute = step.route;
@@ -115,6 +118,14 @@ export const OnboardingProvider = ({ children }) => {
       }
     }
 
+    // Open notification panel if this step highlights the notification bell
+    if (step.target === 'notification-bell') {
+      // Small delay so the element finishes spotlighting before opening panel
+      setTimeout(() => {
+        window.dispatchEvent(new Event('onboarding:open-notifications'));
+      }, 350);
+    }
+
     setCurrentStep(stepIndex);
   }, [navigate, location.pathname]);
 
@@ -122,6 +133,7 @@ export const OnboardingProvider = ({ children }) => {
     const nextIdx = currentStep + 1;
     if (nextIdx >= ONBOARDING_STEPS.length) {
       // End of onboarding
+      window.dispatchEvent(new Event('onboarding:close-notifications'));
       setActive(false);
       setCurrentStep(0);
       return;
@@ -135,6 +147,7 @@ export const OnboardingProvider = ({ children }) => {
   }, [currentStep, goToStep]);
 
   const skip = useCallback(() => {
+    window.dispatchEvent(new Event('onboarding:close-notifications'));
     setActive(false);
     setCurrentStep(0);
   }, []);
