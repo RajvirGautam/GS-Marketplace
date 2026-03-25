@@ -9,7 +9,6 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import passport from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
@@ -98,7 +97,6 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/chat', chatRoutes);
@@ -111,6 +109,31 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// ─── Keep-Alive Ping (prevents Render free-tier cold starts) ──────────────────
+// Render spins down after 15 min of inactivity; ping every 14 min to prevent it.
+const PING_INTERVAL_MS = 14 * 60 * 1000; // 14 minutes
+
+function startKeepAlivePing() {
+  const baseUrl = process.env.RENDER_EXTERNAL_URL;
+  if (!baseUrl) {
+    console.log('ℹ️  RENDER_EXTERNAL_URL not set — keep-alive ping disabled (local dev)');
+    return;
+  }
+
+  const pingUrl = `${baseUrl}/api/health`;
+  console.log(`🏓 Keep-alive ping enabled → ${pingUrl} every 14 min`);
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(pingUrl);
+      console.log(`🏓 Keep-alive ping → ${res.status} ${res.statusText}`);
+    } catch (err) {
+      console.warn(`⚠️  Keep-alive ping failed: ${err.message}`);
+    }
+  }, PING_INTERVAL_MS);
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 app.get('/', (req, res) => {
   res.json({ message: 'SGSITS Marketplace API is running 🚀' });
 });
@@ -119,6 +142,7 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5001;
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  startKeepAlivePing();
 });
 
 export default app;
