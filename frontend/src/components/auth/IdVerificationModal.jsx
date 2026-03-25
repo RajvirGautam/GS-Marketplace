@@ -32,15 +32,7 @@ const modalStyles = `
     background: #000;
     outline: none;
   }
-  .debug-panel {
-    background: #000;
-    border: 1px solid rgba(0, 217, 255, 0.3);
-    color: #00D9FF;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    max-h: 200px;
-    overflow-y: auto;
-  }
+
 `;
 
 const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
@@ -444,42 +436,7 @@ const IdVerificationModal = ({ isOpen, onClose, userEmail }) => {
             )}
           </NeonButton>
 
-          {/* Debug Panel */}
-          {debugInfo.length > 0 && (
-            <div className="debug-panel p-4 space-y-2">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#00D9FF]/20">
-                <span className="font-bold uppercase text-[#00D9FF]">// AI VERIFICATION LOG</span>
-              </div>
-              
-              <div className="space-y-0.5 max-h-40 overflow-y-auto">
-                {debugInfo.map((info, i) => (
-                  <div 
-                    key={i} 
-                    className={`text-[9px] leading-relaxed ${
-                      info.includes('✅') || info.includes('✓') ? 'text-green-400' :
-                      info.includes('❌') ? 'text-red-400' :
-                      info.includes('⚠️') ? 'text-yellow-400' :
-                      info.includes('🎉') ? 'text-green-300 font-bold' :
-                      'text-white/70'
-                    }`}
-                  >
-                    {info}
-                  </div>
-                ))}
-              </div>
 
-              {extractedText && (
-                <details className="mt-4 pt-3 border-t border-[#00D9FF]/20">
-                  <summary className="cursor-pointer text-[10px] text-[#00D9FF] hover:text-white uppercase">
-                    📄 View OCR Text
-                  </summary>
-                  <div className="mt-3 p-3 bg-black/50 text-[9px] text-white/60 max-h-32 overflow-y-auto">
-                    {extractedText}
-                  </div>
-                </details>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

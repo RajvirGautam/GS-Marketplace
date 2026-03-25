@@ -213,6 +213,18 @@ const NotificationBell = ({ dark = true }) => {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
+    // Onboarding: open/close via custom events
+    useEffect(() => {
+        const openHandler = () => setOpen(true);
+        const closeHandler = () => setOpen(false);
+        window.addEventListener('onboarding:open-notifications', openHandler);
+        window.addEventListener('onboarding:close-notifications', closeHandler);
+        return () => {
+            window.removeEventListener('onboarding:open-notifications', openHandler);
+            window.removeEventListener('onboarding:close-notifications', closeHandler);
+        };
+    }, []);
+
     const buttonClass = dark
         ? 'btn-glass' // Marketplace / Dashboard glass button style
         : 'p-2 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-indigo-800 dark:text-slate-200 ring-1 ring-inset ring-black/5 dark:ring-white/10 transition-colors';
