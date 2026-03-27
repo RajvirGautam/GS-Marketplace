@@ -1143,63 +1143,59 @@ const Hero = () => {
               </div>
             </div>
 
-            {/* Mobile feature pills - 2x2 grid */}
-            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3" style={{ '--accent-color': '#00D9FF' }}>
-              <div className="mobile-feature-pill group relative overflow-hidden">
-                <div className="card-scanline" />
-                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
-                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
-                >
-                  <Icons.Cpu className="w-4 h-4 text-white stroke-white drop-shadow-md" />
+            {/* Mobile feature pills - 2x2 grid (Gamification Style) */}
+            <div className="anim-fade-up delay-500 grid grid-cols-2 gap-3 sm:gap-4 pb-2 pt-2">
+              
+              {/* Card 1: Red */}
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col justify-between h-[80px] sm:h-[110px] group transition-transform hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #FF4B5C 0%, #E62E45 100%)', boxShadow: '0 8px 24px -8px rgba(255, 75, 92, 0.4)' }}>
+                <div className="relative z-10 pointer-events-none">
+                  <div className="text-white font-bold text-[13px] sm:text-[15px] leading-tight tracking-tight">AI Smart</div>
+                  <div className="text-white/70 font-medium text-[12px] sm:text-[14px] leading-tight">Listing</div>
                 </div>
-                <div>
-                  <div className="text-white font-bold text-xs">AI Smart Listing</div>
-                  <div className="text-[9px] text-white/65">Instant Gear Specs</div>
+                <div className="relative z-10 flex items-center mt-auto">
+                  <span className="text-white text-[7px] sm:text-[8px] font-bold tracking-widest uppercase cursor-pointer hover:underline">List in Seconds</span>
                 </div>
+                {/* 3D Graphic */}
+                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png" alt="AI" className="absolute -right-2 -bottom-2 w-20 h-20 sm:w-28 sm:h-28 object-contain drop-shadow-2xl select-none pointer-events-none group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <div className="mobile-feature-pill group relative overflow-hidden">
-                <div className="card-scanline" />
-                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
-                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
-                >
-                  <Icons.Zap className="w-4 h-4 text-white stroke-white drop-shadow-md" />
+
+              {/* Card 2: White */}
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col justify-between h-[80px] sm:h-[110px] group transition-transform hover:-translate-y-1" style={{ backgroundColor: '#ffffff', boxShadow: '0 8px 24px -8px rgba(0, 0, 0, 0.1)' }}>
+                <div className="relative z-10 pointer-events-none">
+                  <div className="text-[#1a1a1a] font-bold text-[13px] sm:text-[15px] leading-tight tracking-tight">Campus</div>
+                  <div className="text-[#888888] font-medium text-[12px] sm:text-[14px] leading-tight">Exchange</div>
                 </div>
-                <div>
-                  <div className="text-white font-bold text-xs">Campus Exchange</div>
-                  <div className="text-[9px] text-white/65">Zero Shipping</div>
+                <div className="relative z-10 flex items-center mt-auto">
+                  <span className="text-black text-[7px] sm:text-[8px] font-bold tracking-widest uppercase cursor-pointer hover:underline">Meet & Trade</span>
                 </div>
+                {/* 3D Graphic */}
+                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png" alt="Exchange" className="absolute -right-1 -bottom-1 w-20 h-20 sm:w-28 sm:h-28 object-contain drop-shadow-2xl select-none pointer-events-none group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <div className="mobile-feature-pill group relative overflow-hidden">
-                <div className="card-scanline" />
-                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
-                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
-                >
-                  <Icons.DrafterTools className="w-4 h-4 text-white stroke-white drop-shadow-md" />
+
+              {/* Card 3: White */}
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col justify-between h-[80px] sm:h-[110px] group transition-transform hover:-translate-y-1" style={{ backgroundColor: '#ffffff', boxShadow: '0 8px 24px -8px rgba(0, 0, 0, 0.1)' }}>
+                <div className="relative z-10 pointer-events-none">
+                  <div className="text-[#1a1a1a] font-bold text-[13px] sm:text-[15px] leading-tight tracking-tight">Engineering</div>
+                  <div className="text-[#888888] font-medium text-[12px] sm:text-[14px] leading-tight">Hub</div>
                 </div>
-                <div>
-                  <div className="text-white font-bold text-xs">Engineering Hub</div>
-                  <div className="text-[9px] text-white/65">Built for Engineers</div>
+                <div className="relative z-10 flex items-center mt-auto">
+                  <span className="text-black text-[7px] sm:text-[8px] font-bold tracking-widest uppercase cursor-pointer hover:underline">Gear Up</span>
                 </div>
+                {/* 3D Graphic */}
+                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Gear.png" alt="Hub" className="absolute -right-2 -bottom-2 w-20 h-20 sm:w-28 sm:h-28 object-contain drop-shadow-2xl select-none pointer-events-none group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <div className="mobile-feature-pill group relative overflow-hidden">
-                <div className="card-scanline" />
-                <div className="top-accent-strip opacity-20" style={{ background: 'linear-gradient(135deg, #00D9FF55 0%, transparent 60%)' }} />
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
-                  style={{ background: '#00D9FF25', border: '1px solid #00D9FF40' }}
-                >
-                  <Icons.ShieldCheck className="w-4 h-4 text-white stroke-white drop-shadow-md" />
+
+              {/* Card 4: Blue */}
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col justify-between h-[80px] sm:h-[110px] group transition-transform hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)', boxShadow: '0 8px 24px -8px rgba(37, 99, 235, 0.4)' }}>
+                <div className="relative z-10 pointer-events-none">
+                  <div className="text-white font-bold text-[13px] sm:text-[15px] leading-tight tracking-tight">Verified</div>
+                  <div className="text-white/70 font-medium text-[12px] sm:text-[14px] leading-tight">Only</div>
                 </div>
-                <div>
-                  <div className="text-white font-bold text-xs">Verified Only</div>
-                  <div className="text-[9px] text-white/65">ID Verified Students</div>
+                <div className="relative z-10 flex items-center mt-auto">
+                  <span className="text-white text-[7px] sm:text-[8px] font-bold tracking-widest uppercase cursor-pointer hover:underline">Safe & Secure</span>
                 </div>
+                {/* 3D Graphic */}
+                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" alt="Verified" className="absolute -right-1 -bottom-1 w-20 h-20 sm:w-28 sm:h-28 object-contain drop-shadow-2xl select-none pointer-events-none group-hover:scale-105 transition-transform duration-500" />
               </div>
             </div>
 
