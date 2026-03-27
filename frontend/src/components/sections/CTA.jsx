@@ -23,36 +23,30 @@ const ArrowRight = () => (
 // Crucially, the vertical band between top 35% and bottom 35% is kept completely empty 
 // on narrow screens so the "Trusted by" text is never physically crossed by flying cards.
 const REVIEWS = [
-  // --- MOBILE VISIBLE CARDS (Symmetrical Cascade) ---
+  // --- MOBILE VISIBLE CARDS (Organic Scattered 6-Card Layout) ---
+  
+  // TOP ZONE (3 Scattered Cards)
+  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '12%', left: '4%' }, rotate: '-4deg', width: '250px', zDepth: 1.4, showOnMobile: true, mobilePos: { top: '3%', right: '-8%' }, mobileRotate: '8deg' },
+  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '6deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '15%', left: '-12%' }, mobileRotate: '-6deg' },
+  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-2deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '28%', right: '8%' }, mobileRotate: '4deg' },
 
-  // Left 1 (Very Top)
-  { id: 1, name: "Rahul S.", role: "Engineering", text: "Got my textbooks in literally 10 minutes. Safe and easy.", pos: { top: '12%', left: '4%' }, rotate: '-3deg', width: '250px', zDepth: 1.4, showOnMobile: true, mobilePos: { top: '8%', left: '4%' } },
-
-  // Right 1 (Mid-Top)
-  { id: 7, name: "Vikram P.", role: "M.Tech", text: "Found cheap Arduino kits. Saved a ton of money.", pos: { top: '15%', left: '28%' }, rotate: '1.5deg', width: '230px', zDepth: 3.2, showOnMobile: true, mobilePos: { top: '20%', right: '4%' } },
-
-  // Left 2 (Lower-Top, sits just above text)
-  { id: 8, name: "Anita D.", role: "Design", text: "Sold my old T-square to a junior the same day I listed it.", pos: { top: '42%', left: '3%' }, rotate: '-1.5deg', width: '240px', zDepth: 2.5, showOnMobile: true, mobilePos: { top: '26%', left: '4%' } },
+  // Center-Top (Hidden on mobile)
+  { id: 14, name: "Dev V.", role: "Comp. Sci", text: "Zero latency on image uploads. Works flawlessly.", pos: { top: '22%', right: '26%' }, rotate: '-2deg', width: '235px', zDepth: 3.4, showOnMobile: false },
 
   // --- [ EXCLUSION ZONE: CENTER 38% IS RESERVED FOR TYPOGRAPHY ] ---
 
-  // Right 2 (Upper-Bottom, sits just below text)
-  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '1deg', width: '245px', zDepth: 2.8, showOnMobile: true, mobilePos: { bottom: '26%', right: '4%' } },
+  // Center-Bottom (Hidden on mobile)
+  { id: 3, name: "Aman K.", role: "Mechanical", text: "Listed 6 things, sold 5 in two days. Highly recommend.", pos: { bottom: '8%', left: '32%' }, rotate: '2deg', width: '245px', zDepth: 2.8, showOnMobile: false },
 
-  // Left 3 (Mid-Bottom)
-  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '1.5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '20%', left: '4%' } },
+  // BOTTOM ZONE (3 Scattered Cards)
+  { id: 10, name: "Kritika S.", role: "Architecture", text: "The UI is so clean. Listed my tools and got inquiries fast.", pos: { top: '45%', right: '3%' }, rotate: '-5deg', width: '250px', zDepth: 2.2, showOnMobile: true, mobilePos: { bottom: '26%', left: '4%' }, mobileRotate: '-4deg' },
+  { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { bottom: '32%', left: '24%' }, rotate: '-2deg', width: '220px', zDepth: 3.5, showOnMobile: true, mobilePos: { bottom: '12%', right: '-14%' }, mobileRotate: '9deg' },
+  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '6%', right: '34%' }, rotate: '5deg', width: '220px', zDepth: 2.7, showOnMobile: true, mobilePos: { bottom: '1%', left: '-8%' }, mobileRotate: '-5deg' },
 
-  // Right 3 (Very Bottom)
-  { id: 5, name: "Karan T.", role: "Comp. Sci", text: "Fast uploads, works perfectly on mobile.", pos: { bottom: '6%', right: '34%' }, rotate: '-1deg', width: '220px', zDepth: 2.7, showOnMobile: true, mobilePos: { bottom: '8%', right: '4%' } },
-
-  // --- HIDDEN ON MOBILE (To prevent clutter and maintain the stark geometry) ---
-
+  // --- HIDDEN ON MOBILE (1 remaining) ---
   { id: 15, name: "Arjun N.", role: "Electronics", text: "Verified profiles mean I actually trust the person I'm meeting.", pos: { bottom: '15%', left: '5%' }, rotate: '2.5deg', width: '260px', zDepth: 1.7, showOnMobile: false },
-  // { id: 13, name: "Rishabh K.", role: "Pharmacy", text: "Got lab coats for half the price. Great for juniors.", pos: { bottom: '32%', left: '24%' }, rotate: '-2deg', width: '220px', zDepth: 3.5 },
   { id: 2, name: "Priya M.", role: "B.Tech", text: "Met near the library for the handoff. Super convenient.", pos: { top: '10%', right: '5%' }, rotate: '3.5deg', width: '240px', zDepth: 1.5, showOnMobile: false },
-  { id: 14, name: "Dev V.", role: "Comp. Sci", text: "Zero latency on image uploads. Works flawlessly.", pos: { top: '22%', right: '26%' }, rotate: '-2deg', width: '235px', zDepth: 3.4, showOnMobile: false },
   { id: 4, name: "Neha J.", role: "Arts", text: "Smooth experience, zero platform fees. Love it.", pos: { bottom: '14%', right: '6%' }, rotate: '-3.5deg', width: '255px', zDepth: 1.6, showOnMobile: false },
-  // { id: 9, name: "Rohan J.", role: "Business", text: "Way better than WhatsApp groups. Listings stay fresh.", pos: { bottom: '30%', right: '25%' }, rotate: '2deg', width: '230px', zDepth: 3.1 },
 ];
 
 const CTA = () => {
@@ -332,42 +326,78 @@ const CTA = () => {
 
             // Apply mobile-specific positioning and scale down sizes to fit narrow viewports
             const currentPos = isMobile && r.mobilePos ? r.mobilePos : r.pos;
-            const mobileScale = isMobile ? ' scale(0.65)' : '';
+            const mobileScale = isMobile ? ' scale(0.50)' : '';
+
+            // Emoji palette for mobile cards
+            const emojis = [
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Heart-Eyes.png',
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Star-Struck.png',
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png',
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Money%20Bag.png',
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Partying%20Face.png',
+              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Sunglasses.png'
+            ];
+            const emoji = emojis[index % emojis.length];
 
             return (
               <div
                 key={r.id}
-                className="absolute backdrop-blur-[12px] bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.45)] p-5 md:p-6 rounded-[28px] border border-white/10 flex flex-col gap-4 overflow-hidden"
+                className={`absolute overflow-hidden flex flex-col backdrop-blur-[12px] bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.45)] border border-white/10 ${isMobile ? 'justify-between p-4 px-5 rounded-[24px]' : 'p-5 md:p-6 rounded-[28px] gap-4'}`}
                 style={{
                   ...currentPos,
-                  width: r.width,
-                  transform: `translateZ(${zTranslate}px) rotate(${r.rotate})${mobileScale}`,
+                  width: isMobile ? '280px' : r.width, // Slightly wider to accommodate text
+                  height: isMobile ? '150px' : 'auto', // Fixed compact height
+                  transform: `translateZ(${zTranslate}px) rotate(${isMobile && r.mobileRotate ? r.mobileRotate : r.rotate})${mobileScale}`,
                   opacity: finalOpacity,
                   willChange: 'transform, opacity'
                 }}
               >
-                {/* Top highlight glow */}
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-                <div className="flex items-center gap-3.5 mb-1 relative z-10">
-                  <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white/90 shadow-inner">
-                    {r.name.charAt(0)}
-                  </div>
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[15px] font-bold text-white/95 leading-tight">{r.name}</p>
-                      <div className="w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" title="Verified" />
-                    </div>
-                    <p className="text-[11px] text-white/40 font-medium uppercase tracking-[0.08em] mt-1">{r.role}</p>
-                  </div>
-                </div>
-
-                <p className="text-[14px] text-white/70 leading-[1.6] relative z-10 font-medium italic">
-                  "{r.text}"
-                </p>
-
-                {/* Subtle bottom shine */}
+                {/* Global top highlight and bottom shine for glassmorphism */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
                 <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[40%] bg-white/5 blur-[40px] rounded-full pointer-events-none" />
+
+                {isMobile ? (
+                  // === MOBILE GLASSMORPHISM + 3D EMOJI ===
+                  <>
+                    <div className="relative z-10 pointer-events-none mb-1">
+                      <div className="text-white font-bold text-[19px] leading-tight tracking-tight flex items-center gap-1.5">
+                        {r.name}
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" title="Verified" />
+                      </div>
+                      <div className="text-white/40 font-bold text-[12px] uppercase tracking-wider mt-0.5">
+                        {r.role}
+                      </div>
+                    </div>
+                    <p className="text-white/80 text-[15px] leading-[1.3] relative z-10 font-medium italic pr-12 line-clamp-3 overflow-hidden text-ellipsis">
+                      "{r.text}"
+                    </p>
+                    <img 
+                      src={emoji} 
+                      alt="Review Graphic" 
+                      className="absolute -right-3 -bottom-3 w-20 h-20 object-contain drop-shadow-2xl select-none pointer-events-none" 
+                    />
+                  </>
+                ) : (
+                  // === DESKTOP GLASSMORPHISM STYLE ===
+                  <>
+                    <div className="flex items-center gap-3.5 mb-1 relative z-10">
+                      <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white/90 shadow-inner">
+                        {r.name.charAt(0)}
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <p className="text-[15px] font-bold text-white/95 leading-tight">{r.name}</p>
+                          <div className="w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" title="Verified" />
+                        </div>
+                        <p className="text-[11px] text-white/40 font-medium uppercase tracking-[0.08em] mt-1">{r.role}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-[14px] text-white/70 leading-[1.6] relative z-10 font-medium italic">
+                      "{r.text}"
+                    </p>
+                  </>
+                )}
               </div>
             );
           })}
