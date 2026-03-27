@@ -65,16 +65,20 @@ const ProductCard = ({ product, viewMode = 'grid', index = 0 }) => {
     }
   }, [user, product._id, savedProductIds]);
 
+  // Cap the index for animation to avoid massive delays on lazy loaded items 
+  // (e.g., 24 is the page size)
+  const animationIndex = index % 24;
+
   // Trigger animation on mount
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50 + index * 50);
+    const timer = setTimeout(() => setIsVisible(true), 50 + animationIndex * 50);
     return () => clearTimeout(timer);
-  }, [index]);
+  }, [animationIndex]);
 
   const animationStyle = {
     opacity: isVisible ? 1 : 0,
     transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-    transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.1 + index * 0.05}s`
+    transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${(0.1 + animationIndex * 0.05).toFixed(2)}s`
   };
 
   // Helper functions
