@@ -454,8 +454,8 @@ const CTA = () => {
                     <UploadIcon />
                     <span>List a product</span>
                   </button>
-                  <button className="btn-brutal btn-outline flex items-center justify-center gap-3 text-sm md:text-base">
-                    <span>View Guidelines</span>
+                  <button onClick={() => navigate('/marketplace')} className="btn-brutal btn-outline flex items-center justify-center gap-3 text-sm md:text-base">
+                    <span>View Marketplace</span>
                     <ArrowRight />
                   </button>
                 </div>
