@@ -123,8 +123,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // ─── Keep-Alive Ping (prevents Render free-tier cold starts) ──────────────────
-// Render spins down after 15 min of inactivity; ping every 14 min to prevent it.
-const PING_INTERVAL_MS = 14 * 60 * 1000; // 14 minutes
+// Render spins down after 15 min of inactivity; ping every 10 min to prevent it.
+const PING_INTERVAL_MS = 13 * 60 * 1000; // 10 minutes
 
 function startKeepAlivePing() {
   const baseUrl = process.env.RENDER_EXTERNAL_URL;
@@ -134,7 +134,7 @@ function startKeepAlivePing() {
   }
 
   const pingUrl = `${baseUrl}/api/health`;
-  console.log(`🏓 Keep-alive ping enabled → ${pingUrl} every 14 min`);
+  console.log(`🏓 Keep-alive ping enabled → ${pingUrl} every 10 min`);
 
   setInterval(async () => {
     try {
