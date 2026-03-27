@@ -7,6 +7,7 @@ import Grainient from '../ui/Grainient'
 
 import AddProductModal from './AddProductModal'
 import ConnectIdModal from '../auth/ConnectIdModal'
+import { useOnboarding } from '../../context/OnboardingContext'
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,6 +24,7 @@ const Hero = () => {
   const cardRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
   const { user } = useAuth();
+  const { startOnboarding } = useOnboarding();
 
   const today = new Date();
   const day = today.getDate();
@@ -128,7 +130,7 @@ const Hero = () => {
   }, []);
 
   // Mobile auto-cycling cards — cards change frequency (ms)
-  const MOBILE_CARD_CHANGE_INTERVAL = 1000; 
+  const MOBILE_CARD_CHANGE_INTERVAL = 1000;
   useEffect(() => {
     const interval = setInterval(() => {
       setMobileCardIndex((prev) => (prev + 1) % cards.length);
@@ -848,7 +850,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      <section ref={containerRef} className="hero-enhanced relative pt-[160px] sm:pt-32 lg:pt-28 pb-4 sm:pb-24 px-4 sm:px-6 lg:px-8">
+      <section ref={containerRef} className="hero-enhanced relative pt-[180px] sm:pt-24 lg:pt-16 pb-4 sm:pb-20 px-4 sm:px-6 lg:px-8">
 
         <Grainient
           color1="#61177c"
@@ -907,50 +909,12 @@ const Hero = () => {
           />
         ))}
 
-        <div className="max-w-[1800px] mx-auto relative z-10 pt-16 sm:pt-20 lg:pt-14">
+        <div className="max-w-[1800px] mx-auto relative z-10 pt-10 sm:pt-14 lg:pt-20">
 
           {/* ============================= */}
           {/* ===== MOBILE LAYOUT ONLY ===== */}
           {/* ============================= */}
-          <div className="lg:hidden space-y-6 pb-0">
-
-            {/* Mobile AI Banner */}
-            {showBanner && (
-              <div className="anim-fade-up delay-100 flex items-center justify-between gap-2 rounded-xl p-2 pr-3 max-w-[320px] mx-auto mb-4 group relative overflow-hidden" style={{ background: 'rgba(14, 14, 22, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
-                <div className="card-scanline" />
-                <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
-                <div className="flex items-center gap-2.5 relative z-10">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${currentCard.accent}40, rgba(255,255,255,0.05))` }}>
-                    {/* Rocket Icon matching screenshot */}
-                    <svg className="w-4 h-4 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5M15.4 12L20.2 7.2A3.38 3.38 0 0 0 15.4 2.4L10.6 7.2c-3.1 1.05-6.6 2.43-6.6 2.43l5.17 5.17c0 0 1.38-3.5 2.43-6.6M12 15.4L7.2 20.2c-1.2 1.2-3.1.2-3.4-1.3l5.5-5.5M10 10l4 4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-xs leading-none tracking-wide">AI Listed Autofill</p>
-                    <p className="text-white/60 text-[9px] tracking-wide mt-1 uppercase mono">Snap a photo to fill</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      if (user) { setShowAddModal(true); }
-                      else {
-                        showInfo('Sign In Required', 'Please connect your ID to continue.');
-                        setShowConnectModal(true);
-                      }
-                    }}
-                    className="hero-cta-button flex-shrink-0 font-bold text-[11px] px-3.5 py-1.5 rounded-lg text-white/95 whitespace-nowrap shadow-xl"
-                    style={{ '--accent-color': currentCard.accent }}
-                  >
-                    Try now →
-                  </button>
-                  <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/40 hover:text-white transition-colors p-1" title="Dismiss">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="lg:hidden space-y-6 pb-0 pt-10">
 
             {/* Mobile headline - compact */}
             <div className="text-center anim-fade-up delay-200 space-y-5">
@@ -963,6 +927,45 @@ const Hero = () => {
                 Engineering essentials from <span className="font-semibold text-white/90">verified students</span>.
                 <span className="font-bold block mt-1" style={{ color: currentCard.accent }}> No shipping. No fees.</span>
               </p>
+
+              {/* Mobile CTAs */}
+              <div className="anim-fade-up delay-400 flex flex-col gap-3 px-2 pt-1">
+                <button
+                  onClick={() => {
+                    if (user) {
+                      startOnboarding();
+                    } else {
+                      setShowConnectModal(true);
+                    }
+                  }}
+                  className="group relative w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-bold text-base text-black overflow-hidden transition-all duration-300 active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #c8ff00 0%, #a8e600 100%)',
+                    boxShadow: '0 0 36px rgba(200, 255, 0, 0.32)',
+                  }}
+                >
+                  <span className="relative z-10 tracking-wide">Create Your First Listing</span>
+                  <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                </button>
+
+                <a
+                  href="/marketplace"
+                  className="group relative w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-semibold text-base overflow-hidden transition-all duration-300 active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.04) 100%)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    color: 'rgba(255,255,255,0.9)',
+                    boxShadow: '0 0 24px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(14px)',
+                  }}
+                >
+                  <span className="relative z-10 tracking-wide">Explore the Marketplace</span>
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300" />
+                </a>
+              </div>
             </div>
 
             {/* Mobile stats strip */}
@@ -988,27 +991,35 @@ const Hero = () => {
             <div className="relative w-full anim-scale delay-400">
               <div className="grid" style={{ gridTemplateAreas: "'stack'" }}>
                 {cards.map((card, idx) => {
-                  let state = 'hidden';
-                  if (idx === mobileCardIndex) state = 'active';
-                  else if (idx === (mobileCardIndex + 1) % cards.length) state = 'next';
-                  else if (idx === (mobileCardIndex - 1 + cards.length) % cards.length) state = 'prev';
+                  // Deck offset: how many positions behind the active card is this card
+                  const total = cards.length;
+                  const offset = (idx - mobileCardIndex + total) % total;
+                  // offset 0 = active (top), 1 = one behind, 2 = two behind, rest = hidden
 
                   let zIndex = 10;
                   let opacity = 0;
-                  let transform = 'scale(0.85) translateY(40px)';
+                  let transform = 'scale(0.82) translateY(52px)';
+                  let pointerEvents = 'none';
+                  let filter = 'none';
 
-                  if (state === 'active') {
+                  if (offset === 0) {
+                    // Active card — fully visible on top
+                    zIndex = 40;
+                    opacity = 1;
+                    transform = 'scale(1) translateY(0px)';
+                    pointerEvents = 'auto';
+                  } else if (offset === 1) {
+                    // Second card — peeking behind
                     zIndex = 30;
                     opacity = 1;
-                    transform = 'scale(1) translateY(0)';
-                  } else if (state === 'next') {
+                    transform = 'scale(0.94) translateY(18px)';
+                    filter = 'brightness(0.55)';
+                  } else if (offset === 2) {
+                    // Third card — barely peeking
                     zIndex = 20;
-                    opacity = 0.6;
-                    transform = 'scale(0.95) translateY(20px)';
-                  } else if (state === 'prev') {
-                    zIndex = 40;
-                    opacity = 0;
-                    transform = 'scale(1.05) translateY(-20px)';
+                    opacity = 1;
+                    transform = 'scale(0.88) translateY(34px)';
+                    filter = 'brightness(0.3)';
                   }
 
                   return (
@@ -1019,8 +1030,9 @@ const Hero = () => {
                         zIndex,
                         opacity,
                         transform,
+                        filter,
                         transition: 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-                        pointerEvents: state === 'active' ? 'auto' : 'none',
+                        pointerEvents,
                         '--accent-color': card.accent
                       }}
                     >
@@ -1028,7 +1040,7 @@ const Hero = () => {
                         <div className="card-scanline" />
                         <div className="top-accent-strip opacity-30" style={{ background: `linear-gradient(135deg, ${card.accent}44 0%, transparent 60%)` }} />
                         {/* Progress Bar at the top of the card */}
-                        {state === 'active' && (
+                        {offset === 0 && (
                           <div className="absolute top-0 left-0 right-0 h-1.5 z-50 bg-white/10">
                             <div
                               key={`progress-${mobileCardIndex}`}
@@ -1196,7 +1208,7 @@ const Hero = () => {
           {/* ============================== */}
           {/* ===== DESKTOP LAYOUT ONLY ===== */}
           {/* ============================== */}
-          <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="hidden lg:grid lg:grid-cols-12 gap-6 lg:gap-10 items-start">
 
             {/* ===== LEFT SIDEBAR - STATS ===== */}
             <div className="lg:col-span-2 space-y-10 anim-fade-left delay-100 sticky top-32 h-fit">
@@ -1259,54 +1271,10 @@ const Hero = () => {
             </div>
 
             {/* ===== MAIN CONTENT ===== */}
-            <div className="lg:col-span-7 space-y-12">
+            <div className="lg:col-span-7 space-y-8">
 
               {/* Hero headline */}
-              <div className="space-y-8 anim-fade-up delay-200">
-
-                {/* AI Listing Banner */}
-                {showBanner && (
-                  <div className="inline-flex items-center gap-4 rounded-2xl p-2 pr-3 scale-90 origin-left group relative overflow-hidden" 
-                    style={{ 
-                      background: 'rgba(14, 14, 22, 0.55)', 
-                      backdropFilter: 'blur(20px) saturate(160%)', 
-                      WebkitBackdropFilter: 'blur(20px) saturate(160%)', 
-                      border: '1px solid rgba(255, 255, 255, 0.08)', 
-                      boxShadow: '0 32px 64px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06)' 
-                    }}>
-                    <div className="card-scanline" />
-                    <div className="top-accent-strip opacity-20" style={{ background: `linear-gradient(135deg, ${currentCard.accent}44 0%, transparent 60%)` }} />
-                    <div className="flex items-center gap-3 relative z-10">
-                      <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 ml-1" style={{ background: 'rgba(0,217,255,0.1)' }}>
-                        <svg className="w-3.5 h-3.5 text-[#00D9FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
-                        </svg>
-                      </div>
-                      <div className="pt-0.5">
-                        <p className="text-white font-bold text-[12px] leading-tight">AI Listing Autofill is here!</p>
-                        <p className="text-white/50 text-[10px] mono mt-0.5">Snap a photo — AI fills the details instantly</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-1">
-                      <button
-                        onClick={() => {
-                          if (user) { setShowAddModal(true); }
-                          else {
-                            showInfo('Sign In Required', 'Please connect your ID to continue.');
-                            setShowConnectModal(true);
-                          }
-                        }}
-                        className="hero-cta-button flex-shrink-0 font-semibold text-[11px] px-3 py-1.5 rounded-full text-white whitespace-nowrap"
-                        style={{ '--accent-color': currentCard.accent }}
-                      >
-                        Try now →
-                      </button>
-                      <button onClick={() => setShowBanner(false)} className="flex-shrink-0 text-white/50 hover:text-white transition-colors">
-                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-6 anim-fade-up delay-200">
 
                 <h1 className="text-[clamp(2.5rem,10vw,8rem)] leading-[0.95] font-black text-white tracking-tight">
                   <span className="block anim-fade-up delay-300">TRADE</span>
@@ -1316,10 +1284,51 @@ const Hero = () => {
                   <span className="block anim-fade-up delay-500">ON CAMPUS</span>
                 </h1>
 
-                <p className="text-xl sm:text-2xl text-white/70 max-w-3xl leading-relaxed font-light anim-fade-up delay-600">
-                  Engineering essentials marketplace. From <span className="font-semibold text-white">Raspberry Pis</span> to <span className="font-semibold text-white">Drafters</span>, <span className="font-semibold text-white">Calculators</span> to <span className="font-semibold text-white">Lab Coats</span>.
-                  Exchange with verified students. <span className="font-bold" style={{ color: currentCard.accent }}>No shipping. No middlemen.</span> Pure campus commerce.
-                </p>
+                <div className="anim-fade-up delay-700 space-y-6 max-w-5xl">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button
+                      onClick={() => {
+                        if (user) {
+                          startOnboarding();
+                        } else {
+                          setShowConnectModal(true);
+                        }
+                      }}
+                      className="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-2xl font-bold text-base text-black overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
+                      style={{
+                        background: 'linear-gradient(135deg, #c8ff00 0%, #a8e600 100%)',
+                        boxShadow: '0 0 42px rgba(200, 255, 0, 0.36)',
+                      }}
+                    >
+                      <span className="relative z-10">Create Your First Listing</span>
+                      <svg className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    </button>
+
+                    <a
+                      href="/marketplace"
+                      className="group relative inline-flex items-center justify-center px-8 py-3.5 rounded-2xl font-semibold text-base overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        color: 'rgba(255,255,255,0.9)',
+                        boxShadow: '0 0 28px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.12)',
+                        backdropFilter: 'blur(12px)',
+                      }}
+                    >
+                      <span className="relative z-10 tracking-wide">Explore the Marketplace</span>
+                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300" />
+                    </a>
+                  </div>
+
+                  <p className="text-xl sm:text-2xl text-white/70 max-w-3xl leading-relaxed font-light">
+                    Engineering essentials marketplace. From <span className="font-semibold text-white">Raspberry Pis</span> to <span className="font-semibold text-white">Drafters</span>, <span className="font-semibold text-white">Calculators</span> to <span className="font-semibold text-white">Lab Coats</span>.
+                    Exchange with verified students. <span className="font-bold" style={{ color: currentCard.accent }}>No shipping. No middlemen.</span> Pure campus commerce.
+                  </p>
+                </div>
+
               </div>
 
               {/* ===== REDESIGNED PRODUCT SHOWCASE (STACKING SCROLL) ===== */}
