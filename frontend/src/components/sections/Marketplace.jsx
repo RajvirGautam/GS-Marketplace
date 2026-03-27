@@ -19,17 +19,6 @@ const ChevronDown = () => (
   </svg>
 );
 
-const ChevronLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m15 18-6-6 6-6" />
-  </svg>
-);
-
-const ChevronRight = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m9 18 6-6-6-6" />
-  </svg>
-);
 
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -162,12 +151,24 @@ const PriceHistogram = ({ histogram, maxPrice, minSelected, maxSelected }) => {
 };
 // ────────────────────────────────────────────────────────────────────────────
 
+// Module-level cache — survives component re-mounts (e.g. back nav) but clears on full page refresh
+let _marketplaceCache = null;
+
 const Marketplace = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { unreadCount } = useSocket();
   const { startOnboarding } = useOnboarding();
+
+  // Skip the initial fetch/reset effects when restoring from cache
+  const skipInitialFetch = useRef(false);
+  // Prevent filter-reset + re-fetch when priceRange is updated by server (not user)
+  const skipPriceRangeReset = useRef(false);
+
+  // Refs to track latest values for cache-on-unmount (avoids stale closure)
+  const productsRef = useRef([]);
+  const hasMoreRef = useRef(false);
 
   // State Management
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -195,10 +196,13 @@ const Marketplace = () => {
   // Products state
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({});
+  const [hasMore, setHasMore] = useState(false);
   const productsPerPage = 24;
   const glowRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const mobileSentinelRef = useRef(null);
 
   // Trigger onboarding on mount if flagged
   useEffect(() => {
@@ -311,9 +315,39 @@ const Marketplace = () => {
     }
   }, []);
 
-  // Fetch products from backend
+  // Restore from cache when navigating back from a product page
   useEffect(() => {
-    fetchProducts();
+    const scrollY = sessionStorage.getItem('marketplaceScrollY');
+    if (scrollY && _marketplaceCache) {
+      skipInitialFetch.current = true;
+      setProducts(_marketplaceCache.products);
+      setHasMore(_marketplaceCache.hasMore);
+      setLoading(false);
+      setTimeout(() => window.scrollTo(0, Number(scrollY)), 80);
+      sessionStorage.removeItem('marketplaceScrollY');
+    }
+  }, []);
+
+  // Keep refs in sync so unmount can safely read latest values
+  useEffect(() => { productsRef.current = products; }, [products]);
+  useEffect(() => { hasMoreRef.current = hasMore; }, [hasMore]);
+
+  // Save to cache on unmount
+  useEffect(() => {
+    return () => {
+      _marketplaceCache = {
+        products: productsRef.current,
+        hasMore: hasMoreRef.current,
+      };
+    };
+  }, []);
+
+  // Reset to page 1 when filters/search/sort change
+  useEffect(() => {
+    if (skipInitialFetch.current) return; // skip on cache restore
+    if (skipPriceRangeReset.current) { skipPriceRangeReset.current = false; return; }
+    setCurrentPage(1);
+    setProducts([]);
   }, [
     debouncedSearch,
     selectedCategories,
@@ -322,13 +356,66 @@ const Marketplace = () => {
     selectedConditions,
     selectedTypes,
     priceRange,
-    sortBy,
-    currentPage
+    sortBy
   ]);
 
-  const fetchProducts = async () => {
+  // Fetch products from backend
+  useEffect(() => {
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      return; // skip on cache restore
+    }
+    if (skipPriceRangeReset.current) return; // filter-reset effect will clear this flag
+    fetchProducts(currentPage);
+  }, [
+    currentPage,
+    debouncedSearch,
+    selectedCategories,
+    selectedBranches,
+    selectedYears,
+    selectedConditions,
+    selectedTypes,
+    priceRange,
+    sortBy
+  ]);
+
+  // IntersectionObserver — fetch next page when sentinel is near viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some(e => e.isIntersecting) && hasMore && !loadingMore && !loading) {
+          setCurrentPage(prev => prev + 1);
+        }
+      },
+      { rootMargin: '0px 0px 50px 0px', threshold: 0 }
+    );
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    if (mobileSentinelRef.current) observer.observe(mobileSentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading]);
+
+  // Prevent scrolling past the loaded products when fetching more
+  useEffect(() => {
+    if (loadingMore) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [loadingMore]);
+
+  const fetchProducts = async (page) => {
     try {
-      setLoading(true);
+      if (page === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       const filters = {
         search: debouncedSearch,
         categories: selectedCategories,
@@ -339,31 +426,35 @@ const Marketplace = () => {
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         sortBy,
-        page: currentPage,
+        page,
         limit: productsPerPage
       };
-
-      console.log('🔍 Fetching products with filters:', filters);
 
       const response = await productAPI.getAll(filters);
 
       if (response.success) {
-        setProducts(response.products);
-        setPagination(response.pagination);
+        if (page === 1) {
+          setProducts(response.products);
+          setLoading(false);
+        } else {
+          setProducts(prev => [...prev, ...response.products]);
+          setLoadingMore(false);
+        }
+        setHasMore(response.pagination.page < response.pagination.pages);
         if (response.globalMaxPrice && response.globalMaxPrice !== maxPriceLimit) {
           setMaxPriceLimit(response.globalMaxPrice);
           if (priceRange[1] === maxPriceLimit) {
+            skipPriceRangeReset.current = true; // don't re-fetch; this is a server-side discovery
             setPriceRange([priceRange[0], response.globalMaxPrice]);
             setDraftPriceRange([draftPriceRange[0], response.globalMaxPrice]);
           }
         }
         if (response.priceHistogram) setPriceHistogram(response.priceHistogram);
-        console.log('✅ Loaded', response.products.length, 'products');
       }
     } catch (error) {
       console.error('❌ Error fetching products:', error);
-    } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -500,7 +591,6 @@ const Marketplace = () => {
     }
   }, [location]);
 
-  const totalPages = pagination.pages || 0;
 
   return (
     <>
@@ -1324,22 +1414,18 @@ const Marketplace = () => {
                 </div>
 
                 {/* Products Grid */}
-                {loading ? (
+                {loading && products.length === 0 ? (
                   <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                     {Array.from({ length: viewMode === 'grid' ? 8 : 5 }).map((_, i) => (
                       <div key={i} className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden">
-                        {/* Image placeholder */}
                         <div className="skeleton-shimmer w-full" style={{ height: viewMode === 'grid' ? 180 : 120 }} />
                         <div className="p-4 space-y-3">
-                          {/* Badge row */}
                           <div className="flex gap-2">
                             <div className="skeleton-shimmer h-5 w-16 rounded-full" />
                             <div className="skeleton-shimmer h-5 w-20 rounded-full" />
                           </div>
-                          {/* Title */}
                           <div className="skeleton-shimmer h-4 w-3/4 rounded" />
                           <div className="skeleton-shimmer h-3 w-1/2 rounded" />
-                          {/* Price */}
                           <div className="flex items-center justify-between pt-1">
                             <div className="skeleton-shimmer h-5 w-16 rounded" />
                             <div className="skeleton-shimmer h-8 w-8 rounded-full" />
@@ -1348,7 +1434,7 @@ const Marketplace = () => {
                       </div>
                     ))}
                   </div>
-                ) : products.length === 0 ? (
+                ) : !loading && products.length === 0 ? (
                   <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
                     <div className="text-4xl mb-4 grayscale opacity-50">📦</div>
                     <h3 className="text-lg font-bold text-white mb-2">No products found</h3>
@@ -1362,54 +1448,15 @@ const Marketplace = () => {
                 ) : (
                   <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                     {products.map((product, index) => (
-                      <div
-                        key={product._id}
-                        className="h-full group"
-                      >
+                      <div key={product._id} className="h-full group">
                         <ProductCard product={product} viewMode={viewMode} index={index} />
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center mt-12 gap-2">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
-                    >
-                      <ChevronLeft />
-                    </button>
-
-                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                      const pageNum = i + 1;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-lg transition-all ${currentPage === pageNum
-                            ? 'bg-gradient-to-br from-[#00D9FF] to-[#7C3AED] text-white'
-                            : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
-                            }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-
-                    {totalPages > 5 && <span className="flex items-center text-white/40 px-2">...</span>}
-
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
-                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
-                    >
-                      <ChevronRight />
-                    </button>
-                  </div>
-                )}
+                {/* Lazy load sentinel */}
+                <div ref={sentinelRef} className="h-1 mt-2" />
               </main>
             </div>
           </div>
@@ -1548,25 +1595,21 @@ const Marketplace = () => {
           </div>
 
           {/* Mobile Grid */}
-          {loading ? (
+          {loading && products.length === 0 ? (
             <div className="grid grid-cols-2 gap-3 px-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
-                  {/* Image placeholder */}
                   <div className="skeleton-shimmer w-full" style={{ height: 130 }} />
                   <div className="p-3 space-y-2">
-                    {/* Badge */}
                     <div className="skeleton-shimmer h-4 w-14 rounded-full" />
-                    {/* Title */}
                     <div className="skeleton-shimmer h-3 w-full rounded" />
                     <div className="skeleton-shimmer h-3 w-2/3 rounded" />
-                    {/* Price */}
                     <div className="skeleton-shimmer h-4 w-12 rounded mt-1" />
                   </div>
                 </div>
               ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : !loading && products.length === 0 ? (
             <div className="text-center py-12 px-4 mx-4 bg-white/5 rounded-2xl border border-white/10">
               <div className="text-3xl mb-3 grayscale opacity-50">📦</div>
               <h3 className="text-base font-bold text-white mb-1">No products found</h3>
@@ -1587,28 +1630,8 @@ const Marketplace = () => {
             </div>
           )}
 
-          {/* Mobile Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-8 gap-2 pb-8">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30"
-              >
-                <ChevronLeft />
-              </button>
-              <span className="text-xs text-white/60 flex items-center justify-center px-4 font-mono">
-                Page {currentPage} / {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white disabled:opacity-30"
-              >
-                <ChevronRight />
-              </button>
-            </div>
-          )}
+          {/* Mobile lazy load sentinel */}
+          <div ref={mobileSentinelRef} className="h-1 mt-2" />
 
         </div>
 
@@ -1689,6 +1712,16 @@ const Marketplace = () => {
             </div>
           </div>
         </div>
+
+        {/* Global Loading More Sticky Overlay */}
+        {loadingMore && (
+          <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-center pointer-events-none pb-[120px] md:pb-12 pt-24 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/90 to-transparent">
+            <div className="bg-[#1A1A1A] border border-white/10 px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_10px_40px_rgba(0,0,0,0.8)] pointer-events-auto">
+              <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-[#00D9FF] animate-spin" />
+              <span className="text-sm font-bold text-white tracking-wide">Loading more...</span>
+            </div>
+          </div>
+        )}
 
         {/* Hiding old mobile Add Button since we added a sticky bottom nav */}
         <div className="hidden">
