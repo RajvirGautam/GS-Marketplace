@@ -119,6 +119,7 @@ app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
+  console.log('Good Morning 🌅');
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
