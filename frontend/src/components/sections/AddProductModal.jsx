@@ -787,7 +787,8 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     className="hidden"
                   />
 
-                  {imagePreviews.length < 5 && (
+                  {/* Show upload zone only when no images are staged */}
+                  {imagePreviews.length === 0 && (
                     <div onClick={() => fileInputRef.current?.click()} className="upload-zone mb-3">
                       <svg className="mx-auto mb-3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -799,7 +800,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                   )}
 
                   {imagePreviews.length > 0 && (
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-3">
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-3" style={{ alignItems: 'stretch' }}>
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="image-preview">
                           <img src={preview} alt={`Preview ${index + 1}`} />
@@ -811,6 +812,47 @@ const AddProductModal = ({ isOpen, onClose }) => {
                           </button>
                         </div>
                       ))}
+                      {/* Add More button — only show if under 5 images */}
+                      {imagePreviews.length < 5 && (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          style={{
+                            aspectRatio: '1',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '2px dashed rgba(255,255,255,0.2)',
+                            color: 'rgba(255,255,255,0.5)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            fontFamily: 'Space Mono, monospace',
+                            fontSize: 9,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            padding: 8,
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.borderColor = '#00D9FF';
+                            e.currentTarget.style.background = 'rgba(0,217,255,0.05)';
+                            e.currentTarget.style.color = '#00D9FF';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                            e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
+                          Add More
+                        </button>
+                      )}
                     </div>
                   )}
                   {errors.images && <p className="error-text">{errors.images}</p>}
@@ -827,7 +869,11 @@ const AddProductModal = ({ isOpen, onClose }) => {
                       marginBottom: 24,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                       padding: '14px 20px',
-                      background: isAIAnalyzing ? '#1D4ED8' : '#2563EB',
+                      background: isAIAnalyzing
+                        ? '#166534'
+                        : aiFilledFields
+                        ? '#166534'
+                        : '#2563EB',
                       border: 'none',
                       borderRadius: 8,
                       color: '#FFFFFF',
@@ -835,32 +881,36 @@ const AddProductModal = ({ isOpen, onClose }) => {
                       fontSize: 14, fontWeight: 700, letterSpacing: 0.5,
                       cursor: isAIAnalyzing ? 'wait' : 'pointer',
                       transition: 'all 0.2s ease',
-                      boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
+                      boxShadow: aiFilledFields
+                        ? '0 4px 14px rgba(22, 101, 52, 0.4)'
+                        : '0 4px 14px rgba(37, 99, 235, 0.4)',
                     }}
                     onMouseEnter={(e) => {
                       if (!isAIAnalyzing) {
-                        e.currentTarget.style.background = '#1D4ED8';
+                        e.currentTarget.style.background = aiFilledFields ? '#15803D' : '#1D4ED8';
                         e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(37, 99, 235, 0.6)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isAIAnalyzing) {
-                        e.currentTarget.style.background = '#2563EB';
+                        e.currentTarget.style.background = aiFilledFields ? '#166534' : '#2563EB';
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.4)';
                       }
                     }}
                     onMouseDown={(e) => {
-                      if (!isAIAnalyzing) {
-                        e.currentTarget.style.transform = 'translateY(1px)';
-                      }
+                      if (!isAIAnalyzing) e.currentTarget.style.transform = 'translateY(1px)';
                     }}
                   >
                     {!isAIAnalyzing && (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
-                      </svg>
+                      aiFilledFields ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
+                        </svg>
+                      )
                     )}
                     {isAIAnalyzing ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
@@ -869,47 +919,11 @@ const AddProductModal = ({ isOpen, onClose }) => {
                         </div>
                         <span style={{ minWidth: 40, textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.9)' }}>{aiProgress}%</span>
                       </div>
-                    ) : 'Fill All Fields with AI'}
+                    ) : aiFilledFields ? 'AI Autofill Complete' : 'Fill All Fields with AI'}
                   </button>
                 )}
 
-                {/* ── AI FILLED BANNER ── */}
-                {aiFilledFields && (
-                  <div style={{
-                    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                    background: 'rgba(37, 99, 235, 0.1)',
-                    border: '1px solid rgba(37, 99, 235, 0.4)',
-                    borderRadius: 8, padding: '12px 16px', marginBottom: 20,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#60A5FA" style={{ marginTop: 2, flexShrink: 0 }}>
-                        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" />
-                      </svg>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#DBEAFE', fontFamily: 'Manrope, sans-serif' }}>
-                          Fields auto-filled by AI
-                        </div>
-                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4, lineHeight: 1.4 }}>
-                          Title · Description · Category · Condition · Highlights · Specs — please review before submitting
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={clearAIFill}
-                      style={{
-                        padding: '6px 12px', background: 'transparent',
-                        border: 'none', borderRadius: 6,
-                        color: '#60A5FA', fontSize: 12, fontWeight: 700,
-                        cursor: 'pointer', fontFamily: 'Manrope, sans-serif',
-                        transition: 'all 0.2s ease', marginLeft: 16, flexShrink: 0
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37, 99, 235, 0.15)'; e.currentTarget.style.color = '#93C5FD'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#60A5FA'; }}
-                    >
-                      CLEAR
-                    </button>
-                  </div>
-                )}
+
 
                 {/* Title */}
                 <div className="mb-5">
@@ -920,6 +934,11 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Raspberry Pi 4 Model B"
                     className="input-brutal"
+                    style={aiFilledFields && formData.title ? {
+                      background: 'rgba(37, 99, 235, 0.15)',
+                      borderColor: 'rgba(37, 99, 235, 0.6)',
+                      color: '#DBEAFE',
+                    } : {}}
                   />
                   {errors.title && <p className="error-text">{errors.title}</p>}
                 </div>
@@ -932,6 +951,11 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Describe your product in detail..."
                     className="input-brutal"
+                    style={aiFilledFields && formData.description ? {
+                      background: 'rgba(37, 99, 235, 0.15)',
+                      borderColor: 'rgba(37, 99, 235, 0.6)',
+                      color: '#DBEAFE',
+                    } : {}}
                   />
                   {errors.description && <p className="error-text">{errors.description}</p>}
                 </div>
