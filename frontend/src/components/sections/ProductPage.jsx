@@ -98,7 +98,6 @@ const ProductPage = () => {
   const [saved, setSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-  const [isNavigating, setIsNavigating] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
@@ -110,7 +109,6 @@ const ProductPage = () => {
   const [shareCopied, setShareCopied] = useState(false);
 
   const mainImgRef = useRef(null);
-  const transitionImgRef = useRef(null);
   const viewTracked = useRef(false); // guard against StrictMode double-fire
 
   // Fetch categories for mapping slugs to names
@@ -243,115 +241,20 @@ const ProductPage = () => {
     }
   };
 
-  // Handle back navigation with zoom out effect
+  // Handle back navigation
   const handleBackClick = (e) => {
     e.preventDefault();
-
-    if (isNavigating) return; // Prevent double clicks
-    setIsNavigating(true);
-
     const transitionData = sessionStorage.getItem('productTransition');
-    const isMobile = window.innerWidth < 768;
-
-    // Skip animation on mobile to prevent image flash glitch
-    if (!isMobile && transitionData && mainImgRef.current && product) {
-      try {
-        const { rect, scrollY } = JSON.parse(transitionData);
-        const mainImg = mainImgRef.current;
-        const currentRect = mainImg.getBoundingClientRect();
-
-        // Create transition overlay
-        const transitionImg = document.createElement('img');
-        transitionImg.src = product.image || (product.images && product.images[0]);
-        transitionImg.style.position = 'fixed';
-        transitionImg.style.top = `${currentRect.top}px`;
-        transitionImg.style.left = `${currentRect.left}px`;
-        transitionImg.style.width = `${currentRect.width}px`;
-        transitionImg.style.height = `${currentRect.height}px`;
-        transitionImg.style.objectFit = 'cover';
-        transitionImg.style.zIndex = '9999';
-        transitionImg.style.borderRadius = '24px';
-        transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-        transitionImg.style.pointerEvents = 'none';
-
-        document.body.appendChild(transitionImg);
-        transitionImgRef.current = transitionImg;
-
-        // Start zoom out animation
-        requestAnimationFrame(() => {
-          transitionImg.style.top = `${rect.top}px`;
-          transitionImg.style.left = `${rect.left}px`;
-          transitionImg.style.width = `${rect.width}px`;
-          transitionImg.style.height = `${rect.height}px`;
-          transitionImg.style.borderRadius = '12px';
-
-          // After animation completes, navigate
-          setTimeout(() => {
-            // Clean up
-            if (transitionImgRef.current) {
-              transitionImgRef.current.remove();
-              transitionImgRef.current = null;
-            }
-            sessionStorage.removeItem('productTransition');
-
-            // Navigate back with scroll position
-            if (location.state?.fromChat) {
-              navigate(-1);
-            } else {
-              sessionStorage.setItem('marketplaceScrollY', scrollY);
-              window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
-            }
-          }, 600);
-        });
-      } catch (error) {
-        console.error('Back transition error:', error);
-        sessionStorage.removeItem('productTransition');
-        if (location.state?.fromChat) {
-          navigate(-1);
-        } else {
-          window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
-        }
-      }
+    const scrollY = transitionData ? (() => { try { return JSON.parse(transitionData).scrollY; } catch { return 0; } })() : 0;
+    sessionStorage.removeItem('productTransition');
+    if (location.state?.fromChat) {
+      navigate(-1);
     } else {
-      // Mobile: skip animation, navigate directly with scroll restore
-      const scrollY = transitionData ? (() => { try { return JSON.parse(transitionData).scrollY; } catch { return 0; } })() : 0;
-      sessionStorage.removeItem('productTransition');
-      if (location.state?.fromChat) {
-        navigate(-1);
-      } else {
-        sessionStorage.setItem('marketplaceScrollY', scrollY);
-        window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
-      }
+      if (scrollY) sessionStorage.setItem('marketplaceScrollY', scrollY);
+      window.history.length > 1 ? navigate(-1) : navigate('/marketplace');
     }
   };
 
-  // Handle browser back button - cleanup only
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (transitionImgRef.current) {
-        transitionImgRef.current.remove();
-        transitionImgRef.current = null;
-      }
-      sessionStorage.removeItem('productTransition');
-    };
-
-    const handlePopState = () => {
-      handleBeforeUnload();
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (transitionImgRef.current) {
-        transitionImgRef.current.remove();
-        transitionImgRef.current = null;
-      }
-      sessionStorage.removeItem('productTransition');
-    };
-  }, []);
 
   // Fetch product from API
   useEffect(() => {
@@ -376,59 +279,7 @@ const ProductPage = () => {
             productAPI.trackView(id).catch(() => { });
           }
 
-          setTimeout(() => {
-            setLoading(false);
-
-            // Handle Zoom In Transition from Marketplace
-            const transitionData = sessionStorage.getItem('productTransition');
-
-            if (transitionData && mainImgRef.current) {
-              try {
-                const { rect, imgSrc } = JSON.parse(transitionData);
-                const mainImg = mainImgRef.current;
-
-                setTimeout(() => {
-                  const finalRect = mainImg.getBoundingClientRect();
-
-                  const transitionImg = document.createElement('img');
-                  transitionImg.src = imgSrc;
-                  transitionImg.style.position = 'fixed';
-                  transitionImg.style.top = `${rect.top}px`;
-                  transitionImg.style.left = `${rect.left}px`;
-                  transitionImg.style.width = `${rect.width}px`;
-                  transitionImg.style.height = `${rect.height}px`;
-                  transitionImg.style.objectFit = 'cover';
-                  transitionImg.style.zIndex = '9999';
-                  transitionImg.style.borderRadius = '12px';
-                  transitionImg.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-                  transitionImg.style.pointerEvents = 'none';
-
-                  document.body.appendChild(transitionImg);
-                  transitionImgRef.current = transitionImg;
-
-                  mainImg.style.opacity = '0';
-
-                  requestAnimationFrame(() => {
-                    transitionImg.style.top = `${finalRect.top}px`;
-                    transitionImg.style.left = `${finalRect.left}px`;
-                    transitionImg.style.width = `${finalRect.width}px`;
-                    transitionImg.style.height = `${finalRect.height}px`;
-                    transitionImg.style.borderRadius = '24px';
-
-                    setTimeout(() => {
-                      mainImg.style.opacity = '1';
-                      if (transitionImgRef.current) {
-                        transitionImgRef.current.remove();
-                        transitionImgRef.current = null;
-                      }
-                    }, 600);
-                  });
-                }, 50);
-              } catch (error) {
-                console.error('Zoom transition error:', error);
-              }
-            }
-          }, 10);
+          setLoading(false);
         } else {
           setLoading(false);
           setProduct(null);
@@ -954,7 +805,7 @@ const ProductPage = () => {
               {typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}
             </div>
             <div className="text-xs opacity-50 mb-3">
-              {product.branch?.toUpperCase()} •  {product.year}th Year
+              {typeof product.seller === 'object' && product.seller?.branch ? product.seller.branch.toUpperCase() : '—'} • {typeof product.seller === 'object' && product.seller?.year ? `${product.seller.year}th Year` : '—'}
             </div>
             <div className="bg-white/5 rounded-full px-3 py-1 text-xs font-bold border border-white/5">
               {product.sellerRating || '⭐ New'} Rating
@@ -1162,7 +1013,7 @@ const ProductPage = () => {
               <div>
                 <div className="font-bold text-sm text-[#00D9FF]">{typeof product.seller === 'object' ? product.seller.fullName : product.user || 'Unknown'}</div>
                 <div className="text-[10px] opacity-50 mt-0.5 uppercase tracking-wide">
-                  {product.branch?.toUpperCase()} • {product.year}th Year
+                  {typeof product.seller === 'object' && product.seller?.branch ? product.seller.branch.toUpperCase() : '—'} • {typeof product.seller === 'object' && product.seller?.year ? `${product.seller.year}th Year` : '—'}
                 </div>
               </div>
             </div>
