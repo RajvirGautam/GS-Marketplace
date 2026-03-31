@@ -714,7 +714,7 @@ const UserDashboard = () => {
   const handleConfirmSold = async (dealId) => {
     try {
       const res = await dealAPI.confirmSold(dealId);
-      if (res.success) {
+          if (res.success) { 
         fetchDeals();
         // Fire confetti celebration
         setShowConfetti(true);
@@ -731,7 +731,7 @@ const UserDashboard = () => {
     try {
       setReviewState(prev => ({ ...prev, [dealId]: { ...r, submitting: true } }));
       const res = await dealAPI.submitReview(dealId, r.rating, r.comment || '');
-      if (res.success) {
+          if (res.success) { 
         fetchDeals();
         setReviewState(prev => ({ ...prev, [dealId]: {} }));
       }
@@ -815,12 +815,36 @@ const UserDashboard = () => {
   };
   const getStatusBadge = (status) => {
     const styles = {
-      active: 'bg-green-500/20 text-green-400 border-green-500/30',
-      sold: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+      active: {
+        background: 'rgba(255, 255, 255, 0.08)',
+        color: '#f4f4f5',
+        border: '1px solid rgba(255, 255, 255, 0.2)'
+      },
+      sold: {
+        background: 'rgba(255, 255, 255, 0.06)',
+        color: '#d4d4d8',
+        border: '1px solid rgba(255, 255, 255, 0.16)'
+      },
+      pending: {
+        background: 'rgba(255, 255, 255, 0.05)',
+        color: '#a1a1aa',
+        border: '1px solid rgba(255, 255, 255, 0.12)'
+      }
     };
+    const style = styles[status] || styles.active;
     return (
-      <span className={`px-2 py-1 text-[10px] mono font-bold uppercase border ${styles[status] || styles.active}`}>
+      <span
+        style={{
+          ...style,
+          padding: '3px 9px',
+          borderRadius: 999,
+          fontSize: 10,
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          letterSpacing: 0.7,
+          fontFamily: 'JetBrains Mono, monospace'
+        }}
+      >
         {status}
       </span>
     );
@@ -1313,16 +1337,15 @@ const UserDashboard = () => {
         }
 
         .stat-card {
-          background: rgba(255,255,255,0.02);
+          background: #161618;
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
           padding: 20px;
-          backdrop-filter: blur(10px);
           transition: all 0.3s;
         }
 
         .stat-card:hover {
-          background: rgba(255,255,255,0.05);
+          background: #1c1c1f;
           border-color: rgba(0,217,255,0.3);
           transform: translateY(-2px);
           box-shadow: 0 4px 16px rgba(0,217,255,0.1);
@@ -1356,11 +1379,10 @@ const UserDashboard = () => {
 
         /* ═══════════ CARD - SOFT BRUTALISM ═══════════ */
         .card {
-          background: rgba(255,255,255,0.02);
+          background: #161618;
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
           padding: 24px;
-          backdrop-filter: blur(10px);
         }
 
         .card-header {
@@ -1446,12 +1468,11 @@ const UserDashboard = () => {
         }
 
         .mini-stat-card {
-          background: rgba(255,255,255,0.02);
+          background: #161618;
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
           padding: 14px 16px;
           flex: 1;
-          backdrop-filter: blur(10px);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -1490,21 +1511,19 @@ const UserDashboard = () => {
 
         /* ═══════════ PROFIT CARD ═══════════ */
         .profit-card {
-          background: rgba(255,255,255,0.02);
+          background: #161618;
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
           padding: 24px;
-          backdrop-filter: blur(10px);
         }
 
         /* ═══════════ PRICING CARD - SOFT BRUTALISM ═══════════ */
         .pricing-card {
-          background: linear-gradient(135deg, rgba(0,217,255,0.05) 0%, rgba(124,58,237,0.05) 100%);
+          background: #161618;
           border: 1.5px solid rgba(0,217,255,0.2);
           border-radius: 8px;
           padding: 24px;
           text-align: center;
-          backdrop-filter: blur(10px);
         }
 
         .pricing-badge {
@@ -1638,7 +1657,7 @@ const UserDashboard = () => {
         }
 
         .listing-item {
-          background: rgba(255,255,255,0.02);
+          background: #161618;
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
           padding: 14px;
@@ -1646,12 +1665,11 @@ const UserDashboard = () => {
           display: flex;
           gap: 14px;
           transition: all 0.2s;
-          backdrop-filter: blur(10px);
         }
 
         .listing-item:hover {
           border-color: rgba(0,217,255,0.3);
-          background: rgba(255,255,255,0.04);
+          background: #1c1c1f;
         }
 
         .listing-img {
@@ -1709,6 +1727,469 @@ const UserDashboard = () => {
           z-index: 10;
         }
 
+        /* ═══════════ MARKET THEME (LISTINGS / SAVED / DEALS) ═══════════ */
+        .market-theme {
+          --market-paper: #f4f4f5;
+          --market-bg: #0a0a0b;
+          --market-bg-soft: #111214;
+          --market-bg-lift: #18191d;
+          --market-border: rgba(255, 255, 255, 0.08);
+          --market-border-strong: rgba(255, 255, 255, 0.16);
+          --market-text: #f4f4f5;
+          --market-muted: rgba(244, 244, 245, 0.58);
+          --market-accent: #f4f4f5;
+          --market-accent-2: #d4d4d8;
+          --market-danger: #f87171;
+          --market-shadow: none;
+        }
+
+        .market-theme .overview-header h1 {
+          font-family: 'Manrope', sans-serif;
+          font-size: 32px;
+          font-weight: 800;
+          line-height: 1.1;
+          letter-spacing: -0.3px;
+          color: var(--market-paper);
+        }
+
+        .market-theme .overview-header > div > div {
+          color: var(--market-muted) !important;
+          font-size: 13px;
+        }
+
+        .market-theme .market-section-panel {
+          background: var(--market-bg-soft);
+          border: 1px solid var(--market-border);
+          border-radius: 14px;
+          padding: 18px;
+          box-shadow: var(--market-shadow);
+        }
+
+        .market-theme .market-main-btn {
+          border: 1px solid var(--market-border-strong);
+          border-radius: 999px;
+          padding: 9px 16px;
+          background: var(--market-bg-lift);
+          color: var(--market-paper);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.3px;
+          font-family: 'Manrope', sans-serif;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          transition: background 0.18s ease, border-color 0.18s ease;
+        }
+
+        .market-theme .market-main-btn:hover {
+          background: #1f2024;
+          border-color: rgba(255, 255, 255, 0.24);
+        }
+
+        .market-theme .market-chip-row {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 14px;
+        }
+
+        .market-theme .market-chip {
+          border: 1px solid var(--market-border);
+          background: #0f1012;
+          color: var(--market-muted);
+          border-radius: 999px;
+          padding: 7px 12px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.45px;
+          text-transform: uppercase;
+          cursor: pointer;
+          font-family: 'JetBrains Mono', monospace;
+          transition: all 0.16s ease;
+          white-space: nowrap;
+        }
+
+        .market-theme .market-chip.active {
+          background: #1d2025;
+          color: #f4f4f5;
+          border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        .market-theme .market-chip-soft {
+          border-color: rgba(255, 255, 255, 0.22);
+          color: #e4e4e7;
+          background: #1a1d22;
+        }
+
+        .market-theme .market-metric-strip {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+
+        .market-theme .market-metric-card {
+          background: #0d0e10;
+          border: 1px solid var(--market-border);
+          border-radius: 10px;
+          padding: 12px;
+        }
+
+        .market-theme .market-metric-label {
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.65px;
+          color: var(--market-muted);
+          margin-bottom: 5px;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .market-theme .market-metric-value {
+          font-size: 25px;
+          line-height: 1;
+          color: var(--market-paper);
+          font-weight: 800;
+          font-family: 'Manrope', sans-serif;
+        }
+
+        .market-theme .card {
+          background: var(--market-bg-soft);
+          border: 1px solid var(--market-border);
+          border-radius: 14px;
+          box-shadow: var(--market-shadow);
+        }
+
+        .market-theme .listing-tabs {
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .market-theme .listing-tab {
+          border-radius: 999px;
+          border: 1px solid var(--market-border);
+          color: var(--market-muted);
+          background: #101114;
+          padding: 7px 12px;
+        }
+
+        .market-theme .listing-tab.active {
+          border-color: rgba(255, 255, 255, 0.24);
+          color: #f4f4f5;
+          background: #1c1f24;
+        }
+
+        .market-theme .listing-item {
+          background: #0f1012;
+          border: 1px solid var(--market-border);
+          border-radius: 12px;
+          padding: 14px;
+          margin-bottom: 10px;
+          transition: border-color 0.16s ease, background 0.16s ease;
+        }
+
+        .market-theme .listing-item:hover {
+          border-color: var(--market-border-strong);
+          background: #14161a;
+        }
+
+        .market-theme .listing-item-mylist {
+          display: grid;
+          grid-template-columns: 112px minmax(0, 1fr);
+          gap: 14px;
+          padding: 16px;
+          margin-bottom: 0;
+          border-radius: 14px;
+          background: linear-gradient(180deg, #101116 0%, #0d0e12 100%);
+        }
+
+        .market-theme .mylistings-grid-desktop {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .market-theme .listing-item-mylist .listing-img {
+          width: 112px;
+          height: 112px;
+          border-radius: 12px;
+        }
+
+        .market-theme .listing-kpi-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 8px;
+        }
+
+        .market-theme .listing-kpi-pill {
+          border: 1px solid var(--market-border);
+          border-radius: 999px;
+          padding: 4px 9px;
+          font-size: 10px;
+          color: var(--market-muted);
+          background: #13151a;
+          font-family: 'JetBrains Mono', monospace;
+          letter-spacing: 0.25px;
+        }
+
+        .market-theme .listing-item-mylist .listing-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .market-theme .listing-item-mylist .listing-action-btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .market-theme .listing-item-mylist-mobile {
+          display: block;
+          padding: 0;
+          overflow: hidden;
+          border-radius: 14px;
+          background: linear-gradient(180deg, #101116 0%, #0d0e12 100%);
+        }
+
+        .market-theme .listing-item-mylist-mobile .listing-img {
+          width: 100%;
+          height: auto;
+          aspect-ratio: 16 / 9;
+          border-radius: 0;
+          border: none;
+          border-bottom: 1px solid var(--market-border);
+        }
+
+        .market-theme .listing-mylist-mobile-body {
+          padding: 12px;
+        }
+
+        .market-theme .listing-item-mylist-mobile .listing-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 10px;
+        }
+
+        .market-theme .listing-item-mylist-mobile .listing-action-btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .market-theme .listing-img {
+          width: 78px;
+          height: 78px;
+          border-radius: 10px;
+          border: 1px solid var(--market-border);
+          background: #0b0c0e;
+        }
+
+        .market-theme .listing-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+          flex-wrap: wrap;
+        }
+
+        .market-theme .listing-action-btn {
+          border-radius: 999px;
+          padding: 6px 12px;
+          border: 1px solid #334155;
+          background: #1e293b;
+          color: #f8fafc;
+          font-size: 10px;
+          letter-spacing: 0.45px;
+        }
+
+        .market-theme .listing-action-btn:hover {
+          border-color: #475569;
+          background: #334155;
+        }
+
+        .market-theme .listing-action-btn.del {
+          color: #fff5f7;
+          border-color: #6a1f2b;
+          background: #6a1f2b;
+        }
+
+        .market-theme .listing-action-btn.del:hover {
+          color: #fff5f7;
+          border-color: #581823;
+          background: #581823;
+        }
+
+        .market-theme .market-price {
+          color: #f4f4f5;
+          font-family: 'Manrope', sans-serif;
+          font-size: 22px;
+          line-height: 1;
+          letter-spacing: -0.2px;
+          font-weight: 800;
+        }
+
+        .market-theme .market-meta {
+          font-size: 11px;
+          color: var(--market-muted);
+          line-height: 1.4;
+        }
+
+        .market-theme .market-empty {
+          text-align: center;
+          padding: 54px 12px;
+          color: var(--market-muted);
+        }
+
+        .market-theme .market-empty-icon {
+          width: 52px;
+          height: 52px;
+          border-radius: 14px;
+          margin: 0 auto 12px;
+          border: 1px solid var(--market-border);
+          background: #121316;
+        }
+
+        .market-theme .market-deal-toggle {
+          border: 1px solid var(--market-border);
+          background: #111215;
+          color: var(--market-muted);
+          padding: 8px 14px;
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.35px;
+          cursor: pointer;
+          transition: all 0.16s ease;
+        }
+
+        .market-theme .market-deal-toggle.active {
+          background: #1d2025;
+          border-color: rgba(255, 255, 255, 0.22);
+          color: #f4f4f5;
+        }
+
+        .market-theme .market-deal-toggle.negotiations.active {
+          background: #1d4ed8;
+          border-color: #1d4ed8;
+          color: #f8fbff;
+        }
+
+        .market-theme .market-deal-toggle.confirmed.active {
+          background: #15803d;
+          border-color: #15803d;
+          color: #f3fff8;
+        }
+
+        .market-theme .market-note {
+          background: #111316;
+          border: 1px solid var(--market-border);
+          border-radius: 10px;
+          padding: 10px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .market-theme .market-note > div {
+          font-size: 12px;
+          color: var(--market-muted);
+        }
+
+        .market-theme .market-note button {
+          border: 1px solid var(--market-border-strong);
+          border-radius: 999px;
+          padding: 7px 13px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: 'Manrope', sans-serif;
+          background: #1b1e23;
+          color: var(--market-paper);
+        }
+
+        .market-theme textarea {
+          background: #121417 !important;
+          border: 1px solid var(--market-border) !important;
+          color: var(--market-paper) !important;
+          border-radius: 10px !important;
+        }
+
+        .market-theme textarea::placeholder {
+          color: var(--market-muted);
+        }
+
+        .market-theme .pricing-cta {
+          background: #1a1c21;
+          color: #f4f4f5;
+          border-radius: 999px;
+          border: 1px solid var(--market-border-strong);
+          font-family: 'Manrope', sans-serif;
+          box-shadow: none;
+        }
+
+        .market-theme .pricing-cta:hover {
+          background: #20242a;
+          border-color: rgba(255, 255, 255, 0.24);
+          box-shadow: none;
+        }
+
+        .market-theme .mobile-section-title {
+          font-size: 26px;
+          font-family: 'Manrope', sans-serif;
+          font-weight: 800;
+          color: var(--market-paper);
+          line-height: 1.08;
+          margin-bottom: 5px;
+        }
+
+        .market-theme .mobile-section-sub {
+          font-size: 12px;
+          color: var(--market-muted);
+          margin-bottom: 14px;
+          line-height: 1.45;
+        }
+
+        @media (max-width: 900px) {
+          .market-theme .market-metric-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .market-theme .listing-item-mylist {
+            grid-template-columns: 1fr;
+          }
+
+          .market-theme .listing-item-mylist .listing-img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+          }
+
+          .market-theme .listing-item-mylist .listing-actions {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .market-theme .mylistings-grid-desktop {
+            grid-template-columns: 1fr;
+          }
+
+          .market-theme .market-main-btn {
+            padding: 8px 13px;
+            font-size: 10px;
+          }
+
+          .market-theme .listing-img {
+            width: 68px;
+            height: 68px;
+          }
+
+          .market-theme .market-price {
+            font-size: 20px;
+          }
+        }
+
         /* ═══════════ MODAL - SOFT BRUTALISM ═══════════ */
         .modal-backdrop {
           position: fixed;
@@ -1735,6 +2216,552 @@ const UserDashboard = () => {
           border: none;
           border-top: 1.5px solid rgba(255,255,255,0.08);
           margin: 20px 0;
+        }
+
+        /* ═══════════ MY DEALS REDESIGN ═══════════ */
+        .deals-page-bg {
+          background: #060606;
+          border-radius: 16px;
+          padding: 28px 28px 32px;
+          min-height: 400px;
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .deals-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 28px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .deals-title {
+          font-family: 'Manrope', sans-serif;
+          font-size: 36px;
+          font-weight: 800;
+          color: #f4f4f5;
+          line-height: 1;
+          padding-bottom: 7px;
+          border-bottom: 2.5px solid rgba(255,255,255,0.75);
+          display: inline-block;
+          letter-spacing: -0.5px;
+        }
+
+        .deals-toggle-group {
+          display: flex;
+          gap: 0;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 999px;
+          padding: 4px;
+        }
+
+        .deals-toggle-btn {
+          padding: 7px 18px;
+          border-radius: 999px;
+          border: none;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.18s;
+          font-family: 'Manrope', sans-serif;
+          letter-spacing: 0.15px;
+          background: transparent;
+          color: rgba(244,244,245,0.45);
+        }
+
+        .deals-toggle-btn.active {
+          background: rgba(255,255,255,0.12);
+          color: #f4f4f5;
+          box-shadow: 0 1px 6px rgba(0,0,0,0.5);
+        }
+
+        .deals-toggle-btn.negotiations.active {
+          background: #1d4ed8;
+          color: #f8fbff;
+          box-shadow: 0 1px 10px rgba(29, 78, 216, 0.45);
+        }
+
+        .deals-toggle-btn.confirmed.active {
+          background: #15803d;
+          color: #f3fff8;
+          box-shadow: 0 1px 10px rgba(21, 128, 61, 0.45);
+        }
+
+        .deals-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+        }
+
+        .deal-card {
+          background: #101012;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 16px;
+          position: relative;
+          transition: border-color 0.18s;
+        }
+
+        .deal-card-media {
+          padding: 0;
+          overflow: hidden;
+          aspect-ratio: 4 / 3;
+          min-height: 290px;
+          background: #090909;
+        }
+
+        .deal-media-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .deal-media-gradient {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.96) 0%,
+            rgba(0, 0, 0, 0.9) 28%,
+            rgba(0, 0, 0, 0.65) 50%,
+            rgba(0, 0, 0, 0) 76%);
+        }
+
+        .deal-media-content {
+          position: absolute;
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+          z-index: 2;
+        }
+
+        .deal-media-header {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .deal-media-title {
+          font-family: 'Manrope', sans-serif;
+          font-size: 15px;
+          font-weight: 800;
+          color: #f5f5f5;
+          line-height: 1.3;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+        }
+
+        .deal-media-meta {
+          margin-top: 4px;
+          font-size: 11px;
+          color: rgba(244,244,245,0.84);
+          line-height: 1.4;
+        }
+
+        .deal-media-message {
+          margin-top: 8px;
+          font-size: 11px;
+          color: rgba(244,244,245,0.88);
+          font-style: italic;
+          line-height: 1.45;
+        }
+
+        .deal-card-media .deal-card-price {
+          color: #ffffff;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+          font-size: 22px;
+        }
+
+        .deal-card-media .deal-actions {
+          margin-top: 10px;
+        }
+
+        .deal-card-confirmed {
+          padding: 0;
+          overflow: hidden;
+        }
+
+        .deal-confirmed-media {
+          position: relative;
+          min-height: 220px;
+          aspect-ratio: 4 / 3;
+          background: #0b0b0d;
+        }
+
+        .deal-confirmed-body {
+          padding: 12px;
+        }
+
+        .deal-confirmed-submeta {
+          margin-top: 4px;
+          font-size: 10px;
+          color: rgba(244,244,245,0.72);
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 700;
+        }
+
+        .deal-confirmed-body .deal-review-box {
+          margin-bottom: 12px;
+        }
+
+        @media (max-width: 767px) {
+          .deal-card-media {
+            min-height: 250px;
+          }
+          .mobile-deal-card {
+            width: 100%;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .deal-media-content {
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+          }
+          .deal-media-title {
+            font-size: 14px;
+          }
+          .deal-card-media .deal-card-price {
+            font-size: 20px;
+          }
+        }
+
+        .deal-card:hover {
+          border-color: rgba(255,255,255,0.16);
+        }
+
+        .deal-badge {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          background: #3f3f46;
+          color: #f4f4f5;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.8px;
+          font-family: 'JetBrains Mono', monospace;
+          padding: 4px 10px;
+          border-radius: 999px;
+          text-transform: uppercase;
+          line-height: 1.4;
+        }
+
+        .deal-badge.incoming {
+          background: #9fd8ff;
+          color: #0b2239;
+        }
+
+        .deal-badge.sent {
+          background: #1e3a8a;
+          color: #f8fbff;
+        }
+
+        .deal-badge.handoff {
+          background: #c8aa4a;
+          color: #1f1a0a;
+        }
+
+        .deal-badge.sold {
+          background: #52525b;
+          color: #f4f4f5;
+        }
+
+        .deal-card-top {
+          display: flex;
+          gap: 14px;
+          align-items: flex-start;
+        }
+
+        .deal-card-img {
+          width: 88px;
+          height: 88px;
+          border-radius: 10px;
+          overflow: hidden;
+          flex-shrink: 0;
+          background: #17171b;
+          border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .deal-card-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .deal-card-body {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
+          padding-right: 64px;
+        }
+
+        .deal-card-title {
+          font-family: 'Manrope', sans-serif;
+          font-size: 15px;
+          font-weight: 700;
+          color: #f4f4f5;
+          margin-bottom: 5px;
+          line-height: 1.3;
+        }
+
+        .deal-card-meta {
+          font-size: 11px;
+          color: rgba(244,244,245,0.5);
+          line-height: 1.4;
+        }
+
+        .deal-card-price {
+          font-family: 'Manrope', sans-serif;
+          font-size: 24px;
+          font-weight: 800;
+          color: #f4f4f5;
+          line-height: 1;
+          flex-shrink: 0;
+        }
+
+        .deal-msg-box {
+          margin-top: 12px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          padding: 9px 12px;
+          font-size: 12px;
+          color: rgba(244,244,245,0.6);
+          font-style: italic;
+          font-family: 'Manrope', sans-serif;
+          line-height: 1.5;
+        }
+
+        .deal-note-box {
+          margin-top: 12px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          padding: 10px 12px;
+          font-size: 12px;
+          color: rgba(244,244,245,0.65);
+          font-family: 'Manrope', sans-serif;
+          line-height: 1.5;
+        }
+
+        .deal-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .deal-actions > button {
+          width: 100%;
+        }
+
+        .deal-actions > button:only-child {
+          grid-column: 1 / -1;
+        }
+
+        .deal-btn-primary {
+          background: linear-gradient(135deg, #2563eb, #0891b2);
+          color: #f8fbff;
+          border: 1px solid #1d4ed8;
+          border-radius: 8px;
+          padding: 9px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          flex: 1;
+        }
+
+        .deal-btn-primary:hover {
+          background: linear-gradient(135deg, #1d4ed8, #0e7490);
+          border-color: #1e40af;
+        }
+
+        .deal-btn-primary:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .deal-btn-primary-full {
+          background: linear-gradient(135deg, #2563eb, #0891b2);
+          color: #f8fbff;
+          border: 1px solid #1d4ed8;
+          border-radius: 8px;
+          padding: 10px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          width: 100%;
+          margin-top: 12px;
+          display: block;
+        }
+
+        .deal-btn-primary-full:hover {
+          background: linear-gradient(135deg, #1d4ed8, #0e7490);
+          border-color: #1e40af;
+        }
+
+        .deal-btn-accept {
+          background: #0f8f62;
+          color: #f3fff8;
+          border: 1px solid #0f8f62;
+          border-radius: 8px;
+          padding: 9px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          flex: 1;
+        }
+
+        .deal-btn-accept:hover {
+          background: #0b7a53;
+          border-color: #0b7a53;
+        }
+
+        .deal-btn-handover {
+          background: #c8aa4a;
+          color: #1f1a0a;
+          border: 1px solid #c8aa4a;
+          border-radius: 8px;
+          padding: 10px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          width: 100%;
+          margin-top: 12px;
+          display: block;
+        }
+
+        .deal-btn-handover:hover {
+          background: #b99b40;
+          border-color: #b99b40;
+        }
+
+        .deal-btn-outline-orange {
+          background: transparent;
+          color: #c7d2fe;
+          border: 1.5px solid #6366f1;
+          border-radius: 8px;
+          padding: 9px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          flex: 1;
+        }
+
+        .deal-btn-outline-orange:hover {
+          background: rgba(99,102,241,0.14);
+        }
+
+        .deal-btn-secondary {
+          background: #312e81;
+          color: #f5f3ff;
+          border: 1.5px solid #4338ca;
+          border-radius: 8px;
+          padding: 9px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          flex: 1;
+        }
+
+        .deal-btn-secondary:hover {
+          background: #3730a3;
+          color: #ffffff;
+          border-color: #4f46e5;
+        }
+
+        .deal-btn-decline {
+          background: #6a1f2b;
+          color: #fff5f7;
+          border: 1px solid #6a1f2b;
+          border-radius: 8px;
+          padding: 9px 18px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          flex: 1;
+        }
+
+        .deal-btn-decline:hover {
+          background: #581823;
+          border-color: #581823;
+        }
+
+        .deal-btn-review-submit {
+          background: #ffffff;
+          color: #0a0a0a;
+          border: 1px solid #ffffff;
+          border-radius: 999px;
+          padding: 5px 10px;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.35px;
+          text-transform: uppercase;
+          font-family: 'JetBrains Mono', monospace;
+          cursor: pointer;
+          transition: all 0.16s;
+          white-space: nowrap;
+        }
+
+        .deal-btn-review-submit:hover {
+          background: #f4f4f5;
+          border-color: #f4f4f5;
+        }
+
+        .deal-btn-review-submit:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .deal-review-box {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 10px;
+          padding: 12px 14px;
+          margin-bottom: 10px;
+        }
+
+        @media (max-width: 1100px) {
+          .deals-grid {
+            grid-template-columns: 1fr;
+          }
         }
 
         /* ═══════════ VIEWPORT SPLIT ═══════════ */
@@ -1788,7 +2815,7 @@ const UserDashboard = () => {
           {activeMobileTab === 'Overview' && (
             <>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Hey, {userName?.split(' ')[0]} 👋</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Hey, {userName?.split(' ')[0]}</div>
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>Here's how your listings are doing.</div>
               </div>
               {/* 2x2 Stat Grid */}
@@ -1799,7 +2826,7 @@ const UserDashboard = () => {
                   { label: 'Saves', value: <CountUp end={stats.totalSaves} />, sub: 'interested users', color: '#F59E0B' },
                   { label: 'Revenue', value: <CountUp end={stats.totalRevenue} prefix="₹" />, sub: `${stats.soldListings} sold`, color: '#10B981' },
                 ].map(s => (
-                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 14px 12px', position: 'relative', overflow: 'hidden' }}>
+                  <div key={s.label} style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 14px 12px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}80, transparent)` }} />
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label}</div>
                     <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }}>{s.value}</div>
@@ -1812,12 +2839,12 @@ const UserDashboard = () => {
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5, marginBottom: 12 }}>Quick Insights</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
                 {quickStatsItems.map((qs, i) => (
-                  <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div key={i} style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600, marginBottom: 4 }}>{qs.label}</div>
                         <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>{qs.value}</div>
                     </div>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#1a1a1c', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: qs.color, boxShadow: `0 0 10px ${qs.color}50` }} />
                     </div>
                   </div>
@@ -1828,7 +2855,7 @@ const UserDashboard = () => {
               {/* Recent Activity Card */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: 0.5, marginBottom: 12 }}>Recent Activity</div>
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px' }}>
+                <div style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px' }}>
                 {activityItems.map((a, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: i < activityItems.length - 1 ? 16 : 0, marginBottom: i < activityItems.length - 1 ? 16 : 0, borderBottom: i < activityItems.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: a.color, marginTop: 6, flexShrink: 0, boxShadow: `0 0 8px ${a.color}50` }} />
@@ -1841,154 +2868,454 @@ const UserDashboard = () => {
                 </div>
               </div>
               <button onClick={() => setIsAddProductOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <PlusIcon /> + List a New Product
+                List a New Product
               </button>
             </>
           )}
 
           {/* ── MY LISTINGS TAB ── */}
           {activeMobileTab === 'My Listings' && (
-            <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>My Listings</div>
-                <button onClick={() => setIsAddProductOpen(true)} style={{ background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', border: 'none', borderRadius: 8, padding: '8px 14px', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><PlusIcon /> Add</button>
-              </div>
-              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, scrollbarWidth: 'none', marginBottom: 16 }}>
-                {['all', 'active', 'sold', 'pending'].map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${activeTab === tab ? 'rgba(0,217,255,0.5)' : 'rgba(255,255,255,0.12)'}`, background: activeTab === tab ? 'rgba(0,217,255,0.12)' : 'transparent', color: activeTab === tab ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>
-                    {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
-                  </button>
-                ))}
-              </div>
-              {filteredListings.length > 0 ? filteredListings.map(listing => (
-                <div key={listing._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, marginBottom: 10, display: 'flex', gap: 12 }}>
-                  <div style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-                    <img src={getProductImage(listing)} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div className="market-theme">
+              <div className="market-section-panel" style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+                  <div>
+                    <div className="mobile-section-title">My Listings</div>
+                    <div className="mobile-section-sub" style={{ marginBottom: 0 }}>
+                      Manage your storefront. {stats.activeListings} active out of {stats.totalListings} total listings.
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{listing.title}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>{getStatusBadge(listing.status)}<span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 15 }}>{getPriceDisplay(listing)}</div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleViewProduct(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
-                        <button onClick={() => handleEditProduct(listing)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>Edit</button>
-                        <button onClick={() => handleDelete(listing._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.08)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Delete</button>
+                  <button className="market-main-btn" onClick={() => setIsAddProductOpen(true)}>
+                    <PlusIcon /> Add
+                  </button>
+                </div>
+                <div className="market-chip-row" style={{ overflowX: 'auto', paddingBottom: 2, flexWrap: 'nowrap', marginBottom: 0 }}>
+                  {['all', 'active', 'sold', 'pending'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`market-chip ${activeTab === tab ? 'active' : ''}`}
+                    >
+                      {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="market-section-panel">
+                {filteredListings.length > 0 ? filteredListings.map(listing => (
+                  <div className="listing-item listing-item-mylist-mobile" key={listing._id}>
+                    <div className="listing-img">
+                      <img src={getProductImage(listing)} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div className="listing-mylist-mobile-body">
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#f4f4f5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>
+                        {listing.title}
+                      </div>
+                      <div className="market-meta" style={{ marginBottom: 8 }}>
+                        {listing.category || 'Uncategorised'} · {getTimeAgo(listing.createdAt)}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 }}>
+                        <div className="market-price" style={{ fontSize: 20 }}>{getPriceDisplay(listing)}</div>
+                        {getStatusBadge(listing.status)}
+                      </div>
+                      <div className="listing-kpi-row" style={{ marginTop: 6 }}>
+                        <span className="listing-kpi-pill">{listing.views || 0} views</span>
+                        <span className="listing-kpi-pill">{listing.saves || 0} saves</span>
+                      </div>
+                      <div className="listing-actions">
+                        <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}>VIEW</button>
+                        <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}>EDIT</button>
+                        <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}>DELETE</button>
+                        {listing.status === 'active' && (
+                          <button
+                            className="listing-action-btn"
+                            style={{
+                              color: '#f4f4f5',
+                              borderColor: 'rgba(255, 255, 255, 0.22)',
+                              background: 'rgba(255, 255, 255, 0.12)'
+                            }}
+                            onClick={() => handleMarkAsSold(listing._id)}
+                          >
+                            MARK SOLD
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              )) : (
-                <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}>
-                  <div style={{ fontSize: 40, marginBottom: 10 }}>📦</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
-                  <button onClick={() => setIsAddProductOpen(true)} style={{ marginTop: 8, padding: '10px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Add Listing</button>
-                </div>
-              )}
-            </>
+                )) : (
+                  <div className="market-empty">
+                    <div className="market-empty-icon" />
+                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: '#f4f4f5' }}>
+                      No {activeTab !== 'all' ? activeTab : ''} listings yet
+                    </div>
+                    <div style={{ fontSize: 12, marginBottom: 16 }}>
+                      Start your seller board with your first product card.
+                    </div>
+                    <button className="market-main-btn" onClick={() => setIsAddProductOpen(true)}>
+                      <PlusIcon /> Add Listing
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* ── MY DEALS TAB ── */}
           {activeMobileTab === 'My Deals' && (
-            <>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>My Deals</div>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                {[['negotiations', 'Active'], ['confirmed', 'Confirmed']].map(([val, label]) => (
-                  <button key={val} onClick={() => setDealsSubTab(val)} style={{ flex: 1, padding: '9px', borderRadius: 10, border: 'none', background: dealsSubTab === val ? 'rgba(0,217,255,0.1)' : 'rgba(255,255,255,0.03)', color: dealsSubTab === val ? '#00D9FF' : 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>{label}</button>
-                ))}
+            <div className="market-theme" style={{ background: '#060606', borderRadius: 14, padding: 8, border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="market-section-panel" style={{ marginBottom: 14, background: '#101012', borderColor: 'rgba(255,255,255,0.1)' }}>
+                <div className="mobile-section-title">My Deals</div>
+                <div className="mobile-section-sub" style={{ marginBottom: 12 }}>
+                  Track incoming offers, accepted handoffs, and completed exchanges.
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[['negotiations', 'Ongoing'], ['confirmed', 'Completed']].map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => setDealsSubTab(val)}
+                      className={`market-deal-toggle ${val} ${dealsSubTab === val ? 'active' : ''}`}
+                      style={{ flex: 1 }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              {dealsLoading || offersLoading ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>Loading...</div>
-              ) : dealsSubTab === 'negotiations' ? (() => {
-                const pRec = offersReceived.filter(o => o.status === 'pending');
-                const pSent = offersSent.filter(o => o.status === 'pending');
-                const aDeal = deals.filter(d => d.dealStatus === 'active');
-                const all = [
-                  ...pRec.map(o => ({ ...o, _t: 'received' })),
-                  ...pSent.map(o => ({ ...o, _t: 'sent' })),
-                  ...aDeal.map(d => ({ ...d, _t: 'deal' })),
-                ];
-                if (!all.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>·</div><div style={{ fontSize: 14, marginTop: 10 }}>No active negotiations</div></div>;
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {all.map((item, i) => {
-                      const color = item._t === 'received' ? '#3B82F6' : item._t === 'sent' ? '#F59E0B' : '#8B5CF6';
-                      const bgRaw = item._t === 'received' ? 'rgba(59,130,246,0.12)' : item._t === 'sent' ? 'rgba(245,158,11,0.12)' : 'rgba(139,92,246,0.12)';
-                      const label = item._t === 'received' ? 'INCOMING' : item._t === 'sent' ? 'SENT' : 'ACTIVE';
-                      return (
-                        <div key={item._id + i} style={{ background: bgRaw, border: 'none', borderRadius: 12, padding: 14 }}>
-                          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
-                            <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={item.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product?.title}</div>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{item._t === 'received' ? `From: ${item.buyer?.fullName}` : item._t === 'sent' ? `To: ${item.seller?.fullName}` : `via ${item.source}`}</div>
-                            </div>
-                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6' }}>₹{item.offerPrice || item.agreedPrice}</div>
-                              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'none', padding: '2px 7px', borderRadius: 4, background: `${color}18`, color, border: 'none', display: 'inline-block', marginTop: 3 }}>{label}</span>
+
+              <div className="market-section-panel" style={{ background: '#101012', borderColor: 'rgba(255,255,255,0.1)' }}>
+                {dealsLoading || offersLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--market-muted)' }}>Loading deals...</div>
+                ) : dealsSubTab === 'negotiations' ? (() => {
+                  const pendingReceived = offersReceived.filter(o => o.status === 'pending');
+                  const pendingSent = offersSent.filter(o => o.status === 'pending');
+                  const activeDeals = deals.filter(d => d.dealStatus === 'active');
+                  const merged = [
+                    ...pendingReceived.map(o => ({ ...o, _t: 'received' })),
+                    ...pendingSent.map(o => ({ ...o, _t: 'sent' })),
+                    ...activeDeals.map(d => ({ ...d, _t: 'deal' }))
+                  ].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+
+                  if (!merged.length) {
+                    return (
+                      <div className="market-empty">
+                        <div className="market-empty-icon" />
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#f4f4f5', marginBottom: 6 }}>No active negotiations</div>
+                        <div style={{ fontSize: 12 }}>Offers and deal activity will appear here.</div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+                      {merged.map((item, i) => {
+                        const type = item._t;
+                        const isSellerDeal = type === 'deal'
+                          ? (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId
+                          : false;
+                        const title = item.product?.title || 'Untitled product';
+                        const partyLabel = type === 'received'
+                          ? `From ${item.buyer?.fullName || 'Buyer'}`
+                          : type === 'sent'
+                            ? `To ${item.seller?.fullName || 'Seller'}`
+                            : `${isSellerDeal ? 'Buyer' : 'Seller'} ${typeof (isSellerDeal ? item.buyer : item.seller) === 'object' ? (isSellerDeal ? item.buyer : item.seller)?.fullName || 'Unknown' : 'Unknown'}`;
+                        const amount = item.offerPrice || item.agreedPrice;
+
+                        return (
+                          <div className="deal-card deal-card-media mobile-deal-card" key={item._id + i} style={{ minHeight: 250 }}>
+                            <img className="deal-media-img" src={item.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                            <div className="deal-media-gradient" />
+                            <span className={`deal-badge ${type === 'received' ? 'incoming' : type === 'sent' ? 'sent' : 'handoff'}`}>
+                              {type === 'received' ? 'INCOMING' : type === 'sent' ? 'SENT' : 'HANDOFF'}
+                            </span>
+                            <div className="deal-media-content">
+                              <div className="deal-media-header">
+                                <div style={{ minWidth: 0 }}>
+                                  <div className="deal-media-title">{title}</div>
+                                  <div className="deal-media-meta">{partyLabel}</div>
+                                </div>
+                                <div className="deal-card-price">₹{amount}</div>
+                              </div>
+
+                              {item.message && type !== 'deal' && (
+                                <div className="deal-media-message">"{item.message}"</div>
+                              )}
+
+                              {type === 'deal' && (
+                                <div className="deal-media-message">
+                                  {isSellerDeal ? 'Ready to hand over this item?' : 'Received the item from seller?'}
+                                </div>
+                              )}
+
+                              {type === 'received' && (
+                                <div className="deal-actions">
+                                  <button className="deal-btn-accept" onClick={() => handleOfferStatus(item._id, 'accepted')}>ACCEPT</button>
+                                  <button className="deal-btn-decline" onClick={() => handleOfferStatus(item._id, 'rejected')}>REJECT</button>
+                                </div>
+                              )}
+
+                              {type === 'sent' && (
+                                <div className="deal-actions">
+                                  <button className="deal-btn-decline" onClick={() => handleOfferStatus(item._id, 'cancelled')}>CANCEL OFFER</button>
+                                </div>
+                              )}
+
+                              {type === 'deal' && (
+                                <button className="deal-btn-handover" onClick={() => handleConfirmSold(item._id)}>
+                                  {isSellerDeal ? 'MARK HANDED OVER' : 'CONFIRM RECEIVED'}
+                                </button>
+                              )}
                             </div>
                           </div>
-                          {item._t === 'received' && (
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              <button onClick={() => handleOfferStatus(item._id, 'accepted')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Accept</button>
-                              <button onClick={() => handleOfferStatus(item._id, 'rejected')} style={{ flex: 1, padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.06)', color: '#EF4444', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Reject</button>
-                            </div>
-                          )}
-                          {item._t === 'sent' && <button onClick={() => handleOfferStatus(item._id, 'cancelled')} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel Offer</button>}
-                          {item._t === 'deal' && (() => { const isSel = (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId; return isSel ? <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(16,185,129,0.08)', color: '#10B981', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Mark Handed Over</button> : <button onClick={() => handleConfirmSold(item._id)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(0,217,255,0.07)', color: '#3B82F6', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Confirm Received</button>; })()}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })() : (() => {
-                const confirmed = deals.filter(d => d.dealStatus === 'sold');
-                if (!confirmed.length) return <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40 }}>/</div><div style={{ fontSize: 14, marginTop: 10 }}>No confirmed deals yet</div></div>;
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {confirmed.map(deal => (
-                      <div key={deal._id} style={{ background: 'rgba(16,185,129,0.12)', border: 'none', borderRadius: 12, padding: 14 }}>
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 10 }}>
-                          <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.product?.title}</div><div style={{ fontSize: 12, fontWeight: 800, color: '#3B82F6', marginTop: 2 }}>₹{deal.agreedPrice}</div></div>
-                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'none', padding: '3px 8px', borderRadius: 4, background: 'rgba(16,185,129,0.1)', color: '#10B981', border: 'none', flexShrink: 0 }}>SOLD</span>
-                        </div>
-                        <button onClick={() => setDealHistoryOpen(deal)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: 'none', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                          View Timeline
-                        </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })() : (() => {
+                  const confirmed = deals.filter(d => d.dealStatus === 'sold');
+                  if (!confirmed.length) {
+                    return (
+                      <div className="market-empty">
+                        <div className="market-empty-icon" />
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#f4f4f5', marginBottom: 6 }}>No completed deals yet</div>
+                        <div style={{ fontSize: 12 }}>Completed handoffs will appear in your archive here.</div>
                       </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+                      {confirmed.map(deal => {
+                        const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                        const isSeller = sellerId?.toString() === currentUserId;
+                        const isBuyer = !isSeller;
+                        const otherParty = isSeller ? deal.buyer : deal.seller;
+                        const r = reviewState[deal._id] || {};
+                        return (
+                        <div className="deal-card deal-card-confirmed mobile-deal-card" key={deal._id}>
+                          <div className="deal-confirmed-media" style={{ minHeight: 250 }}>
+                            <img className="deal-media-img" src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                            <div className="deal-media-gradient" />
+                            <span className="deal-badge sold">SOLD</span>
+                            <div className="deal-media-content">
+                              <div className="deal-media-header">
+                                <div style={{ minWidth: 0 }}>
+                                  <div className="deal-media-title">{deal.product?.title}</div>
+                                  <div className="deal-media-meta">
+                                    {isSeller
+                                      ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : 'Unknown'}`
+                                      : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : 'Unknown'}`}
+                                  </div>
+                                  <div className="deal-confirmed-submeta">Completed {getTimeAgo(deal.updatedAt || deal.createdAt)} · {deal.source === 'chat' ? 'CHAT DEAL' : 'OFFER DEAL'}</div>
+                                </div>
+                                <div className="deal-card-price">₹{deal.agreedPrice}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="deal-confirmed-body">
+                            {isBuyer && (
+                              deal.buyerReview?.submittedAt ? (
+                                <div className="deal-review-box">
+                                  <div style={{ fontSize: 11, color: 'rgba(244,244,245,0.45)', marginBottom: 5 }}>Your review of the seller</div>
+                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                      <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#f97316' : 'rgba(255,255,255,0.18)' }}>★</span>
+                                    ))}
+                                  </div>
+                                  {deal.buyerReview.comment && (
+                                    <div style={{ fontSize: 12, fontStyle: 'italic', color: 'rgba(244,244,245,0.6)' }}>
+                                      "{deal.buyerReview.comment}"
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="deal-review-box">
+                                  <div style={{ fontSize: 12, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>Rate Seller</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                    <div style={{ display: 'flex', gap: 4 }}>
+                                      {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                          key={star}
+                                          onClick={() => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], rating: star } }))}
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                            fontSize: 24,
+                                            lineHeight: 1,
+                                            color: star <= (r.rating || 0) ? '#f97316' : 'rgba(255,255,255,0.2)'
+                                          }}
+                                        >
+                                          ★
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {r.rating ? (
+                                      <button
+                                        className="deal-btn-review-submit"
+                                        onClick={() => handleSubmitReview(deal._id)}
+                                        disabled={r.submitting}
+                                      >
+                                        {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                  <textarea
+                                    value={r.comment || ''}
+                                    onChange={(e) => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], comment: e.target.value } }))}
+                                    placeholder="Share your experience (optional)..."
+                                    rows={2}
+                                    style={{ width: '100%', fontSize: 12, padding: '8px 10px', fontFamily: 'inherit', resize: 'none', outline: 'none', marginBottom: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f4f4f5' }}
+                                  />
+                                </div>
+                              )
+                            )}
+
+                            {isSeller && (
+                              deal.sellerReview?.submittedAt ? (
+                                <div className="deal-review-box">
+                                  <div style={{ fontSize: 11, color: 'rgba(244,244,245,0.45)', marginBottom: 5 }}>Your review of the buyer</div>
+                                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                      <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#f97316' : 'rgba(255,255,255,0.18)' }}>★</span>
+                                    ))}
+                                  </div>
+                                  {deal.sellerReview.comment && (
+                                    <div style={{ fontSize: 12, fontStyle: 'italic', color: 'rgba(244,244,245,0.6)' }}>
+                                      "{deal.sellerReview.comment}"
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="deal-review-box">
+                                  <div style={{ fontSize: 12, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>Rate Buyer</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                    <div style={{ display: 'flex', gap: 4 }}>
+                                      {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                          key={star}
+                                          onClick={() => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], rating: star } }))}
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                            fontSize: 24,
+                                            lineHeight: 1,
+                                            color: star <= (r.rating || 0) ? '#f97316' : 'rgba(255,255,255,0.2)'
+                                          }}
+                                        >
+                                          ★
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {r.rating ? (
+                                      <button
+                                        className="deal-btn-review-submit"
+                                        onClick={() => handleSubmitReview(deal._id)}
+                                        disabled={r.submitting}
+                                      >
+                                        {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                  <textarea
+                                    value={r.comment || ''}
+                                    onChange={(e) => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], comment: e.target.value } }))}
+                                    placeholder="How was this buyer? (optional)"
+                                    rows={2}
+                                    style={{ width: '100%', fontSize: 12, padding: '8px 10px', fontFamily: 'inherit', resize: 'none', outline: 'none', marginBottom: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f4f4f5' }}
+                                  />
+                                </div>
+                              )
+                            )}
+
+                            <div className="deal-actions">
+                              <button className="deal-btn-primary" onClick={() => setDealHistoryOpen(deal)}>VIEW TIMELINE</button>
+                            </div>
+                          </div>
+                        </div>
+                      );})}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           )}
 
           {/* ── SAVED PRODUCTS TAB ── */}
           {activeMobileTab === 'Saved Products' && (
-            <>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 16 }}>Saved Products</div>
-              {savedLoading ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>Loading...</div>
-              ) : savedProducts.length > 0 ? savedProducts.map(item => (
-                <div key={item._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, marginBottom: 10, display: 'flex', gap: 12 }}>
-                  <div style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}><img src={getProductImage(item)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{item.title}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{item.category} · {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 15 }}>{getPriceDisplay(item)}</div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleViewProduct(item._id)} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>View</button>
-                        <button onClick={async () => { try { const res = await productAPI.toggleSave(item._id); if (res.success && !res.saved) { setSavedProducts(prev => prev.filter(p => p._id !== item._id)); toggleSavedId(item._id); } } catch (e) { } }} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.07)', color: '#EF4444', fontSize: 11, cursor: 'pointer' }}>Unsave</button>
+            <div className="market-theme">
+              <div className="market-section-panel" style={{ marginBottom: 14 }}>
+                <div className="mobile-section-title">Saved Products</div>
+                <div className="mobile-section-sub" style={{ marginBottom: 0 }}>
+                  Your personal watchlist of listings worth revisiting.
+                </div>
+              </div>
+
+              <div className="market-section-panel">
+                {savedLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--market-muted)' }}>Loading saved products...</div>
+                ) : savedProducts.length > 0 ? savedProducts.map(item => (
+                  <div className="listing-item listing-item-mylist-mobile" key={item._id}>
+                    <div className="listing-img">
+                      <img src={getProductImage(item)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div className="listing-mylist-mobile-body">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: 14, color: '#f4f4f5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>
+                            {item.title}
+                          </div>
+                          <div className="market-meta">
+                            {item.category} · {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}
+                          </div>
+                        </div>
+                        <div className="market-price" style={{ fontSize: 20, textAlign: 'right' }}>{getPriceDisplay(item)}</div>
+                      </div>
+
+                      <div className="market-meta" style={{ marginBottom: 6 }}>
+                        Saved {getTimeAgo(item.createdAt)}
+                      </div>
+                      <div className="listing-kpi-row" style={{ marginTop: 4 }}>
+                        <span className="listing-kpi-pill">{item.saves || 0} saves</span>
+                        <span className="listing-kpi-pill">{item.views || 0} views</span>
+                      </div>
+
+                      <div className="listing-actions">
+                        <button className="listing-action-btn" onClick={() => handleViewProduct(item._id)}>
+                          VIEW ITEM
+                        </button>
+                        <button
+                          className="listing-action-btn del"
+                          onClick={async () => {
+                            try {
+                              const res = await productAPI.toggleSave(item._id);
+                              if (res.success && !res.saved) {
+                                setSavedProducts(prev => prev.filter(p => p._id !== item._id));
+                                toggleSavedId(item._id);
+                              }
+                            } catch (e) { }
+                          }}
+                        >
+                          UNSAVE
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              )) : (
-                <div style={{ textAlign: 'center', padding: '50px 0', color: 'rgba(255,255,255,0.3)' }}><div style={{ fontSize: 40, marginBottom: 10 }}>🤍</div><div style={{ fontSize: 14, fontWeight: 600 }}>No saved products yet</div><button onClick={() => navigate('/marketplace')} style={{ marginTop: 14, padding: '10px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #00D9FF, #7C3AED)', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Browse Marketplace</button></div>
-              )}
-            </>
+                )) : (
+                  <div className="market-empty">
+                    <div className="market-empty-icon" />
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#f4f4f5', marginBottom: 6 }}>No saved products yet</div>
+                    <div style={{ fontSize: 12, marginBottom: 16 }}>Save products from marketplace and build your watchlist.</div>
+                    <button className="market-main-btn" onClick={() => navigate('/marketplace')}>
+                      Browse Marketplace
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* ── MY ACCOUNT TAB ── */}
@@ -2148,683 +3475,446 @@ const UserDashboard = () => {
               <div className="content-main">
                 {sidebarActive === 'My Listings' ? (
                   /* ── MY LISTINGS FULL CRUD VIEW ── */
-                  <>
+                  <div className="market-theme">
                     <div className="overview-header">
                       <div>
                         <h1>My Listings</h1>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                          {stats.totalListings} total · {stats.activeListings} active · {stats.soldListings} sold
+                        <div>
+                          Your seller board with live inventory, performance, and quick actions.
                         </div>
                       </div>
-                      <button
-                        className="pricing-cta"
-                        style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
-                        onClick={() => setIsAddProductOpen(true)}
-                      >
+                      <button className="market-main-btn" onClick={() => setIsAddProductOpen(true)}>
                         <PlusIcon /> Add New Listing
                       </button>
                     </div>
 
-                    {/* QUICK STATS ROW */}
-                    <div className="stat-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
-                      {[
-                        { label: 'Total', value: <CountUp end={stats.totalListings} />, color: '#fff' },
-                        { label: 'Active', value: <CountUp end={stats.activeListings} />, color: '#3B82F6' },
-                        { label: 'Sold', value: <CountUp end={stats.soldListings} />, color: '#10B981' },
-                        { label: 'Pending', value: <CountUp end={stats.pendingListings} />, color: '#F59E0B' },
-                      ].map(s => (
-                        <div className="stat-card" key={s.label}>
-                          <div className="stat-label">{s.label}</div>
-                          <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* FILTER TABS + LISTINGS GRID */}
-                    <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                        <div className="listing-tabs" style={{ marginBottom: 0 }}>
-                          {['all', 'active', 'sold', 'pending'].map(tab => (
-                            <button
-                              key={tab}
-                              className={`listing-tab ${activeTab === tab ? 'active' : ''}`}
-                              onClick={() => setActiveTab(tab)}
-                            >
-                              {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
-                            </button>
-                          ))}
-                        </div>
+                    <div className="market-section-panel" style={{ marginBottom: 16 }}>
+                      <div className="market-metric-strip">
+                        {[
+                          { label: 'Total', value: <CountUp end={stats.totalListings} /> },
+                          { label: 'Active', value: <CountUp end={stats.activeListings} /> },
+                          { label: 'Sold', value: <CountUp end={stats.soldListings} /> },
+                          { label: 'Pending', value: <CountUp end={stats.pendingListings} /> }
+                        ].map(s => (
+                          <div className="market-metric-card" key={s.label}>
+                            <div className="market-metric-label">{s.label}</div>
+                            <div className="market-metric-value">{s.value}</div>
+                          </div>
+                        ))}
                       </div>
 
-                      {filteredListings.length > 0 ? filteredListings.map((listing) => (
-                        <div className="listing-item" key={listing._id}>
+                      <div className="market-chip-row" style={{ marginBottom: 0 }}>
+                        {['all', 'active', 'sold', 'pending'].map(tab => (
+                          <button
+                            key={tab}
+                            className={`market-chip ${activeTab === tab ? 'active' : ''}`}
+                            onClick={() => setActiveTab(tab)}
+                          >
+                            {tab} ({tab === 'all' ? stats.totalListings : stats[`${tab}Listings`] || 0})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="market-section-panel">
+                      {filteredListings.length > 0 ? <div className="mylistings-grid-desktop">{filteredListings.map((listing) => (
+                        <div className="listing-item listing-item-mylist-mobile" key={listing._id}>
                           <div className="listing-img">
-                            <img src={getProductImage(listing)} alt={listing.title} />
+                            <img src={getProductImage(listing)} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <div>
-                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{listing.title}</div>
-                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>{listing.category || 'Uncategorised'}</div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div className="listing-mylist-mobile-body">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, color: '#f4f4f5', fontSize: 15, marginBottom: 4 }}>{listing.title}</div>
+                                <div className="market-meta" style={{ marginBottom: 7 }}>
+                                  {listing.category || 'Uncategorised'} · {getTimeAgo(listing.createdAt)}
+                                </div>
+                                <div className="listing-kpi-row">
                                   {getStatusBadge(listing.status)}
-                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(listing.createdAt)}</span>
+                                  <span className="listing-kpi-pill">{listing.views || 0} views</span>
+                                  <span className="listing-kpi-pill">{listing.saves || 0} saves</span>
                                 </div>
                               </div>
                               <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 18 }}>{getPriceDisplay(listing)}</div>
-                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                                  👁 {listing.views || 0} views · 🤍 {listing.saves || 0} saves
-                                </div>
+                                <div className="market-price">{getPriceDisplay(listing)}</div>
                               </div>
                             </div>
-                            <div className="listing-actions" style={{ marginTop: 10 }}>
+                            <div className="listing-actions">
                               <button className="listing-action-btn" onClick={() => handleViewProduct(listing._id)}><EyeIcon /> VIEW</button>
                               <button className="listing-action-btn" onClick={() => handleEditProduct(listing)}><EditIcon /> EDIT</button>
                               <button className="listing-action-btn del" onClick={() => handleDelete(listing._id)}><TrashIcon /> DELETE</button>
                               {listing.status === 'active' && (
-                                <button className="listing-action-btn" style={{ color: '#10B981', border: 'none' }} onClick={() => handleMarkAsSold(listing._id)}>✓ MARK SOLD</button>
+                                <button
+                                  className="listing-action-btn"
+                                  style={{
+                                    color: '#f3fff8',
+                                    borderColor: '#0f8f62',
+                                    background: '#0f8f62'
+                                  }}
+                                  onClick={() => handleMarkAsSold(listing._id)}
+                                >
+                                  MARK SOLD
+                                </button>
                               )}
                             </div>
                           </div>
                         </div>
-                      )) : (
-                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>📦</div>
-                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
-                          <div style={{ fontSize: 13, marginBottom: 20 }}>Start selling by adding your first product</div>
-                          <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>
+                      ))}</div> : (
+                        <div className="market-empty">
+                          <div className="market-empty-icon" />
+                          <div style={{ fontSize: 17, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>
+                            No {activeTab !== 'all' ? activeTab : ''} listings yet
+                          </div>
+                          <div style={{ fontSize: 13, marginBottom: 18 }}>
+                            Add products to start filling your storefront.
+                          </div>
+                          <button className="market-main-btn" onClick={() => setIsAddProductOpen(true)}>
                             <PlusIcon /> Add Your First Listing
                           </button>
                         </div>
                       )}
                     </div>
-                  </>
+                  </div>
                 ) : sidebarActive === 'My Deals' ? (
                   /* ── MY DEALS VIEW ── */
-                  <>
-                    <div className="overview-header">
-                      <div>
-                        <h1>My Deals</h1>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                          Accepted negotiations and confirmed sales
-                        </div>
+                  <div className="market-theme deals-page-bg">
+                    {/* Header row: title left, toggles right */}
+                    <div className="deals-header-row">
+                      <span className="deals-title">My Deals</span>
+                      <div className="deals-toggle-group">
+                        {[['negotiations', 'Ongoing Deals'], ['confirmed', 'Completed Deals']].map(([key, label]) => (
+                          <button
+                            key={key}
+                            className={`deals-toggle-btn ${key} ${dealsSubTab === key ? 'active' : ''}`}
+                            onClick={() => setDealsSubTab(key)}
+                          >
+                            {label}
+                          </button>
+                        ))}
                       </div>
-                    </div>
-
-                    {/* Sub-tab pills */}
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                      {[['negotiations', 'Negotiations'], ['confirmed', 'Confirmed Deals']].map(([key, label]) => (
-                        <button
-                          key={key}
-                          onClick={() => setDealsSubTab(key)}
-                          style={{
-                            padding: '8px 20px',
-                            borderRadius: 30,
-                            border: 'none',
-                            background: dealsSubTab === key ? 'rgba(0,217,255,0.1)' : 'transparent',
-                            color: dealsSubTab === key ? '#00D9FF' : 'rgba(255,255,255,0.4)',
-                            fontWeight: 700,
-                            fontSize: 12,
-                            fontFamily: 'inherit',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s',
-                          }}
-                        >
-                          {label}
-                        </button>
-                      ))}
                     </div>
 
                     {(dealsLoading || offersLoading) ? (
-                      <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
-                        Loading...
+                      <div style={{ textAlign: 'center', padding: '44px 20px', color: 'rgba(244,244,245,0.4)' }}>
+                        Loading deal activity...
                       </div>
                     ) : (() => {
-                      // Negotiations sub-tab: pending offers + active deals
                       if (dealsSubTab === 'negotiations') {
-                        // Pending offer cards the current user is involved in
                         const pendingReceived = offersReceived.filter(o => o.status === 'pending');
                         const pendingSent = offersSent.filter(o => o.status === 'pending');
-                        // Active deals (offer accepted, seller hasn't confirmed sold yet)
                         const activeDeals = deals.filter(d => d.dealStatus === 'active');
+                        const merged = [
+                          ...pendingReceived.map(o => ({ ...o, _t: 'received' })),
+                          ...pendingSent.map(o => ({ ...o, _t: 'sent' })),
+                          ...activeDeals.map(d => ({ ...d, _t: 'deal' }))
+                        ].sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
 
-                        const hasAnything = pendingReceived.length > 0 || pendingSent.length > 0 || activeDeals.length > 0;
-
-                        if (!hasAnything) {
+                        if (!merged.length) {
                           return (
-                            <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                              <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>·</div>
-                              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No negotiations yet</div>
-                              <div style={{ fontSize: 13 }}>Make or receive an offer to start negotiating</div>
+                            <div style={{ textAlign: 'center', padding: '60px 12px', color: 'rgba(244,244,245,0.35)' }}>
+                              <div style={{ fontSize: 17, fontWeight: 700, color: '#f4f4f5', marginBottom: 6 }}>No ongoing deals yet</div>
+                              <div style={{ fontSize: 13 }}>Incoming offers and active handoffs will show up here.</div>
                             </div>
                           );
                         }
 
                         return (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                          <div className="deals-grid">
+                            {merged.map((item, i) => {
+                              const type = item._t;
+                              const isSellerDeal = type === 'deal'
+                                ? (typeof item.seller === 'object' ? item.seller?._id : item.seller)?.toString() === currentUserId
+                                : false;
+                              const counterpart = type === 'received'
+                                ? `Buyer: ${item.buyer?.fullName || 'Unknown'}`
+                                : type === 'sent'
+                                  ? `Seller: ${item.seller?.fullName || 'Unknown'}`
+                                  : `${isSellerDeal ? 'Buyer' : 'Seller'}: ${typeof (isSellerDeal ? item.buyer : item.seller) === 'object' ? (isSellerDeal ? item.buyer : item.seller)?.fullName || 'Unknown' : 'Unknown'}`;
+                              const badgeLabel = type === 'received' ? 'INCOMING' : type === 'sent' ? 'SENT' : 'HANDOFF';
+                              const badgeClass = type === 'received' ? 'incoming' : type === 'sent' ? 'sent' : 'handoff';
 
-                            {/* ── PENDING OFFERS RECEIVED (seller) ── */}
-                            {pendingReceived.length > 0 && (
-                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
-                                  Incoming Offers
-                                </div>
-                                {pendingReceived.map(offer => (
-                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(59,130,246,0.12)' }}>
-                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                        <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                      </div>
-                                      <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                          Buyer: {offer.buyer?.fullName}{offer.buyer?.branch ? ` · ${offer.buyer.branch.toUpperCase()}` : ''}
-                                        </div>
-                                        {offer.message && (
-                                          <div style={{ fontSize: 11, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', padding: '4px 8px', borderRadius: 5 }}>
-                                            "{offer.message}"
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{offer.offerPrice}</div>
-                                        {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
-                                      </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                                      <button
-                                        className="listing-action-btn"
-                                        style={{ padding: '6px 14px', fontSize: 11, border: 'none', color: '#10B981', background: 'rgba(16,185,129,0.08)' }}
-                                        onClick={() => handleOfferStatus(offer._id, 'accepted')}
-                                      >
-                                        Accept
-                                      </button>
-                                      <button
-                                        className="listing-action-btn del"
-                                        style={{ padding: '6px 14px', fontSize: 11 }}
-                                        onClick={() => handleOfferStatus(offer._id, 'rejected')}
-                                      >
-                                        Reject
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* ── PENDING OFFERS SENT (buyer) ── */}
-                            {pendingSent.length > 0 && (
-                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
-                                  Offers You Sent
-                                </div>
-                                {pendingSent.map(offer => (
-                                  <div key={offer._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(59,130,246,0.12)' }}>
-                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                      <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                        <img src={offer.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                      </div>
-                                      <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{offer.product?.title}</div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                          Seller: {offer.seller?.fullName}
+                              return (
+                                <div className="deal-card deal-card-media" key={item._id + i}>
+                                  <img className="deal-media-img" src={item.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                  <div className="deal-media-gradient" />
+                                  <span className={`deal-badge ${badgeClass}`}>{badgeLabel}</span>
+                                  <div className="deal-media-content">
+                                    <div className="deal-media-header">
+                                      <div style={{ minWidth: 0 }}>
+                                        <div className="deal-media-title">{item.product?.title}</div>
+                                        <div className="deal-media-meta">
+                                          {counterpart}
+                                          {type === 'deal' ? ` via ${item.source === 'chat' ? 'Offer' : 'Offer'}` : ''}
                                         </div>
                                       </div>
-                                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{offer.offerPrice}</div>
-                                        {offer.product?.price && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{offer.product.price}</div>}
-                                        <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'none', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.08)', color: '#F59E0B', display: 'inline-block', marginTop: 4 }}>PENDING</span>
-                                      </div>
+                                      <div className="deal-card-price">₹{item.offerPrice || item.agreedPrice}</div>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                      <button
-                                        className="listing-action-btn"
-                                        style={{ padding: '6px 14px', fontSize: 11, color: 'rgba(255,100,100,0.8)', border: 'none' }}
-                                        onClick={() => handleOfferStatus(offer._id, 'cancelled')}
-                                      >
-                                        Cancel Offer
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
 
-                            {/* ── ACCEPTED DEALS (awaiting seller confirm) ── */}
-                            {activeDeals.length > 0 && (
-                              <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'none', marginBottom: 14 }}>
-                                  Accepted — Awaiting Handoff
-                                </div>
-                                {activeDeals.map((deal) => {
-                                  const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
-                                  const isSeller = sellerId?.toString() === currentUserId;
-                                  const otherParty = isSeller ? deal.buyer : deal.seller;
-                                  return (
-                                    <div key={deal._id} className="listing-item" style={{ flexDirection: 'column', gap: 10, padding: 14, marginBottom: 10, borderRadius: 10, border: 'none', background: 'rgba(139,92,246,0.12)' }}>
-                                      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                        <div className="listing-img" style={{ width: 52, height: 52 }}>
-                                          <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                          <div style={{ fontWeight: 700, color: '#fff', fontSize: 13, marginBottom: 2 }}>{deal.product?.title}</div>
-                                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                                            {isSeller
-                                              ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
-                                              : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
-                                            {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
-                                          </div>
-                                          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>via {deal.source === 'chat' ? 'Chat' : 'Offer'}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                          <div style={{ fontSize: 17, fontWeight: 800, color: '#3B82F6' }}>₹{deal.agreedPrice}</div>
-                                          {deal.product?.price && deal.agreedPrice !== deal.product.price && (
-                                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>₹{deal.product.price}</div>
-                                          )}
-                                          <span style={{ fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'none', letterSpacing: 1, padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.08)', color: '#10B981', display: 'inline-block', marginTop: 4 }}>ACCEPTED</span>
-                                        </div>
-                                      </div>
-                                      {/* Seller: Mark as Handed Over */}
-                                      {isSeller && (
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.05)', border: 'none', borderRadius: 8, padding: '11px 14px' }}>
-                                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                            Ready to hand over the item?
-                                          </div>
-                                          <button
-                                            onClick={() => handleConfirmSold(deal._id)}
-                                            style={{ padding: '7px 16px', borderRadius: 6, border: 'none', background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                                          >
-                                            Handed Over
-                                          </button>
-                                        </div>
-                                      )}
-                                      {/* Buyer: Mark as Received */}
-                                      {!isSeller && (
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,217,255,0.05)', border: 'none', borderRadius: 8, padding: '11px 14px' }}>
-                                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                            Got the item? Confirm receipt here.
-                                          </div>
-                                          <button
-                                            onClick={() => handleConfirmSold(deal._id)}
-                                            style={{ padding: '7px 16px', borderRadius: 6, border: 'none', background: 'rgba(0,217,255,0.1)', color: '#3B82F6', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
-                                          >
-                                            Received Item
-                                          </button>
-                                        </div>
-                                      )}
+                                  {item.message && type !== 'deal' && (
+                                    <div className="deal-media-message">"{item.message}"</div>
+                                  )}
 
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                          </div>
-                        );
-                      }
-
-                      // ── CONFIRMED DEALS sub-tab ──
-                      const confirmedDeals = deals.filter(d => d.dealStatus === 'sold');
-                      if (confirmedDeals.length === 0) {
-                        return (
-                          <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                            <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>/</div>
-                            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No confirmed deals yet</div>
-                            <div style={{ fontSize: 13 }}>Deals move here once the seller confirms them as sold</div>
-                          </div>
-                        );
-                      }
-
-                      return confirmedDeals.map((deal) => {
-                        const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
-                        const userId = user?._id;
-                        const isSeller = sellerId?.toString() === currentUserId;
-                        const isBuyer = !isSeller;
-                        const otherParty = isSeller ? deal.buyer : deal.seller;
-                        const r = reviewState[deal._id] || {};
-
-                        return (
-                          <div
-                            key={deal._id}
-                            className="listing-item"
-                            style={{ flexDirection: 'column', gap: 12, padding: 16, marginBottom: 12, borderRadius: 12 }}
-                          >
-                            {/* Deal header row */}
-                            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                              <div className="listing-img" style={{ width: 60, height: 60 }}>
-                                <img src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                  <div>
-                                    <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 3 }}>
-                                      {deal.product?.title}
-                                    </div>
-                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 5 }}>
-                                      {isSeller
-                                        ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`
-                                        : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : '—'}`}
-                                      {typeof otherParty === 'object' && otherParty?.branch
-                                        ? ` · ${otherParty.branch.toUpperCase()}` : ''}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <span style={{
-                                        fontSize: 9, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
-                                        textTransform: 'none', letterSpacing: 1, padding: '2px 8px',
-                                        borderRadius: 4,
-                                        border: 'none',
-                                        background: deal.dealStatus === 'sold' ? 'rgba(16,185,129,0.1)' : 'rgba(0,217,255,0.1)',
-                                        color: deal.dealStatus === 'sold' ? '#10B981' : '#00D9FF'
-                                      }}>
-                                        {deal.dealStatus === 'sold' ? 'SOLD' : 'ACTIVE'}
-                                      </span>
-                                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                                        via {deal.source === 'chat' ? 'Chat' : 'Offer'}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                    <div style={{ fontSize: 18, fontWeight: 800, color: '#3B82F6' }}>₹{deal.agreedPrice}</div>
-                                    {deal.product?.price && deal.agreedPrice !== deal.product.price && (
-                                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
-                                        ₹{deal.product.price}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* SELLER: Confirm as Sold button (Negotiations tab) */}
-                            {isSeller && deal.dealStatus === 'active' && (
-                              <div style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                background: 'rgba(16,185,129,0.05)', border: 'none',
-                                borderRadius: 8, padding: '10px 14px'
-                              }}>
-                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-                                  Hand off the item? Confirm the sale to finalise.
-                                </div>
-                                <button
-                                  onClick={() => handleConfirmSold(deal._id)}
-                                  style={{
-                                    padding: '7px 16px', borderRadius: 6,
-                                    border: 'none',
-                                    background: 'rgba(16,185,129,0.15)', color: '#10B981',
-                                    fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                                    cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s'
-                                  }}
-                                >
-                                  Confirm Sold
-                                </button>
-                              </div>
-                            )}
-
-                            {/* BUYER: Review form or submitted review */}
-                            {isBuyer && deal.dealStatus === 'sold' && (
-                              deal.buyerReview?.submittedAt ? (
-                                <div style={{
-                                  background: 'rgba(124,58,237,0.08)', border: 'none',
-                                  borderRadius: 8, padding: '10px 14px'
-                                }}>
-                                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the seller</div>
-                                  <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
-                                    {[1, 2, 3, 4, 5].map(s => (
-                                      <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
-                                    ))}
-                                  </div>
-                                  {deal.buyerReview.comment && (
-                                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                      "{deal.buyerReview.comment}"
+                                  {type === 'deal' && (
+                                    <div className="deal-media-message">
+                                      {isSellerDeal ? 'Ready to hand over this item?' : 'Confirm that you received the item.'}
                                     </div>
                                   )}
-                                </div>
-                              ) : (
-                                <div style={{
-                                  background: 'rgba(124,58,237,0.08)', border: 'none',
-                                  borderRadius: 8, padding: '12px 14px'
-                                }}>
-                                  <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                    Rate Seller
-                                  </div>
-                                  <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                      <button
-                                        key={star}
-                                        onClick={() => setReviewState(prev => ({
-                                          ...prev,
-                                          [deal._id]: { ...prev[deal._id], rating: star }
-                                        }))}
-                                        style={{
-                                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                                          fontSize: 24, lineHeight: 1,
-                                          color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
-                                          transition: 'color 0.15s'
-                                        }}
-                                      >
-                                        ★
-                                      </button>
-                                    ))}
-                                  </div>
-                                  <textarea
-                                    value={r.comment || ''}
-                                    onChange={(e) => setReviewState(prev => ({
-                                      ...prev,
-                                      [deal._id]: { ...prev[deal._id], comment: e.target.value }
-                                    }))}
-                                    placeholder="Share your experience (optional)..."
-                                    rows={2}
-                                    style={{
-                                      width: '100%', background: 'rgba(255,255,255,0.04)',
-                                      border: 'none', borderRadius: 6,
-                                      color: '#fff', fontSize: 12, padding: '8px 10px',
-                                      fontFamily: 'inherit', resize: 'none', outline: 'none',
-                                      marginBottom: 10
-                                    }}
-                                  />
-                                  <button
-                                    onClick={() => handleSubmitReview(deal._id)}
-                                    disabled={!r.rating || r.submitting}
-                                    style={{
-                                      padding: '7px 18px', borderRadius: 6, border: 'none',
-                                      background: r.rating
-                                        ? 'rgba(255,255,255,0.1)'
-                                        : 'rgba(255,255,255,0.08)',
-                                      color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
-                                      fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                                      cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
-                                    }}
-                                  >
-                                    {r.submitting ? 'Submitting...' : 'Submit Review'}
-                                  </button>
-                                </div>
-                              )
-                            )}
 
-                            {/* SELLER: review form for buyer + view buyer's submitted review */}
-                            {isSeller && deal.dealStatus === 'sold' && (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                  {/* Buyer's review of seller (Hidden from Seller) */}
-                                  {/* 
-                                  {deal.buyerReview?.submittedAt && (
-                                    <div style={{
-                                      background: 'rgba(245,158,11,0.08)', border: 'none',
-                                      borderRadius: 8, padding: '10px 14px'
-                                    }}>
-                                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Buyer's review of you</div>
+                                  {type === 'received' && (
+                                    <div className="deal-actions">
+                                      <button className="deal-btn-accept" onClick={() => handleOfferStatus(item._id, 'accepted')}>ACCEPT OFFER</button>
+                                      <button className="deal-btn-decline" onClick={() => handleOfferStatus(item._id, 'rejected')}>REJECT</button>
+                                    </div>
+                                  )}
+
+                                  {type === 'sent' && (
+                                    <div className="deal-actions">
+                                      <button className="deal-btn-decline" onClick={() => handleOfferStatus(item._id, 'cancelled')}>CANCEL OFFER</button>
+                                    </div>
+                                  )}
+
+                                  {type === 'deal' && (
+                                    <button className="deal-btn-handover" onClick={() => handleConfirmSold(item._id)}>
+                                      {isSellerDeal ? 'MARK HANDED OVER' : 'CONFIRM RECEIVED'}
+                                    </button>
+                                  )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      }
+
+                      const confirmedDeals = deals.filter(d => d.dealStatus === 'sold');
+                      if (!confirmedDeals.length) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '60px 12px', color: 'rgba(244,244,245,0.35)' }}>
+                            <div style={{ fontSize: 17, fontWeight: 700, color: '#f4f4f5', marginBottom: 6 }}>No completed deals yet</div>
+                            <div style={{ fontSize: 13 }}>Finalized deals and reviews will be archived here.</div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="deals-grid">
+                          {confirmedDeals.map((deal) => {
+                            const sellerId = typeof deal.seller === 'object' ? deal.seller?._id : deal.seller;
+                            const isSeller = sellerId?.toString() === currentUserId;
+                            const isBuyer = !isSeller;
+                            const otherParty = isSeller ? deal.buyer : deal.seller;
+                            const r = reviewState[deal._id] || {};
+
+                            return (
+                              <div key={deal._id} className="deal-card deal-card-confirmed">
+                                <div className="deal-confirmed-media">
+                                  <img className="deal-media-img" src={deal.product?.images?.[0] || '/placeholder.jpg'} alt="" />
+                                  <div className="deal-media-gradient" />
+                                  <span className="deal-badge sold">SOLD</span>
+                                  <div className="deal-media-content">
+                                    <div className="deal-media-header">
+                                      <div style={{ minWidth: 0 }}>
+                                        <div className="deal-media-title">{deal.product?.title}</div>
+                                        <div className="deal-media-meta">
+                                          {isSeller
+                                            ? `Buyer: ${typeof otherParty === 'object' ? otherParty?.fullName : 'Unknown'}`
+                                            : `Seller: ${typeof otherParty === 'object' ? otherParty?.fullName : 'Unknown'}`}
+                                          {typeof otherParty === 'object' && otherParty?.branch ? ` · ${otherParty.branch.toUpperCase()}` : ''}
+                                        </div>
+                                        <div className="deal-confirmed-submeta">{deal.source === 'chat' ? 'CHAT DEAL' : 'OFFER DEAL'}</div>
+                                      </div>
+                                      <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                                        <div className="deal-card-price">₹{deal.agreedPrice}</div>
+                                        {deal.product?.price && deal.agreedPrice !== deal.product.price && (
+                                          <div style={{ fontSize: 11, color: 'rgba(244,244,245,0.7)', textDecoration: 'line-through', marginTop: 2 }}>₹{deal.product.price}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="deal-confirmed-body">
+
+                                {isBuyer && (
+                                  deal.buyerReview?.submittedAt ? (
+                                    <div className="deal-review-box">
+                                      <div style={{ fontSize: 11, color: 'rgba(244,244,245,0.45)', marginBottom: 5 }}>Your review of the seller</div>
                                       <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
                                         {[1, 2, 3, 4, 5].map(s => (
-                                          <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                                          <span key={s} style={{ fontSize: 14, color: s <= deal.buyerReview.rating ? '#f97316' : 'rgba(255,255,255,0.18)' }}>★</span>
                                         ))}
                                       </div>
                                       {deal.buyerReview.comment && (
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                        <div style={{ fontSize: 12, fontStyle: 'italic', color: 'rgba(244,244,245,0.6)' }}>
                                           "{deal.buyerReview.comment}"
                                         </div>
                                       )}
                                     </div>
-                                  )}
-                                  */}
-                                {/* Seller's review of buyer */}
-                                {deal.sellerReview?.submittedAt ? (
-                                  <div style={{
-                                    background: 'rgba(16,185,129,0.08)', border: 'none',
-                                    borderRadius: 8, padding: '10px 14px'
-                                  }}>
-                                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Your review of the buyer</div>
-                                    <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
-                                      {[1, 2, 3, 4, 5].map(s => (
-                                        <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
-                                      ))}
-                                    </div>
-                                    {deal.sellerReview.comment && (
-                                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
-                                        "{deal.sellerReview.comment}"
+                                  ) : (
+                                    <div className="deal-review-box">
+                                      <div style={{ fontSize: 12, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>Rate Seller</div>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                        <div style={{ display: 'flex', gap: 4 }}>
+                                          {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                              key={star}
+                                              onClick={() => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], rating: star } }))}
+                                              style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                padding: 0,
+                                                fontSize: 24,
+                                                lineHeight: 1,
+                                                color: star <= (r.rating || 0) ? '#f97316' : 'rgba(255,255,255,0.2)'
+                                              }}
+                                            >
+                                              ★
+                                            </button>
+                                          ))}
+                                        </div>
+                                        {r.rating ? (
+                                          <button
+                                            className="deal-btn-review-submit"
+                                            onClick={() => handleSubmitReview(deal._id)}
+                                            disabled={r.submitting}
+                                          >
+                                            {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                          </button>
+                                        ) : null}
                                       </div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div style={{
-                                    background: 'rgba(16,185,129,0.06)', border: 'none',
-                                    borderRadius: 8, padding: '12px 14px'
-                                  }}>
-                                    <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-                                      Rate Buyer
+                                      <textarea
+                                        value={r.comment || ''}
+                                        onChange={(e) => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], comment: e.target.value } }))}
+                                        placeholder="Share your experience (optional)..."
+                                        rows={2}
+                                        style={{ width: '100%', fontSize: 12, padding: '8px 10px', fontFamily: 'inherit', resize: 'none', outline: 'none', marginBottom: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f4f4f5' }}
+                                      />
                                     </div>
-                                    <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
-                                      {[1, 2, 3, 4, 5].map(star => (
-                                        <button
-                                          key={star}
-                                          onClick={() => setReviewState(prev => ({
-                                            ...prev,
-                                            [deal._id]: { ...prev[deal._id], rating: star }
-                                          }))}
-                                          style={{
-                                            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                                            fontSize: 24, lineHeight: 1,
-                                            color: star <= (r.rating || 0) ? '#F59E0B' : 'rgba(255,255,255,0.2)',
-                                            transition: 'color 0.15s'
-                                          }}
-                                        >
-                                          ★
-                                        </button>
-                                      ))}
-                                    </div>
-                                    <textarea
-                                      value={r.comment || ''}
-                                      onChange={(e) => setReviewState(prev => ({
-                                        ...prev,
-                                        [deal._id]: { ...prev[deal._id], comment: e.target.value }
-                                      }))}
-                                      placeholder="How was this buyer? (optional)"
-                                      rows={2}
-                                      style={{
-                                        width: '100%', background: 'rgba(255,255,255,0.04)',
-                                        border: 'none', borderRadius: 6,
-                                        color: '#fff', fontSize: 12, padding: '8px 10px',
-                                        fontFamily: 'inherit', resize: 'none', outline: 'none',
-                                        marginBottom: 10
-                                      }}
-                                    />
-                                    <button
-                                      onClick={() => handleSubmitReview(deal._id)}
-                                      disabled={!r.rating || r.submitting}
-                                      style={{
-                                        padding: '7px 18px', borderRadius: 6, border: 'none',
-                                        background: r.rating
-                                          ? 'rgba(255,255,255,0.1)'
-                                          : 'rgba(255,255,255,0.08)',
-                                        color: r.rating ? '#fff' : 'rgba(255,255,255,0.3)',
-                                        fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                                        cursor: r.rating ? 'pointer' : 'not-allowed', transition: 'all 0.15s'
-                                      }}
-                                    >
-                                      {r.submitting ? 'Submitting...' : 'Submit Review'}
-                                    </button>
-                                  </div>
+                                  )
                                 )}
-                              </div>
-                            )}
 
-                            {/* DEAL HISTORY BUTTON */}
-                            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
-                              <button
-                                onClick={() => setDealHistoryOpen(deal)}
-                                style={{
-                                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                                  padding: '7px 14px', borderRadius: 8,
-                                  border: 'none',
-                                  background: 'rgba(0,217,255,0.06)',
-                                  color: '#3B82F6', fontFamily: 'inherit',
-                                  fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                                  transition: 'all 0.15s',
-                                  letterSpacing: 0.4,
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.45)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,217,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,217,255,0.25)'; }}
-                              >
-                                Deal History
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      });
+                                {isSeller && (
+                                  deal.sellerReview?.submittedAt ? (
+                                    <div className="deal-review-box">
+                                      <div style={{ fontSize: 11, color: 'rgba(244,244,245,0.45)', marginBottom: 5 }}>Your review of the buyer</div>
+                                      <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
+                                        {[1, 2, 3, 4, 5].map(s => (
+                                          <span key={s} style={{ fontSize: 14, color: s <= deal.sellerReview.rating ? '#f97316' : 'rgba(255,255,255,0.18)' }}>★</span>
+                                        ))}
+                                      </div>
+                                      {deal.sellerReview.comment && (
+                                        <div style={{ fontSize: 12, fontStyle: 'italic', color: 'rgba(244,244,245,0.6)' }}>
+                                          "{deal.sellerReview.comment}"
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="deal-review-box">
+                                      <div style={{ fontSize: 12, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>Rate Buyer</div>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                        <div style={{ display: 'flex', gap: 4 }}>
+                                          {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                              key={star}
+                                              onClick={() => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], rating: star } }))}
+                                              style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                padding: 0,
+                                                fontSize: 24,
+                                                lineHeight: 1,
+                                                color: star <= (r.rating || 0) ? '#f97316' : 'rgba(255,255,255,0.2)'
+                                              }}
+                                            >
+                                              ★
+                                            </button>
+                                          ))}
+                                        </div>
+                                        {r.rating ? (
+                                          <button
+                                            className="deal-btn-review-submit"
+                                            onClick={() => handleSubmitReview(deal._id)}
+                                            disabled={r.submitting}
+                                          >
+                                            {r.submitting ? 'Submitting...' : 'Submit Review'}
+                                          </button>
+                                        ) : null}
+                                      </div>
+                                      <textarea
+                                        value={r.comment || ''}
+                                        onChange={(e) => setReviewState(prev => ({ ...prev, [deal._id]: { ...prev[deal._id], comment: e.target.value } }))}
+                                        placeholder="How was this buyer? (optional)"
+                                        rows={2}
+                                        style={{ width: '100%', fontSize: 12, padding: '8px 10px', fontFamily: 'inherit', resize: 'none', outline: 'none', marginBottom: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f4f4f5' }}
+                                      />
+                                    </div>
+                                  )
+                                )}
+
+                                <div style={{ marginTop: 4 }}>
+                                  <button className="deal-btn-primary" style={{ width: '100%' }} onClick={() => setDealHistoryOpen(deal)}>
+                                    DEAL TIMELINE
+                                  </button>
+                                </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
                     })()}
-                  </>
+                  </div>
                 ) : sidebarActive === 'Saved Products' ? (
 
                   /* ── SAVED PRODUCTS VIEW ── */
-                  <>
+                  <div className="market-theme">
                     <div className="overview-header">
                       <div>
                         <h1>Saved Products</h1>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                          Products you've hearted across the marketplace
+                        <div>
+                          A curated watchlist of products you want to track or buy later.
                         </div>
                       </div>
-                      <button
-                        className="pricing-cta"
-                        style={{ padding: '10px 20px', fontSize: 13 }}
-                        onClick={() => navigate('/marketplace')}
-                      >
+                      <button className="market-main-btn" onClick={() => navigate('/marketplace')}>
                         Browse Marketplace
                       </button>
                     </div>
 
-                    <div className="card" style={{ padding: 20, border: "none", background: "rgba(255,255,255,0.02)" }}>
+                    <div className="market-section-panel">
                       {savedLoading ? (
-                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--market-muted)' }}>
                           Loading saved products...
                         </div>
-                      ) : savedProducts.length > 0 ? savedProducts.map((item) => (
-                        <div className="listing-item" key={item._id}>
+                      ) : savedProducts.length > 0 ? <div className="mylistings-grid-desktop">{savedProducts.map((item) => (
+                        <div className="listing-item listing-item-mylist-mobile" key={item._id}>
                           <div className="listing-img">
-                            <img src={getProductImage(item)} alt={item.title} />
+                            <img src={getProductImage(item)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <div>
-                                <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4 }}>{item.title}</div>
-                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                          <div className="listing-mylist-mobile-body">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, color: '#f4f4f5', fontSize: 15, marginBottom: 4 }}>{item.title}</div>
+                                <div className="market-meta" style={{ marginBottom: 6 }}>
                                   {item.category} · by {typeof item.seller === 'object' ? item.seller.fullName : 'Unknown'}
                                 </div>
-                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{getTimeAgo(item.createdAt)}</div>
-                              </div>
-                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <div style={{ fontWeight: 800, color: '#3B82F6', fontSize: 18 }}>{getPriceDisplay(item)}</div>
-                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                                  {item.saves || 0} saves · {item.views || 0} views
+                                <div className="market-meta">Saved {getTimeAgo(item.createdAt)}</div>
+                                <div className="listing-kpi-row" style={{ marginTop: 6 }}>
+                                  <span className="listing-kpi-pill">{item.saves || 0} saves</span>
+                                  <span className="listing-kpi-pill">{item.views || 0} views</span>
                                 </div>
                               </div>
+                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                <div className="market-price">{getPriceDisplay(item)}</div>
+                              </div>
                             </div>
-                            <div className="listing-actions" style={{ marginTop: 10 }}>
+                            <div className="listing-actions">
                               <button className="listing-action-btn" onClick={() => handleViewProduct(item._id)}>
-                                <EyeIcon /> VIEW
+                                <EyeIcon /> VIEW ITEM
                               </button>
                               <button
                                 className="listing-action-btn del"
-                                style={{ color: '#EF4444', border: 'none' }}
                                 onClick={async () => {
                                   try {
                                     const res = await productAPI.toggleSave(item._id);
@@ -2840,18 +3930,18 @@ const UserDashboard = () => {
                             </div>
                           </div>
                         </div>
-                      )) : (
-                        <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
-                          <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.4 }}>🤍</div>
-                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>No saved products yet</div>
-                          <div style={{ fontSize: 13, marginBottom: 20 }}>Heart products in the marketplace to save them here</div>
-                          <button className="pricing-cta" onClick={() => navigate('/marketplace')}>
+                      ))}</div> : (
+                        <div className="market-empty">
+                          <div className="market-empty-icon" />
+                          <div style={{ fontSize: 17, fontWeight: 700, color: '#f4f4f5', marginBottom: 8 }}>No saved products yet</div>
+                          <div style={{ fontSize: 13, marginBottom: 18 }}>Save listings in marketplace and build your personal shortlist.</div>
+                          <button className="market-main-btn" onClick={() => navigate('/marketplace')}>
                             Browse Marketplace
                           </button>
                         </div>
                       )}
                     </div>
-                  </>
+                  </div>
                 ) : sidebarActive === 'My Account' ? (
                   /* ── MY ACCOUNT VIEW ── */
                   <MyAccount />
@@ -2938,7 +4028,7 @@ const UserDashboard = () => {
                           <div className="mini-stat-label">Pending Approval</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span className="mini-stat-value"><CountUp end={stats.pendingListings} /></span>
-                            <span style={{ color: '#F59E0B', fontSize: 14, fontWeight: 600, display: 'flex' }}>⏳</span>
+                             <span style={{ color: '#F59E0B', fontSize: 14, fontWeight: 600, display: 'flex' }}><TrendingIcon /></span>
                           </div>
                           <div className="mini-stat-sub">Awaiting review</div>
                         </div>
@@ -3019,7 +4109,7 @@ const UserDashboard = () => {
                           </div>
                         )) : (
                           <div style={{ textAlign: 'center', padding: '30px 0', color: 'rgba(255,255,255,0.3)' }}>
-                            <div style={{ fontSize: 36, marginBottom: 8, opacity: 0.3 }}>📦</div>
+                             <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.06)', margin: '0 auto 8px', opacity: 0.3 }} />
                             <div style={{ fontSize: 13 }}>No {activeTab !== 'all' ? activeTab : ''} listings yet</div>
                           </div>
                         )}
@@ -3050,7 +4140,7 @@ const UserDashboard = () => {
                                     <span style={{ fontSize: 11, fontWeight: 800, color: ['#00D9FF', '#7C3AED', '#F59E0B'][i], flexShrink: 0 }}>#{i + 1}</span>
                                     <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
                                   </div>
-                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 8 }}>👁 {l.views || 0} · 🤍 {l.saves || 0}</span>
+                                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0, marginLeft: 8 }}>{l.views || 0} views · {l.saves || 0} saves</span>
                                 </div>
                                 <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
                                   <div style={{
@@ -3073,14 +4163,14 @@ const UserDashboard = () => {
                       {/* PRICING */}
                       <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="pricing-badge">
-                          <ZapIcon /> Premium Seller
+                          Premium Seller
                         </div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
                           <span className="pricing-amount">{stats.soldListings}</span>
                           <span className="pricing-per">Items<br />Sold</span>
                         </div>
                         <div className="pricing-desc">
-                          Keep selling to unlock premium<br />features and seller badges 🚀
+                           Keep selling to unlock premium<br />features and seller badges
                         </div>
                         <button className="pricing-cta" onClick={() => setIsAddProductOpen(true)}>Add New Product</button>
                       </div>
@@ -3093,14 +4183,33 @@ const UserDashboard = () => {
               < div className="content-right" >
                 {/* ACTIVITY */}
                 <div className="right-section-title" style={{ fontSize: '14px', letterSpacing: '0.5px' }}>Recent Activity</div>
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ padding: '4px 0', display: 'flex', flexDirection: 'column' }}>
                 {
                   activityItems.map((n, i) => (
-                    <div className="notif-item" key={i} style={{ padding: 0 }}>
-                      <div className="notif-dot" style={{ background: n.color, marginTop: '7px', borderRadius: '50%', width: '8px', height: '8px', boxShadow: `0 0 8px ${n.color}50` }} />
-                      <div style={{ flex: 1 }}>
-                        <div className="notif-text" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>{n.text}</div>
-                        <div className="notif-time" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '4px' }}>{n.time}</div>
+                    <div key={i} style={{ display: 'flex', gap: 0 }}>
+                      {/* Timeline spine: dot + vertical line */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 24, flexShrink: 0 }}>
+                        <div style={{
+                          width: 8, height: 8, borderRadius: '50%',
+                          background: n.color,
+                          boxShadow: `0 0 8px ${n.color}60`,
+                          flexShrink: 0, marginTop: 6,
+                        }} />
+                        {i < activityItems.length - 1 && (
+                          <div style={{
+                            width: 1,
+                            flex: 1,
+                            minHeight: 20,
+                            background: `linear-gradient(to bottom, ${n.color}50, rgba(255,255,255,0.06))`,
+                            marginTop: 4,
+                            marginBottom: 4,
+                          }} />
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div style={{ flex: 1, paddingBottom: i < activityItems.length - 1 ? 16 : 0 }}>
+                        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>{n.text}</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '4px' }}>{n.time}</div>
                       </div>
                     </div>
                   ))
@@ -3114,12 +4223,12 @@ const UserDashboard = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                 {
                   quickStatsItems.map((a, i) => (
-                    <div className="activity-item" key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 16, padding: '16px', alignItems: 'center', transition: 'all 0.2s', cursor: 'default' }}>
+                    <div className="activity-item" key={i} style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px', alignItems: 'center', transition: 'all 0.2s', cursor: 'default' }}>
                       <div style={{ flex: 1 }}>
                         <div className="notif-time" style={{ marginBottom: '6px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{a.label}</div>
                         <div style={{ fontWeight: 800, fontSize: '24px', color: '#fff', letterSpacing: '-0.5px' }}>{a.value}</div>
                       </div>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#1a1a1c', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
                          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: a.color, boxShadow: `0 0 12px ${a.color}40` }} />
                       </div>
                     </div>
